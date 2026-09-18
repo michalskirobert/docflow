@@ -1,0 +1,73 @@
+{
+  "common": {
+    "appName": "DocFlow",
+    "dashboard": "Panel",
+    "templates": "Szablony",
+    "documents": "Dokumenty",
+    "settings": "Ustawienia",
+    "logout": "Wyloguj",
+    "language": "Język",
+    "loading": "Ładowanie...",
+    "company": "NurByte",
+    "companyTagline": "Produkt rozwijany przez NurByte."
+  },
+  "home": {
+    "title": "Automatyzacja dokumentów dla firm",
+    "description": "Zamieniaj szablony i uporządkowane dane w spójne dokumenty biznesowe.",
+    "cta": "Otwórz panel"
+  },
+  "auth": {
+    "title": "Zaloguj się",
+    "description": "Uzyskaj dostęp do swojego obszaru DocFlow.",
+    "email": "E-mail",
+    "password": "Hasło",
+    "signIn": "Zaloguj się",
+    "signingIn": "Logowanie…",
+    "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+    "rememberMe": "Zapamiętaj mnie przez 30 dni",
+    "noAccount": "Nie masz jeszcze konta?",
+    "createAccount": "Utwórz konto",
+    "registerTitle": "Utwórz swój workspace",
+    "registerDescription": "Rozpocznij 30-dniowy okres próbny DocFlow. Bez danych karty.",
+    "name": "Imię i nazwisko",
+    "organization": "Nazwa organizacji",
+    "confirmPassword": "Powtórz hasło",
+    "passwordHint": "Użyj minimum 10 znaków, wielkiej i małej litery oraz cyfry.",
+    "verification": "Weryfikacja użytkownika",
+    "loadingCaptcha": "Ładowanie zadania…",
+    "newChallenge": "Nowe zadanie",
+    "answer": "Odpowiedź",
+    "register": "Utwórz konto",
+    "creatingAccount": "Tworzenie konta…",
+    "hasAccount": "Masz już konto?",
+    "registrationFailed": "Rejestracja nie powiodła się. Sprawdź formularz i zadanie weryfikacyjne."
+  },
+  "dashboard": {
+    "title": "Panel",
+    "templates": "Szablony",
+    "documents": "Dokumenty",
+    "access": "Dostęp",
+    "enabled": "Aktywny",
+    "locked": "Zablokowany"
+  },
+  "templates": {
+    "title": "Szablony",
+    "description": "Używaj znaczników zmiennych, np. customerName. Przykładowe szablony są dodawane automatycznie.",
+    "new": "Nowy szablon",
+    "name": "Nazwa",
+    "descriptionLabel": "Opis",
+    "content": "Treść szablonu",
+    "create": "Utwórz",
+    "variables": "Zmienne",
+    "none": "brak",
+    "example": "przykład",
+    "delete": "Usuń"
+  },
+  "documents": {
+    "title": "Dokumenty"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "languageHelp": "Po zalogowaniu język zapisujemy na koncie użytkownika oraz w ciasteczku językowym przeglądarki."
+  }
+}

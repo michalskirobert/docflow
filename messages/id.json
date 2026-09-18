@@ -1,0 +1,73 @@
+{
+  "common": {
+    "appName": "DocFlow",
+    "dashboard": "Dasbor",
+    "templates": "Templat",
+    "documents": "Dokumen",
+    "settings": "Pengaturan",
+    "logout": "Keluar",
+    "language": "Bahasa",
+    "loading": "Memuat...",
+    "company": "NurByte",
+    "companyTagline": "Produk yang dikembangkan oleh NurByte."
+  },
+  "home": {
+    "title": "Otomatisasi dokumen untuk bisnis",
+    "description": "Ubah templat dan data terstruktur menjadi dokumen bisnis yang konsisten.",
+    "cta": "Buka dasbor"
+  },
+  "auth": {
+    "title": "Masuk",
+    "description": "Akses ruang kerja DocFlow Anda.",
+    "email": "Email",
+    "password": "Kata sandi",
+    "signIn": "Masuk",
+    "signingIn": "Sedang masuk…",
+    "invalidCredentials": "Email atau kata sandi salah.",
+    "rememberMe": "Ingat saya selama 30 hari",
+    "noAccount": "Belum punya akun?",
+    "createAccount": "Buat akun",
+    "registerTitle": "Buat ruang kerja Anda",
+    "registerDescription": "Mulai uji coba DocFlow selama 30 hari. Tidak perlu detail kartu.",
+    "name": "Nama Anda",
+    "organization": "Nama organisasi",
+    "confirmPassword": "Konfirmasi kata sandi",
+    "passwordHint": "Gunakan minimal 10 karakter dengan huruf besar, huruf kecil, dan angka.",
+    "verification": "Verifikasi manusia",
+    "loadingCaptcha": "Memuat tantangan…",
+    "newChallenge": "Tantangan baru",
+    "answer": "Jawaban",
+    "register": "Buat akun",
+    "creatingAccount": "Membuat akun…",
+    "hasAccount": "Sudah punya akun?",
+    "registrationFailed": "Pendaftaran gagal. Periksa formulir dan tantangan verifikasi."
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "templates": "Templat",
+    "documents": "Dokumen",
+    "access": "Akses",
+    "enabled": "Aktif",
+    "locked": "Terkunci"
+  },
+  "templates": {
+    "title": "Templat",
+    "description": "Gunakan placeholder variabel, misalnya customerName. Contoh templat ditambahkan secara otomatis.",
+    "new": "Templat baru",
+    "name": "Nama",
+    "descriptionLabel": "Deskripsi",
+    "content": "Isi templat",
+    "create": "Buat",
+    "variables": "Variabel",
+    "none": "tidak ada",
+    "example": "contoh",
+    "delete": "Hapus"
+  },
+  "documents": {
+    "title": "Dokumen"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "languageHelp": "Setelah masuk, bahasa disimpan di akun Anda dan di cookie bahasa browser."
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "common": {
+    "appName": "DocFlow",
+    "dashboard": "Dashboard",
+    "templates": "Templates",
+    "documents": "Documents",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "language": "Language",
+    "loading": "Loading...",
+    "company": "NurByte",
+    "companyTagline": "A product developed by NurByte."
+  },
+  "home": {
+    "title": "Document automation for businesses",
+    "description": "Turn reusable templates and structured data into consistent business documents.",
+    "cta": "Open dashboard"
+  },
+  "auth": {
+    "title": "Sign in",
+    "description": "Access your DocFlow workspace.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "invalidCredentials": "Invalid email or password.",
+    "rememberMe": "Remember me for 30 days",
+    "noAccount": "No account yet?",
+    "createAccount": "Create account",
+    "registerTitle": "Create your workspace",
+    "registerDescription": "Start your 30-day DocFlow trial. No payment details required.",
+    "name": "Your name",
+    "organization": "Organization name",
+    "confirmPassword": "Confirm password",
+    "passwordHint": "Use at least 10 characters with uppercase, lowercase and a number.",
+    "verification": "Human verification",
+    "loadingCaptcha": "Loading challenge…",
+    "newChallenge": "New challenge",
+    "answer": "Answer",
+    "register": "Create account",
+    "creatingAccount": "Creating account…",
+    "hasAccount": "Already have an account?",
+    "registrationFailed": "Registration failed. Check the form and verification challenge."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "templates": "Templates",
+    "documents": "Documents",
+    "access": "Access",
+    "enabled": "Enabled",
+    "locked": "Locked"
+  },
+  "templates": {
+    "title": "Templates",
+    "description": "Use variable placeholders such as customerName. Example templates are seeded automatically.",
+    "new": "New template",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "content": "Template content",
+    "create": "Create",
+    "variables": "Variables",
+    "none": "none",
+    "example": "example",
+    "delete": "Delete"
+  },
+  "documents": {
+    "title": "Documents"
+  },
+  "settings": {
+    "title": "Settings",
+    "languageHelp": "Your language is saved to your account after sign-in and to the browser locale cookie."
+  }
+}
