@@ -1,6 +1,8 @@
 "use client";
+
 import {
   Download,
+  Edit3,
   Eye,
   FileText,
   LoaderCircle,
@@ -8,11 +10,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useDeleteDocumentService } from "../service";
 import type { Document } from "../types";
+
 export function DocumentHistory({
   documents,
   loading = false,
@@ -20,13 +24,16 @@ export function DocumentHistory({
   documents: Document[];
   loading?: boolean;
 }) {
+  const t = useTranslations("documents");
+
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
+
   const filtered = useMemo(
     () =>
       documents
-        .filter((d) =>
-          `${d.name} ${d.template?.name ?? ""}`
+        .filter((document) =>
+          `${document.name} ${document.template?.name ?? ""}`
             .toLowerCase()
             .includes(q.toLowerCase()),
         )
@@ -41,89 +48,128 @@ export function DocumentHistory({
         ),
     [documents, q, sort],
   );
+
   return (
     <section className="document-history">
       <div className="section-heading">
         <FileText />
+
         <div>
-          <h2>Document history</h2>
-          <p>Search, sort, preview or download generated documents.</p>
+          <h2>{t("history")}</h2>
         </div>
       </div>
+
       <div className="filter-bar">
         <label className="search-field">
           <Search size={16} />
+
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search documents…"
+            onChange={(event) => setQ(event.target.value)}
+            placeholder={t("searchPlaceholder")}
           />
         </label>
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="nameAsc">Name A–Z</option>
-          <option value="nameDesc">Name Z–A</option>
+
+        <select
+          value={sort}
+          onChange={(event) => setSort(event.target.value)}
+          aria-label={t("sort")}
+        >
+          <option value="newest">{t("newest")}</option>
+
+          <option value="oldest">{t("oldest")}</option>
+
+          <option value="nameAsc">{t("nameAsc")}</option>
+
+          <option value="nameDesc">{t("nameDesc")}</option>
         </select>
       </div>
+
       {loading ? (
         <ListSkeleton rows={5} />
       ) : filtered.length ? (
-        filtered.map((d) => <DocumentRow key={d.id} document={d} />)
+        filtered.map((document) => (
+          <DocumentRow key={document.id} document={document} />
+        ))
       ) : (
         <div className="empty-state compact">
           <FileText />
-          <p>No matching documents.</p>
+          <p>{t("noDocuments")}</p>
         </div>
       )}
     </section>
   );
 }
+
 function DocumentRow({ document: d }: { document: Document }) {
+  const t = useTranslations("documents");
   const remove = useDeleteDocumentService(d.id);
-  const { confirm } = useFeedback();
+  const { confirm, notify } = useFeedback();
   const locale = useLocale();
+
   const del = async () => {
     if (
       await confirm({
-        title: "Delete document?",
-        message: `${d.name} will be permanently deleted. This action cannot be undone.`,
-        confirmLabel: "Delete permanently",
+        title: t("deleteTitle"),
+        message: t("deleteMessage", {
+          name: d.name,
+        }),
+        confirmLabel: t("deletePermanently"),
         kind: "danger",
       })
-    )
-      await remove.mutateAsync(undefined);
+    ) {
+      try {
+        await remove.mutateAsync(undefined);
+        notify(t("deleteSuccess"), "success");
+      } catch {
+        notify(t("deleteError"), "error");
+      }
+    }
   };
+
   return (
     <article className="document-row">
       <div className="document-icon">
         <FileText />
       </div>
+
       <div className="document-meta">
         <strong>{d.name}</strong>
+
         <span>
-          {d.template?.name ?? "Deleted template"} ·{" "}
-          {new Date(d.createdAt).toLocaleDateString()}
+          {d.template?.name ?? t("deletedTemplate")} ·{" "}
+          {new Date(d.createdAt).toLocaleDateString(locale)}
         </span>
       </div>
+
       <div className="document-actions">
         <a
           href={`/${locale}/documents/${d.id}/preview`}
           target="_blank"
           rel="noreferrer"
         >
-          <Eye /> Preview
+          <Eye />
+          {t("preview")}
         </a>
+
+        <Link href={`/documents/${d.id}/edit`}>
+          <Edit3 />
+          {t("edit")}
+        </Link>
+
         <a href={`/api/documents/${d.id}/pdf`} download>
-          <Download /> PDF
+          <Download />
+          {t("pdf")}
         </a>
+
         <button
           className="danger-link"
           disabled={remove.isPending}
           onClick={del}
         >
-          {remove.isPending ? <LoaderCircle className="spinner" /> : <Trash2 />}{" "}
-          {remove.isPending ? "Deleting…" : "Delete"}
+          {remove.isPending ? <LoaderCircle className="spinner" /> : <Trash2 />}
+
+          {remove.isPending ? t("deleting") : t("delete")}
         </button>
       </div>
     </article>

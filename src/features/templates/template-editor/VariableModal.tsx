@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, Trash2, Variable } from "lucide-react";
 import type { TemplateVariable, VariableType } from "../types";
 export function VariableModal({
@@ -7,13 +7,20 @@ export function VariableModal({
   onInsert,
   t,
   initial,
+  existingVariables,
 }: {
   onClose: () => void;
   onInsert: (v: TemplateVariable) => void;
   t: (key: string) => string;
   initial?: TemplateVariable;
+  existingVariables: TemplateVariable[];
 }) {
+  const [label, setLabel] = useState(initial?.label ?? initial?.name ?? "");
+  const [labelError, setLabelError] = useState("");
   const [name, setName] = useState(initial?.name ?? "");
+  const [nameError, setNameError] = useState("");
+  const labelRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
   const [required, setRequired] = useState(initial?.required ?? false);
   const [requiredMessage, setRequiredMessage] = useState(
@@ -36,9 +43,30 @@ export function VariableModal({
   );
   const submit = () => {
     const clean = name.trim().replace(/[^\w.]/g, "");
-    if (!clean) return;
+    if (!label.trim()) {
+      setLabelError(t("variableLabelRequired"));
+      labelRef.current?.focus();
+      return;
+    }
+    if (!clean) {
+      setNameError(t("variableNameRequired"));
+      nameRef.current?.focus();
+      return;
+    }
+    const duplicate = existingVariables.some(
+      (variable) =>
+        variable.name.toLocaleLowerCase() === clean.toLocaleLowerCase() &&
+        variable.name !== initial?.name,
+    );
+    if (duplicate) {
+      setNameError(t("variableNameDuplicate"));
+      nameRef.current?.focus();
+      return;
+    }
+    setNameError("");
     onInsert({
       name: clean,
+      label: label.trim(),
       type,
       required,
       requiredMessage: required ? requiredMessage : undefined,
@@ -62,21 +90,44 @@ export function VariableModal({
         <span className="eyebrow">
           <Variable size={14} /> {t("dynamicContent")}
         </span>
-        <h3>{initial ? "Edit variable" : t("addVariable")}</h3>
+        <h3>{initial ? t("editVariable") : t("addVariable")}</h3>
         <p>
           {t("variableHelpBefore")} <code>{`{{variable}}`}</code>{" "}
           {t("variableHelpAfter")}
         </p>
         <div className="form-grid two">
           <label className="field">
+            {t("variableLabel")}
+            <input
+              ref={labelRef}
+              autoFocus
+              maxLength={120}
+              value={label}
+              onChange={(e) => {
+                setLabel(e.target.value);
+                setLabelError("");
+              }}
+              placeholder={t("variableLabelPlaceholder")}
+              aria-invalid={Boolean(labelError)}
+            />
+            {labelError && <small className="error">{labelError}</small>}
+            <small>{t("variableLabelHelp")}</small>
+          </label>
+          <label className="field">
             {t("variableName")}
             <input
-              autoFocus
+              ref={nameRef}
               maxLength={80}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameError("");
+              }}
               placeholder="customerName"
+              aria-invalid={Boolean(nameError)}
             />
+            {nameError && <small className="error">{nameError}</small>}
+            <small>{t("variableNameHelp")}</small>
           </label>
           <label className="field">
             {t("variableType")}
@@ -96,8 +147,8 @@ export function VariableModal({
             >
               <option value="text">{t("typeText")}</option>
               <option value="date">{t("typeDate")}</option>
-              <option value="datetime">Date & time</option>
-              <option value="time">Time</option>
+              <option value="datetime">{t("typeDateTime")}</option>
+              <option value="time">{t("typeTime")}</option>
               <option value="image">{t("typeImage")}</option>
               <option value="select">{t("typeSelect")}</option>
             </select>
@@ -268,8 +319,12 @@ export function VariableModal({
           <button className="btn secondary" onClick={onClose}>
             {t("cancel")}
           </button>
-          <button className="btn" onClick={submit} disabled={!name.trim()}>
-            {initial ? "Save changes" : t("insertVariable")}
+          <button
+            className="btn"
+            onClick={submit}
+            disabled={!name.trim() || !label.trim()}
+          >
+            {initial ? t("saveVariableChanges") : t("insertVariable")}
           </button>
         </div>
       </div>

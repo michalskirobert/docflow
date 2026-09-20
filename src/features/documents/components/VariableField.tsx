@@ -3,6 +3,7 @@
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { CalendarDays, Clock3, Trash2, Upload } from "lucide-react";
 import { IMaskInput } from "react-imask";
+import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
 import {
   MAX_TEMPLATE_IMAGE_BYTES,
@@ -404,6 +405,7 @@ type Props = {
 };
 
 export function VariableField({ variable, value, error, onChange }: Props) {
+  const t = useTranslations("documents");
   const label = variable.label || variable.name;
 
   /*
@@ -435,16 +437,14 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       !SAFE_TEMPLATE_IMAGE_TYPES.includes(f.type as never) ||
       f.size > MAX_TEMPLATE_IMAGE_BYTES
     ) {
-      setUploadError("Invalid image type or file is too large.");
+      setUploadError(t("invalidImage"));
       return;
     }
 
     const b = new Uint8Array(await f.slice(0, 16).arrayBuffer());
 
     if (!MAGIC[f.type]?.(b)) {
-      setUploadError(
-        "The file content does not match a supported image format.",
-      );
+      setUploadError(t("invalidImageSignature"));
       return;
     }
 
@@ -452,7 +452,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
 
     r.onload = () => onChange(String(r.result));
 
-    r.onerror = () => setUploadError("Could not read the image.");
+    r.onerror = () => setUploadError(t("imageReadError"));
 
     r.readAsDataURL(f);
   };
@@ -512,10 +512,10 @@ export function VariableField({ variable, value, error, onChange }: Props) {
 
     const pickerLabel =
       type === "date"
-        ? "Choose date"
+        ? t("chooseDate")
         : type === "datetime"
-          ? "Choose date and time"
-          : "Choose time";
+          ? t("chooseDateTime")
+          : t("chooseTime");
 
     const openPicker = () => {
       const picker = nativeDateTimePicker.current;
@@ -626,16 +626,16 @@ export function VariableField({ variable, value, error, onChange }: Props) {
                 }}
               >
                 <Trash2 size={15} />
-                Remove image
+                {t("removeImage")}
               </button>
             </div>
           ) : (
             <>
               <Upload />
 
-              <strong>Drop an image here or click to choose</strong>
+              <strong>{t("dropImage")}</strong>
 
-              <small>PNG, JPG, WEBP or GIF</small>
+              <small>{t("imageTypes")}</small>
             </>
           )}
         </div>

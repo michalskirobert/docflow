@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
+import { useFeedback } from "@/components/ui/feedback-provider";
 import { ArrowLeft, LoaderCircle, Save, Trash2, X } from "lucide-react";
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
@@ -60,6 +61,8 @@ type Props = {
 export function TemplateEditor({ template, onClose }: Props) {
   const t = useTranslations("templateEditor");
 
+  const { notify } = useFeedback();
+  const nameRef = useRef<HTMLInputElement>(null);
   const editor = useRef<HTMLDivElement>(null);
   const headerEditor = useRef<HTMLDivElement>(null);
   const footerEditor = useRef<HTMLDivElement>(null);
@@ -926,15 +929,27 @@ export function TemplateEditor({ template, onClose }: Props) {
       variables,
     };
 
-    if (!payload.name || !payload.content) {
+    if (!payload.name) {
+      notify(t("nameRequired"), "error");
+      nameRef.current?.focus();
       return;
     }
 
-    template
-      ? await update.mutateAsync(payload)
-      : await create.mutateAsync(payload);
+    if (!payload.content) {
+      notify(t("contentRequired"), "error");
+      editor.current?.focus();
+      return;
+    }
 
-    onClose();
+    try {
+      template
+        ? await update.mutateAsync(payload)
+        : await create.mutateAsync(payload);
+      notify(t(template ? "updateSuccess" : "createSuccess"), "success");
+      onClose();
+    } catch {
+      notify(t("saveError"), "error");
+    }
   };
 
   const pending = create.isPending || update.isPending;
@@ -960,6 +975,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             </span>
 
             <input
+              ref={nameRef}
               className="editor-title"
               maxLength={250}
               value={name}
@@ -1231,7 +1247,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               <button
                 type="button"
                 className="image-resize-handle image-resize-width"
-                aria-label="Resize image width"
+                aria-label={t("resizeImageWidth")}
                 onMouseDown={(event) => startResize(event, "width")}
                 style={{
                   left: resizeBox.right - 10,
@@ -1242,7 +1258,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               <button
                 type="button"
                 className="image-resize-handle image-resize-height"
-                aria-label="Resize image height"
+                aria-label={t("resizeImageHeight")}
                 onMouseDown={(event) => startResize(event, "height")}
                 style={{
                   left: resizeBox.left + resizeBox.width / 2 - 10,
@@ -1281,6 +1297,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             }}
             onInsert={saveVariableDefinition}
             initial={editingVariable}
+            existingVariables={variables}
             t={t}
           />
         )}

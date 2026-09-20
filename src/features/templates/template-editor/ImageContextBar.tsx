@@ -81,10 +81,10 @@ export function ImageContextBar({
           <option value="right">{t("rightWrap")}</option>
         </select>
       </label>
-      <button type="button" onClick={onMoveBefore} title="Move before">
+      <button type="button" onClick={onMoveBefore} title={t("moveImageBefore")}>
         <ArrowLeft size={15} />
       </button>
-      <button type="button" onClick={onMoveAfter} title="Move after">
+      <button type="button" onClick={onMoveAfter} title={t("moveImageAfter")}>
         <ArrowRight size={15} />
       </button>
       <button type="button" onClick={onRemove}>

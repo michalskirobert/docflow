@@ -6,7 +6,7 @@ import { requireSession } from "@/server/auth/require-session";
 export const runtime = "nodejs";
 
 export async function GET(
-  _: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await requireSession();
@@ -50,7 +50,7 @@ export async function GET(
     return new NextResponse(Buffer.from(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `${new URL(request.url).searchParams.get("inline") === "1" ? "inline" : "attachment"}; filename="${filename}"`,
         "Cache-Control": "private, no-store",
       },
     });

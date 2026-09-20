@@ -8,6 +8,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import {
@@ -19,14 +20,15 @@ import type { Template } from "./types";
 import { parseTemplateVariables } from "./types";
 import { TemplateEditor } from "./template-editor";
 export default function TemplateList() {
+  const t = useTranslations("templates");
   const query = useTemplatesService();
   const create = useCreateTemplateService();
   const [editing, setEditing] = useState<Template | null | "new">(null);
   const [q, setQ] = useState("");
   const filtered = useMemo(
     () =>
-      query.data?.filter((t) =>
-        `${t.name} ${t.description ?? ""}`
+      query.data?.filter((item) =>
+        `${item.name} ${item.description ?? ""}`
           .toLowerCase()
           .includes(q.toLowerCase()),
       ) ?? [],
@@ -40,28 +42,28 @@ export default function TemplateList() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search templates…"
+            placeholder={t("search")}
           />
         </label>
         <button className="btn" onClick={() => setEditing("new")}>
-          <FilePlus2 size={18} /> New template
+          <FilePlus2 size={18} /> {t("new")}
         </button>
       </div>
       {query.isLoading ? (
         <ListSkeleton rows={6} cards />
       ) : filtered.length ? (
         <div className="template-grid">
-          {filtered.map((t) => (
+          {filtered.map((item) => (
             <TemplateCard
-              key={t.id}
-              template={t}
-              onEdit={() => setEditing(t)}
+              key={item.id}
+              template={item}
+              onEdit={() => setEditing(item)}
               onDuplicate={() =>
                 create.mutate({
-                  name: `${t.name.replace(/(?: copy)+$/i, "")} copy`,
-                  description: t.description ?? "",
-                  content: t.content,
-                  variables: parseTemplateVariables(t.variablesJson),
+                  name: `${item.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                  description: item.description ?? "",
+                  content: item.content,
+                  variables: parseTemplateVariables(item.variablesJson),
                 })
               }
             />
@@ -70,12 +72,8 @@ export default function TemplateList() {
       ) : (
         <div className="empty-state">
           <FilePlus2 />
-          <h2>{q ? "No matching templates" : "Create your first template"}</h2>
-          <p>
-            {q
-              ? "Try another search phrase."
-              : "Design reusable documents with variables, tables and images."}
-          </p>
+          <h2>{q ? t("noMatching") : t("first")}</h2>
+          <p>{q ? t("trySearch") : t("firstDescription")}</p>
         </div>
       )}
       {editing && (
@@ -96,15 +94,16 @@ function TemplateCard({
   onEdit: () => void;
   onDuplicate: () => void;
 }) {
+  const t = useTranslations("templates");
   const remove = useDeleteTemplateService(template.id);
   const { confirm } = useFeedback();
   const variables = parseTemplateVariables(template.variablesJson);
   const del = async () => {
     if (
       await confirm({
-        title: "Delete template?",
-        message: `${template.name} will be permanently deleted. This action cannot be undone.`,
-        confirmLabel: "Delete permanently",
+        title: t("deleteTitle"),
+        message: t("deleteMessage", { name: template.name }),
+        confirmLabel: t("deletePermanently"),
         kind: "danger",
       })
     )
@@ -121,10 +120,10 @@ function TemplateCard({
       <div className="template-body">
         <div className="row between">
           <h3>{template.name}</h3>
-          {template.isExample && <span className="badge">Example</span>}
+          {template.isExample && <span className="badge">{t("example")}</span>}
         </div>
         <p className="muted clamp">
-          {template.description || "No description"}
+          {template.description || t("noDescription")}
         </p>
         <div className="variable-list">
           {variables.slice(0, 4).map((v) => (
@@ -133,10 +132,10 @@ function TemplateCard({
         </div>
         <div className="card-actions">
           <button onClick={onEdit}>
-            <Edit3 /> Edit
+            <Edit3 /> {t("edit")}
           </button>
           <button onClick={onDuplicate}>
-            <Copy /> Duplicate
+            <Copy /> {t("duplicate")}
           </button>
           <button
             className="danger-link"

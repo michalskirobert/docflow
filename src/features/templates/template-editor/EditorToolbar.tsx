@@ -103,10 +103,10 @@ export function EditorToolbar({
         value={state.lineHeight}
         onPointerDown={rememberSelection}
         onChange={(e) => setLineHeight(e.target.value)}
-        aria-label="Line height"
-        title="Line height"
+        aria-label={t("lineHeight")}
+        title={t("lineHeight")}
       >
-        <option value="">Line height</option>
+        <option value="">{t("lineHeight")}</option>
         {["1", "1.15", "1.25", "1.5", "1.75", "2"].map((value) => (
           <option key={value} value={value}>
             {value}

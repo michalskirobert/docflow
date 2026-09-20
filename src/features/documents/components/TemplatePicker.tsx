@@ -1,25 +1,32 @@
 "use client";
+
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import type { Template } from "@/features/templates/types";
+
+type Props = {
+  templates: Template[];
+  loading?: boolean;
+  value: string;
+  disabled?: boolean;
+  onChange: (id: string) => void;
+};
 
 export function TemplatePicker({
   templates,
   value,
   onChange,
   loading = false,
-}: {
-  templates: Template[];
-  loading?: boolean;
-  value: string;
-  onChange: (id: string) => void;
-}) {
+  disabled = false,
+}: Props) {
+  const t = useTranslations("documents");
   const [q, setQ] = useState("");
   const filtered = useMemo(
     () =>
-      templates.filter((t) =>
-        `${t.name} ${t.description ?? ""}`
+      templates.filter((template) =>
+        `${template.name} ${template.description ?? ""}`
           .toLowerCase()
           .includes(q.toLowerCase()),
       ),
@@ -32,23 +39,25 @@ export function TemplatePicker({
         <Search size={16} />
         <input
           value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search templates…"
+          onChange={(event) => setQ(event.target.value)}
+          placeholder={t("searchTemplates")}
+          disabled={disabled}
         />
       </label>
       <div className="template-picker-list">
         {loading ? (
           <ListSkeleton rows={3} />
         ) : (
-          filtered.map((t) => (
+          filtered.map((template) => (
             <button
               type="button"
-              className={value === t.id ? "selected" : ""}
-              key={t.id}
-              onClick={() => onChange(t.id)}
+              className={value === template.id ? "selected" : ""}
+              key={template.id}
+              onClick={() => onChange(template.id)}
+              disabled={disabled}
             >
-              <strong>{t.name}</strong>
-              <small>{t.description || "No description"}</small>
+              <strong>{template.name}</strong>
+              <small>{template.description || t("noDescription")}</small>
             </button>
           ))
         )}
