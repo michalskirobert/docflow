@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { getSession } from "./session";
+
 export async function requireSession() {
-  const s = await getSession();
-  if (!s) throw new Error("UNAUTHORIZED");
-  return s;
+  const session = await getSession();
+  if (!session) redirect("/login");
+  return session;
 }

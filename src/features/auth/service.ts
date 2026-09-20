@@ -3,9 +3,10 @@ import { api } from "@/lib/axios";
 import type {
   CaptchaChallenge,
   LoginPayload,
-  RegisterPayload,
+  RegisterResponse,
   SessionUser,
 } from "@/types/auth";
+import type { RegisterFormValues } from "./schema";
 
 export function useCaptcha() {
   return useQuery({
@@ -15,6 +16,7 @@ export function useCaptcha() {
     staleTime: 0,
     gcTime: 0,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 }
 export function useLogin() {
@@ -25,7 +27,7 @@ export function useLogin() {
 }
 export function useRegister() {
   return useMutation({
-    mutationFn: async (payload: RegisterPayload) =>
-      (await api.post<SessionUser>("/auth/register", payload)).data,
+    mutationFn: async (payload: RegisterFormValues) =>
+      (await api.post<RegisterResponse>("/auth/register", payload)).data,
   });
 }

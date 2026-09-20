@@ -1,54 +1,83 @@
 "use client";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
 import { Link, useRouter } from "@/i18n/navigation";
+import { useFeedback } from "@/components/ui/feedback-provider";
+import type { ApiError } from "@/types/api";
+import type { AppLocale } from "@/types/auth";
+import { FormField } from "./form-field";
+import { loginSchema, type LoginFormValues } from "./schema";
 import { useLogin } from "./service";
-
 export default function LoginForm() {
   const t = useTranslations("auth");
-  const locale = useLocale();
   const router = useRouter();
-  const login = useLogin();
-  const [error, setError] = useState("");
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    const f = new FormData(e.currentTarget);
+  const locale = useLocale() as AppLocale;
+  const mutation = useLogin();
+  const { notify } = useFeedback();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "", rememberMe: false },
+  });
+  const tr = (k?: string) => (k ? t(`validation.${k}`) : "");
+  const submit = handleSubmit(async (values) => {
     try {
-      const user = await login.mutateAsync({
-        email: String(f.get("email")),
-        password: String(f.get("password")),
-        rememberMe: f.get("rememberMe") === "on",
-      });
+      const user = await mutation.mutateAsync(values);
+      notify(t("loginSuccess"), "success");
       router.replace("/dashboard", { locale: user.locale ?? locale });
       router.refresh();
-    } catch {
-      setError(t("invalidCredentials"));
+    } catch (error) {
+      const code = axios.isAxiosError<ApiError & { code?: string }>(error)
+        ? error.response?.data?.code
+        : undefined;
+      const msg =
+        code === "EMAIL_NOT_VERIFIED"
+          ? t("emailNotVerified")
+          : t("invalidCredentials");
+      setError("root", { message: msg });
+      notify(msg, code === "EMAIL_NOT_VERIFIED" ? "warning" : "error");
     }
-  }
+  });
   return (
-    <form onSubmit={submit} className="auth-form">
-      <label className="field">
-        {t("email")}
-        <input name="email" type="email" required autoComplete="email" />
-      </label>
-      <label className="field">
-        {t("password")}
-        <input
-          name="password"
-          type="password"
-          required
-          minLength={8}
-          autoComplete="current-password"
-        />
-      </label>
+    <form onSubmit={submit} className="auth-form" noValidate>
+      <FormField
+        label={t("email")}
+        type="email"
+        requiredMark
+        {...register("email")}
+        error={
+          errors.email
+            ? { ...errors.email, message: tr(String(errors.email.message)) }
+            : undefined
+        }
+      />
+      <FormField
+        label={t("password")}
+        type="password"
+        requiredMark
+        {...register("password")}
+        error={
+          errors.password
+            ? {
+                ...errors.password,
+                message: tr(String(errors.password.message)),
+              }
+            : undefined
+        }
+      />
       <label className="checkbox">
-        <input name="rememberMe" type="checkbox" />{" "}
-        <span>{t("rememberMe")}</span>
+        <input type="checkbox" {...register("rememberMe")} />
+        {t("rememberMe")}
       </label>
-      {error && <p className="error">{error}</p>}
-      <button className="btn full" disabled={login.isPending}>
-        {login.isPending ? t("signingIn") : t("signIn")}
+      {errors.root && <p className="form-error">{errors.root.message}</p>}
+      <button className="btn full" disabled={mutation.isPending}>
+        {mutation.isPending ? t("signingIn") : t("signIn")}
       </button>
       <p className="auth-switch">
         {t("noAccount")} <Link href="/register">{t("createAccount")}</Link>

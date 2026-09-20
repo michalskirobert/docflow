@@ -1,48 +1,54 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
-import { z } from "zod";
-
+import { loginSchema } from "@/features/auth/schema";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/server/auth/session";
-
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  rememberMe: z.boolean().default(false),
-});
-
 export async function POST(request: Request) {
-  const parsed = schema.safeParse(await request.json());
+  const parsed = loginSchema.safeParse(await request.json());
 
-  if (!parsed.success) {
+  if (!parsed.success)
     return NextResponse.json(
-      { message: "Invalid credentials" },
+      { code: "VALIDATION_ERROR", message: "Invalid credentials" },
       { status: 400 },
     );
-  }
 
   const user = await prisma.user.findUnique({
-    where: { email: parsed.data.email },
+    where: { email: parsed.data.email.toLowerCase() },
     include: { memberships: { include: { organization: true }, take: 1 } },
   });
 
-  const membership = user?.memberships[0];
-  const validPassword = user
+  const passwordMatches = user
     ? await bcrypt.compare(parsed.data.password, user.passwordHash)
     : false;
 
-  if (!user || !validPassword || !membership) {
+  if (!user || !passwordMatches)
     return NextResponse.json(
-      { message: "Invalid email or password" },
+      { code: "INVALID_CREDENTIALS", message: "Invalid email or password" },
       { status: 401 },
     );
-  }
+
+  if (!user.emailVerifiedAt)
+    return NextResponse.json(
+      { code: "EMAIL_NOT_VERIFIED", message: "Email address is not verified" },
+      { status: 403 },
+    );
+
+  const membership = user.memberships[0];
+
+  if (!membership)
+    return NextResponse.json(
+      { code: "NO_ORGANIZATION", message: "No organization assigned" },
+      { status: 403 },
+    );
 
   const session = {
     id: user.id,
     email: user.email,
-    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    name: `${user.firstName} ${user.lastName}`,
     locale: user.locale as "pl" | "en" | "id" | null,
+    emailVerified: true,
     organizationId: membership.organizationId,
     organizationName: membership.organization.name,
     role: membership.role,
@@ -51,5 +57,6 @@ export async function POST(request: Request) {
   };
 
   await createSession(session, parsed.data.rememberMe);
+
   return NextResponse.json(session);
 }

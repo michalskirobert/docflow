@@ -2,11 +2,11 @@ import { getTranslations } from "next-intl/server";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/server/auth/session";
+import { requireSession } from "@/server/auth/require-session";
 import { getSubscriptionAccess } from "@/server/subscription/access";
 
 export default async function DashboardPage() {
-  const session = (await getSession())!;
+  const session = await requireSession();
   const t = await getTranslations("dashboard");
   const [templates, documents, access] = await Promise.all([
     prisma.template.count({

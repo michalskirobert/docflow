@@ -8,6 +8,7 @@ const SESSION_EXPIRATION = "12h";
 
 function key() {
   const secret = process.env.AUTH_SECRET;
+
   if (!secret || secret.length < 32)
     throw new Error("AUTH_SECRET must contain at least 32 characters.");
   return new TextEncoder().encode(secret);

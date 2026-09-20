@@ -13,12 +13,29 @@ enum Role {
   MEMBER
 }
 
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum PlanCode {
+  FREE
+  MONTHLY
+  YEARLY
+}
+
 enum SubscriptionStatus {
-  NONE
-  TRIALING
   ACTIVE
+  PENDING_PAYMENT
   PAST_DUE
   CANCELED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  CANCELED
+  FAILED
 }
 
 enum DocumentStatus {
@@ -26,28 +43,51 @@ enum DocumentStatus {
   FAILED
 }
 
+enum SalesDocumentType {
+  RECEIPT
+  INVOICE
+}
+
 model User {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  name               String
+  id                 String                   @id @default(cuid())
+  email              String                   @unique
+  firstName          String
+  lastName           String
   passwordHash       String
-  subscriptionExempt Boolean      @default(false)
-  trialExempt        Boolean      @default(false)
+  emailVerifiedAt    DateTime?
+  subscriptionExempt Boolean                  @default(false)
+  trialExempt        Boolean                  @default(false)
   locale             String?
   memberships        Membership[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  verificationTokens EmailVerificationToken[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Organization {
-  id            String        @id @default(cuid())
-  name          String
-  memberships   Membership[]
-  templates     Template[]
-  documents     Document[]
-  subscription  Subscription?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id             String          @id @default(cuid())
+  name           String
+  memberships    Membership[]
+  templates      Template[]
+  documents      Document[]
+  subscription   Subscription?
+  billingProfile BillingProfile?
+  payments       Payment[]
+  salesDocuments SalesDocument[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Membership {
@@ -62,16 +102,74 @@ model Membership {
   @@index([organizationId])
 }
 
+model BillingProfile {
+  id              String       @id @default(cuid())
+  organizationId  String       @unique
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customerType    CustomerType
+  billingEmail    String
+  firstName       String?
+  lastName        String?
+  companyName     String?
+  taxId           String?
+  vatId           String?
+  countryCode     String
+  street          String
+  buildingNumber  String
+  apartmentNumber String?
+  postalCode      String
+  city            String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
 model Subscription {
   id                   String             @id @default(cuid())
   organizationId       String             @unique
   organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  status               SubscriptionStatus @default(TRIALING)
-  trialEndsAt          DateTime?
+  plan                 PlanCode           @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
   currentPeriodEndsAt  DateTime?
-  monthlyDocumentLimit Int                @default(100)
+  monthlyDocumentLimit Int                @default(10)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  salesDocuments  SalesDocument[]
+  plan            PlanCode
+  status          PaymentStatus   @default(PENDING)
+  provider        String          @default("PAYU")
+  providerOrderId String?         @unique
+  extOrderId      String          @unique
+  currency        String          @default("PLN")
+  netAmount       Int
+  vatAmount       Int
+  grossAmount     Int
+  vatRate         Int
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([organizationId])
+}
+
+model SalesDocument {
+  id             String            @id @default(cuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  paymentId      String?
+  payment        Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  type           SalesDocumentType
+  number         String?
+  fileUrl        String?
+  sentAt         DateTime?
+  createdAt      DateTime          @default(now())
+
+  @@index([organizationId])
+  @@index([paymentId])
 }
 
 model Template {

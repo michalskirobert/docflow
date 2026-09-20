@@ -1,10 +1,17 @@
 export type AppLocale = "pl" | "en" | "id";
 
+export type CustomerType = "INDIVIDUAL" | "BUSINESS";
+
+export type PlanCode = "FREE" | "MONTHLY" | "YEARLY";
+
 export type SessionUser = {
   id: string;
   email: string;
+  firstName: string;
+  lastName: string;
   name: string;
   locale: AppLocale | null;
+  emailVerified: boolean;
   organizationId: string;
   organizationName: string;
   role: "OWNER" | "ADMIN" | "MEMBER";
@@ -18,19 +25,15 @@ export type LoginPayload = {
   rememberMe: boolean;
 };
 
-export type RegisterPayload = {
-  name: string;
-  organizationName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  locale: AppLocale;
-  captchaToken: string;
-  captchaAnswer: string;
-};
-
 export type CaptchaChallenge = {
   question: string;
   token: string;
   expiresInSeconds: number;
+};
+
+export type RegisterResponse = {
+  email: string;
+  verificationRequired: boolean;
+  paymentRequired: boolean;
+  redirectUri?: string;
 };
