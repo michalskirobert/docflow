@@ -16,7 +16,13 @@ export default async function RegisterPage({
   const t = await getTranslations("auth");
   return (
     <main className="login-page">
-      <section className="login-card wide"><div className="auth-topbar"><Link href="/login" className="auth-back"><ArrowLeft size={16}/> {t("backToLogin")}</Link><LanguageSwitcher /></div>
+      <section className="login-card wide">
+        <div className="auth-topbar">
+          <Link href="/login" className="auth-back">
+            <ArrowLeft size={16} /> {t("backToLogin")}
+          </Link>
+          <LanguageSwitcher />
+        </div>
         <div className="login-brand">DocFlow</div>
         <p className="brand-by">by NurByte</p>
         <h1>{t("registerTitle")}</h1>

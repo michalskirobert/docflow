@@ -1,6 +1,7 @@
 # DocFlow v1.5.0
 
 Editor UX iteration:
+
 - real A4 workspace remains A4 at every viewport size;
 - mobile defaults to a fit-to-page zoom and supports 25% zoom steps;
 - workspace scrolls independently instead of clipping the document;

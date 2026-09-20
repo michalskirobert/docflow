@@ -222,6 +222,21 @@
     "zoomOut": "Zoom out",
     "zoomIn": "Zoom in",
     "fitPage": "Fit page",
-    "resizeImage": "Drag to resize image"
+    "resizeImage": "Drag to resize image",
+    "variableType": "Variable type",
+    "typeText": "Text",
+    "typeDate": "Date",
+    "typeImage": "Image",
+    "typeSelect": "Select",
+    "inputMask": "Input mask",
+    "maskHelp": "9 means a digit, A means a letter. Leave empty for plain text.",
+    "dateFormat": "Date format",
+    "selectOptions": "Select options",
+    "oneOptionPerLine": "One option per line",
+    "heightPx": "Height (px)",
+    "imagePlaceholder": "Image placeholder",
+    "requiredField": "Required field",
+    "requiredMessage": "Required message",
+    "requiredDefault": "This field is required."
   }
 }

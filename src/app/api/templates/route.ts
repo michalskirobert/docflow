@@ -8,6 +8,22 @@ const schema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
   content: z.string().min(1),
+  variables: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string().optional(),
+        type: z.enum(["text", "date", "image", "select"]),
+        required: z.boolean().optional(),
+        requiredMessage: z.string().optional(),
+        mask: z.string().optional(),
+        dateFormat: z.string().optional(),
+        options: z.array(z.string()).optional(),
+        imageWidth: z.number().optional(),
+        imageHeight: z.number().optional(),
+      }),
+    )
+    .optional(),
 });
 export async function GET() {
   try {
@@ -27,12 +43,19 @@ export async function POST(req: Request) {
     const s = await requireSession();
     const parsed = schema.parse(await req.json());
     const p = { ...parsed, content: sanitizeTemplateHtml(parsed.content) };
+    const variableDefinitions =
+      p.variables ??
+      extractVariables(p.content).map((name) => ({
+        name,
+        type: "text" as const,
+      }));
+    const { variables: _variables, ...templateData } = p;
     return NextResponse.json(
       await prisma.template.create({
         data: {
-          ...p,
+          ...templateData,
           organizationId: s.organizationId,
-          variablesJson: JSON.stringify(extractVariables(p.content)),
+          variablesJson: JSON.stringify(variableDefinitions),
         },
       }),
       { status: 201 },

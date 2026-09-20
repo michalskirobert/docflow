@@ -150,7 +150,10 @@ export async function POST(request: Request) {
 
     if (data.plan !== "FREE") {
       const extOrderId = randomUUID();
-      const transferReference = data.paymentMethod === "BANK_TRANSFER" ? `DF-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}` : null;
+      const transferReference =
+        data.paymentMethod === "BANK_TRANSFER"
+          ? `DF-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`
+          : null;
 
       const payment = await prisma.payment.create({
         data: {
@@ -169,7 +172,17 @@ export async function POST(request: Request) {
       });
 
       if (data.paymentMethod === "BANK_TRANSFER") {
-        return NextResponse.json({email,verificationRequired:true,paymentRequired:true,paymentPending:true,paymentMethod:"BANK_TRANSFER",transferReference},{status:201});
+        return NextResponse.json(
+          {
+            email,
+            verificationRequired: true,
+            paymentRequired: true,
+            paymentPending: true,
+            paymentMethod: "BANK_TRANSFER",
+            transferReference,
+          },
+          { status: 201 },
+        );
       }
 
       const forwarded = request.headers

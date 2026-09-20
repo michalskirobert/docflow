@@ -35,8 +35,14 @@ export async function POST(request: Request) {
         data: {
           plan: payment.plan,
           status: "ACTIVE",
-          monthlyDocumentLimit: payment.plan === "FREE" ? 10 : Number(process.env.YEARLY_DOCUMENT_LIMIT ?? 100),
-          currentPeriodEndsAt: payment.plan === "YEARLY" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null,
+          monthlyDocumentLimit:
+            payment.plan === "FREE"
+              ? 10
+              : Number(process.env.YEARLY_DOCUMENT_LIMIT ?? 100),
+          currentPeriodEndsAt:
+            payment.plan === "YEARLY"
+              ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+              : null,
         },
       });
   });

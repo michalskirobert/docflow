@@ -86,9 +86,32 @@ export default function RegisterForm() {
   const selectedPlan = useWatch({ control, name: "plan" });
   const paymentMethod = useWatch({ control, name: "paymentMethod" });
   const taxId = useWatch({ control, name: "taxId" });
-  const [companyLoading,setCompanyLoading]=useState(false);
-  const [companyMessage,setCompanyMessage]=useState("");
-  const lookupCompany=async()=>{const nip=(taxId??"").replace(/\D/g,"");if(nip.length!==10){setCompanyMessage(t("invalidNipLookup"));return}setCompanyLoading(true);setCompanyMessage("");try{const {data}=await api.get(`/company-data?nip=${nip}`);setValue("companyName",data.companyName??"");setValue("taxId",data.taxId??nip);setValue("countryCode","PL");if(data.street)setValue("street",data.street);if(data.buildingNumber)setValue("buildingNumber",data.buildingNumber);if(data.postalCode)setValue("postalCode",data.postalCode);if(data.city)setValue("city",data.city);setCompanyMessage(t("companyLoaded"))}catch{setCompanyMessage(t("companyNotFound"))}finally{setCompanyLoading(false)}};
+  const [companyLoading, setCompanyLoading] = useState(false);
+  const [companyMessage, setCompanyMessage] = useState("");
+  const lookupCompany = async () => {
+    const nip = (taxId ?? "").replace(/\D/g, "");
+    if (nip.length !== 10) {
+      setCompanyMessage(t("invalidNipLookup"));
+      return;
+    }
+    setCompanyLoading(true);
+    setCompanyMessage("");
+    try {
+      const { data } = await api.get(`/company-data?nip=${nip}`);
+      setValue("companyName", data.companyName ?? "");
+      setValue("taxId", data.taxId ?? nip);
+      setValue("countryCode", "PL");
+      if (data.street) setValue("street", data.street);
+      if (data.buildingNumber) setValue("buildingNumber", data.buildingNumber);
+      if (data.postalCode) setValue("postalCode", data.postalCode);
+      if (data.city) setValue("city", data.city);
+      setCompanyMessage(t("companyLoaded"));
+    } catch {
+      setCompanyMessage(t("companyNotFound"));
+    } finally {
+      setCompanyLoading(false);
+    }
+  };
 
   const plans = useQuery({
     queryKey: ["plans", customerType],
@@ -188,7 +211,6 @@ export default function RegisterForm() {
           message: "captchaUnavailable",
         });
 
-
         await refreshCaptcha();
 
         return;
@@ -215,7 +237,9 @@ export default function RegisterForm() {
         return;
       }
 
-      router.push(`/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`);
+      router.push(
+        `/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`,
+      );
     } catch (error) {
       const response = axios.isAxiosError<
         ApiError & {
@@ -232,7 +256,6 @@ export default function RegisterForm() {
           type: "server",
           message: "emailExists",
         });
-
 
         return;
       }
@@ -251,7 +274,6 @@ export default function RegisterForm() {
           message: "invalidCaptcha",
         });
 
-
         return;
       }
 
@@ -261,7 +283,6 @@ export default function RegisterForm() {
           message: "planUnavailable",
         });
 
-
         return;
       }
 
@@ -269,7 +290,6 @@ export default function RegisterForm() {
         type: "server",
         message: "registrationFailed",
       });
-
     }
   });
 
@@ -362,7 +382,28 @@ export default function RegisterForm() {
             error={fieldError(errors.companyName)}
           />
 
-          <div className="nip-row"><FormField label={t("taxId")} requiredMark {...register("taxId")} error={fieldError(errors.taxId)} /><button type="button" className="btn secondary" onClick={lookupCompany} disabled={companyLoading}>{companyLoading?t("companyLoading"):t("fetchCompany")}</button></div>{companyMessage&&<p className="hint">{companyMessage}</p>}<FormField label={t("vatId")} {...register("vatId")} error={fieldError(errors.vatId)} />
+          <div className="nip-row">
+            <FormField
+              label={t("taxId")}
+              requiredMark
+              {...register("taxId")}
+              error={fieldError(errors.taxId)}
+            />
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={lookupCompany}
+              disabled={companyLoading}
+            >
+              {companyLoading ? t("companyLoading") : t("fetchCompany")}
+            </button>
+          </div>
+          {companyMessage && <p className="hint">{companyMessage}</p>}
+          <FormField
+            label={t("vatId")}
+            {...register("vatId")}
+            error={fieldError(errors.vatId)}
+          />
         </>
       )}
 
@@ -441,7 +482,18 @@ export default function RegisterForm() {
               {...register("plan")}
             />
 
-            <div className="plan-visual" aria-hidden="true"><span>{plan.code === "FREE" ? "✦" : "◆"}</span></div><div className="plan-check">✓</div><strong className="plan-name">{plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}</strong><small className="plan-copy">{plan.code === "FREE" ? t("freeLicenseCopy") : t("annualLicenseCopy")}</small>
+            <div className="plan-visual" aria-hidden="true">
+              <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+            </div>
+            <div className="plan-check">✓</div>
+            <strong className="plan-name">
+              {plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}
+            </strong>
+            <small className="plan-copy">
+              {plan.code === "FREE"
+                ? t("freeLicenseCopy")
+                : t("annualLicenseCopy")}
+            </small>
 
             <span>
               {(plan.displayAmount / 100).toLocaleString(locale, {
@@ -470,7 +522,36 @@ export default function RegisterForm() {
         </p>
       )}
 
-      {selectedPlan === "YEARLY" && <><h2>{t("paymentMethod")}</h2><div className="payment-methods"><label className={`payment-option ${paymentMethod==="PAYU"?"selected":""}`}><input type="radio" value="PAYU" {...register("paymentMethod")}/><div><strong>{t("payu")}</strong><small>{t("payuCopy")}</small></div></label><label className={`payment-option ${paymentMethod==="BANK_TRANSFER"?"selected":""}`}><input type="radio" value="BANK_TRANSFER" {...register("paymentMethod")}/><div><strong>{t("bankTransfer")}</strong><small>{t("bankTransferCopy")}</small></div></label></div><p className="hint">{t("freeWhilePaymentPending")}</p></>}
+      {selectedPlan === "YEARLY" && (
+        <>
+          <h2>{t("paymentMethod")}</h2>
+          <div className="payment-methods">
+            <label
+              className={`payment-option ${paymentMethod === "PAYU" ? "selected" : ""}`}
+            >
+              <input type="radio" value="PAYU" {...register("paymentMethod")} />
+              <div>
+                <strong>{t("payu")}</strong>
+                <small>{t("payuCopy")}</small>
+              </div>
+            </label>
+            <label
+              className={`payment-option ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
+            >
+              <input
+                type="radio"
+                value="BANK_TRANSFER"
+                {...register("paymentMethod")}
+              />
+              <div>
+                <strong>{t("bankTransfer")}</strong>
+                <small>{t("bankTransferCopy")}</small>
+              </div>
+            </label>
+          </div>
+          <p className="hint">{t("freeWhilePaymentPending")}</p>
+        </>
+      )}
 
       <div
         className={`captcha-box${errors.captchaAnswer ? " captcha-error" : ""}`}

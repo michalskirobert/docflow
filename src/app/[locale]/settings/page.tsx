@@ -1,16 +1,13 @@
-import dynamic from "next/dynamic";
-import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/app-shell";
-const LanguageSwitcher = dynamic(
-  () => import("@/features/language/language-switcher"),
-);
-export default async function Page() {
-  const t = await getTranslations("settings");
+import SettingsPanel from "@/features/settings/SettingsPanel";
+export default function Page() {
   return (
     <AppShell>
-      <h1>{t("title")}</h1>
-      <p className="muted">{t("languageHelp")}</p>
-      <LanguageSwitcher />
+      <div className="page-heading">
+        <h1>Settings</h1>
+        <p className="muted">Account, billing, invoices and preferences.</p>
+      </div>
+      <SettingsPanel />
     </AppShell>
   );
 }

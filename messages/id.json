@@ -222,6 +222,21 @@
     "zoomOut": "Perkecil",
     "zoomIn": "Perbesar",
     "fitPage": "Sesuaikan halaman",
-    "resizeImage": "Seret untuk mengubah ukuran gambar"
+    "resizeImage": "Seret untuk mengubah ukuran gambar",
+    "variableType": "Tipe variabel",
+    "typeText": "Teks",
+    "typeDate": "Tanggal",
+    "typeImage": "Gambar",
+    "typeSelect": "Pilihan",
+    "inputMask": "Mask input",
+    "maskHelp": "9 berarti angka, A berarti huruf. Kosongkan untuk teks biasa.",
+    "dateFormat": "Format tanggal",
+    "selectOptions": "Opsi pilihan",
+    "oneOptionPerLine": "Satu opsi per baris",
+    "heightPx": "Tinggi (px)",
+    "imagePlaceholder": "Placeholder gambar",
+    "requiredField": "Wajib diisi",
+    "requiredMessage": "Pesan wajib",
+    "requiredDefault": "Kolom ini wajib diisi."
   }
 }

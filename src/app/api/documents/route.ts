@@ -42,7 +42,13 @@ export async function POST(req: Request) {
         { message: "Template not found" },
         { status: 404 },
       );
-    const rendered = await renderDocument(renderTemplate(t.content, p.data));
+    let variableDefinitions = [];
+    try {
+      variableDefinitions = JSON.parse(t.variablesJson);
+    } catch {}
+    const rendered = await renderDocument(
+      renderTemplate(t.content, p.data, variableDefinitions),
+    );
     const doc = await prisma.document.create({
       data: {
         organizationId: s.organizationId,

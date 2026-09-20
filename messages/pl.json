@@ -222,6 +222,21 @@
     "zoomOut": "Pomniejsz",
     "zoomIn": "Powiększ",
     "fitPage": "Dopasuj stronę",
-    "resizeImage": "Przeciągnij, aby zmienić rozmiar obrazu"
+    "resizeImage": "Przeciągnij, aby zmienić rozmiar obrazu",
+    "variableType": "Typ zmiennej",
+    "typeText": "Tekst",
+    "typeDate": "Data",
+    "typeImage": "Obraz",
+    "typeSelect": "Lista wyboru",
+    "inputMask": "Maska wprowadzania",
+    "maskHelp": "9 oznacza cyfrę, A oznacza literę. Zostaw puste dla zwykłego tekstu.",
+    "dateFormat": "Format daty",
+    "selectOptions": "Opcje listy",
+    "oneOptionPerLine": "Jedna opcja w każdym wierszu",
+    "heightPx": "Wysokość (px)",
+    "imagePlaceholder": "Miejsce na obraz",
+    "requiredField": "Pole wymagane",
+    "requiredMessage": "Komunikat wymagania",
+    "requiredDefault": "To pole jest wymagane."
   }
 }

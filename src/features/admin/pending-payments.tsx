@@ -1,3 +1,58 @@
-"use client";import { useQuery,useMutation,useQueryClient } from "@tanstack/react-query";import { api } from "@/lib/axios";
-type Row={id:string;grossAmount:number;createdAt:string;transferReference?:string|null;organization:{name:string;billingProfile?:{billingEmail:string;companyName?:string|null;taxId?:string|null}|null}};
-export default function PendingPayments(){const qc=useQueryClient();const q=useQuery({queryKey:["admin-payments"],queryFn:async()=>(await api.get<Row[]>("/admin/payments")).data});const approve=useMutation({mutationFn:async(id:string)=>(await api.post(`/admin/payments/${id}/approve`)).data,onSuccess:()=>qc.invalidateQueries({queryKey:["admin-payments"]})});return <div className="card"><h2>Bank transfers awaiting verification</h2>{q.data?.length?q.data.map(p=><div className="document-row" key={p.id}><div className="document-meta"><strong>{p.organization.name}</strong><span>{p.organization.billingProfile?.billingEmail} · {(p.grossAmount/100).toFixed(2)} PLN · {new Date(p.createdAt).toLocaleDateString()}{p.transferReference?` · ${p.transferReference}`:""}</span></div><button className="btn" disabled={approve.isPending} onClick={()=>approve.mutate(p.id)}>Confirm payment & activate Annual</button></div>):<p className="muted">No pending bank transfers.</p>}</div>}
+"use client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/axios";
+type Row = {
+  id: string;
+  grossAmount: number;
+  createdAt: string;
+  transferReference?: string | null;
+  organization: {
+    name: string;
+    billingProfile?: {
+      billingEmail: string;
+      companyName?: string | null;
+      taxId?: string | null;
+    } | null;
+  };
+};
+export default function PendingPayments() {
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["admin-payments"],
+    queryFn: async () => (await api.get<Row[]>("/admin/payments")).data,
+  });
+  const approve = useMutation({
+    mutationFn: async (id: string) =>
+      (await api.post(`/admin/payments/${id}/approve`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-payments"] }),
+  });
+  return (
+    <div className="card">
+      <h2>Bank transfers awaiting verification</h2>
+      {q.data?.length ? (
+        q.data.map((p) => (
+          <div className="document-row" key={p.id}>
+            <div className="document-meta">
+              <strong>{p.organization.name}</strong>
+              <span>
+                {p.organization.billingProfile?.billingEmail} ·{" "}
+                {(p.grossAmount / 100).toFixed(2)} PLN ·{" "}
+                {new Date(p.createdAt).toLocaleDateString()}
+                {p.transferReference ? ` · ${p.transferReference}` : ""}
+              </span>
+            </div>
+            <button
+              className="btn"
+              disabled={approve.isPending}
+              onClick={() => approve.mutate(p.id)}
+            >
+              Confirm payment & activate Annual
+            </button>
+          </div>
+        ))
+      ) : (
+        <p className="muted">No pending bank transfers.</p>
+      )}
+    </div>
+  );
+}

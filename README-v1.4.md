@@ -1,6 +1,7 @@
 # DocFlow v1.4.0
 
 Editor/security UX update:
+
 - translated PL/EN/ID editor UI
 - link modal with http/https validation
 - image modal with drag & drop, URL validation, width and placement

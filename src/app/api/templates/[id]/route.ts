@@ -8,6 +8,22 @@ const schema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
   content: z.string().min(1),
+  variables: z
+    .array(
+      z.object({
+        name: z.string(),
+        label: z.string().optional(),
+        type: z.enum(["text", "date", "image", "select"]),
+        required: z.boolean().optional(),
+        requiredMessage: z.string().optional(),
+        mask: z.string().optional(),
+        dateFormat: z.string().optional(),
+        options: z.array(z.string()).optional(),
+        imageWidth: z.number().optional(),
+        imageHeight: z.number().optional(),
+      }),
+    )
+    .optional(),
 });
 export async function PUT(
   req: Request,
@@ -17,6 +33,13 @@ export async function PUT(
   const { id } = await params;
   const parsed = schema.parse(await req.json());
   const p = { ...parsed, content: sanitizeTemplateHtml(parsed.content) };
+  const variableDefinitions =
+    p.variables ??
+    extractVariables(p.content).map((name) => ({
+      name,
+      type: "text" as const,
+    }));
+  const { variables: _variables, ...templateData } = p;
   const exists = await prisma.template.findFirst({
     where: { id, organizationId: s.organizationId },
   });
@@ -26,8 +49,8 @@ export async function PUT(
     await prisma.template.update({
       where: { id },
       data: {
-        ...p,
-        variablesJson: JSON.stringify(extractVariables(p.content)),
+        ...templateData,
+        variablesJson: JSON.stringify(variableDefinitions),
       },
     }),
   );
