@@ -1,0 +1,245 @@
+.dashboard-heading {
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 28px;
+
+  > div:first-child {
+    min-width: 0;
+  }
+
+  h1 {
+    margin: 4px 0 8px;
+  }
+
+  .muted {
+    margin: 0;
+  }
+
+  .btn {
+    flex: 0 0 auto;
+    margin-top: 24px;
+  }
+}
+
+.dashboard-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  display: flex;
+  min-width: 0;
+  min-height: 142px;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+
+  > div:not(.stat-card-icon) {
+    min-width: 0;
+    flex: 1;
+  }
+
+  b {
+    display: block;
+    line-height: 1.2;
+  }
+
+  h2 {
+    margin: 6px 0 0;
+    font-size: 1.55rem;
+    line-height: 1.08;
+  }
+}
+
+.stat-card-icon {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  overflow: visible;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #6366f1;
+
+  svg {
+    display: block;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0 !important;
+    overflow: visible;
+  }
+}
+
+.stat-card-icon-success {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.license-card {
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 9px;
+  }
+
+  .muted {
+    margin-top: 7px;
+    font-size: 0.8rem;
+  }
+}
+
+.usage-card {
+  h2 {
+    margin-bottom: 4px;
+  }
+
+  .muted {
+    display: block;
+  }
+}
+
+.usage-track {
+  width: 100%;
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8ecf4;
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #6366f1;
+    transition: width 0.2s ease;
+  }
+}
+
+.payment-review {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin-top: 9px;
+  padding: 6px 9px;
+  border: 1px solid #f5cf67;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #a44a0a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Payment verification callout */
+.dashboard-stats + .quick-start {
+  position: relative;
+  margin-top: 18px;
+  padding: 20px 22px 20px 26px;
+  overflow: hidden;
+  border-color: #fde6a7;
+  background: linear-gradient(135deg, #fffdf7 0%, #ffffff 68%);
+
+  &::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: #f59e0b;
+    content: "";
+  }
+
+  .eyebrow {
+    color: #b45309;
+  }
+
+  h2 {
+    margin: 5px 0 8px;
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  p {
+    max-width: 900px;
+    margin: 0;
+    line-height: 1.55;
+  }
+}
+
+/* Default dashboard callout */
+.quick-start {
+  margin-top: 18px;
+  padding: 20px 22px;
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 2px;
+  }
+
+  h2 {
+    margin: 5px 0 8px;
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  p {
+    max-width: 900px;
+    margin: 0;
+    line-height: 1.55;
+  }
+}
+
+/* Quick start following payment verification */
+.dashboard-stats + .quick-start + .quick-start {
+  position: relative;
+  padding-left: 26px;
+  overflow: hidden;
+
+  &::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: #6366f1;
+    content: "";
+  }
+}
+
+@media (max-width: 1180px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-heading {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 0;
+    }
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: auto;
+  }
+
+  .dashboard-stats + .quick-start,
+  .quick-start,
+  .dashboard-stats + .quick-start + .quick-start {
+    padding: 18px 18px 18px 22px;
+  }
+}

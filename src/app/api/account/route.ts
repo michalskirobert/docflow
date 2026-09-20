@@ -1,6 +1,165 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { accountSchema } from "@/features/settings/schema";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
+import { sendVerificationEmail } from "@/server/email/verification";
+
+export async function GET() {
+  try {
+    const s = await requireSession();
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: s.id,
+          organizationId: s.organizationId,
+        },
+      },
+      include: {
+        user: true,
+        organization: { include: { billingProfile: true } },
+      },
+    });
+    if (!membership)
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    const b = membership.organization.billingProfile;
+    return NextResponse.json({
+      firstName: membership.user.firstName,
+      lastName: membership.user.lastName,
+      email: membership.user.email,
+      organizationName: membership.organization.name,
+      canEditOrganization: membership.role === "OWNER",
+      customerType: b?.customerType ?? "INDIVIDUAL",
+      billingEmail: b?.billingEmail ?? membership.user.email,
+      companyName: b?.companyName ?? "",
+      taxId: b?.taxId ?? "",
+      vatId: b?.vatId ?? "",
+      countryCode: b?.countryCode ?? "PL",
+      street: b?.street ?? "",
+      buildingNumber: b?.buildingNumber ?? "",
+      apartmentNumber: b?.apartmentNumber ?? "",
+      postalCode: b?.postalCode ?? "",
+      city: b?.city ?? "",
+    });
+  } catch (error) {
+    console.error("[GET account]", error);
+    return NextResponse.json(
+      { message: "Could not load account" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const s = await requireSession();
+    const parsed = accountSchema.safeParse(await request.json());
+    if (!parsed.success)
+      return NextResponse.json(
+        { code: "VALIDATION_ERROR", issues: parsed.error.flatten() },
+        { status: 400 },
+      );
+    const data = parsed.data;
+    const email = data.email.toLowerCase();
+    const existing = await prisma.user.findFirst({
+      where: { email, NOT: { id: s.id } },
+      select: { id: true },
+    });
+    if (existing)
+      return NextResponse.json(
+        { code: "EMAIL_EXISTS", message: "Email already used" },
+        { status: 409 },
+      );
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_organizationId: {
+          userId: s.id,
+          organizationId: s.organizationId,
+        },
+      },
+    });
+    if (!membership)
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    const current = await prisma.user.findUniqueOrThrow({
+      where: { id: s.id },
+    });
+    const emailChanged = current.email.toLowerCase() !== email;
+    const user = await prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id: s.id },
+        data: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email,
+          ...(emailChanged ? { emailVerifiedAt: null } : {}),
+        },
+      });
+      if (membership.role === "OWNER") {
+        await tx.organization.update({
+          where: { id: s.organizationId },
+          data: { name: data.organizationName },
+        });
+        await tx.billingProfile.upsert({
+          where: { organizationId: s.organizationId },
+          create: {
+            organizationId: s.organizationId,
+            customerType: data.customerType,
+            billingEmail: data.billingEmail.toLowerCase(),
+            firstName:
+              data.customerType === "INDIVIDUAL" ? data.firstName : null,
+            lastName: data.customerType === "INDIVIDUAL" ? data.lastName : null,
+            companyName:
+              data.customerType === "BUSINESS"
+                ? data.companyName || null
+                : null,
+            taxId: data.customerType === "BUSINESS" ? data.taxId || null : null,
+            vatId: data.customerType === "BUSINESS" ? data.vatId || null : null,
+            countryCode: data.countryCode.toUpperCase(),
+            street: data.street,
+            buildingNumber: data.buildingNumber,
+            apartmentNumber: data.apartmentNumber || null,
+            postalCode: data.postalCode,
+            city: data.city,
+          },
+          update: {
+            customerType: data.customerType,
+            billingEmail: data.billingEmail.toLowerCase(),
+            firstName:
+              data.customerType === "INDIVIDUAL" ? data.firstName : null,
+            lastName: data.customerType === "INDIVIDUAL" ? data.lastName : null,
+            companyName:
+              data.customerType === "BUSINESS"
+                ? data.companyName || null
+                : null,
+            taxId: data.customerType === "BUSINESS" ? data.taxId || null : null,
+            vatId: data.customerType === "BUSINESS" ? data.vatId || null : null,
+            countryCode: data.countryCode.toUpperCase(),
+            street: data.street,
+            buildingNumber: data.buildingNumber,
+            apartmentNumber: data.apartmentNumber || null,
+            postalCode: data.postalCode,
+            city: data.city,
+          },
+        });
+      }
+      return updated;
+    });
+    if (emailChanged) await sendVerificationEmail(user);
+    return NextResponse.json({ emailChanged });
+  } catch (error) {
+    console.error("[PATCH account]", error);
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    )
+      return NextResponse.json({ code: "EMAIL_EXISTS" }, { status: 409 });
+    return NextResponse.json(
+      { message: "Could not update account" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function DELETE() {
   try {
     const s = await requireSession();

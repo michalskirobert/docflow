@@ -1,5 +1,8 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { AccountSettings } from "./AccountSettings";
+import { PasswordSettings } from "./PasswordSettings";
 import { CreditCard, FileText, ShieldAlert, Trash2 } from "lucide-react";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import LanguageSwitcher from "@/features/language/language-switcher";
@@ -10,6 +13,7 @@ import {
   useStartLicensePayment,
 } from "./service";
 export default function SettingsPanel() {
+  const t = useTranslations("settings");
   const billing = useBillingOverview();
   const remove = useDeleteAccount();
   const start = useStartLicensePayment();
@@ -19,10 +23,9 @@ export default function SettingsPanel() {
   const deleteAccount = async () => {
     if (
       await confirm({
-        title: "Delete account?",
-        message:
-          "Your account, organization, templates, documents and billing history will be permanently deleted. This action cannot be undone.",
-        confirmLabel: "Delete account permanently",
+        title: t("deleteAccountTitle"),
+        message: t("deleteAccountMessage"),
+        confirmLabel: t("deleteAccountConfirm"),
         kind: "danger",
       })
     ) {
@@ -44,17 +47,19 @@ export default function SettingsPanel() {
   };
   return (
     <div className="settings-grid">
+      <AccountSettings />
+      <PasswordSettings />
       <section className="card settings-card">
-        <h2>Preferences</h2>
-        <p className="muted">Language and interface preferences.</p>
+        <h2>{t("preferences")}</h2>
+        <p className="muted">{t("preferencesHelp")}</p>
         <LanguageSwitcher />
       </section>
       <section className="card settings-card">
         <div className="section-heading">
           <CreditCard />
           <div>
-            <h2>License & payments</h2>
-            <p>Manage the current license and payments waiting to be booked.</p>
+            <h2>{t("licensePayments")}</h2>
+            <p>{t("licensePaymentsHelp")}</p>
           </div>
         </div>
         <div className="license-summary">
@@ -62,7 +67,7 @@ export default function SettingsPanel() {
             <strong>{billing.data?.subscription?.plan ?? "FREE"}</strong>
             {billing.data?.subscription?.currentPeriodEndsAt && (
               <small className="license-expiry">
-                Valid until{" "}
+                {t("validUntil")}{" "}
                 {new Date(
                   billing.data.subscription.currentPeriodEndsAt,
                 ).toLocaleDateString()}{" "}
@@ -77,7 +82,7 @@ export default function SettingsPanel() {
                       86400000,
                   ),
                 )}{" "}
-                days remaining
+                {t("daysRemaining")}
               </small>
             )}
           </div>
@@ -89,10 +94,7 @@ export default function SettingsPanel() {
           new Date(billing.data.subscription.currentPeriodEndsAt).getTime() -
             Date.now() <=
             7 * 86400000 && (
-            <div className="license-reminder">
-              Your license expires soon. Renew it to keep the annual document
-              limit. We also send an email reminder during the final 7 days.
-            </div>
+            <div className="license-reminder">{t("licenseReminder")}</div>
           )}
         {pending.map((p) => (
           <div className="payment-row" key={p.id}>
@@ -101,14 +103,14 @@ export default function SettingsPanel() {
                 {(p.grossAmount / 100).toFixed(2)} {p.currency}
               </strong>
               <small>
-                {p.provider} · {p.transferReference || "online payment"}
+                {p.provider} · {p.transferReference || t("onlinePayment")}
               </small>
             </div>
-            <span className="badge warning">Pending</span>
+            <span className="badge warning">{t("pending")}</span>
           </div>
         ))}
         <label className="field">
-          Payment method
+          {t("paymentMethod")}
           <select
             value={method}
             onChange={(e) =>
@@ -116,7 +118,7 @@ export default function SettingsPanel() {
             }
           >
             <option value="PAYU">PayU</option>
-            <option value="BANK_TRANSFER">Bank transfer</option>
+            <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
           </select>
         </label>
         <button
@@ -124,13 +126,11 @@ export default function SettingsPanel() {
           disabled={start.isPending || change.isPending}
           onClick={runPayment}
         >
-          {pending.length
-            ? "Change method / continue payment"
-            : "Pay / renew annual license"}
+          {pending.length ? t("continuePayment") : t("renewLicense")}
         </button>
         {(start.data?.transferReference || change.data?.transferReference) && (
           <p className="payment-reference">
-            Transfer title:{" "}
+            {t("transferTitle")}:{" "}
             <strong>
               {start.data?.transferReference || change.data?.transferReference}
             </strong>
@@ -141,8 +141,8 @@ export default function SettingsPanel() {
         <div className="section-heading">
           <FileText />
           <div>
-            <h2>Invoices & transactions</h2>
-            <p>Paid and pending transactions for your organization.</p>
+            <h2>{t("invoicesTransactions")}</h2>
+            <p>{t("invoicesTransactionsHelp")}</p>
           </div>
         </div>
         {billing.data?.payments.length ? (
@@ -164,11 +164,11 @@ export default function SettingsPanel() {
             </div>
           ))
         ) : (
-          <p className="muted">No transactions yet.</p>
+          <p className="muted">{t("noTransactions")}</p>
         )}
         {billing.data?.salesDocuments.map((x) => (
           <a className="invoice-row" key={x.id} href={x.fileUrl || "#"}>
-            <FileText size={16} /> Invoice {x.number || x.id.slice(-6)}
+            <FileText size={16} /> {t("invoice")} {x.number || x.id.slice(-6)}
           </a>
         ))}
       </section>
@@ -176,8 +176,8 @@ export default function SettingsPanel() {
         <div className="section-heading">
           <ShieldAlert />
           <div>
-            <h2>Danger zone</h2>
-            <p>Permanent account actions.</p>
+            <h2>{t("dangerZone")}</h2>
+            <p>{t("dangerZoneHelp")}</p>
           </div>
         </div>
         <button
@@ -185,7 +185,7 @@ export default function SettingsPanel() {
           disabled={remove.isPending}
           onClick={deleteAccount}
         >
-          <Trash2 size={16} /> Delete account
+          <Trash2 size={16} /> {t("deleteAccount")}
         </button>
       </section>
     </div>

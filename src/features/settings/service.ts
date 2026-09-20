@@ -47,3 +47,33 @@ export const useChangePaymentMethod = () =>
     PaymentResult,
     { paymentId: string; paymentMethod: "PAYU" | "BANK_TRANSFER" }
   >("/billing", [["billing"]]);
+
+export type AccountDetails = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  organizationName: string;
+  canEditOrganization: boolean;
+  customerType: "INDIVIDUAL" | "BUSINESS";
+  billingEmail: string;
+  companyName: string;
+  taxId: string;
+  vatId: string;
+  countryCode: string;
+  street: string;
+  buildingNumber: string;
+  apartmentNumber: string;
+  postalCode: string;
+  city: string;
+};
+export const useAccountDetails = () =>
+  useGet<AccountDetails>(["account"], "/account");
+export const useUpdateAccount = () =>
+  usePatch<{ emailChanged: boolean }, import("./schema").AccountFormValues>(
+    "/account",
+    [["account"]],
+  );
+export const useChangePassword = () =>
+  usePost<{ success: boolean }, import("./schema").PasswordFormValues>(
+    "/account/password",
+  );

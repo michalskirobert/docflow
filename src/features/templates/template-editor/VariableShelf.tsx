@@ -34,6 +34,10 @@ export function VariableShelf({
 }: Props) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
+  const [pointerPosition, setPointerPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const dragRef = useRef<DragState | null>(null);
   const dropIndexRef = useRef<number | null>(null);
@@ -46,6 +50,7 @@ export function VariableShelf({
   const clearDrag = () => {
     dragRef.current = null;
     setDragIndex(null);
+    setPointerPosition(null);
     setActiveDropIndex(null);
   };
 
@@ -83,29 +88,41 @@ export function VariableShelf({
 
       event.preventDefault();
 
-      const element = document.elementFromPoint(event.clientX, event.clientY);
+      setPointerPosition({ x: event.clientX, y: event.clientY });
 
-      const dropZone = element?.closest<HTMLElement>(
-        "[data-variable-drop-index]",
+      const shelf = document.querySelector<HTMLElement>(".variable-shelf-list");
+      const zones = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-variable-drop-index]"),
       );
-
-      if (!dropZone) {
+      if (!shelf || zones.length === 0) {
         setActiveDropIndex(null);
         return;
       }
-
-      const rawIndex = dropZone.dataset.variableDropIndex;
-
-      const index = rawIndex === undefined ? Number.NaN : Number(rawIndex);
-
-      if (!Number.isInteger(index)) {
+      const shelfRect = shelf.getBoundingClientRect();
+      if (
+        event.clientY < shelfRect.top - 20 ||
+        event.clientY > shelfRect.bottom + 20 ||
+        event.clientX < shelfRect.left - 20 ||
+        event.clientX > shelfRect.right + 20
+      ) {
         setActiveDropIndex(null);
         return;
       }
-
-      if (dropIndexRef.current !== index) {
-        setActiveDropIndex(index);
+      let nearestIndex: number | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+      for (const zone of zones) {
+        const raw = zone.dataset.variableDropIndex;
+        const index = raw === undefined ? Number.NaN : Number(raw);
+        if (!Number.isInteger(index)) continue;
+        const rect = zone.getBoundingClientRect();
+        const distance = Math.abs(event.clientX - (rect.left + rect.width / 2));
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
       }
+      if (dropIndexRef.current !== nearestIndex)
+        setActiveDropIndex(nearestIndex);
     };
 
     const handlePointerUp = (event: globalThis.PointerEvent) => {
@@ -161,6 +178,7 @@ export function VariableShelf({
     event.currentTarget.setPointerCapture(event.pointerId);
 
     setDragIndex(index);
+    setPointerPosition({ x: event.clientX, y: event.clientY });
     setActiveDropIndex(null);
   };
 
@@ -191,6 +209,17 @@ export function VariableShelf({
   return (
     <div className="variable-shelf">
       <strong>{t("variables")}</strong>
+
+      {dragIndex !== null && pointerPosition && (
+        <div
+          className="variable-drag-preview"
+          style={{ left: pointerPosition.x, top: pointerPosition.y }}
+          aria-hidden="true"
+        >
+          <GripVertical size={16} />
+          <span>{`{{${variables[dragIndex]?.name ?? ""}}}`}</span>
+        </div>
+      )}
 
       <div className="variable-shelf-list">
         <DropZone index={0} />
