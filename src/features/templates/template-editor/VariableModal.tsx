@@ -43,7 +43,9 @@ export function VariableModal({
       required,
       requiredMessage: required ? requiredMessage : undefined,
       mask: type === "text" && mask ? mask : undefined,
-      dateFormat: type === "date" ? dateFormat : undefined,
+      dateFormat: ["date", "datetime", "time"].includes(type)
+        ? dateFormat
+        : undefined,
       options:
         type === "select"
           ? options.map((x) => x.trim()).filter(Boolean)
@@ -80,10 +82,22 @@ export function VariableModal({
             {t("variableType")}
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as VariableType)}
+              onChange={(e) => {
+                const next = e.target.value as VariableType;
+                setType(next);
+                setDateFormat(
+                  next === "time"
+                    ? "HH:mm"
+                    : next === "datetime"
+                      ? "DD.MM.YYYY HH:mm"
+                      : "DD.MM.YYYY",
+                );
+              }}
             >
               <option value="text">{t("typeText")}</option>
               <option value="date">{t("typeDate")}</option>
+              <option value="datetime">Date & time</option>
+              <option value="time">Time</option>
               <option value="image">{t("typeImage")}</option>
               <option value="select">{t("typeSelect")}</option>
             </select>
@@ -100,16 +114,33 @@ export function VariableModal({
             <small>{t("maskHelp")}</small>
           </label>
         )}
-        {type === "date" && (
+        {["date", "datetime", "time"].includes(type) && (
           <label className="field">
             {t("dateFormat")}
             <select
               value={dateFormat}
               onChange={(e) => setDateFormat(e.target.value)}
             >
-              <option>DD.MM.YYYY</option>
-              <option>YYYY-MM-DD</option>
-              <option>DD/MM/YYYY</option>
+              {type === "date" && (
+                <>
+                  <option>DD.MM.YYYY</option>
+                  <option>YYYY-MM-DD</option>
+                  <option>DD/MM/YYYY</option>
+                </>
+              )}
+              {type === "datetime" && (
+                <>
+                  <option>DD.MM.YYYY HH:mm</option>
+                  <option>YYYY-MM-DD HH:mm</option>
+                  <option>DD/MM/YYYY HH:mm</option>
+                </>
+              )}
+              {type === "time" && (
+                <>
+                  <option>HH:mm</option>
+                  <option>HH:mm:ss</option>
+                </>
+              )}
             </select>
           </label>
         )}

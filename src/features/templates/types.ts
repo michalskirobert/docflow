@@ -1,4 +1,5 @@
-export type VariableType = "text" | "date" | "image" | "select";
+export type VariableType =
+  "text" | "date" | "datetime" | "time" | "image" | "select";
 export type TemplateVariable = {
   name: string;
   label?: string;

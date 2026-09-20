@@ -70,15 +70,32 @@ export function renderTemplate(
     const def = defs.get(key),
       value = data[key];
     if (def?.type === "image") return "";
-    if (def?.type === "date" && value) {
-      const date = new Date(String(value) + "T00:00:00");
+    if (def && ["date", "datetime", "time"].includes(def.type) && value) {
+      const raw = String(value);
+      if (def.type === "time") {
+        const [hh = "00", mm = "00", ss = "00"] = raw.split(":");
+        const format = def.dateFormat ?? "HH:mm";
+        return escapeHtml(
+          format.replace("HH", hh).replace("mm", mm).replace("ss", ss),
+        );
+      }
+      const date = new Date(def.type === "date" ? `${raw}T00:00:00` : raw);
       if (!Number.isNaN(date.getTime())) {
         const dd = String(date.getDate()).padStart(2, "0"),
           mm = String(date.getMonth() + 1).padStart(2, "0"),
           yyyy = String(date.getFullYear()),
-          format = def.dateFormat ?? "DD.MM.YYYY";
+          hh = String(date.getHours()).padStart(2, "0"),
+          min = String(date.getMinutes()).padStart(2, "0"),
+          format =
+            def.dateFormat ??
+            (def.type === "datetime" ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY");
         return escapeHtml(
-          format.replace("DD", dd).replace("MM", mm).replace("YYYY", yyyy),
+          format
+            .replace("DD", dd)
+            .replace("MM", mm)
+            .replace("YYYY", yyyy)
+            .replace("HH", hh)
+            .replace("mm", min),
         );
       }
     }

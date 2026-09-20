@@ -100,6 +100,9 @@ export function TemplateEditor({ template, onClose }: Props) {
     justifyFull: false,
     unorderedList: false,
     orderedList: false,
+    block: "p",
+    fontSize: "",
+    lineHeight: "",
   });
 
   const [headerEnabled, setHeaderEnabled] = useState(
@@ -289,6 +292,41 @@ export function TemplateEditor({ template, onClose }: Props) {
         justifyFull: document.queryCommandState("justifyFull"),
         unorderedList: document.queryCommandState("insertUnorderedList"),
         orderedList: document.queryCommandState("insertOrderedList"),
+        block: (() => {
+          const value = String(document.queryCommandValue("formatBlock") || "p")
+            .toLowerCase()
+            .replace(/[<>]/g, "");
+          return ["p", "h1", "h2", "h3", "h4", "h5", "blockquote"].includes(
+            value,
+          )
+            ? value
+            : "p";
+        })(),
+        fontSize: (() => {
+          const selection = window.getSelection();
+          const element =
+            selection?.anchorNode instanceof Element
+              ? selection.anchorNode
+              : selection?.anchorNode?.parentElement;
+          const px = element
+            ? Math.round(parseFloat(getComputedStyle(element).fontSize))
+            : 0;
+          return px ? String(px) : "";
+        })(),
+        lineHeight: (() => {
+          const selection = window.getSelection();
+          const element =
+            selection?.anchorNode instanceof Element
+              ? selection.anchorNode
+              : selection?.anchorNode?.parentElement;
+          if (!element) return "";
+          const style = getComputedStyle(element);
+          const font = parseFloat(style.fontSize);
+          const line = parseFloat(style.lineHeight);
+          return font && line
+            ? String(Math.round((line / font) * 100) / 100)
+            : "";
+        })(),
       });
     } catch {}
   };
@@ -630,6 +668,25 @@ export function TemplateEditor({ template, onClose }: Props) {
     (activeEditor.current ?? editor.current)?.focus();
   };
 
+  const setLineHeight = (value: string) => {
+    if (!value) return;
+    restoreSelection();
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    const node = range.commonAncestorContainer;
+    const element = (
+      node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
+    ) as HTMLElement | null;
+    const block = element?.closest(
+      "p,h1,h2,h3,h4,h5,blockquote,li,div",
+    ) as HTMLElement | null;
+    if (block && (activeEditor.current ?? editor.current)?.contains(block))
+      block.style.lineHeight = value;
+    rememberSelection();
+    syncToolbarState();
+  };
+
   const updateSelectedImage = (
     width = imageWidth,
     height = imageHeight,
@@ -790,8 +847,6 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     range.insertNode(img);
 
-    img.after(document.createTextNode("\u00a0"));
-
     /*
      * IMAGE variable musi dostać poprawny placeholder natychmiast
      * po dropie.
@@ -948,6 +1003,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           t={t}
           cmd={cmd}
           setPx={setPx}
+          setLineHeight={setLineHeight}
           insertTable={() =>
             cmd(
               "insertHTML",

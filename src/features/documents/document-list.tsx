@@ -1,5 +1,6 @@
 "use client";
-import { useMemo, useState } from "react";
+
+import { useMemo, useRef, useState } from "react";
 import { LoaderCircle, Sparkles } from "lucide-react";
 import {
   useDocumentsService,
@@ -11,67 +12,131 @@ import { TemplatePicker } from "./components/TemplatePicker";
 import { VariableField } from "./components/VariableField";
 import { DocumentHistory } from "./components/DocumentHistory";
 import { validateVariable } from "./helpers";
+import { useFeedback } from "@/components/ui/feedback-provider";
+
 export default function DocumentList() {
-  const docs = useDocumentsService(),
-    temps = useDocumentTemplatesService(),
-    gen = useGenerateDocumentService();
+  const docs = useDocumentsService();
+  const temps = useDocumentTemplatesService();
+  const gen = useGenerateDocumentService();
+
+  const { notify } = useFeedback();
+
   const [templateId, setTemplateId] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const generatorRef = useRef<HTMLElement>(null);
+
   const selected = temps.data?.find((t) => t.id === templateId);
+
   const variables = useMemo(
     () => (selected ? parseTemplateVariables(selected.variablesJson) : []),
     [selected],
   );
+
   const generate = () => {
-    if (!selected) return;
+    if (!selected) {
+      return;
+    }
+
     const next = Object.fromEntries(
       variables
         .map((v) => [v.name, validateVariable(v, values[v.name] ?? "")])
-        .filter(([, e]) => e),
+        .filter(([, error]) => error),
     );
+
     setErrors(next);
-    if (Object.keys(next).length) return;
-    gen.mutate({
-      templateId,
-      name: `${selected.name} - ${new Date().toLocaleDateString()}`,
-      data: values,
-    });
+
+    if (Object.keys(next).length) {
+      const first = variables.find((v) => next[v.name]);
+
+      requestAnimationFrame(() => {
+        const element = first
+          ? document.getElementById(
+              `document-variable-${first.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`,
+            )
+          : null;
+
+        element?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        element?.focus();
+      });
+
+      return;
+    }
+
+    gen.mutate(
+      {
+        templateId,
+        name: `${selected.name} - ${new Date().toLocaleDateString()}`,
+        data: values,
+      },
+      {
+        onSuccess: () => {
+          notify("Document generated successfully.", "success");
+
+          setTemplateId("");
+          setValues({});
+          setErrors({});
+        },
+        onError: () => {
+          notify("Document generation failed. Please try again.", "error");
+        },
+      },
+    );
   };
+
   return (
     <div className="documents-layout">
-      <section className="card generator-card">
+      <section ref={generatorRef} className="card generator-card">
         <div className="section-heading">
           <Sparkles />
+
           <div>
             <h2>Generate document</h2>
+
             <p>
               Find a template and complete the fields defined by its author.
             </p>
           </div>
         </div>
+
         <TemplatePicker
           templates={temps.data ?? []}
           loading={temps.isLoading}
           value={templateId}
           onChange={(id) => {
-            setTemplateId(id);
+            const nextId = id === templateId ? "" : id;
+
+            setTemplateId(nextId);
             setValues({});
             setErrors({});
           }}
         />
-        {variables.map((v) => (
+
+        {variables.map((variable) => (
           <VariableField
-            key={v.name}
-            variable={v}
-            value={values[v.name] ?? ""}
-            error={errors[v.name]}
+            key={variable.name}
+            variable={variable}
+            value={values[variable.name] ?? ""}
+            error={errors[variable.name]}
             onChange={(value) => {
-              setValues((x) => ({ ...x, [v.name]: value }));
-              setErrors((x) => ({ ...x, [v.name]: "" }));
+              setValues((current) => ({
+                ...current,
+                [variable.name]: value,
+              }));
+
+              setErrors((current) => ({
+                ...current,
+                [variable.name]: "",
+              }));
             }}
           />
         ))}
+
         {selected && (
           <button
             className="btn full"
@@ -80,21 +145,19 @@ export default function DocumentList() {
           >
             {gen.isPending ? (
               <>
-                <LoaderCircle className="spinner" size={17} /> Generating…
+                <LoaderCircle className="spinner" size={17} />
+                Generating…
               </>
             ) : (
               <>
-                <Sparkles size={17} /> Generate document
+                <Sparkles size={17} />
+                Generate document
               </>
             )}
           </button>
         )}
-        {gen.error && (
-          <p className="error">
-            Generation failed. Check the fields and license access.
-          </p>
-        )}
       </section>
+
       <DocumentHistory documents={docs.data ?? []} loading={docs.isLoading} />
     </div>
   );

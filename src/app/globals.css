@@ -2691,3 +2691,112 @@ body {
     font-weight: 700;
   }
 }
+
+/* v1.7.6 document generation/editor polish */
+.generator-card {
+  max-height: calc(100dvh - 140px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.field-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-weight: 650;
+}
+.required {
+  color: #dc2626;
+}
+.field-hint {
+  color: var(--muted);
+  font-weight: 500;
+}
+.native-date-control {
+  position: relative;
+}
+.native-date-control input {
+  padding-right: 38px;
+}
+.native-date-control > svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #64748b;
+}
+.field.field-error input,
+.field.field-error select {
+  border-color: #dc2626;
+}
+.option-builder-fixed {
+  height: 220px;
+  max-height: 220px;
+  overflow-y: auto;
+  align-content: start;
+  padding-right: 6px;
+}
+.variable-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+@media (max-width: 760px) {
+  .generator-card {
+    max-height: none;
+    overflow: visible;
+  }
+}
+/* Headings should not unexpectedly wrap around floated images. */
+.a4-paper h1,
+.a4-paper h2,
+.a4-paper h3,
+.a4-paper h4,
+.a4-paper h5,
+.page-header-editor h1,
+.page-header-editor h2,
+.page-header-editor h3,
+.page-footer-editor h1,
+.page-footer-editor h2,
+.page-footer-editor h3 {
+  clear: both;
+}
+
+.native-date-control {
+  position: relative;
+  width: 100%;
+}
+
+.native-date-input {
+  width: 100%;
+  padding-right: 42px !important;
+}
+
+.date-picker-trigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.date-picker-trigger:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -3px;
+  border-radius: 6px;
+}
+
+.native-date-picker {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -1,46 +1,14 @@
 "use client";
+
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
-import { Trash2, Upload } from "lucide-react";
+import { CalendarDays, Clock3, Trash2, Upload } from "lucide-react";
+import { IMaskInput } from "react-imask";
 import type { TemplateVariable } from "@/features/templates/types";
-import { applyInputMask } from "../helpers";
 import {
   MAX_TEMPLATE_IMAGE_BYTES,
   SAFE_TEMPLATE_IMAGE_TYPES,
 } from "@/utils/constants";
 
-function formatDateInput(value: string, format = "DD.MM.YYYY") {
-  if (!value) return "";
-  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return value;
-  const [, yyyy, mm, dd] = m;
-  return format.replace("DD", dd).replace("MM", mm).replace("YYYY", yyyy);
-}
-function parseDateInput(value: string, format = "DD.MM.YYYY") {
-  const tokens = format.match(/DD|MM|YYYY|[^DMY]+/g) ?? [];
-  let pattern = "^";
-  const groups: string[] = [];
-  for (const token of tokens) {
-    if (token === "DD") {
-      pattern += "(\\d{2})";
-      groups.push("dd");
-    } else if (token === "MM") {
-      pattern += "(\\d{2})";
-      groups.push("mm");
-    } else if (token === "YYYY") {
-      pattern += "(\\d{4})";
-      groups.push("yyyy");
-    } else pattern += token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
-  const match = value.match(new RegExp(pattern + "$"));
-  if (!match) return value;
-  const parts: Record<string, string> = {};
-  groups.forEach((key, index) => {
-    parts[key] = match[index + 1];
-  });
-  return parts.yyyy && parts.mm && parts.dd
-    ? `${parts.yyyy}-${parts.mm}-${parts.dd}`
-    : value;
-}
 const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
   "image/png": (b) =>
     b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
@@ -50,23 +18,419 @@ const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
     String.fromCharCode(...b.slice(0, 4)) === "RIFF" &&
     String.fromCharCode(...b.slice(8, 12)) === "WEBP",
 };
-export function VariableField({
-  variable,
-  value,
-  error,
-  onChange,
-}: {
+
+type DateTimeVariableType = "date" | "datetime" | "time";
+
+type VariableType = "text" | "select" | "image" | DateTimeVariableType;
+
+type DateTimeParts = {
+  year?: string;
+  month?: string;
+  day?: string;
+  hour?: string;
+  minute?: string;
+  second?: string;
+};
+
+const FORMAT_TOKENS = ["YYYY", "YY", "DD", "MM", "HH", "mm", "ss"] as const;
+
+type FormatToken = (typeof FORMAT_TOKENS)[number];
+
+const TOKEN_LENGTH: Record<FormatToken, number> = {
+  YYYY: 4,
+  YY: 2,
+  DD: 2,
+  MM: 2,
+  HH: 2,
+  mm: 2,
+  ss: 2,
+};
+
+function userMaskToIMask(mask: string): string {
+  let result = "";
+
+  for (const char of mask) {
+    if (char === "9") {
+      result += "9";
+      continue;
+    }
+
+    if (/\d/.test(char)) {
+      result += `\\${char}`;
+      continue;
+    }
+
+    if (char === "\\" || char === "[" || char === "]" || char === "{") {
+      result += `\\${char}`;
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+function getDefaultDateTimeFormat(type: DateTimeVariableType): string {
+  switch (type) {
+    case "date":
+      return "DD.MM.YYYY";
+
+    case "datetime":
+      return "DD.MM.YYYY HH:mm";
+
+    case "time":
+      return "HH:mm";
+  }
+}
+
+function getDateTimeFormat(
+  variable: TemplateVariable,
+  type: DateTimeVariableType,
+): string {
+  return variable.dateFormat?.trim() || getDefaultDateTimeFormat(type);
+}
+
+function getFormatToken(
+  format: string,
+  position: number,
+): FormatToken | undefined {
+  return FORMAT_TOKENS.find((token) => format.startsWith(token, position));
+}
+
+function formatToMask(format: string): string {
+  let result = "";
+  let position = 0;
+
+  while (position < format.length) {
+    const token = getFormatToken(format, position);
+
+    if (token) {
+      result += "9".repeat(TOKEN_LENGTH[token]);
+      position += token.length;
+      continue;
+    }
+
+    const char = format[position];
+
+    if (/\d/.test(char)) {
+      result += `\\${char}`;
+    } else if (char === "\\" || char === "[" || char === "]" || char === "{") {
+      result += `\\${char}`;
+    } else {
+      result += char;
+    }
+
+    position += 1;
+  }
+
+  return result;
+}
+
+function canonicalToParts(
+  value: string,
+  type: DateTimeVariableType,
+): DateTimeParts | null {
+  if (!value) {
+    return null;
+  }
+
+  if (type === "date") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      year: match[1],
+      month: match[2],
+      day: match[3],
+    };
+  }
+
+  if (type === "time") {
+    const match = value.match(/^(\d{2}):(\d{2})(?::(\d{2}))?$/);
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      hour: match[1],
+      minute: match[2],
+      second: match[3],
+    };
+  }
+
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    year: match[1],
+    month: match[2],
+    day: match[3],
+    hour: match[4],
+    minute: match[5],
+    second: match[6],
+  };
+}
+
+function formatParts(parts: DateTimeParts, format: string): string {
+  const values: Record<FormatToken, string> = {
+    YYYY: parts.year ?? "",
+    YY: parts.year?.slice(-2) ?? "",
+    DD: parts.day ?? "",
+    MM: parts.month ?? "",
+    HH: parts.hour ?? "",
+    mm: parts.minute ?? "",
+    ss: parts.second ?? "00",
+  };
+
+  let result = "";
+  let position = 0;
+
+  while (position < format.length) {
+    const token = getFormatToken(format, position);
+
+    if (token) {
+      result += values[token];
+      position += token.length;
+      continue;
+    }
+
+    result += format[position];
+    position += 1;
+  }
+
+  return result;
+}
+
+function formatCanonicalValue(
+  value: string,
+  format: string,
+  type: DateTimeVariableType,
+): string {
+  const parts = canonicalToParts(value, type);
+
+  if (!parts) {
+    return "";
+  }
+
+  return formatParts(parts, format);
+}
+
+function parseFormattedValue(
+  value: string,
+  format: string,
+): DateTimeParts | null {
+  const parts: DateTimeParts = {};
+
+  let valuePosition = 0;
+  let formatPosition = 0;
+
+  while (formatPosition < format.length) {
+    const token = getFormatToken(format, formatPosition);
+
+    if (token) {
+      const length = TOKEN_LENGTH[token];
+
+      const tokenValue = value.slice(valuePosition, valuePosition + length);
+
+      if (
+        tokenValue.length !== length ||
+        !new RegExp(`^\\d{${length}}$`).test(tokenValue)
+      ) {
+        return null;
+      }
+
+      switch (token) {
+        case "YYYY":
+          parts.year = tokenValue;
+          break;
+
+        case "YY":
+          parts.year = `20${tokenValue}`;
+          break;
+
+        case "DD":
+          parts.day = tokenValue;
+          break;
+
+        case "MM":
+          parts.month = tokenValue;
+          break;
+
+        case "HH":
+          parts.hour = tokenValue;
+          break;
+
+        case "mm":
+          parts.minute = tokenValue;
+          break;
+
+        case "ss":
+          parts.second = tokenValue;
+          break;
+      }
+
+      valuePosition += length;
+      formatPosition += token.length;
+      continue;
+    }
+
+    if (value[valuePosition] !== format[formatPosition]) {
+      return null;
+    }
+
+    valuePosition += 1;
+    formatPosition += 1;
+  }
+
+  if (valuePosition !== value.length) {
+    return null;
+  }
+
+  return parts;
+}
+
+function isValidDateParts(parts: DateTimeParts): boolean {
+  if (!parts.year || !parts.month || !parts.day) {
+    return false;
+  }
+
+  const year = Number(parts.year);
+  const month = Number(parts.month);
+  const day = Number(parts.day);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1
+  ) {
+    return false;
+  }
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  return day <= daysInMonth;
+}
+
+function isValidTimeParts(parts: DateTimeParts): boolean {
+  if (!parts.hour || !parts.minute) {
+    return false;
+  }
+
+  const hour = Number(parts.hour);
+  const minute = Number(parts.minute);
+
+  const second = parts.second !== undefined ? Number(parts.second) : undefined;
+
+  if (
+    !Number.isInteger(hour) ||
+    !Number.isInteger(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return false;
+  }
+
+  if (
+    second !== undefined &&
+    (!Number.isInteger(second) || second < 0 || second > 59)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function parseToCanonicalValue(
+  value: string,
+  format: string,
+  type: DateTimeVariableType,
+): string | null {
+  const parts = parseFormattedValue(value, format);
+
+  if (!parts) {
+    return null;
+  }
+
+  if (type === "date") {
+    if (!isValidDateParts(parts)) {
+      return null;
+    }
+
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  }
+
+  if (type === "time") {
+    if (!isValidTimeParts(parts)) {
+      return null;
+    }
+
+    return parts.second !== undefined
+      ? `${parts.hour}:${parts.minute}:${parts.second}`
+      : `${parts.hour}:${parts.minute}`;
+  }
+
+  if (!isValidDateParts(parts) || !isValidTimeParts(parts)) {
+    return null;
+  }
+
+  const time =
+    parts.second !== undefined
+      ? `${parts.hour}:${parts.minute}:${parts.second}`
+      : `${parts.hour}:${parts.minute}`;
+
+  return `${parts.year}-${parts.month}-${parts.day}T${time}`;
+}
+
+type Props = {
   variable: TemplateVariable;
   value: string;
   error?: string;
   onChange: (v: string) => void;
-}) {
+};
+
+export function VariableField({ variable, value, error, onChange }: Props) {
   const label = variable.label || variable.name;
+
+  /*
+   * Compatibility with templates created with the newer variable types.
+   * The shared TemplateVariable union should also contain:
+   * "date" | "datetime" | "time".
+   */
+  const variableType = String(variable.type) as VariableType;
+
   const file = useRef<HTMLInputElement>(null);
+
+  const nativeDateTimePicker = useRef<HTMLInputElement>(null);
+
   const [uploadError, setUploadError] = useState("");
+
+  const id = `document-variable-${variable.name.replace(
+    /[^a-zA-Z0-9_-]/g,
+    "-",
+  )}`;
+
   const load = async (f?: File) => {
-    if (!f) return;
+    if (!f) {
+      return;
+    }
+
     setUploadError("");
+
     if (
       !SAFE_TEMPLATE_IMAGE_TYPES.includes(f.type as never) ||
       f.size > MAX_TEMPLATE_IMAGE_BYTES
@@ -74,74 +438,185 @@ export function VariableField({
       setUploadError("Invalid image type or file is too large.");
       return;
     }
+
     const b = new Uint8Array(await f.slice(0, 16).arrayBuffer());
+
     if (!MAGIC[f.type]?.(b)) {
       setUploadError(
         "The file content does not match a supported image format.",
       );
       return;
     }
+
     const r = new FileReader();
+
     r.onload = () => onChange(String(r.result));
+
     r.onerror = () => setUploadError("Could not read the image.");
+
     r.readAsDataURL(f);
   };
-  if (variable.type === "select")
+
+  const Label = () => (
+    <span className="field-label">
+      {label}
+
+      {variable.required && (
+        <span className="required" aria-hidden="true">
+          {" "}
+          *
+        </span>
+      )}
+    </span>
+  );
+
+  if (variableType === "select") {
     return (
-      <label className="field">
-        {label}
-        {variable.required && <span className="required"> *</span>}
-        <select value={value} onChange={(e) => onChange(e.target.value)}>
+      <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
+        <Label />
+
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={Boolean(error)}
+        >
           <option value="">—</option>
+
           {variable.options?.map((x) => (
-            <option key={x}>{x}</option>
+            <option key={x} value={x}>
+              {x}
+            </option>
           ))}
         </select>
+
         {error && <small className="form-error">{error}</small>}
       </label>
     );
-  if (variable.type === "date")
+  }
+
+  if (
+    variableType === "date" ||
+    variableType === "datetime" ||
+    variableType === "time"
+  ) {
+    const type = variableType as DateTimeVariableType;
+
+    const format = getDateTimeFormat(variable, type);
+
+    const formattedValue = formatCanonicalValue(value, format, type);
+
+    const nativeType = type === "datetime" ? "datetime-local" : type;
+
+    const Icon = type === "time" ? Clock3 : CalendarDays;
+
+    const pickerLabel =
+      type === "date"
+        ? "Choose date"
+        : type === "datetime"
+          ? "Choose date and time"
+          : "Choose time";
+
+    const openPicker = () => {
+      const picker = nativeDateTimePicker.current;
+
+      if (!picker) {
+        return;
+      }
+
+      if (typeof picker.showPicker === "function") {
+        picker.showPicker();
+        return;
+      }
+
+      picker.click();
+    };
+
     return (
-      <label className="field">
-        {label}
-        {variable.required && <span className="required"> *</span>}
+      <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
+        <Label />
+
+        <div className="native-date-control">
+          <IMaskInput
+            id={id}
+            className="native-date-input"
+            value={formattedValue}
+            mask={formatToMask(format)}
+            definitions={{
+              "9": /[0-9]/,
+            }}
+            placeholder={format}
+            aria-invalid={Boolean(error)}
+            onAccept={(nextValue) => {
+              const next = String(nextValue);
+
+              if (!next.trim()) {
+                onChange("");
+                return;
+              }
+
+              const canonicalValue = parseToCanonicalValue(next, format, type);
+
+              if (canonicalValue !== null) {
+                onChange(canonicalValue);
+              }
+            }}
+          />
+
+          <button
+            type="button"
+            className="date-picker-trigger"
+            aria-label={pickerLabel}
+            onClick={openPicker}
+          >
+            <Icon size={16} aria-hidden="true" />
+          </button>
+        </div>
+
         <input
-          type="text"
-          inputMode="numeric"
-          value={formatDateInput(value, variable.dateFormat)}
-          placeholder={variable.dateFormat ?? "DD.MM.YYYY"}
-          onChange={(e) =>
-            onChange(parseDateInput(e.target.value, variable.dateFormat))
-          }
+          ref={nativeDateTimePicker}
+          type={nativeType}
+          value={value}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="native-date-picker"
+          onChange={(e) => onChange(e.target.value)}
         />
-        <small>{variable.dateFormat}</small>
+
         {error && <small className="form-error">{error}</small>}
       </label>
     );
-  if (variable.type === "image")
+  }
+
+  if (variableType === "image") {
     return (
-      <div className="field">
-        <span>
-          {label}
-          {variable.required && <span className="required"> *</span>}
-        </span>
+      <div
+        className={`field ${error ? "field-error" : ""}`}
+        data-variable-field={variable.name}
+      >
+        <Label />
+
         <div
           className="document-image-dropzone"
           role="button"
           tabIndex={0}
           onClick={() => file.current?.click()}
-          onKeyDown={(e) =>
-            (e.key === "Enter" || e.key === " ") && file.current?.click()
-          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              file.current?.click();
+            }
+          }}
           onDragOver={(e: DragEvent) => e.preventDefault()}
           onDrop={(e: DragEvent) => {
             e.preventDefault();
+
             void load(e.dataTransfer.files?.[0]);
           }}
         >
           {value ? (
             <div className="variable-upload-current">
               <img className="variable-upload-preview" src={value} alt="" />
+
               <button
                 type="button"
                 className="btn secondary compact"
@@ -150,43 +625,68 @@ export function VariableField({
                   onChange("");
                 }}
               >
-                <Trash2 size={15} /> Remove image
+                <Trash2 size={15} />
+                Remove image
               </button>
             </div>
           ) : (
             <>
               <Upload />
+
               <strong>Drop an image here or click to choose</strong>
+
               <small>PNG, JPG, WEBP or GIF</small>
             </>
           )}
         </div>
+
         <input
+          id={id}
           ref={file}
           hidden
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif"
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             void load(e.target.files?.[0]);
+
             e.target.value = "";
           }}
         />
+
         {(error || uploadError) && (
           <small className="form-error">{error || uploadError}</small>
         )}
       </div>
     );
+  }
+
+  const mask = variable.mask?.trim();
+
   return (
-    <label className="field">
-      {label}
-      {variable.required && <span className="required"> *</span>}
-      <input
-        value={value}
-        onChange={(e) =>
-          onChange(applyInputMask(e.target.value, variable.mask))
-        }
-        placeholder={variable.mask || undefined}
-      />
+    <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
+      <Label />
+
+      {mask ? (
+        <IMaskInput
+          id={id}
+          value={value}
+          mask={userMaskToIMask(mask)}
+          definitions={{
+            "9": /[0-9]/,
+          }}
+          placeholder={variable.mask}
+          aria-invalid={Boolean(error)}
+          onAccept={(nextValue) => onChange(String(nextValue))}
+        />
+      ) : (
+        <input
+          id={id}
+          value={value}
+          aria-invalid={Boolean(error)}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+
       {error && <small className="form-error">{error}</small>}
     </label>
   );

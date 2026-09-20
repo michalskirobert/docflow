@@ -16,7 +16,7 @@ const schema = z.object({
       z.object({
         name: z.string(),
         label: z.string().optional(),
-        type: z.enum(["text", "date", "image", "select"]),
+        type: z.enum(["text", "date", "datetime", "time", "image", "select"]),
         required: z.boolean().optional(),
         requiredMessage: z.string().optional(),
         mask: z.string().optional(),

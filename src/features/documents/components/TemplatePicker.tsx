@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import type { Template } from "@/features/templates/types";
+
 export function TemplatePicker({
   templates,
   value,
@@ -24,6 +25,7 @@ export function TemplatePicker({
       ),
     [templates, q],
   );
+
   return (
     <div className="template-picker">
       <label className="search-field">

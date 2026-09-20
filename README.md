@@ -256,3 +256,14 @@ Editor fixes: variables can be dropped into body/header/footer at the pointer po
 - Mobile template create/edit keeps an explicit back action; save uses an icon and pending spinner.
 - Document date variables display and accept the template-defined format instead of the browser-specific native date presentation.
 - Select-variable option builder has a fixed scrollable height so the modal no longer grows for every new option.
+
+## v1.7.6
+
+- Native date picker restored for document generation; output still respects the variable date format.
+- Added `datetime` and `time` variable types with configurable output formats.
+- Required markers are rendered inline with labels and invalid generation focuses/scrolls to the first invalid field.
+- Selecting the active template again deselects it and clears the generation form.
+- Variable select-option builder uses a fixed scrollable height; variable modal is viewport constrained.
+- Editor toolbar now reflects paragraph/heading, computed font size and line height, and supports line-height values 1–2.
+- Improved selection preservation around toolbar controls.
+- Removed the unconditional non-breaking-space insertion after moving images and prevent headings from wrapping around floated images.

@@ -26,11 +26,15 @@ export type ToolbarState = {
   justifyFull: boolean;
   unorderedList: boolean;
   orderedList: boolean;
+  block: string;
+  fontSize: string;
+  lineHeight: string;
 };
 type Props = {
   t: (key: string) => string;
   cmd: (command: string, value?: string) => void;
   setPx: (px: string) => void;
+  setLineHeight: (value: string) => void;
   insertTable: () => void;
   rememberSelection: () => void;
   openImage: () => void;
@@ -42,6 +46,7 @@ export function EditorToolbar({
   t,
   cmd,
   setPx,
+  setLineHeight,
   insertTable,
   rememberSelection,
   openImage,
@@ -52,16 +57,25 @@ export function EditorToolbar({
   const b = (active: boolean) => (active ? "active" : undefined);
   return (
     <div className="editor-toolbar">
-      <button onClick={() => cmd("undo")} title={t("undo")}>
+      <button
+        onMouseDown={rememberSelection}
+        onClick={() => cmd("undo")}
+        title={t("undo")}
+      >
         <Undo2 />
       </button>
-      <button onClick={() => cmd("redo")} title={t("redo")}>
+      <button
+        onMouseDown={rememberSelection}
+        onClick={() => cmd("redo")}
+        title={t("redo")}
+      >
         <Redo2 />
       </button>
       <span />
       <select
+        onPointerDown={rememberSelection}
         onChange={(e) => cmd("formatBlock", e.target.value)}
-        defaultValue="p"
+        value={state.block}
         aria-label={t("paragraphStyle")}
       >
         <option value="p">{t("paragraph")}</option>
@@ -73,22 +87,36 @@ export function EditorToolbar({
         <option value="blockquote">{t("quote")}</option>
       </select>
       <select
-        defaultValue=""
+        value={state.fontSize}
+        onPointerDown={rememberSelection}
         onChange={(e) => setPx(e.target.value)}
         aria-label={t("fontSize")}
       >
-        <option value="" disabled>
-          {t("size")}
-        </option>
+        <option value="">{t("size")}</option>
         {FONT_SIZES_PX.map((size) => (
           <option key={size} value={size}>
             {size}px
           </option>
         ))}
       </select>
+      <select
+        value={state.lineHeight}
+        onPointerDown={rememberSelection}
+        onChange={(e) => setLineHeight(e.target.value)}
+        aria-label="Line height"
+        title="Line height"
+      >
+        <option value="">Line height</option>
+        {["1", "1.15", "1.25", "1.5", "1.75", "2"].map((value) => (
+          <option key={value} value={value}>
+            {value}
+          </option>
+        ))}
+      </select>
       <button
         className={b(state.bold)}
         aria-pressed={state.bold}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("bold")}
         title={t("bold")}
       >
@@ -97,6 +125,7 @@ export function EditorToolbar({
       <button
         className={b(state.italic)}
         aria-pressed={state.italic}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("italic")}
         title={t("italic")}
       >
@@ -105,6 +134,7 @@ export function EditorToolbar({
       <button
         className={b(state.underline)}
         aria-pressed={state.underline}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("underline")}
         title={t("underline")}
       >
@@ -114,6 +144,7 @@ export function EditorToolbar({
       <button
         className={b(state.justifyLeft)}
         aria-pressed={state.justifyLeft}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("justifyLeft")}
         title={t("alignLeft")}
       >
@@ -122,6 +153,7 @@ export function EditorToolbar({
       <button
         className={b(state.justifyCenter)}
         aria-pressed={state.justifyCenter}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("justifyCenter")}
         title={t("alignCenter")}
       >
@@ -130,6 +162,7 @@ export function EditorToolbar({
       <button
         className={b(state.justifyRight)}
         aria-pressed={state.justifyRight}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("justifyRight")}
         title={t("alignRight")}
       >
@@ -138,6 +171,7 @@ export function EditorToolbar({
       <button
         className={b(state.justifyFull)}
         aria-pressed={state.justifyFull}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("justifyFull")}
         title={t("justify")}
       >
@@ -147,6 +181,7 @@ export function EditorToolbar({
       <button
         className={b(state.unorderedList)}
         aria-pressed={state.unorderedList}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("insertUnorderedList")}
         title={t("bulletList")}
       >
@@ -155,6 +190,7 @@ export function EditorToolbar({
       <button
         className={b(state.orderedList)}
         aria-pressed={state.orderedList}
+        onMouseDown={rememberSelection}
         onClick={() => cmd("insertOrderedList")}
         title={t("numberedList")}
       >
