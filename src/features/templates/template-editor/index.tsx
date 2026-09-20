@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, LoaderCircle, Save, Trash2, X } from "lucide-react";
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
@@ -27,9 +27,12 @@ import { ZoomBar } from "./ZoomBar";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
 import {
+  createImageVariablePlaceholder,
   getImageAlign,
   getImageFit,
   imageStyle,
+  normalizeEditorVariableImages,
+  removePlacedImage,
   safeHttpUrl,
   safeRasterImageUrl,
   type ImageAlign,
@@ -49,14 +52,20 @@ const MAGIC: Record<string, (bytes: Uint8Array) => boolean> = {
     String.fromCharCode(...b.slice(8, 12)) === "WEBP",
 };
 
-type Props = { template?: Template; onClose: () => void };
+type Props = {
+  template?: Template;
+  onClose: () => void;
+};
+
 export function TemplateEditor({ template, onClose }: Props) {
   const t = useTranslations("templateEditor");
-  const editor = useRef<HTMLDivElement>(null),
-    headerEditor = useRef<HTMLDivElement>(null),
-    footerEditor = useRef<HTMLDivElement>(null),
-    fileRef = useRef<HTMLInputElement>(null),
-    savedRange = useRef<Range | null>(null);
+
+  const editor = useRef<HTMLDivElement>(null);
+  const headerEditor = useRef<HTMLDivElement>(null);
+  const footerEditor = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const savedRange = useRef<Range | null>(null);
+
   const resizing = useRef<{
     x: number;
     y: number;
@@ -64,17 +73,23 @@ export function TemplateEditor({ template, onClose }: Props) {
     height: number;
     mode: "width" | "height" | "both";
   } | null>(null);
-  const activeEditor = useRef<HTMLDivElement | null>(null),
-    draggedImage = useRef<HTMLImageElement | null>(null);
+
+  const activeEditor = useRef<HTMLDivElement | null>(null);
+  const draggedImage = useRef<HTMLImageElement | null>(null);
+
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
+
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
+
   const [variableOpen, setVariableOpen] = useState(false);
+
   const [editingVariable, setEditingVariable] = useState<
     TemplateVariable | undefined
   >();
+
   const [toolbarState, setToolbarState] = useState<ToolbarState>({
     bold: false,
     italic: false,
@@ -86,46 +101,65 @@ export function TemplateEditor({ template, onClose }: Props) {
     unorderedList: false,
     orderedList: false,
   });
+
   const [headerEnabled, setHeaderEnabled] = useState(
     Boolean(template?.headerContent),
   );
+
   const [footerEnabled, setFooterEnabled] = useState(
     Boolean(template?.footerContent),
   );
+
   const [pageNumbers, setPageNumbers] = useState(
     Boolean(template?.pageNumbers),
   );
-  const [imageOpen, setImageOpen] = useState(false),
-    [imageUrl, setImageUrl] = useState(""),
-    [imageError, setImageError] = useState(""),
-    [dragging, setDragging] = useState(false),
-    [validatingImage, setValidatingImage] = useState(false);
-  const [imageWidth, setImageWidth] = useState("240"),
-    [imageHeight, setImageHeight] = useState(""),
-    [imageFit, setImageFit] = useState<ImageFit>("contain"),
-    [imageAlign, setImageAlign] = useState<ImageAlign>("center");
-  const [linkOpen, setLinkOpen] = useState(false),
-    [linkUrl, setLinkUrl] = useState(""),
-    [linkText, setLinkText] = useState(""),
-    [linkError, setLinkError] = useState("");
+
+  const [imageOpen, setImageOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageError, setImageError] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const [validatingImage, setValidatingImage] = useState(false);
+
+  const [imageWidth, setImageWidth] = useState("240");
+  const [imageHeight, setImageHeight] = useState("");
+  const [imageFit, setImageFit] = useState<ImageFit>("contain");
+  const [imageAlign, setImageAlign] = useState<ImageAlign>("center");
+
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
+  const [linkError, setLinkError] = useState("");
+
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(
-      null,
-    ),
-    [resizeBox, setResizeBox] = useState<DOMRect | null>(null),
-    [zoom, setZoom] = useState(100);
-  const create = useCreateTemplateService(),
-    update = useUpdateTemplateService(template?.id ?? "");
+    null,
+  );
+
+  const [resizeBox, setResizeBox] = useState<DOMRect | null>(null);
+  const [zoom, setZoom] = useState(100);
+
+  const create = useCreateTemplateService();
+  const update = useUpdateTemplateService(template?.id ?? "");
 
   useEffect(() => {
-    if (editor.current)
+    if (editor.current) {
       editor.current.innerHTML =
         template?.content ??
         `<h1>${t("documentTitle")}</h1><p>${t("startWriting")}</p>`;
-    if (headerEditor.current)
+
+      normalizeEditorVariableImages(editor.current);
+    }
+
+    if (headerEditor.current) {
       headerEditor.current.innerHTML = template?.headerContent ?? "";
-    if (footerEditor.current)
+      normalizeEditorVariableImages(headerEditor.current);
+    }
+
+    if (footerEditor.current) {
       footerEditor.current.innerHTML = template?.footerContent ?? "";
+      normalizeEditorVariableImages(footerEditor.current);
+    }
   }, [template, t]);
+
   useEffect(() => {
     const fit = () =>
       setZoom(
@@ -138,25 +172,37 @@ export function TemplateEditor({ template, onClose }: Props) {
             )
           : 100,
       );
+
     fit();
+
     window.addEventListener("resize", fit);
+
     return () => window.removeEventListener("resize", fit);
   }, []);
+
   useEffect(() => {
     const sync = () =>
       setResizeBox(selectedImage?.getBoundingClientRect() ?? null);
+
     sync();
+
     window.addEventListener("resize", sync);
     window.addEventListener("scroll", sync, true);
+
     return () => {
       window.removeEventListener("resize", sync);
       window.removeEventListener("scroll", sync, true);
     };
   }, [selectedImage, zoom]);
+
   useEffect(() => {
     const move = (event: MouseEvent) => {
-      if (!resizing.current || !selectedImage) return;
+      if (!resizing.current || !selectedImage) {
+        return;
+      }
+
       const scale = zoom / 100;
+
       const w = Math.max(
         32,
         Math.min(
@@ -164,6 +210,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           resizing.current.width + (event.clientX - resizing.current.x) / scale,
         ),
       );
+
       const h = Math.max(
         32,
         Math.min(
@@ -172,26 +219,63 @@ export function TemplateEditor({ template, onClose }: Props) {
             (event.clientY - resizing.current.y) / scale,
         ),
       );
+
       if (resizing.current.mode !== "height") {
         selectedImage.style.width = `${Math.round(w)}px`;
         setImageWidth(String(Math.round(w)));
       }
+
       if (resizing.current.mode !== "width") {
         selectedImage.style.height = `${Math.round(h)}px`;
         setImageHeight(String(Math.round(h)));
       }
+
       setResizeBox(selectedImage.getBoundingClientRect());
     };
+
     const up = () => {
       resizing.current = null;
     };
+
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
+
     return () => {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
     };
   }, [selectedImage, zoom]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        !selectedImage ||
+        (event.key !== "Backspace" && event.key !== "Delete")
+      ) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+
+      if (
+        target?.matches("input, textarea, select") ||
+        (target?.isContentEditable && window.getSelection()?.toString())
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      removePlacedImage(selectedImage);
+
+      setSelectedImage(null);
+      setResizeBox(null);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedImage]);
 
   const syncToolbarState = () => {
     try {
@@ -208,64 +292,99 @@ export function TemplateEditor({ template, onClose }: Props) {
       });
     } catch {}
   };
+
   const rememberSelection = () => {
     const selection = window.getSelection();
-    if (!selection?.rangeCount) return;
+
+    if (!selection?.rangeCount) {
+      return;
+    }
+
     const node = selection.anchorNode;
+
     const region = [
       editor.current,
       headerEditor.current,
       footerEditor.current,
-    ].find((el) => el?.contains(node));
+    ].find((element) => element?.contains(node));
+
     if (region) {
       activeEditor.current = region;
       savedRange.current = selection.getRangeAt(0).cloneRange();
+
       syncToolbarState();
     }
   };
+
   const restoreSelection = () => {
     (activeEditor.current ?? editor.current)?.focus();
+
     const selection = window.getSelection();
+
     if (savedRange.current && selection) {
       selection.removeAllRanges();
       selection.addRange(savedRange.current);
     }
   };
+
   const cmd = (command: string, value?: string) => {
     restoreSelection();
+
     document.execCommand(command, false, value);
+
     rememberSelection();
     syncToolbarState();
   };
+
   const insertVariable = (variable: TemplateVariable) => {
     restoreSelection();
+
     document.execCommand("insertHTML", false, variableHtml(variable));
+
     setVariables((current) => upsertVariable(current, variable));
+
     setVariableOpen(false);
+
     rememberSelection();
+
+    const region = activeEditor.current ?? editor.current;
+
+    if (variable.type === "image" && region) {
+      normalizeEditorVariableImages(region);
+    }
   };
+
   const saveVariableDefinition = (variable: TemplateVariable) => {
     if (!editingVariable) {
       insertVariable(variable);
       return;
     }
+
     const oldName = editingVariable.name;
-    setVariables((current) =>
-      upsertVariable(
-        current.filter((v) => v.name !== oldName),
-        variable,
-      ),
-    );
+
+    setVariables((current) => upsertVariable(current, variable, oldName));
+
     [editor.current, headerEditor.current, footerEditor.current].forEach(
       (region) => {
-        if (!region) return;
-        region
-          .querySelectorAll<HTMLImageElement>(
-            `img[data-variable-name="${CSS.escape(oldName)}"]`,
-          )
-          .forEach((img) => {
-            if (variable.type === "image") {
+        if (!region) {
+          return;
+        }
+
+        if (variable.type === "image") {
+          region
+            .querySelectorAll<HTMLImageElement>(
+              `img[data-variable-name="${CSS.escape(oldName)}"]`,
+            )
+            .forEach((img) => {
+              img.dataset.variableName = variable.name;
+              img.dataset.variableType = "image";
               img.dataset.imageFit = variable.imageFit ?? "contain";
+
+              img.alt = "";
+              img.title = `{{${variable.name}}}`;
+
+              img.src = createImageVariablePlaceholder(variable.name);
+
               img.setAttribute(
                 "style",
                 imageStyle(
@@ -275,46 +394,68 @@ export function TemplateEditor({ template, onClose }: Props) {
                   variable.imageFit ?? "contain",
                 ),
               );
-            }
-          });
-        if (oldName === variable.name) return;
+            });
+
+          /*
+           * Cleanup kompatybilności ze starszym formatem.
+           *
+           * IMAGE variable nie jest tokenem tekstowym i dlatego nie
+           * przebudowujemy całego region.innerHTML.
+           */
+          region
+            .querySelectorAll<HTMLElement>(
+              `[data-variable-label="${CSS.escape(oldName)}"]`,
+            )
+            .forEach((label) => label.remove());
+
+          normalizeEditorVariableImages(region);
+
+          return;
+        }
+
+        if (oldName === variable.name) {
+          return;
+        }
+
+        /*
+         * Zwykłe text/date/select variables nadal istnieją jako token:
+         *
+         * {{variableName}}
+         */
         region.innerHTML = region.innerHTML
           .split(`{{${oldName}}}`)
           .join(`{{${variable.name}}}`);
-        region
-          .querySelectorAll<HTMLImageElement>(
-            `img[data-variable-name="${CSS.escape(oldName)}"]`,
-          )
-          .forEach((img) => {
-            img.dataset.variableName = variable.name;
-            img.alt = `{{${variable.name}}}`;
-            img.title = `{{${variable.name}}}`;
-          });
-        region
-          .querySelectorAll<HTMLElement>(
-            `[data-variable-label="${CSS.escape(oldName)}"]`,
-          )
-          .forEach((label) => {
-            label.dataset.variableLabel = variable.name;
-            label.textContent = `{{${variable.name}}}`;
-          });
       },
     );
+
     setEditingVariable(undefined);
     setVariableOpen(false);
   };
+
   const insertImage = (src: string) => {
     try {
       restoreSelection();
+
       if (
         !document.execCommand(
           "insertHTML",
           false,
-          `<img draggable="true" src="${src.replace(/"/g, "&quot;")}" alt="" data-image-fit="${imageFit}" style="${imageStyle(imageWidth, imageAlign, imageHeight || undefined, imageFit)}" />&nbsp;`,
+          `<img draggable="true" src="${src.replace(
+            /"/g,
+            "&quot;",
+          )}" alt="" data-image-fit="${imageFit}" style="${imageStyle(
+            imageWidth,
+            imageAlign,
+            imageHeight || undefined,
+            imageFit,
+          )}" />&nbsp;`,
         )
-      )
+      ) {
         throw new Error();
+      }
+
       rememberSelection();
+
       setImageOpen(false);
       setImageUrl("");
       setImageError("");
@@ -322,77 +463,113 @@ export function TemplateEditor({ template, onClose }: Props) {
       setImageError(t("imageInsertError"));
     }
   };
+
   const validateFile = async (file: File) => {
     try {
       setImageError("");
+
       if (!SAFE_TEMPLATE_IMAGE_TYPES.some((type) => type === file.type)) {
         setImageError(t("imageInvalidType"));
         return;
       }
+
       if (file.size > MAX_TEMPLATE_IMAGE_BYTES) {
         setImageError(t("imageTooLarge"));
         return;
       }
+
       const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+
       if (!MAGIC[file.type]?.(bytes)) {
         setImageError(t("imageSignatureInvalid"));
         return;
       }
+
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
+
         reader.onload = () => resolve(String(reader.result));
         reader.onerror = () => reject(reader.error);
+
         reader.readAsDataURL(file);
       });
+
       insertImage(dataUrl);
     } catch {
       setImageError(t("imageReadError"));
     }
   };
+
   const chooseFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) void validateFile(file);
+
+    if (file) {
+      void validateFile(file);
+    }
+
     event.target.value = "";
   };
+
   const dropFile = (event: DragEvent) => {
     event.preventDefault();
+
     setDragging(false);
+
     const file = event.dataTransfer.files?.[0];
-    if (file) void validateFile(file);
+
+    if (file) {
+      void validateFile(file);
+    }
   };
+
   const validateRemoteImage = () => {
     const url = imageUrl.trim();
+
     setImageError("");
+
     if (!safeRasterImageUrl(url)) {
       setImageError(t("imageUrlFormatInvalid"));
       return;
     }
+
     setValidatingImage(true);
+
     const probe = new Image();
+
     probe.onload = () => {
       setValidatingImage(false);
       insertImage(url);
     };
+
     probe.onerror = () => {
       setValidatingImage(false);
       setImageError(t("imageUrlInvalid"));
     };
+
     probe.src = url;
   };
+
   const insertLink = () => {
     const url = linkUrl.trim();
+
     setLinkError("");
+
     if (!safeHttpUrl(url)) {
       setLinkError(t("urlInvalid"));
       return;
     }
+
     try {
       restoreSelection();
-      const selection = window.getSelection(),
-        selected = selection?.toString() ?? "";
+
+      const selection = window.getSelection();
+      const selected = selection?.toString() ?? "";
+
       if (selected) {
         document.execCommand("createLink", false, url);
+
         const anchor = selection?.anchorNode?.parentElement?.closest("a");
+
         if (anchor) {
           anchor.target = "_blank";
           anchor.rel = "noopener noreferrer";
@@ -400,18 +577,30 @@ export function TemplateEditor({ template, onClose }: Props) {
       } else {
         const text = (linkText.trim() || url).replace(
           /[<>&]/g,
-          (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!,
+          (c) =>
+            ({
+              "<": "&lt;",
+              ">": "&gt;",
+              "&": "&amp;",
+            })[c]!,
         );
+
         if (
           !document.execCommand(
             "insertHTML",
             false,
-            `<a href="${url.replace(/"/g, "&quot;")}" target="_blank" rel="noopener noreferrer">${text}</a>`,
+            `<a href="${url.replace(
+              /"/g,
+              "&quot;",
+            )}" target="_blank" rel="noopener noreferrer">${text}</a>`,
           )
-        )
+        ) {
           throw new Error();
+        }
       }
+
       rememberSelection();
+
       setLinkOpen(false);
       setLinkUrl("");
       setLinkText("");
@@ -419,39 +608,55 @@ export function TemplateEditor({ template, onClose }: Props) {
       setLinkError(t("linkInsertError"));
     }
   };
+
   const setPx = (px: string) => {
-    if (!px) return;
+    if (!px) {
+      return;
+    }
+
     restoreSelection();
+
     document.execCommand("fontSize", false, "7");
+
     (activeEditor.current ?? editor.current)
       ?.querySelectorAll('font[size="7"]')
       .forEach((element) => {
         const html = element as HTMLElement;
+
         html.removeAttribute("size");
         html.style.fontSize = `${px}px`;
       });
+
     (activeEditor.current ?? editor.current)?.focus();
   };
+
   const updateSelectedImage = (
     width = imageWidth,
     height = imageHeight,
     fit: ImageFit = imageFit,
     align: ImageAlign = imageAlign,
   ) => {
-    if (!selectedImage) return;
+    if (!selectedImage) {
+      return;
+    }
+
     selectedImage.dataset.imageFit = fit;
+
     selectedImage.setAttribute(
       "style",
       imageStyle(width, align, height || undefined, fit),
     );
+
     setImageWidth(width);
     setImageHeight(height);
     setImageFit(fit);
     setImageAlign(align);
+
     requestAnimationFrame(() =>
       setResizeBox(selectedImage.getBoundingClientRect()),
     );
   };
+
   const selectImage = (image: HTMLImageElement) => {
     [editor.current, headerEditor.current, footerEditor.current].forEach(
       (region) =>
@@ -459,115 +664,224 @@ export function TemplateEditor({ template, onClose }: Props) {
           ?.querySelectorAll("img[data-selected=true]")
           .forEach((node) => node.removeAttribute("data-selected")),
     );
+
     image.dataset.selected = "true";
     image.draggable = true;
+
     setSelectedImage(image);
+
     setImageWidth(String(parseInt(image.style.width) || image.width || 240));
+
     setImageHeight(
       image.style.height && image.style.height !== "auto"
         ? String(parseInt(image.style.height))
         : "",
     );
+
     setImageFit(getImageFit(image));
     setImageAlign(getImageAlign(image));
   };
+
   const moveImage = (direction: -1 | 1) => {
-    if (!selectedImage) return;
+    if (!selectedImage) {
+      return;
+    }
+
     const sibling =
       direction < 0 ? selectedImage.previousSibling : selectedImage.nextSibling;
-    if (!sibling) return;
+
+    if (!sibling) {
+      return;
+    }
+
     direction < 0
       ? sibling.before(selectedImage)
       : sibling.after(selectedImage);
-    selectedImage.scrollIntoView({ block: "nearest" });
+
+    selectedImage.scrollIntoView({
+      block: "nearest",
+    });
+
+    if (selectedImage.dataset.variableType === "image") {
+      const region = selectedImage.closest(
+        ".a4-paper, .page-header-editor, .page-footer-editor",
+      ) as HTMLDivElement | null;
+
+      normalizeEditorVariableImages(region);
+    }
+
+    requestAnimationFrame(() =>
+      setResizeBox(selectedImage.getBoundingClientRect()),
+    );
   };
+
   const rangeAtPoint = (x: number, y: number) => {
     const doc = document as Document & {
       caretRangeFromPoint?: (x: number, y: number) => Range | null;
+
       caretPositionFromPoint?: (
         x: number,
         y: number,
-      ) => { offsetNode: Node; offset: number } | null;
+      ) => {
+        offsetNode: Node;
+        offset: number;
+      } | null;
     };
+
     let range = doc.caretRangeFromPoint?.(x, y) ?? null;
+
     if (!range) {
       const pos = doc.caretPositionFromPoint?.(x, y);
+
       if (pos) {
         range = document.createRange();
+
         range.setStart(pos.offsetNode, pos.offset);
         range.collapse(true);
       }
     }
+
     return range;
   };
+
   const dropIntoRegion = (
-    e: DragEvent<HTMLDivElement>,
+    event: DragEvent<HTMLDivElement>,
     region: HTMLDivElement | null,
   ) => {
-    const variableName = e.dataTransfer.getData("text/docflow-variable"),
-      variable = variables.find((item) => item.name === variableName),
-      range = rangeAtPoint(e.clientX, e.clientY);
+    const variableName = event.dataTransfer.getData("text/docflow-variable");
+
+    const variable = variables.find((item) => item.name === variableName);
+
+    const range = rangeAtPoint(event.clientX, event.clientY);
+
     if (variable && range && region?.contains(range.startContainer)) {
-      e.preventDefault();
+      event.preventDefault();
+
       activeEditor.current = region;
       savedRange.current = range;
+
       insertVariable(variable);
+
       return;
     }
+
     if (
       !draggedImage.current ||
       !range ||
       !region?.contains(range.startContainer)
-    )
+    ) {
       return;
-    e.preventDefault();
+    }
+
+    event.preventDefault();
+
+    /*
+     * Przenosimy dokładnie ten sam <img>.
+     *
+     * Dzięki temu zachowujemy:
+     * - width,
+     * - height,
+     * - object-fit,
+     * - alignment,
+     * - data-variable-*,
+     * - pozostałe style.
+     */
     const img = draggedImage.current;
+
     range.insertNode(img);
+
     img.after(document.createTextNode("\u00a0"));
+
+    /*
+     * IMAGE variable musi dostać poprawny placeholder natychmiast
+     * po dropie.
+     *
+     * Nie czekamy na blur/click/ponowne zaznaczenie.
+     */
+    if (img.dataset.variableType === "image") {
+      const name = img.dataset.variableName ?? "image";
+
+      img.src = createImageVariablePlaceholder(name);
+      img.alt = "";
+      img.title = `{{${name}}}`;
+
+      normalizeEditorVariableImages(region);
+    }
+
     selectImage(img);
+
+    requestAnimationFrame(() => {
+      setResizeBox(img.getBoundingClientRect());
+    });
+
     draggedImage.current = null;
   };
-  const dropIntoEditor = (e: DragEvent<HTMLDivElement>) =>
-    dropIntoRegion(e, editor.current);
+
+  const dropIntoEditor = (event: DragEvent<HTMLDivElement>) =>
+    dropIntoRegion(event, editor.current);
+
   const startResize = (
     event: ReactMouseEvent,
     mode: "width" | "height" | "both" = "both",
   ) => {
-    if (!selectedImage) return;
+    if (!selectedImage) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
+
     const rect = selectedImage.getBoundingClientRect();
+
     resizing.current = {
       x: event.clientX,
       y: event.clientY,
+
       width: parseInt(selectedImage.style.width) || selectedImage.width || 240,
+
       height:
         parseInt(selectedImage.style.height) ||
         selectedImage.height ||
         Math.max(32, rect.height / (zoom / 100)),
+
       mode,
     };
   };
+
   const save = async () => {
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      normalizeEditorVariableImages,
+    );
+
     const payload = {
       name: name.trim(),
       description: description.trim(),
+
       content: editor.current?.innerHTML ?? "",
+
       headerContent: headerEnabled
         ? (headerEditor.current?.innerHTML ?? "")
         : "",
+
       footerContent: footerEnabled
         ? (footerEditor.current?.innerHTML ?? "")
         : "",
+
       pageNumbers,
       variables,
     };
-    if (!payload.name || !payload.content) return;
+
+    if (!payload.name || !payload.content) {
+      return;
+    }
+
     template
       ? await update.mutateAsync(payload)
       : await create.mutateAsync(payload);
+
     onClose();
   };
+
   const pending = create.isPending || update.isPending;
 
   return (
@@ -580,37 +894,56 @@ export function TemplateEditor({ template, onClose }: Props) {
             onClick={onClose}
             aria-label={t("back")}
           >
-            <ArrowLeft />
+            <ArrowLeft size={18} />
+
+            <span className="mobile-editor-back-label">{t("back")}</span>
           </button>
+
           <div>
             <span className="eyebrow">
               {template ? t("editTemplate") : t("newTemplate")}
             </span>
+
             <input
               className="editor-title"
               maxLength={250}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(event) => setName(event.target.value)}
               placeholder={t("templateName")}
             />
           </div>
+
           <div className="editor-actions">
             <button className="btn secondary" onClick={onClose}>
               <X size={17} />
               {t("close")}
             </button>
+
             <button className="btn" disabled={pending} onClick={save}>
-              {pending ? t("saving") : t("save")}
+              {pending ? (
+                <>
+                  <LoaderCircle className="spinner" size={17} />
+
+                  {t("saving")}
+                </>
+              ) : (
+                <>
+                  <Save size={17} />
+                  {t("save")}
+                </>
+              )}
             </button>
           </div>
         </header>
+
         <input
           className="editor-description"
           maxLength={400}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(event) => setDescription(event.target.value)}
           placeholder={t("description")}
         />
+
         <EditorToolbar
           t={t}
           cmd={cmd}
@@ -630,6 +963,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           }}
           state={toolbarState}
         />
+
         {selectedImage && (
           <ImageContextBar
             t={t}
@@ -641,11 +975,14 @@ export function TemplateEditor({ template, onClose }: Props) {
             onMoveBefore={() => moveImage(-1)}
             onMoveAfter={() => moveImage(1)}
             onRemove={() => {
-              selectedImage.remove();
+              removePlacedImage(selectedImage);
+
               setSelectedImage(null);
+              setResizeBox(null);
             }}
           />
         )}
+
         <VariableShelf
           t={t}
           variables={variables}
@@ -660,7 +997,33 @@ export function TemplateEditor({ template, onClose }: Props) {
               current.filter((variable) => variable.name !== variableName),
             )
           }
+          reorderVariable={(from, to) =>
+            setVariables((current) => {
+              if (
+                from < 0 ||
+                to < 0 ||
+                from >= current.length ||
+                to > current.length
+              ) {
+                return current;
+              }
+
+              const next = [...current];
+              const [moved] = next.splice(from, 1);
+
+              const insertAt = from < to ? to - 1 : to;
+
+              if (insertAt === from) {
+                return current;
+              }
+
+              next.splice(insertAt, 0, moved);
+
+              return next;
+            })
+          }
         />
+
         <DocumentOptions
           t={t}
           header={headerEnabled}
@@ -670,10 +1033,18 @@ export function TemplateEditor({ template, onClose }: Props) {
           setFooter={setFooterEnabled}
           setPageNumbers={setPageNumbers}
         />
+
         <div className="editor-mobile-hint">{t("mobileHint")}</div>
+
         <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+
         <div className="paper-stage">
-          <div className="paper-zoom" style={{ zoom: zoom / 100 }}>
+          <div
+            className="paper-zoom"
+            style={{
+              zoom: zoom / 100,
+            }}
+          >
             <div className="a4-page-shell">
               {headerEnabled && (
                 <div
@@ -684,36 +1055,45 @@ export function TemplateEditor({ template, onClose }: Props) {
                   onFocus={() => {
                     activeEditor.current = headerEditor.current;
                   }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => dropIntoRegion(e, headerEditor.current)}
-                  onDragStart={(e) => {
-                    const target = e.target as HTMLElement;
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) =>
+                    dropIntoRegion(event, headerEditor.current)
+                  }
+                  onDragStart={(event) => {
+                    const target = event.target as HTMLElement;
+
                     if (target.tagName === "IMG") {
                       draggedImage.current = target as HTMLImageElement;
-                      e.dataTransfer.effectAllowed = "move";
+
+                      event.dataTransfer.effectAllowed = "move";
                     }
                   }}
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.tagName === "IMG")
+                  onClick={(event) => {
+                    const target = event.target as HTMLElement;
+
+                    if (target.tagName === "IMG") {
                       selectImage(target as HTMLImageElement);
+                    }
                   }}
                   onKeyUp={rememberSelection}
                   onMouseUp={rememberSelection}
                   data-placeholder={t("headerPlaceholder")}
                 />
               )}
+
               <div
                 ref={editor}
                 className="a4-paper"
                 contentEditable
                 suppressContentEditableWarning
-                onDragOver={(e) => e.preventDefault()}
-                onDragStart={(e) => {
-                  const target = e.target as HTMLElement;
+                onDragOver={(event) => event.preventDefault()}
+                onDragStart={(event) => {
+                  const target = event.target as HTMLElement;
+
                   if (target.tagName === "IMG") {
                     draggedImage.current = target as HTMLImageElement;
-                    e.dataTransfer.effectAllowed = "move";
+
+                    event.dataTransfer.effectAllowed = "move";
                   }
                 }}
                 onDrop={dropIntoEditor}
@@ -722,18 +1102,23 @@ export function TemplateEditor({ template, onClose }: Props) {
                 }}
                 onKeyUp={rememberSelection}
                 onMouseUp={rememberSelection}
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  if (target.tagName === "IMG")
+                onClick={(event) => {
+                  const target = event.target as HTMLElement;
+
+                  if (target.tagName === "IMG") {
                     selectImage(target as HTMLImageElement);
-                  else {
-                    editor.current
-                      ?.querySelectorAll("img[data-selected=true]")
-                      .forEach((node) => node.removeAttribute("data-selected"));
-                    setSelectedImage(null);
+
+                    return;
                   }
+
+                  editor.current
+                    ?.querySelectorAll("img[data-selected=true]")
+                    .forEach((node) => node.removeAttribute("data-selected"));
+
+                  setSelectedImage(null);
                 }}
               />
+
               {footerEnabled && (
                 <div
                   ref={footerEditor}
@@ -743,28 +1128,36 @@ export function TemplateEditor({ template, onClose }: Props) {
                   onFocus={() => {
                     activeEditor.current = footerEditor.current;
                   }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => dropIntoRegion(e, footerEditor.current)}
-                  onDragStart={(e) => {
-                    const target = e.target as HTMLElement;
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) =>
+                    dropIntoRegion(event, footerEditor.current)
+                  }
+                  onDragStart={(event) => {
+                    const target = event.target as HTMLElement;
+
                     if (target.tagName === "IMG") {
                       draggedImage.current = target as HTMLImageElement;
-                      e.dataTransfer.effectAllowed = "move";
+
+                      event.dataTransfer.effectAllowed = "move";
                     }
                   }}
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target.tagName === "IMG")
+                  onClick={(event) => {
+                    const target = event.target as HTMLElement;
+
+                    if (target.tagName === "IMG") {
                       selectImage(target as HTMLImageElement);
+                    }
                   }}
                   onKeyUp={rememberSelection}
                   onMouseUp={rememberSelection}
                   data-placeholder={t("footerPlaceholder")}
                 />
-              )}{" "}
+              )}
+
               {pageNumbers && <div className="page-number-preview">1 / 1</div>}
             </div>
           </div>
+
           {selectedImage && resizeBox && (
             <>
               <button
@@ -772,35 +1165,58 @@ export function TemplateEditor({ template, onClose }: Props) {
                 className="image-resize-handle"
                 aria-label={t("resizeImage")}
                 title={t("resizeImage")}
-                onMouseDown={(e) => startResize(e, "both")}
+                onMouseDown={(event) => startResize(event, "both")}
                 style={{
                   left: resizeBox.right - 10,
                   top: resizeBox.bottom - 10,
                 }}
               />
+
               <button
                 type="button"
                 className="image-resize-handle image-resize-width"
                 aria-label="Resize image width"
-                onMouseDown={(e) => startResize(e, "width")}
+                onMouseDown={(event) => startResize(event, "width")}
                 style={{
                   left: resizeBox.right - 10,
                   top: resizeBox.top + resizeBox.height / 2 - 10,
                 }}
               />
+
               <button
                 type="button"
                 className="image-resize-handle image-resize-height"
                 aria-label="Resize image height"
-                onMouseDown={(e) => startResize(e, "height")}
+                onMouseDown={(event) => startResize(event, "height")}
                 style={{
                   left: resizeBox.left + resizeBox.width / 2 - 10,
                   top: resizeBox.bottom - 10,
                 }}
               />
+
+              <button
+                type="button"
+                className="selected-image-delete"
+                aria-label={t("remove")}
+                title={t("remove")}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  removePlacedImage(selectedImage);
+
+                  setSelectedImage(null);
+                  setResizeBox(null);
+                }}
+                style={{
+                  left: resizeBox.right - 16,
+                  top: resizeBox.top - 16,
+                }}
+              >
+                <Trash2 size={15} />
+              </button>
             </>
           )}
         </div>
+
         {variableOpen && (
           <VariableModal
             onClose={() => {
@@ -812,6 +1228,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             t={t}
           />
         )}
+
         {linkOpen && (
           <LinkDialog
             t={t}
@@ -827,6 +1244,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             onInsert={insertLink}
           />
         )}
+
         {imageOpen && (
           <ImageDialog
             t={t}

@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
+import { PendingOverlay } from "@/components/ui/pending-overlay";
+import { LoaderCircle } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/axios";
 import type { ApiError } from "@/types/api";
@@ -294,307 +296,331 @@ export default function RegisterForm() {
   });
 
   return (
-    <form onSubmit={submit} className="auth-form wide" noValidate>
-      <input type="hidden" {...register("locale")} />
-
-      <input type="hidden" {...register("captchaToken")} />
-
-      <h2>{t("accountDetails")}</h2>
-
-      <div className="form-grid">
-        <FormField
-          label={t("firstName")}
-          requiredMark
-          {...register("firstName")}
-          error={fieldError(errors.firstName)}
-        />
-
-        <FormField
-          label={t("lastName")}
-          requiredMark
-          {...register("lastName")}
-          error={fieldError(errors.lastName)}
-        />
-      </div>
-
-      <FormField
-        label={t("organization")}
-        requiredMark
-        {...register("organizationName")}
-        error={fieldError(errors.organizationName)}
+    <form
+      onSubmit={submit}
+      className="auth-form wide pending-form"
+      noValidate
+      aria-busy={mutation.isPending}
+    >
+      <PendingOverlay
+        active={mutation.isPending}
+        label={t("creatingAccount")}
       />
+      <fieldset disabled={mutation.isPending} className="pending-fieldset">
+        <input type="hidden" {...register("locale")} />
 
-      <FormField
-        label={t("email")}
-        type="email"
-        requiredMark
-        autoComplete="email"
-        {...register("email")}
-        error={fieldError(errors.email)}
-      />
+        <input type="hidden" {...register("captchaToken")} />
 
-      <div className="form-grid">
-        <FormField
-          label={t("password")}
-          type="password"
-          requiredMark
-          autoComplete="new-password"
-          {...register("password")}
-          error={fieldError(errors.password)}
-        />
+        <h2>{t("accountDetails")}</h2>
 
-        <FormField
-          label={t("confirmPassword")}
-          type="password"
-          requiredMark
-          autoComplete="new-password"
-          {...register("confirmPassword")}
-          error={fieldError(errors.confirmPassword)}
-        />
-      </div>
-
-      <h2>{t("billing")}</h2>
-
-      <div className="segmented">
-        <label>
-          <input
-            type="radio"
-            value="INDIVIDUAL"
-            {...register("customerType")}
-          />
-
-          {t("privatePerson")}
-        </label>
-
-        <label>
-          <input type="radio" value="BUSINESS" {...register("customerType")} />
-
-          {t("business")}
-        </label>
-      </div>
-
-      {customerType === "BUSINESS" && (
-        <>
+        <div className="form-grid">
           <FormField
-            label={t("companyName")}
+            label={t("firstName")}
             requiredMark
-            {...register("companyName")}
-            error={fieldError(errors.companyName)}
+            {...register("firstName")}
+            error={fieldError(errors.firstName)}
           />
 
-          <div className="nip-row">
-            <FormField
-              label={t("taxId")}
-              requiredMark
-              {...register("taxId")}
-              error={fieldError(errors.taxId)}
-            />
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={lookupCompany}
-              disabled={companyLoading}
-            >
-              {companyLoading ? t("companyLoading") : t("fetchCompany")}
-            </button>
-          </div>
-          {companyMessage && <p className="hint">{companyMessage}</p>}
           <FormField
-            label={t("vatId")}
-            {...register("vatId")}
-            error={fieldError(errors.vatId)}
+            label={t("lastName")}
+            requiredMark
+            {...register("lastName")}
+            error={fieldError(errors.lastName)}
           />
-        </>
-      )}
-
-      <FormField
-        label={t("billingEmail")}
-        type="email"
-        requiredMark
-        autoComplete="email"
-        {...register("billingEmail")}
-        error={fieldError(errors.billingEmail)}
-      />
-
-      <div className="form-grid">
-        <FormField
-          label={t("countryCode")}
-          requiredMark
-          {...register("countryCode")}
-          error={fieldError(errors.countryCode)}
-        />
-
-        <FormField
-          label={t("city")}
-          requiredMark
-          autoComplete="address-level2"
-          {...register("city")}
-          error={fieldError(errors.city)}
-        />
-      </div>
-
-      <div className="form-grid">
-        <FormField
-          label={t("street")}
-          requiredMark
-          autoComplete="address-line1"
-          {...register("street")}
-          error={fieldError(errors.street)}
-        />
-
-        <FormField
-          label={t("buildingNumber")}
-          requiredMark
-          {...register("buildingNumber")}
-          error={fieldError(errors.buildingNumber)}
-        />
-      </div>
-
-      <div className="form-grid">
-        <FormField
-          label={t("apartmentNumber")}
-          {...register("apartmentNumber")}
-          error={fieldError(errors.apartmentNumber)}
-        />
-
-        <FormField
-          label={t("postalCode")}
-          requiredMark
-          autoComplete="postal-code"
-          {...register("postalCode")}
-          error={fieldError(errors.postalCode)}
-        />
-      </div>
-
-      <h2>{t("choosePlan")}</h2>
-
-      <div className="plan-grid">
-        {plans.data?.map((plan) => (
-          <label
-            key={plan.code}
-            className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
-          >
-            <input
-              className="plan-radio"
-              type="radio"
-              value={plan.code}
-              disabled={!plan.available}
-              {...register("plan")}
-            />
-
-            <div className="plan-visual" aria-hidden="true">
-              <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
-            </div>
-            <div className="plan-check">✓</div>
-            <strong className="plan-name">
-              {plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}
-            </strong>
-            <small className="plan-copy">
-              {plan.code === "FREE"
-                ? t("freeLicenseCopy")
-                : t("annualLicenseCopy")}
-            </small>
-
-            <span>
-              {(plan.displayAmount / 100).toLocaleString(locale, {
-                style: "currency",
-                currency: "PLN",
-              })}{" "}
-              {plan.displayNet ? t("net") : t("gross")}
-            </span>
-
-            {plan.code !== "FREE" && (
-              <small>
-                {plan.displayNet ? `+ ${plan.vatRate}% VAT` : t("vatIncluded")}
-              </small>
-            )}
-
-            <small>
-              {plan.documentLimit} {t("documentsPerMonth")}
-            </small>
-          </label>
-        ))}
-      </div>
-
-      {errors.plan && (
-        <p className="form-error">
-          {translateValidation(String(errors.plan.message))}
-        </p>
-      )}
-
-      {selectedPlan === "YEARLY" && (
-        <>
-          <h2>{t("paymentMethod")}</h2>
-          <div className="payment-methods">
-            <label
-              className={`payment-option ${paymentMethod === "PAYU" ? "selected" : ""}`}
-            >
-              <input type="radio" value="PAYU" {...register("paymentMethod")} />
-              <div>
-                <strong>{t("payu")}</strong>
-                <small>{t("payuCopy")}</small>
-              </div>
-            </label>
-            <label
-              className={`payment-option ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
-            >
-              <input
-                type="radio"
-                value="BANK_TRANSFER"
-                {...register("paymentMethod")}
-              />
-              <div>
-                <strong>{t("bankTransfer")}</strong>
-                <small>{t("bankTransferCopy")}</small>
-              </div>
-            </label>
-          </div>
-          <p className="hint">{t("freeWhilePaymentPending")}</p>
-        </>
-      )}
-
-      <div
-        className={`captcha-box${errors.captchaAnswer ? " captcha-error" : ""}`}
-      >
-        <div>
-          <strong>{t("verification")} *</strong>
-
-          <p>
-            {captcha.isLoading ? t("loadingCaptcha") : captcha.data?.question}
-          </p>
         </div>
 
-        <button
-          type="button"
-          className="btn secondary"
-          onClick={refreshCaptcha}
-          disabled={captcha.isFetching}
+        <FormField
+          label={t("organization")}
+          requiredMark
+          {...register("organizationName")}
+          error={fieldError(errors.organizationName)}
+        />
+
+        <FormField
+          label={t("email")}
+          type="email"
+          requiredMark
+          autoComplete="email"
+          {...register("email")}
+          error={fieldError(errors.email)}
+        />
+
+        <div className="form-grid">
+          <FormField
+            label={t("password")}
+            type="password"
+            requiredMark
+            autoComplete="new-password"
+            {...register("password")}
+            error={fieldError(errors.password)}
+          />
+
+          <FormField
+            label={t("confirmPassword")}
+            type="password"
+            requiredMark
+            autoComplete="new-password"
+            {...register("confirmPassword")}
+            error={fieldError(errors.confirmPassword)}
+          />
+        </div>
+
+        <h2>{t("billing")}</h2>
+
+        <div className="segmented">
+          <label>
+            <input
+              type="radio"
+              value="INDIVIDUAL"
+              {...register("customerType")}
+            />
+
+            {t("privatePerson")}
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              value="BUSINESS"
+              {...register("customerType")}
+            />
+
+            {t("business")}
+          </label>
+        </div>
+
+        {customerType === "BUSINESS" && (
+          <>
+            <FormField
+              label={t("companyName")}
+              requiredMark
+              {...register("companyName")}
+              error={fieldError(errors.companyName)}
+            />
+
+            <div className="nip-row">
+              <FormField
+                label={t("taxId")}
+                requiredMark
+                {...register("taxId")}
+                error={fieldError(errors.taxId)}
+              />
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={lookupCompany}
+                disabled={companyLoading}
+              >
+                {companyLoading ? t("companyLoading") : t("fetchCompany")}
+              </button>
+            </div>
+            {companyMessage && <p className="hint">{companyMessage}</p>}
+            <FormField
+              label={t("vatId")}
+              {...register("vatId")}
+              error={fieldError(errors.vatId)}
+            />
+          </>
+        )}
+
+        <FormField
+          label={t("billingEmail")}
+          type="email"
+          requiredMark
+          autoComplete="email"
+          {...register("billingEmail")}
+          error={fieldError(errors.billingEmail)}
+        />
+
+        <div className="form-grid">
+          <FormField
+            label={t("countryCode")}
+            requiredMark
+            {...register("countryCode")}
+            error={fieldError(errors.countryCode)}
+          />
+
+          <FormField
+            label={t("city")}
+            requiredMark
+            autoComplete="address-level2"
+            {...register("city")}
+            error={fieldError(errors.city)}
+          />
+        </div>
+
+        <div className="form-grid">
+          <FormField
+            label={t("street")}
+            requiredMark
+            autoComplete="address-line1"
+            {...register("street")}
+            error={fieldError(errors.street)}
+          />
+
+          <FormField
+            label={t("buildingNumber")}
+            requiredMark
+            {...register("buildingNumber")}
+            error={fieldError(errors.buildingNumber)}
+          />
+        </div>
+
+        <div className="form-grid">
+          <FormField
+            label={t("apartmentNumber")}
+            {...register("apartmentNumber")}
+            error={fieldError(errors.apartmentNumber)}
+          />
+
+          <FormField
+            label={t("postalCode")}
+            requiredMark
+            autoComplete="postal-code"
+            {...register("postalCode")}
+            error={fieldError(errors.postalCode)}
+          />
+        </div>
+
+        <h2>{t("choosePlan")}</h2>
+
+        <div className="plan-grid">
+          {plans.data?.map((plan) => (
+            <label
+              key={plan.code}
+              className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
+            >
+              <input
+                className="plan-radio"
+                type="radio"
+                value={plan.code}
+                disabled={!plan.available}
+                {...register("plan")}
+              />
+
+              <div className="plan-visual" aria-hidden="true">
+                <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+              </div>
+              <div className="plan-check">✓</div>
+              <strong className="plan-name">
+                {plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}
+              </strong>
+              <small className="plan-copy">
+                {plan.code === "FREE"
+                  ? t("freeLicenseCopy")
+                  : t("annualLicenseCopy")}
+              </small>
+
+              <span>
+                {(plan.displayAmount / 100).toLocaleString(locale, {
+                  style: "currency",
+                  currency: "PLN",
+                })}{" "}
+                {plan.displayNet ? t("net") : t("gross")}
+              </span>
+
+              {plan.code !== "FREE" && (
+                <small>
+                  {plan.displayNet
+                    ? `+ ${plan.vatRate}% VAT`
+                    : t("vatIncluded")}
+                </small>
+              )}
+
+              <small>
+                {plan.documentLimit} {t("documentsPerMonth")}
+              </small>
+            </label>
+          ))}
+        </div>
+
+        {errors.plan && (
+          <p className="form-error">
+            {translateValidation(String(errors.plan.message))}
+          </p>
+        )}
+
+        {selectedPlan === "YEARLY" && (
+          <>
+            <h2>{t("paymentMethod")}</h2>
+            <div className="payment-methods">
+              <label
+                className={`payment-option ${paymentMethod === "PAYU" ? "selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  value="PAYU"
+                  {...register("paymentMethod")}
+                />
+                <div>
+                  <strong>{t("payu")}</strong>
+                  <small>{t("payuCopy")}</small>
+                </div>
+              </label>
+              <label
+                className={`payment-option ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  value="BANK_TRANSFER"
+                  {...register("paymentMethod")}
+                />
+                <div>
+                  <strong>{t("bankTransfer")}</strong>
+                  <small>{t("bankTransferCopy")}</small>
+                </div>
+              </label>
+            </div>
+            <p className="hint">{t("freeWhilePaymentPending")}</p>
+          </>
+        )}
+
+        <div
+          className={`captcha-box${errors.captchaAnswer ? " captcha-error" : ""}`}
         >
-          {t("newChallenge")}
+          <div>
+            <strong>{t("verification")} *</strong>
+
+            <p>
+              {captcha.isLoading ? t("loadingCaptcha") : captcha.data?.question}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="btn secondary"
+            onClick={refreshCaptcha}
+            disabled={captcha.isFetching}
+          >
+            {t("newChallenge")}
+          </button>
+        </div>
+
+        <FormField
+          label={t("answer")}
+          requiredMark
+          inputMode="numeric"
+          autoComplete="off"
+          {...register("captchaAnswer")}
+          error={fieldError(errors.captchaAnswer)}
+        />
+
+        {errors.root && (
+          <p className="form-error">{t(String(errors.root.message))}</p>
+        )}
+
+        <button
+          className="btn full"
+          disabled={
+            mutation.isPending || captcha.isLoading || !captcha.data?.token
+          }
+        >
+          {mutation.isPending && (
+            <LoaderCircle className="spinner" aria-hidden="true" />
+          )}
+          {mutation.isPending ? t("creatingAccount") : t("register")}
         </button>
-      </div>
-
-      <FormField
-        label={t("answer")}
-        requiredMark
-        inputMode="numeric"
-        autoComplete="off"
-        {...register("captchaAnswer")}
-        error={fieldError(errors.captchaAnswer)}
-      />
-
-      {errors.root && (
-        <p className="form-error">{t(String(errors.root.message))}</p>
-      )}
-
-      <button
-        className="btn full"
-        disabled={
-          mutation.isPending || captcha.isLoading || !captcha.data?.token
-        }
-      >
-        {mutation.isPending ? t("creatingAccount") : t("register")}
-      </button>
+      </fieldset>
     </form>
   );
 }

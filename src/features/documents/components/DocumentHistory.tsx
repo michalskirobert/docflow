@@ -1,11 +1,25 @@
 "use client";
-import { Download, Eye, FileText, Search, Trash2 } from "lucide-react";
+import {
+  Download,
+  Eye,
+  FileText,
+  LoaderCircle,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useDeleteDocumentService } from "../service";
 import type { Document } from "../types";
-export function DocumentHistory({ documents }: { documents: Document[] }) {
+export function DocumentHistory({
+  documents,
+  loading = false,
+}: {
+  documents: Document[];
+  loading?: boolean;
+}) {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
   const filtered = useMemo(
@@ -52,7 +66,9 @@ export function DocumentHistory({ documents }: { documents: Document[] }) {
           <option value="nameDesc">Name Z–A</option>
         </select>
       </div>
-      {filtered.length ? (
+      {loading ? (
+        <ListSkeleton rows={5} />
+      ) : filtered.length ? (
         filtered.map((d) => <DocumentRow key={d.id} document={d} />)
       ) : (
         <div className="empty-state compact">
@@ -106,7 +122,8 @@ function DocumentRow({ document: d }: { document: Document }) {
           disabled={remove.isPending}
           onClick={del}
         >
-          <Trash2 /> Delete
+          {remove.isPending ? <LoaderCircle className="spinner" /> : <Trash2 />}{" "}
+          {remove.isPending ? "Deleting…" : "Delete"}
         </button>
       </div>
     </article>

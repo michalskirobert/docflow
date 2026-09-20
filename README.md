@@ -239,3 +239,20 @@ The long-term correct solution is to recover the original pre-v1.7 Prisma migrat
 ## v1.7.3
 
 Editor fixes: variables can be dropped into body/header/footer at the pointer position; toolbar formatting buttons reflect the current selection state; image sizing supports width, height, or both with contain/cover/fill; generated-document image inputs can be cleared; variables can be edited from the variable shelf; image-variable placeholders use a stable transparent data image and a visible variable label; historical README and migration notes are consolidated in this file.
+
+## v1.7.4
+
+- Consistent pending UX for login/registration and destructive document/template actions: controls are blocked while requests are in flight and buttons show progress.
+- Selected ordinary images and IMAGE-variable instances can be removed with the context X button or Backspace/Delete without deleting the variable definition.
+- Variable definitions keep their insertion order; editing replaces in place. The variable shelf supports explicit drag reordering plus keyboard/mobile up/down controls.
+- IMAGE-variable placeholders are normalized after editor hydration to a stable transparent editor image and exactly one visible `{{variable}}` label, preventing broken-image icons after reopening saved templates.
+- Image layout metadata continues to survive generated-document replacement.
+
+## v1.7.5
+
+- Skeleton loading states for template, document and admin-payment lists.
+- Variable shelf drag-and-drop now has explicit drop gaps, including before the first variable, plus improved left spacing.
+- Selected images have an in-workspace delete control in addition to the context-bar action and Delete/Backspace.
+- Mobile template create/edit keeps an explicit back action; save uses an icon and pending spinner.
+- Document date variables display and accept the template-defined format instead of the browser-specific native date presentation.
+- Select-variable option builder has a fixed scrollable height so the modal no longer grows for every new option.

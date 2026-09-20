@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import type { ImageAlign, ImageFit } from "./utils";
 
 type Props = {
@@ -88,7 +88,7 @@ export function ImageContextBar({
         <ArrowRight size={15} />
       </button>
       <button type="button" onClick={onRemove}>
-        <Trash2 size={15} />
+        <X size={15} />
         {t("remove")}
       </button>
     </div>

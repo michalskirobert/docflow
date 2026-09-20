@@ -1,13 +1,16 @@
 "use client";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import type { Template } from "@/features/templates/types";
 export function TemplatePicker({
   templates,
   value,
   onChange,
+  loading = false,
 }: {
   templates: Template[];
+  loading?: boolean;
   value: string;
   onChange: (id: string) => void;
 }) {
@@ -32,17 +35,21 @@ export function TemplatePicker({
         />
       </label>
       <div className="template-picker-list">
-        {filtered.map((t) => (
-          <button
-            type="button"
-            className={value === t.id ? "selected" : ""}
-            key={t.id}
-            onClick={() => onChange(t.id)}
-          >
-            <strong>{t.name}</strong>
-            <small>{t.description || "No description"}</small>
-          </button>
-        ))}
+        {loading ? (
+          <ListSkeleton rows={3} />
+        ) : (
+          filtered.map((t) => (
+            <button
+              type="button"
+              className={value === t.id ? "selected" : ""}
+              key={t.id}
+              onClick={() => onChange(t.id)}
+            >
+              <strong>{t.name}</strong>
+              <small>{t.description || "No description"}</small>
+            </button>
+          ))
+        )}
       </div>
     </div>
   );

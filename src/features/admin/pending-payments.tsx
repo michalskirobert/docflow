@@ -1,5 +1,7 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, LoaderCircle } from "lucide-react";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { api } from "@/lib/axios";
 type Row = {
   id: string;
@@ -29,7 +31,9 @@ export default function PendingPayments() {
   return (
     <div className="card">
       <h2>Bank transfers awaiting verification</h2>
-      {q.data?.length ? (
+      {q.isLoading ? (
+        <ListSkeleton rows={4} />
+      ) : q.data?.length ? (
         q.data.map((p) => (
           <div className="document-row" key={p.id}>
             <div className="document-meta">
@@ -46,7 +50,15 @@ export default function PendingPayments() {
               disabled={approve.isPending}
               onClick={() => approve.mutate(p.id)}
             >
-              Confirm payment & activate Annual
+              {approve.isPending ? (
+                <>
+                  <LoaderCircle className="spinner" size={17} /> Confirming…
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={17} /> Confirm payment & activate Annual
+                </>
+              )}
             </button>
           </div>
         ))

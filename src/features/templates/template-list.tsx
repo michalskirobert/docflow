@@ -1,6 +1,14 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Copy, Edit3, FilePlus2, Search, Trash2 } from "lucide-react";
+import {
+  Copy,
+  Edit3,
+  FilePlus2,
+  LoaderCircle,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import {
   useCreateTemplateService,
@@ -39,7 +47,9 @@ export default function TemplateList() {
           <FilePlus2 size={18} /> New template
         </button>
       </div>
-      {filtered.length ? (
+      {query.isLoading ? (
+        <ListSkeleton rows={6} cards />
+      ) : filtered.length ? (
         <div className="template-grid">
           {filtered.map((t) => (
             <TemplateCard
@@ -128,8 +138,17 @@ function TemplateCard({
           <button onClick={onDuplicate}>
             <Copy /> Duplicate
           </button>
-          <button className="danger-link" onClick={del}>
-            <Trash2 />
+          <button
+            className="danger-link"
+            onClick={del}
+            disabled={remove.isPending}
+            aria-busy={remove.isPending}
+          >
+            {remove.isPending ? (
+              <LoaderCircle className="spinner" />
+            ) : (
+              <Trash2 />
+            )}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { LoaderCircle, Sparkles } from "lucide-react";
 import {
   useDocumentsService,
   useDocumentTemplatesService,
@@ -52,6 +52,7 @@ export default function DocumentList() {
         </div>
         <TemplatePicker
           templates={temps.data ?? []}
+          loading={temps.isLoading}
           value={templateId}
           onChange={(id) => {
             setTemplateId(id);
@@ -77,7 +78,15 @@ export default function DocumentList() {
             disabled={gen.isPending}
             onClick={generate}
           >
-            {gen.isPending ? "Generating…" : "Generate document"}
+            {gen.isPending ? (
+              <>
+                <LoaderCircle className="spinner" size={17} /> Generating…
+              </>
+            ) : (
+              <>
+                <Sparkles size={17} /> Generate document
+              </>
+            )}
           </button>
         )}
         {gen.error && (
@@ -86,7 +95,7 @@ export default function DocumentList() {
           </p>
         )}
       </section>
-      <DocumentHistory documents={docs.data ?? []} />
+      <DocumentHistory documents={docs.data ?? []} loading={docs.isLoading} />
     </div>
   );
 }

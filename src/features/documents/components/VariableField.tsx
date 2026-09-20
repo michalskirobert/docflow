@@ -7,6 +7,40 @@ import {
   MAX_TEMPLATE_IMAGE_BYTES,
   SAFE_TEMPLATE_IMAGE_TYPES,
 } from "@/utils/constants";
+
+function formatDateInput(value: string, format = "DD.MM.YYYY") {
+  if (!value) return "";
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return value;
+  const [, yyyy, mm, dd] = m;
+  return format.replace("DD", dd).replace("MM", mm).replace("YYYY", yyyy);
+}
+function parseDateInput(value: string, format = "DD.MM.YYYY") {
+  const tokens = format.match(/DD|MM|YYYY|[^DMY]+/g) ?? [];
+  let pattern = "^";
+  const groups: string[] = [];
+  for (const token of tokens) {
+    if (token === "DD") {
+      pattern += "(\\d{2})";
+      groups.push("dd");
+    } else if (token === "MM") {
+      pattern += "(\\d{2})";
+      groups.push("mm");
+    } else if (token === "YYYY") {
+      pattern += "(\\d{4})";
+      groups.push("yyyy");
+    } else pattern += token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  const match = value.match(new RegExp(pattern + "$"));
+  if (!match) return value;
+  const parts: Record<string, string> = {};
+  groups.forEach((key, index) => {
+    parts[key] = match[index + 1];
+  });
+  return parts.yyyy && parts.mm && parts.dd
+    ? `${parts.yyyy}-${parts.mm}-${parts.dd}`
+    : value;
+}
 const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
   "image/png": (b) =>
     b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
@@ -72,9 +106,13 @@ export function VariableField({
         {label}
         {variable.required && <span className="required"> *</span>}
         <input
-          type="date"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          type="text"
+          inputMode="numeric"
+          value={formatDateInput(value, variable.dateFormat)}
+          placeholder={variable.dateFormat ?? "DD.MM.YYYY"}
+          onChange={(e) =>
+            onChange(parseDateInput(e.target.value, variable.dateFormat))
+          }
         />
         <small>{variable.dateFormat}</small>
         {error && <small className="form-error">{error}</small>}

@@ -116,7 +116,7 @@ export function VariableModal({
         {type === "select" && (
           <div className="field">
             <span>{t("selectOptions")}</span>
-            <div className="option-builder">
+            <div className="option-builder option-builder-fixed">
               {options.map((option, index) => (
                 <div className="option-row" key={index}>
                   <input
