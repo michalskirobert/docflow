@@ -151,6 +151,7 @@
     "duplicateSuffix": "kopia"
   },
   "documents": {
+    "close": "Zamknij",
     "title": "Dokumenty",
     "newDocument": "Nowy dokument",
     "editDocument": "Edytuj dokument",

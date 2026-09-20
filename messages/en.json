@@ -151,6 +151,7 @@
     "duplicateSuffix": "copy"
   },
   "documents": {
+    "close": "Zamknij",
     "title": "Documents",
     "newDocument": "New document",
     "editDocument": "Edit document",

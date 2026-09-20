@@ -7,6 +7,169 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                 String                   @id @default(cuid())
+  email              String                   @unique
+  passwordHash       String
+  subscriptionExempt Boolean                  @default(false)
+  trialExempt        Boolean                  @default(false)
+  locale             String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  emailVerifiedAt    DateTime?
+  firstName          String
+  lastName           String
+  verificationTokens EmailVerificationToken[]
+  memberships        Membership[]
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Organization {
+  id             String          @id @default(cuid())
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  billingProfile BillingProfile?
+  documents      Document[]
+  memberships    Membership[]
+  payments       Payment[]
+  salesDocuments SalesDocument[]
+  subscription   Subscription?
+  templates      Template[]
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  role           Role         @default(MEMBER)
+  userId         String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model BillingProfile {
+  id              String       @id @default(cuid())
+  organizationId  String       @unique
+  customerType    CustomerType
+  billingEmail    String
+  firstName       String?
+  lastName        String?
+  companyName     String?
+  taxId           String?
+  vatId           String?
+  countryCode     String
+  street          String
+  buildingNumber  String
+  apartmentNumber String?
+  postalCode      String
+  city            String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodEndsAt  DateTime?
+  monthlyDocumentLimit Int                @default(10)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  plan                 PlanCode           @default(FREE)
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id                String          @id @default(cuid())
+  organizationId    String
+  plan              PlanCode
+  status            PaymentStatus   @default(PENDING)
+  provider          String          @default("PAYU")
+  providerOrderId   String?         @unique
+  extOrderId        String          @unique
+  currency          String          @default("PLN")
+  netAmount         Int
+  vatAmount         Int
+  grossAmount       Int
+  vatRate           Int
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transferReference String?         @unique
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  salesDocuments    SalesDocument[]
+
+  @@index([organizationId])
+}
+
+model SalesDocument {
+  id             String            @id @default(cuid())
+  organizationId String
+  paymentId      String?
+  type           SalesDocumentType
+  number         String?
+  fileUrl        String?
+  sentAt         DateTime?
+  createdAt      DateTime          @default(now())
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  payment        Payment?          @relation(fields: [paymentId], references: [id])
+
+  @@index([organizationId])
+  @@index([paymentId])
+}
+
+model Template {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  content        String
+  variablesJson  String       @default("[]")
+  isExample      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  footerContent  String?
+  headerContent  String?
+  pageNumbers    Boolean      @default(false)
+  documents      Document[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  organizationId  String
+  templateId      String?
+  name            String
+  status          DocumentStatus @default(GENERATED)
+  payloadJson     String
+  renderedContent String
+  createdAt       DateTime       @default(now())
+  pageNumbers     Boolean        @default(false)
+  renderedFooter  String?
+  renderedHeader  String?
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template        Template?      @relation(fields: [templateId], references: [id])
+
+  @@index([organizationId])
+  @@index([templateId])
+}
+
 enum Role {
   OWNER
   ADMIN
@@ -45,167 +208,4 @@ enum DocumentStatus {
 enum SalesDocumentType {
   RECEIPT
   INVOICE
-}
-
-model User {
-  id                 String                   @id @default(cuid())
-  email              String                   @unique
-  firstName          String
-  lastName           String
-  passwordHash       String
-  emailVerifiedAt    DateTime?
-  subscriptionExempt Boolean                  @default(false)
-  trialExempt        Boolean                  @default(false)
-  locale             String?
-  memberships        Membership[]
-  verificationTokens EmailVerificationToken[]
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
-}
-
-model EmailVerificationToken {
-  id        String    @id @default(cuid())
-  tokenHash String    @unique
-  userId    String
-  expiresAt DateTime
-  usedAt    DateTime?
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
-
-  @@index([userId])
-}
-
-model Organization {
-  id             String          @id @default(cuid())
-  name           String
-  memberships    Membership[]
-  templates      Template[]
-  documents      Document[]
-  subscription   Subscription?
-  billingProfile BillingProfile?
-  payments       Payment[]
-  salesDocuments SalesDocument[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-}
-
-model Membership {
-  id             String       @id @default(cuid())
-  role           Role         @default(MEMBER)
-  userId         String
-  organizationId String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@index([organizationId])
-}
-
-model BillingProfile {
-  id              String       @id @default(cuid())
-  organizationId  String       @unique
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  customerType    CustomerType
-  billingEmail    String
-  firstName       String?
-  lastName        String?
-  companyName     String?
-  taxId           String?
-  vatId           String?
-  countryCode     String
-  street          String
-  buildingNumber  String
-  apartmentNumber String?
-  postalCode      String
-  city            String
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-}
-
-model Subscription {
-  id                   String             @id @default(cuid())
-  organizationId       String             @unique
-  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  plan                 PlanCode           @default(FREE)
-  status               SubscriptionStatus @default(ACTIVE)
-  currentPeriodEndsAt  DateTime?
-  monthlyDocumentLimit Int                @default(10)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-}
-
-model Payment {
-  id              String          @id @default(cuid())
-  organizationId  String
-  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  salesDocuments  SalesDocument[]
-  plan            PlanCode
-  status          PaymentStatus   @default(PENDING)
-  provider        String          @default("PAYU")
-  providerOrderId String?         @unique
-  extOrderId      String          @unique
-  transferReference String?       @unique
-  currency        String          @default("PLN")
-  netAmount       Int
-  vatAmount       Int
-  grossAmount     Int
-  vatRate         Int
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  @@index([organizationId])
-}
-
-model SalesDocument {
-  id             String            @id @default(cuid())
-  organizationId String
-  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  paymentId      String?
-  payment        Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
-  type           SalesDocumentType
-  number         String?
-  fileUrl        String?
-  sentAt         DateTime?
-  createdAt      DateTime          @default(now())
-
-  @@index([organizationId])
-  @@index([paymentId])
-}
-
-model Template {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name           String
-  description    String?
-  content        String
-  variablesJson  String       @default("[]")
-  isExample      Boolean      @default(false)
-  headerContent  String?
-  footerContent  String?
-  pageNumbers    Boolean      @default(false)
-  documents      Document[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@index([organizationId])
-}
-
-model Document {
-  id              String         @id @default(cuid())
-  organizationId  String
-  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  templateId      String?
-  template        Template?      @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  name            String
-  status          DocumentStatus @default(GENERATED)
-  payloadJson     String
-  renderedContent String
-  renderedHeader  String?
-  renderedFooter  String?
-  pageNumbers     Boolean        @default(false)
-  createdAt       DateTime       @default(now())
-
-  @@index([organizationId])
-  @@index([templateId])
 }

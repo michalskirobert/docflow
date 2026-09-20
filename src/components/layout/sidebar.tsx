@@ -9,12 +9,16 @@ import {
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+
+import { version } from "../../../package.json";
+
 const links = [
   { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
   { href: "/templates", key: "templates", icon: Layers },
   { href: "/documents", key: "documents", icon: FileText },
   { href: "/settings", key: "settings", icon: Settings },
 ] as const;
+
 export function Sidebar() {
   const t = useTranslations("common"),
     pathname = usePathname(),
@@ -46,7 +50,7 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="sidebar-bottom">
-        <span className="version">DocFlow v1.1.0</span>
+        <span className="version">DocFlow v{version}</span>
         <button className="logout" onClick={logout}>
           <LogOut size={18} />
           <span>{t("logout")}</span>

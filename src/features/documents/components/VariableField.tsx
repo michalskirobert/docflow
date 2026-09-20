@@ -408,15 +408,9 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   const t = useTranslations("documents");
   const label = variable.label || variable.name;
 
-  /*
-   * Compatibility with templates created with the newer variable types.
-   * The shared TemplateVariable union should also contain:
-   * "date" | "datetime" | "time".
-   */
   const variableType = String(variable.type) as VariableType;
 
   const file = useRef<HTMLInputElement>(null);
-
   const nativeDateTimePicker = useRef<HTMLInputElement>(null);
 
   const [uploadError, setUploadError] = useState("");
@@ -503,11 +497,8 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     const type = variableType as DateTimeVariableType;
 
     const format = getDateTimeFormat(variable, type);
-
     const formattedValue = formatCanonicalValue(value, format, type);
-
     const nativeType = type === "datetime" ? "datetime-local" : type;
-
     const Icon = type === "time" ? Clock3 : CalendarDays;
 
     const pickerLabel =
@@ -517,24 +508,18 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           ? t("chooseDateTime")
           : t("chooseTime");
 
-    const openPicker = () => {
-      const picker = nativeDateTimePicker.current;
-
-      if (!picker) {
-        return;
-      }
-
-      if (typeof picker.showPicker === "function") {
-        picker.showPicker();
-        return;
-      }
-
-      picker.click();
-    };
-
     return (
-      <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
-        <Label />
+      <div className={`field ${error ? "field-error" : ""}`}>
+        <label className="field-label" htmlFor={id}>
+          {label}
+
+          {variable.required && (
+            <span className="required" aria-hidden="true">
+              {" "}
+              *
+            </span>
+          )}
+        </label>
 
         <div className="native-date-control">
           <IMaskInput
@@ -563,28 +548,23 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             }}
           />
 
-          <button
-            type="button"
-            className="date-picker-trigger"
-            aria-label={pickerLabel}
-            onClick={openPicker}
-          >
-            <Icon size={16} aria-hidden="true" />
-          </button>
+          <span className="date-picker-trigger">
+            <Icon size={18} aria-hidden="true" />
+
+            <input
+              ref={nativeDateTimePicker}
+              type={nativeType}
+              value={value}
+              tabIndex={-1}
+              aria-label={pickerLabel}
+              className="native-date-picker"
+              onChange={(e) => onChange(e.target.value)}
+            />
+          </span>
         </div>
 
-        <input
-          ref={nativeDateTimePicker}
-          type={nativeType}
-          value={value}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="native-date-picker"
-          onChange={(e) => onChange(e.target.value)}
-        />
-
         {error && <small className="form-error">{error}</small>}
-      </label>
+      </div>
     );
   }
 

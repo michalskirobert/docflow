@@ -151,6 +151,7 @@
     "duplicateSuffix": "salinan"
   },
   "documents": {
+    "close": "Zamknij",
     "title": "Dokumen",
     "newDocument": "Dokumen baru",
     "editDocument": "Edit dokumen",
