@@ -20,7 +20,6 @@ enum CustomerType {
 
 enum PlanCode {
   FREE
-  MONTHLY
   YEARLY
 }
 
@@ -145,6 +144,7 @@ model Payment {
   provider        String          @default("PAYU")
   providerOrderId String?         @unique
   extOrderId      String          @unique
+  transferReference String?       @unique
   currency        String          @default("PLN")
   netAmount       Int
   vatAmount       Int

@@ -1,6 +1,6 @@
 {
   "name": "docflow",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "private": true,
   "packageManager": "yarn@4.6.0",
   "engines": {
@@ -26,7 +26,9 @@
     "lucide-react": "^0.544.0",
     "next": "16.3.3",
     "next-intl": "^4.3.9",
+    "nodemailer": "^7.0.6",
     "prettier": "^3.9.8",
+    "puppeteer": "^24.22.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
+    "@types/nodemailer": "^7.0.1",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "eslint": "^9.35.0",

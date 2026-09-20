@@ -2,7 +2,7 @@ export type AppLocale = "pl" | "en" | "id";
 
 export type CustomerType = "INDIVIDUAL" | "BUSINESS";
 
-export type PlanCode = "FREE" | "MONTHLY" | "YEARLY";
+export type PlanCode = "FREE" | "YEARLY";
 
 export type SessionUser = {
   id: string;
@@ -36,4 +36,7 @@ export type RegisterResponse = {
   verificationRequired: boolean;
   paymentRequired: boolean;
   redirectUri?: string;
+  paymentPending?: boolean;
+  paymentMethod?: "PAYU" | "BANK_TRANSFER";
+  transferReference?: string;
 };

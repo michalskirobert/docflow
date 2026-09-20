@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { extractVariables } from "@/server/documents/template";
+import { sanitizeTemplateHtml } from "@/server/documents/sanitize-template";
 const schema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
@@ -14,7 +15,8 @@ export async function PUT(
 ) {
   const s = await requireSession();
   const { id } = await params;
-  const p = schema.parse(await req.json());
+  const parsed = schema.parse(await req.json());
+  const p = { ...parsed, content: sanitizeTemplateHtml(parsed.content) };
   const exists = await prisma.template.findFirst({
     where: { id, organizationId: s.organizationId },
   });

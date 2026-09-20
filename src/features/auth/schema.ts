@@ -33,7 +33,8 @@ export const registerSchema = z
     apartmentNumber: z.string().trim().max(20).optional(),
     postalCode: required(2).max(20),
     city: required(2).max(100),
-    plan: z.enum(["FREE", "MONTHLY", "YEARLY"]),
+    plan: z.enum(["FREE", "YEARLY"]),
+    paymentMethod: z.enum(["PAYU", "BANK_TRANSFER"]),
     locale: z.enum(["pl", "en", "id"]),
     captchaToken: z.string().min(1, "captchaUnavailable"),
     captchaAnswer: z

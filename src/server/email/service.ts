@@ -1,35 +1,28 @@
+import nodemailer from "nodemailer";
+
 type EmailInput = { to: string; subject: string; html: string };
+
 export async function sendEmail(input: EmailInput) {
   const provider = process.env.EMAIL_PROVIDER ?? "console";
   if (provider === "console") {
-    console.info("[email:console]", {
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-    });
+    console.info("[email:console]", { to: input.to, subject: input.subject });
     return;
   }
-  if (provider !== "resend")
-    throw new Error(`Unsupported EMAIL_PROVIDER: ${provider}`);
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
-  if (!key || !from)
-    throw new Error("RESEND_API_KEY and EMAIL_FROM are required for Resend");
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-    }),
+  if (provider !== "smtp") throw new Error(`Unsupported EMAIL_PROVIDER: ${provider}`);
+
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT ?? "587");
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASSWORD;
+  const fromEmail = process.env.MAIL_FROM_EMAIL ?? user;
+  const fromName = process.env.MAIL_FROM_NAME ?? "DocFlow";
+  if (!host || !user || !pass || !fromEmail) throw new Error("SMTP configuration is incomplete");
+
+  const transport = nodemailer.createTransport({
+    host,
+    port,
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user, pass },
   });
-  if (!response.ok)
-    throw new Error(
-      `Email provider returned ${response.status}: ${await response.text()}`,
-    );
+  await transport.sendMail({ from: `"${fromName}" <${fromEmail}>`, to: input.to, subject: input.subject, html: input.html });
 }

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -18,7 +18,7 @@ import { registerSchema, type RegisterFormValues } from "./schema";
 import { useCaptcha, useRegister } from "./service";
 
 type PublicPlan = {
-  code: "FREE" | "MONTHLY" | "YEARLY";
+  code: "FREE" | "YEARLY";
   documentLimit: number;
   net: number;
   vat: number;
@@ -67,6 +67,7 @@ export default function RegisterForm() {
       postalCode: "",
       city: "",
       plan: "FREE",
+      paymentMethod: "PAYU",
       locale,
       captchaToken: "",
       captchaAnswer: "",
@@ -82,6 +83,12 @@ export default function RegisterForm() {
     control,
     name: "email",
   });
+  const selectedPlan = useWatch({ control, name: "plan" });
+  const paymentMethod = useWatch({ control, name: "paymentMethod" });
+  const taxId = useWatch({ control, name: "taxId" });
+  const [companyLoading,setCompanyLoading]=useState(false);
+  const [companyMessage,setCompanyMessage]=useState("");
+  const lookupCompany=async()=>{const nip=(taxId??"").replace(/\D/g,"");if(nip.length!==10){setCompanyMessage(t("invalidNipLookup"));return}setCompanyLoading(true);setCompanyMessage("");try{const {data}=await api.get(`/company-data?nip=${nip}`);setValue("companyName",data.companyName??"");setValue("taxId",data.taxId??nip);setValue("countryCode","PL");if(data.street)setValue("street",data.street);if(data.buildingNumber)setValue("buildingNumber",data.buildingNumber);if(data.postalCode)setValue("postalCode",data.postalCode);if(data.city)setValue("city",data.city);setCompanyMessage(t("companyLoaded"))}catch{setCompanyMessage(t("companyNotFound"))}finally{setCompanyLoading(false)}};
 
   const plans = useQuery({
     queryKey: ["plans", customerType],
@@ -181,7 +188,6 @@ export default function RegisterForm() {
           message: "captchaUnavailable",
         });
 
-        notify(t("validation.captchaUnavailable"), "error");
 
         await refreshCaptcha();
 
@@ -209,9 +215,7 @@ export default function RegisterForm() {
         return;
       }
 
-      router.push(
-        `/registration-success?email=${encodeURIComponent(result.email)}`,
-      );
+      router.push(`/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`);
     } catch (error) {
       const response = axios.isAxiosError<
         ApiError & {
@@ -229,7 +233,6 @@ export default function RegisterForm() {
           message: "emailExists",
         });
 
-        notify(t("validation.emailExists"), "error");
 
         return;
       }
@@ -248,7 +251,6 @@ export default function RegisterForm() {
           message: "invalidCaptcha",
         });
 
-        notify(t("validation.invalidCaptcha"), "error");
 
         return;
       }
@@ -259,7 +261,6 @@ export default function RegisterForm() {
           message: "planUnavailable",
         });
 
-        notify(t("validation.planUnavailable"), "error");
 
         return;
       }
@@ -269,7 +270,6 @@ export default function RegisterForm() {
         message: "registrationFailed",
       });
 
-      notify(t("registrationFailed"), "error");
     }
   });
 
@@ -362,20 +362,7 @@ export default function RegisterForm() {
             error={fieldError(errors.companyName)}
           />
 
-          <div className="form-grid">
-            <FormField
-              label={t("taxId")}
-              requiredMark
-              {...register("taxId")}
-              error={fieldError(errors.taxId)}
-            />
-
-            <FormField
-              label={t("vatId")}
-              {...register("vatId")}
-              error={fieldError(errors.vatId)}
-            />
-          </div>
+          <div className="nip-row"><FormField label={t("taxId")} requiredMark {...register("taxId")} error={fieldError(errors.taxId)} /><button type="button" className="btn secondary" onClick={lookupCompany} disabled={companyLoading}>{companyLoading?t("companyLoading"):t("fetchCompany")}</button></div>{companyMessage&&<p className="hint">{companyMessage}</p>}<FormField label={t("vatId")} {...register("vatId")} error={fieldError(errors.vatId)} />
         </>
       )}
 
@@ -444,16 +431,17 @@ export default function RegisterForm() {
         {plans.data?.map((plan) => (
           <label
             key={plan.code}
-            className={`plan-card ${!plan.available ? "disabled" : ""}`}
+            className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
           >
             <input
+              className="plan-radio"
               type="radio"
               value={plan.code}
               disabled={!plan.available}
               {...register("plan")}
             />
 
-            <strong>{plan.code}</strong>
+            <div className="plan-visual" aria-hidden="true"><span>{plan.code === "FREE" ? "✦" : "◆"}</span></div><div className="plan-check">✓</div><strong className="plan-name">{plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}</strong><small className="plan-copy">{plan.code === "FREE" ? t("freeLicenseCopy") : t("annualLicenseCopy")}</small>
 
             <span>
               {(plan.displayAmount / 100).toLocaleString(locale, {
@@ -481,6 +469,8 @@ export default function RegisterForm() {
           {translateValidation(String(errors.plan.message))}
         </p>
       )}
+
+      {selectedPlan === "YEARLY" && <><h2>{t("paymentMethod")}</h2><div className="payment-methods"><label className={`payment-option ${paymentMethod==="PAYU"?"selected":""}`}><input type="radio" value="PAYU" {...register("paymentMethod")}/><div><strong>{t("payu")}</strong><small>{t("payuCopy")}</small></div></label><label className={`payment-option ${paymentMethod==="BANK_TRANSFER"?"selected":""}`}><input type="radio" value="BANK_TRANSFER" {...register("paymentMethod")}/><div><strong>{t("bankTransfer")}</strong><small>{t("bankTransferCopy")}</small></div></label></div><p className="hint">{t("freeWhilePaymentPending")}</p></>}
 
       <div
         className={`captcha-box${errors.captchaAnswer ? " captcha-error" : ""}`}
