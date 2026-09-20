@@ -1,95 +1,68 @@
 "use client";
-import { MailCheck } from "lucide-react";
+
+import { Suspense } from "react";
+import { LoaderCircle, MailCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import LanguageSwitcher from "@/features/language/language-switcher";
-import { useLocale } from "next-intl";
-const copy = {
-  pl: {
-    step: "OSTATNI KROK",
-    title: "Sprawdź swoją skrzynkę",
-    sent: "Wysłaliśmy link weryfikacyjny na",
-    info: "Link wygasa ze względów bezpieczeństwa. Jeśli go nie widzisz, sprawdź folder spam.",
-    back: "Wróć do logowania",
-    pay: "Płatność podczas weryfikacji",
-    payInfo:
-      "Do czasu potwierdzenia przelewu konto działa na darmowej licencji (10 dokumentów miesięcznie).",
-    ref: "Tytuł przelewu",
-    refHelp:
-      "Wpisz dokładnie ten identyfikator w tytule przelewu. Dzięki niemu przypiszemy wpłatę do Twojego konta.",
-    recipient: "Odbiorca",
-    account: "Numer rachunku",
-  },
-  en: {
-    step: "ONE LAST STEP",
-    title: "Check your inbox",
-    sent: "We sent a verification link to",
-    info: "The link expires for security reasons. If you cannot find it, check spam.",
-    back: "Back to sign in",
-    pay: "Payment under verification",
-    payInfo:
-      "Until the bank transfer is confirmed, your account uses the Free license (10 documents per month).",
-    ref: "Transfer title",
-    refHelp:
-      "Use this exact identifier as the bank transfer title so we can match the payment to your account.",
-    recipient: "Recipient",
-    account: "Bank account",
-  },
-  id: {
-    step: "LANGKAH TERAKHIR",
-    title: "Periksa kotak masuk",
-    sent: "Kami mengirim tautan verifikasi ke",
-    info: "Tautan akan kedaluwarsa demi keamanan. Jika tidak terlihat, periksa spam.",
-    back: "Kembali ke login",
-    pay: "Pembayaran sedang diverifikasi",
-    payInfo:
-      "Sampai transfer dikonfirmasi, akun menggunakan lisensi Gratis (10 dokumen per bulan).",
-    ref: "Judul transfer",
-    refHelp:
-      "Gunakan identitas ini persis sebagai judul transfer agar pembayaran dapat dicocokkan dengan akun Anda.",
-    recipient: "Penerima",
-    account: "Rekening bank",
-  },
-};
-export default function RegistrationSuccessPage() {
+import { copy } from "./utils";
+
+function RegistrationSuccessContent() {
   const params = useSearchParams();
+
   const email = params.get("email") ?? "your email";
   const bank = params.get("payment") === "bank";
   const reference = params.get("reference") ?? "";
+
   const locale = useLocale() as keyof typeof copy;
   const c = copy[locale] ?? copy.en;
+
   const recipient = process.env.NEXT_PUBLIC_BANK_TRANSFER_RECIPIENT;
+
   const account = process.env.NEXT_PUBLIC_BANK_TRANSFER_IBAN;
+
   return (
     <main className="auth-page modern-auth">
       <section className="auth-card status-card">
         <div className="auth-language">
           <LanguageSwitcher />
         </div>
+
         <div className="status-icon ok">
           <MailCheck />
         </div>
+
         <span className="eyebrow">{c.step}</span>
+
         <h1>{c.title}</h1>
+
         <p>
           {c.sent} <strong>{email}</strong>.
         </p>
+
         {bank && (
           <div className="payment-review bank-instructions">
             <strong>{c.pay}</strong>
+
             <div>{c.payInfo}</div>
+
             {reference && (
               <div className="transfer-reference">
                 <span>{c.ref}</span>
+
                 <code>{reference}</code>
+
                 <small>{c.refHelp}</small>
               </div>
             )}
+
             {recipient && (
               <div>
                 <b>{c.recipient}:</b> {recipient}
               </div>
             )}
+
             {account && (
               <div>
                 <b>{c.account}:</b> {account}
@@ -97,11 +70,39 @@ export default function RegistrationSuccessPage() {
             )}
           </div>
         )}
+
         <div className="info-box">{c.info}</div>
+
         <Link className="btn full" href="/login">
           {c.back}
         </Link>
       </section>
     </main>
+  );
+}
+
+function RegistrationSuccessFallback() {
+  return (
+    <main className="auth-page modern-auth">
+      <section className="auth-card status-card">
+        <div className="auth-language">
+          <LanguageSwitcher />
+        </div>
+
+        <div className="status-icon loading">
+          <LoaderCircle />
+        </div>
+
+        <p>Loading…</p>
+      </section>
+    </main>
+  );
+}
+
+export default function RegistrationSuccessPage() {
+  return (
+    <Suspense fallback={<RegistrationSuccessFallback />}>
+      <RegistrationSuccessContent />
+    </Suspense>
   );
 }
