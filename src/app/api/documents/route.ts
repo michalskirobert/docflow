@@ -49,6 +49,12 @@ export async function POST(req: Request) {
     const rendered = await renderDocument(
       renderTemplate(t.content, p.data, variableDefinitions),
     );
+    const renderedHeader = t.headerContent
+      ? renderTemplate(t.headerContent, p.data, variableDefinitions)
+      : null;
+    const renderedFooter = t.footerContent
+      ? renderTemplate(t.footerContent, p.data, variableDefinitions)
+      : null;
     const doc = await prisma.document.create({
       data: {
         organizationId: s.organizationId,
@@ -56,6 +62,9 @@ export async function POST(req: Request) {
         name: p.name,
         payloadJson: JSON.stringify(p.data),
         renderedContent: rendered,
+        renderedHeader,
+        renderedFooter,
+        pageNumbers: t.pageNumbers,
       },
     });
     return NextResponse.json(doc, { status: 201 });

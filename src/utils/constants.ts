@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.6.0";
+export const APP_VERSION = "1.7.1";
 export const FREE_MONTHLY_DOCUMENT_LIMIT = 10;
 export const ANNUAL_MONTHLY_DOCUMENT_LIMIT = 100;
 export const A4_WIDTH_PX = 794;

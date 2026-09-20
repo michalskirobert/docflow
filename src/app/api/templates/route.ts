@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireSession } from "@/server/auth/require-session";
+import { getSession } from "@/server/auth/session";
 import { extractVariables } from "@/server/documents/template";
 import { sanitizeTemplateHtml } from "@/server/documents/sanitize-template";
 const schema = z.object({
-  name: z.string().min(2),
-  description: z.string().optional(),
+  name: z.string().min(2).max(250),
+  description: z.string().max(400).optional(),
   content: z.string().min(1),
+  headerContent: z.string().optional(),
+  footerContent: z.string().optional(),
+  pageNumbers: z.boolean().optional(),
   variables: z
     .array(
       z.object({
@@ -21,13 +24,17 @@ const schema = z.object({
         options: z.array(z.string()).optional(),
         imageWidth: z.number().optional(),
         imageHeight: z.number().optional(),
+        imageAlign: z.enum(["inline", "left", "center", "right"]).optional(),
+        imageFit: z.enum(["contain", "cover", "fill"]).optional(),
       }),
     )
     .optional(),
 });
 export async function GET() {
   try {
-    const s = await requireSession();
+    const s = await getSession();
+    if (!s)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     return NextResponse.json(
       await prisma.template.findMany({
         where: { organizationId: s.organizationId },
@@ -40,9 +47,16 @@ export async function GET() {
 }
 export async function POST(req: Request) {
   try {
-    const s = await requireSession();
+    const s = await getSession();
+    if (!s)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     const parsed = schema.parse(await req.json());
-    const p = { ...parsed, content: sanitizeTemplateHtml(parsed.content) };
+    const p = {
+      ...parsed,
+      content: sanitizeTemplateHtml(parsed.content),
+      headerContent: sanitizeTemplateHtml(parsed.headerContent ?? ""),
+      footerContent: sanitizeTemplateHtml(parsed.footerContent ?? ""),
+    };
     const variableDefinitions =
       p.variables ??
       extractVariables(p.content).map((name) => ({
@@ -61,11 +75,15 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (e) {
+    if (e instanceof z.ZodError)
+      return NextResponse.json(
+        { message: "Invalid template" },
+        { status: 400 },
+      );
+    console.error("[POST template]", e);
     return NextResponse.json(
-      {
-        message: e instanceof z.ZodError ? "Invalid template" : "Unauthorized",
-      },
-      { status: e instanceof z.ZodError ? 400 : 401 },
+      { message: "Could not create template" },
+      { status: 500 },
     );
   }
 }

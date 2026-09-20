@@ -5,6 +5,9 @@ export type TemplateInput = {
   name: string;
   description?: string;
   content: string;
+  headerContent?: string;
+  footerContent?: string;
+  pageNumbers?: boolean;
   variables?: TemplateVariable[];
 };
 export const useTemplatesService = () =>

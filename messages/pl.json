@@ -237,6 +237,19 @@
     "imagePlaceholder": "Miejsce na obraz",
     "requiredField": "Pole wymagane",
     "requiredMessage": "Komunikat wymagania",
-    "requiredDefault": "To pole jest wymagane."
+    "requiredDefault": "To pole jest wymagane.",
+    "back": "Wróć",
+    "variables": "Zmienne",
+    "removeVariable": "Usuń zmienną",
+    "header": "Nagłówek",
+    "footer": "Stopka",
+    "pageNumbers": "Numeracja stron",
+    "headerPlaceholder": "Kliknij, aby edytować nagłówek",
+    "footerPlaceholder": "Kliknij, aby edytować stopkę",
+    "option": "Opcja",
+    "addOption": "Dodaj opcję",
+    "imageFit": "Dopasowanie obrazu",
+    "contain": "Zmieść",
+    "cover": "Wypełnij"
   }
 }

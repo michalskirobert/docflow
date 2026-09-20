@@ -1,135 +1,143 @@
 "use client";
+
 import {
-  ChangeEvent,
-  DragEvent,
-  MouseEvent as ReactMouseEvent,
+  type ChangeEvent,
+  type DragEvent,
+  type MouseEvent as ReactMouseEvent,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
-import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  ImagePlus,
-  Italic,
-  Link2,
-  List,
-  ListOrdered,
-  Minus,
-  Plus,
-  Redo2,
-  Table2,
-  Trash2,
-  Underline,
-  Undo2,
-  Upload,
-  Variable,
-  X,
-} from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
-import { VariableModal } from "./VariableModal";
-import { upsertVariable, variableHtml } from "./utils";
+import { useCreateTemplateService, useUpdateTemplateService } from "../service";
 import {
   A4_WIDTH_PX,
-  FONT_SIZES_PX,
   MAX_TEMPLATE_IMAGE_BYTES,
   SAFE_TEMPLATE_IMAGE_TYPES,
 } from "@/utils/constants";
-import { useCreateTemplateService, useUpdateTemplateService } from "../service";
+import { VariableModal } from "./VariableModal";
+import { EditorToolbar, type ToolbarState } from "./EditorToolbar";
+import { VariableShelf } from "./VariableShelf";
+import { ImageContextBar } from "./ImageContextBar";
+import { DocumentOptions } from "./DocumentOptions";
+import { ZoomBar } from "./ZoomBar";
+import { LinkDialog } from "./LinkDialog";
+import { ImageDialog } from "./ImageDialog";
+import {
+  getImageAlign,
+  getImageFit,
+  imageStyle,
+  safeHttpUrl,
+  safeRasterImageUrl,
+  type ImageAlign,
+  type ImageFit,
+  upsertVariable,
+  variableHtml,
+} from "./utils";
 
-const sizes = FONT_SIZES_PX.map(String);
-const MAX_IMAGE_BYTES = MAX_TEMPLATE_IMAGE_BYTES;
-const SAFE_IMAGE_TYPES: readonly string[] = SAFE_TEMPLATE_IMAGE_TYPES;
-const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
+const MAGIC: Record<string, (bytes: Uint8Array) => boolean> = {
   "image/png": (b) =>
     b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
   "image/jpeg": (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
   "image/gif": (b) =>
-    String.fromCharCode(...b.slice(0, 6)) === "GIF87a" ||
-    String.fromCharCode(...b.slice(0, 6)) === "GIF89a",
+    ["GIF87a", "GIF89a"].includes(String.fromCharCode(...b.slice(0, 6))),
   "image/webp": (b) =>
     String.fromCharCode(...b.slice(0, 4)) === "RIFF" &&
     String.fromCharCode(...b.slice(8, 12)) === "WEBP",
 };
-function safeHttpUrl(raw: string) {
-  try {
-    const u = new URL(raw);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-function safeRasterImageUrl(raw: string) {
-  try {
-    const u = new URL(raw);
-    return (
-      (u.protocol === "http:" || u.protocol === "https:") &&
-      /\.(png|jpe?g|webp|gif)$/i.test(u.pathname)
-    );
-  } catch {
-    return false;
-  }
-}
 
-export function TemplateEditor({
-  template,
-  onClose,
-}: {
-  template?: Template;
-  onClose: () => void;
-}) {
+type Props = { template?: Template; onClose: () => void };
+export function TemplateEditor({ template, onClose }: Props) {
   const t = useTranslations("templateEditor");
-  const editor = useRef<HTMLDivElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const savedRange = useRef<Range | null>(null);
+  const editor = useRef<HTMLDivElement>(null),
+    headerEditor = useRef<HTMLDivElement>(null),
+    footerEditor = useRef<HTMLDivElement>(null),
+    fileRef = useRef<HTMLInputElement>(null),
+    savedRange = useRef<Range | null>(null);
+  const resizing = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    mode: "width" | "height" | "both";
+  } | null>(null);
+  const activeEditor = useRef<HTMLDivElement | null>(null),
+    draggedImage = useRef<HTMLImageElement | null>(null);
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
-  const [variableOpen, setVariableOpen] = useState(false);
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
-  const [imageOpen, setImageOpen] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageError, setImageError] = useState("");
-  const [dragging, setDragging] = useState(false);
-  const [imageWidth, setImageWidth] = useState("240");
-  const [imageAlign, setImageAlign] = useState("center");
-  const [validatingImage, setValidatingImage] = useState(false);
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkText, setLinkText] = useState("");
-  const [linkError, setLinkError] = useState("");
-  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(
-    null,
+  const [variableOpen, setVariableOpen] = useState(false);
+  const [editingVariable, setEditingVariable] = useState<
+    TemplateVariable | undefined
+  >();
+  const [toolbarState, setToolbarState] = useState<ToolbarState>({
+    bold: false,
+    italic: false,
+    underline: false,
+    justifyLeft: false,
+    justifyCenter: false,
+    justifyRight: false,
+    justifyFull: false,
+    unorderedList: false,
+    orderedList: false,
+  });
+  const [headerEnabled, setHeaderEnabled] = useState(
+    Boolean(template?.headerContent),
   );
-  const [zoom, setZoom] = useState(100);
-  const [resizeBox, setResizeBox] = useState<DOMRect | null>(null);
-  const resizing = useRef<{ x: number; width: number } | null>(null);
-  const create = useCreateTemplateService();
-  const update = useUpdateTemplateService(template?.id ?? "");
+  const [footerEnabled, setFooterEnabled] = useState(
+    Boolean(template?.footerContent),
+  );
+  const [pageNumbers, setPageNumbers] = useState(
+    Boolean(template?.pageNumbers),
+  );
+  const [imageOpen, setImageOpen] = useState(false),
+    [imageUrl, setImageUrl] = useState(""),
+    [imageError, setImageError] = useState(""),
+    [dragging, setDragging] = useState(false),
+    [validatingImage, setValidatingImage] = useState(false);
+  const [imageWidth, setImageWidth] = useState("240"),
+    [imageHeight, setImageHeight] = useState(""),
+    [imageFit, setImageFit] = useState<ImageFit>("contain"),
+    [imageAlign, setImageAlign] = useState<ImageAlign>("center");
+  const [linkOpen, setLinkOpen] = useState(false),
+    [linkUrl, setLinkUrl] = useState(""),
+    [linkText, setLinkText] = useState(""),
+    [linkError, setLinkError] = useState("");
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(
+      null,
+    ),
+    [resizeBox, setResizeBox] = useState<DOMRect | null>(null),
+    [zoom, setZoom] = useState(100);
+  const create = useCreateTemplateService(),
+    update = useUpdateTemplateService(template?.id ?? "");
+
   useEffect(() => {
     if (editor.current)
       editor.current.innerHTML =
         template?.content ??
         `<h1>${t("documentTitle")}</h1><p>${t("startWriting")}</p>`;
+    if (headerEditor.current)
+      headerEditor.current.innerHTML = template?.headerContent ?? "";
+    if (footerEditor.current)
+      footerEditor.current.innerHTML = template?.footerContent ?? "";
   }, [template, t]);
   useEffect(() => {
-    const fit = () => {
-      if (window.matchMedia("(max-width: 760px)").matches)
-        setZoom(
-          Math.max(
-            25,
-            Math.floor((((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25) *
+    const fit = () =>
+      setZoom(
+        window.matchMedia("(max-width: 760px)").matches
+          ? Math.max(
               25,
-          ),
-        );
-      else setZoom(100);
-    };
+              Math.floor(
+                (((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25,
+              ) * 25,
+            )
+          : 100,
+      );
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
@@ -146,18 +154,32 @@ export function TemplateEditor({
     };
   }, [selectedImage, zoom]);
   useEffect(() => {
-    const move = (e: MouseEvent) => {
+    const move = (event: MouseEvent) => {
       if (!resizing.current || !selectedImage) return;
       const scale = zoom / 100;
-      const next = Math.max(
+      const w = Math.max(
         32,
         Math.min(
           1200,
-          resizing.current.width + (e.clientX - resizing.current.x) / scale,
+          resizing.current.width + (event.clientX - resizing.current.x) / scale,
         ),
       );
-      selectedImage.style.width = `${Math.round(next)}px`;
-      setImageWidth(String(Math.round(next)));
+      const h = Math.max(
+        32,
+        Math.min(
+          1600,
+          resizing.current.height +
+            (event.clientY - resizing.current.y) / scale,
+        ),
+      );
+      if (resizing.current.mode !== "height") {
+        selectedImage.style.width = `${Math.round(w)}px`;
+        setImageWidth(String(Math.round(w)));
+      }
+      if (resizing.current.mode !== "width") {
+        selectedImage.style.height = `${Math.round(h)}px`;
+        setImageHeight(String(Math.round(h)));
+      }
       setResizeBox(selectedImage.getBoundingClientRect());
     };
     const up = () => {
@@ -170,17 +192,39 @@ export function TemplateEditor({
       window.removeEventListener("mouseup", up);
     };
   }, [selectedImage, zoom]);
+
+  const syncToolbarState = () => {
+    try {
+      setToolbarState({
+        bold: document.queryCommandState("bold"),
+        italic: document.queryCommandState("italic"),
+        underline: document.queryCommandState("underline"),
+        justifyLeft: document.queryCommandState("justifyLeft"),
+        justifyCenter: document.queryCommandState("justifyCenter"),
+        justifyRight: document.queryCommandState("justifyRight"),
+        justifyFull: document.queryCommandState("justifyFull"),
+        unorderedList: document.queryCommandState("insertUnorderedList"),
+        orderedList: document.queryCommandState("insertOrderedList"),
+      });
+    } catch {}
+  };
   const rememberSelection = () => {
     const selection = window.getSelection();
-    if (
-      selection?.rangeCount &&
-      editor.current?.contains(selection.anchorNode)
-    ) {
+    if (!selection?.rangeCount) return;
+    const node = selection.anchorNode;
+    const region = [
+      editor.current,
+      headerEditor.current,
+      footerEditor.current,
+    ].find((el) => el?.contains(node));
+    if (region) {
+      activeEditor.current = region;
       savedRange.current = selection.getRangeAt(0).cloneRange();
+      syncToolbarState();
     }
   };
   const restoreSelection = () => {
-    editor.current?.focus();
+    (activeEditor.current ?? editor.current)?.focus();
     const selection = window.getSelection();
     if (savedRange.current && selection) {
       selection.removeAllRanges();
@@ -191,30 +235,85 @@ export function TemplateEditor({
     restoreSelection();
     document.execCommand(command, false, value);
     rememberSelection();
+    syncToolbarState();
   };
-  const insertVariable = (v: TemplateVariable) => {
+  const insertVariable = (variable: TemplateVariable) => {
     restoreSelection();
-    document.execCommand("insertHTML", false, variableHtml(v));
-    setVariables((list) => upsertVariable(list, v));
+    document.execCommand("insertHTML", false, variableHtml(variable));
+    setVariables((current) => upsertVariable(current, variable));
     setVariableOpen(false);
     rememberSelection();
   };
-  const imageStyle = (width: string, align: string) => {
-    const w = Math.max(32, Math.min(1200, Number(width) || 240));
-    if (align === "left")
-      return `width:${w}px;max-width:100%;height:auto;float:left;margin:0 16px 10px 0`;
-    if (align === "right")
-      return `width:${w}px;max-width:100%;height:auto;float:right;margin:0 0 10px 16px`;
-    if (align === "inline")
-      return `width:${w}px;max-width:100%;height:auto;display:inline-block;vertical-align:middle;margin:4px 8px`;
-    return `width:${w}px;max-width:100%;height:auto;display:block;margin:8px auto`;
+  const saveVariableDefinition = (variable: TemplateVariable) => {
+    if (!editingVariable) {
+      insertVariable(variable);
+      return;
+    }
+    const oldName = editingVariable.name;
+    setVariables((current) =>
+      upsertVariable(
+        current.filter((v) => v.name !== oldName),
+        variable,
+      ),
+    );
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      (region) => {
+        if (!region) return;
+        region
+          .querySelectorAll<HTMLImageElement>(
+            `img[data-variable-name="${CSS.escape(oldName)}"]`,
+          )
+          .forEach((img) => {
+            if (variable.type === "image") {
+              img.dataset.imageFit = variable.imageFit ?? "contain";
+              img.setAttribute(
+                "style",
+                imageStyle(
+                  variable.imageWidth ?? 180,
+                  variable.imageAlign ?? "center",
+                  variable.imageHeight,
+                  variable.imageFit ?? "contain",
+                ),
+              );
+            }
+          });
+        if (oldName === variable.name) return;
+        region.innerHTML = region.innerHTML
+          .split(`{{${oldName}}}`)
+          .join(`{{${variable.name}}}`);
+        region
+          .querySelectorAll<HTMLImageElement>(
+            `img[data-variable-name="${CSS.escape(oldName)}"]`,
+          )
+          .forEach((img) => {
+            img.dataset.variableName = variable.name;
+            img.alt = `{{${variable.name}}}`;
+            img.title = `{{${variable.name}}}`;
+          });
+        region
+          .querySelectorAll<HTMLElement>(
+            `[data-variable-label="${CSS.escape(oldName)}"]`,
+          )
+          .forEach((label) => {
+            label.dataset.variableLabel = variable.name;
+            label.textContent = `{{${variable.name}}}`;
+          });
+      },
+    );
+    setEditingVariable(undefined);
+    setVariableOpen(false);
   };
   const insertImage = (src: string) => {
     try {
       restoreSelection();
-      const html = `<img src="${src.replace(/"/g, "&quot;")}" alt="" style="${imageStyle(imageWidth, imageAlign)}" />&nbsp;`;
-      const ok = document.execCommand("insertHTML", false, html);
-      if (!ok) throw new Error("insertHTML failed");
+      if (
+        !document.execCommand(
+          "insertHTML",
+          false,
+          `<img draggable="true" src="${src.replace(/"/g, "&quot;")}" alt="" data-image-fit="${imageFit}" style="${imageStyle(imageWidth, imageAlign, imageHeight || undefined, imageFit)}" />&nbsp;`,
+        )
+      )
+        throw new Error();
       rememberSelection();
       setImageOpen(false);
       setImageUrl("");
@@ -226,11 +325,11 @@ export function TemplateEditor({
   const validateFile = async (file: File) => {
     try {
       setImageError("");
-      if (!SAFE_IMAGE_TYPES.some((type) => type === file.type)) {
+      if (!SAFE_TEMPLATE_IMAGE_TYPES.some((type) => type === file.type)) {
         setImageError(t("imageInvalidType"));
         return;
       }
-      if (file.size > MAX_IMAGE_BYTES) {
+      if (file.size > MAX_TEMPLATE_IMAGE_BYTES) {
         setImageError(t("imageTooLarge"));
         return;
       }
@@ -250,16 +349,16 @@ export function TemplateEditor({
       setImageError(t("imageReadError"));
     }
   };
-  const chooseFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) void validateFile(f);
-    e.target.value = "";
+  const chooseFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) void validateFile(file);
+    event.target.value = "";
   };
-  const dropFile = (e: DragEvent) => {
-    e.preventDefault();
+  const dropFile = (event: DragEvent) => {
+    event.preventDefault();
     setDragging(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f) void validateFile(f);
+    const file = event.dataTransfer.files?.[0];
+    if (file) void validateFile(file);
   };
   const validateRemoteImage = () => {
     const url = imageUrl.trim();
@@ -289,8 +388,8 @@ export function TemplateEditor({
     }
     try {
       restoreSelection();
-      const selection = window.getSelection();
-      const selected = selection?.toString() ?? "";
+      const selection = window.getSelection(),
+        selected = selection?.toString() ?? "";
       if (selected) {
         document.execCommand("createLink", false, url);
         const anchor = selection?.anchorNode?.parentElement?.closest("a");
@@ -303,15 +402,14 @@ export function TemplateEditor({
           /[<>&]/g,
           (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!,
         );
-        const safeUrl = url.replace(/"/g, "&quot;");
         if (
           !document.execCommand(
             "insertHTML",
             false,
-            `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`,
+            `<a href="${url.replace(/"/g, "&quot;")}" target="_blank" rel="noopener noreferrer">${text}</a>`,
           )
         )
-          throw new Error("insertHTML failed");
+          throw new Error();
       }
       rememberSelection();
       setLinkOpen(false);
@@ -321,25 +419,147 @@ export function TemplateEditor({
       setLinkError(t("linkInsertError"));
     }
   };
-  const insertTable = () =>
-    cmd(
-      "insertHTML",
-      "<table><tbody><tr><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td></tr></tbody></table><p><br></p>",
-    );
   const setPx = (px: string) => {
     if (!px) return;
+    restoreSelection();
     document.execCommand("fontSize", false, "7");
-    editor.current?.querySelectorAll('font[size="7"]').forEach((el) => {
-      (el as HTMLElement).removeAttribute("size");
-      (el as HTMLElement).style.fontSize = `${px}px`;
-    });
-    editor.current?.focus();
+    (activeEditor.current ?? editor.current)
+      ?.querySelectorAll('font[size="7"]')
+      .forEach((element) => {
+        const html = element as HTMLElement;
+        html.removeAttribute("size");
+        html.style.fontSize = `${px}px`;
+      });
+    (activeEditor.current ?? editor.current)?.focus();
+  };
+  const updateSelectedImage = (
+    width = imageWidth,
+    height = imageHeight,
+    fit: ImageFit = imageFit,
+    align: ImageAlign = imageAlign,
+  ) => {
+    if (!selectedImage) return;
+    selectedImage.dataset.imageFit = fit;
+    selectedImage.setAttribute(
+      "style",
+      imageStyle(width, align, height || undefined, fit),
+    );
+    setImageWidth(width);
+    setImageHeight(height);
+    setImageFit(fit);
+    setImageAlign(align);
+    requestAnimationFrame(() =>
+      setResizeBox(selectedImage.getBoundingClientRect()),
+    );
+  };
+  const selectImage = (image: HTMLImageElement) => {
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      (region) =>
+        region
+          ?.querySelectorAll("img[data-selected=true]")
+          .forEach((node) => node.removeAttribute("data-selected")),
+    );
+    image.dataset.selected = "true";
+    image.draggable = true;
+    setSelectedImage(image);
+    setImageWidth(String(parseInt(image.style.width) || image.width || 240));
+    setImageHeight(
+      image.style.height && image.style.height !== "auto"
+        ? String(parseInt(image.style.height))
+        : "",
+    );
+    setImageFit(getImageFit(image));
+    setImageAlign(getImageAlign(image));
+  };
+  const moveImage = (direction: -1 | 1) => {
+    if (!selectedImage) return;
+    const sibling =
+      direction < 0 ? selectedImage.previousSibling : selectedImage.nextSibling;
+    if (!sibling) return;
+    direction < 0
+      ? sibling.before(selectedImage)
+      : sibling.after(selectedImage);
+    selectedImage.scrollIntoView({ block: "nearest" });
+  };
+  const rangeAtPoint = (x: number, y: number) => {
+    const doc = document as Document & {
+      caretRangeFromPoint?: (x: number, y: number) => Range | null;
+      caretPositionFromPoint?: (
+        x: number,
+        y: number,
+      ) => { offsetNode: Node; offset: number } | null;
+    };
+    let range = doc.caretRangeFromPoint?.(x, y) ?? null;
+    if (!range) {
+      const pos = doc.caretPositionFromPoint?.(x, y);
+      if (pos) {
+        range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+        range.collapse(true);
+      }
+    }
+    return range;
+  };
+  const dropIntoRegion = (
+    e: DragEvent<HTMLDivElement>,
+    region: HTMLDivElement | null,
+  ) => {
+    const variableName = e.dataTransfer.getData("text/docflow-variable"),
+      variable = variables.find((item) => item.name === variableName),
+      range = rangeAtPoint(e.clientX, e.clientY);
+    if (variable && range && region?.contains(range.startContainer)) {
+      e.preventDefault();
+      activeEditor.current = region;
+      savedRange.current = range;
+      insertVariable(variable);
+      return;
+    }
+    if (
+      !draggedImage.current ||
+      !range ||
+      !region?.contains(range.startContainer)
+    )
+      return;
+    e.preventDefault();
+    const img = draggedImage.current;
+    range.insertNode(img);
+    img.after(document.createTextNode("\u00a0"));
+    selectImage(img);
+    draggedImage.current = null;
+  };
+  const dropIntoEditor = (e: DragEvent<HTMLDivElement>) =>
+    dropIntoRegion(e, editor.current);
+  const startResize = (
+    event: ReactMouseEvent,
+    mode: "width" | "height" | "both" = "both",
+  ) => {
+    if (!selectedImage) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const rect = selectedImage.getBoundingClientRect();
+    resizing.current = {
+      x: event.clientX,
+      y: event.clientY,
+      width: parseInt(selectedImage.style.width) || selectedImage.width || 240,
+      height:
+        parseInt(selectedImage.style.height) ||
+        selectedImage.height ||
+        Math.max(32, rect.height / (zoom / 100)),
+      mode,
+    };
   };
   const save = async () => {
     const payload = {
       name: name.trim(),
       description: description.trim(),
       content: editor.current?.innerHTML ?? "",
+      headerContent: headerEnabled
+        ? (headerEditor.current?.innerHTML ?? "")
+        : "",
+      footerContent: footerEnabled
+        ? (footerEditor.current?.innerHTML ?? "")
+        : "",
+      pageNumbers,
       variables,
     };
     if (!payload.name || !payload.content) return;
@@ -349,34 +569,26 @@ export function TemplateEditor({
     onClose();
   };
   const pending = create.isPending || update.isPending;
-  const updateSelectedImage = (width = imageWidth, align = imageAlign) => {
-    if (!selectedImage) return;
-    selectedImage.setAttribute("style", imageStyle(width, align));
-    setImageWidth(width);
-    setImageAlign(align);
-    requestAnimationFrame(() =>
-      setResizeBox(selectedImage.getBoundingClientRect()),
-    );
-  };
-  const startResize = (e: ReactMouseEvent) => {
-    if (!selectedImage) return;
-    e.preventDefault();
-    e.stopPropagation();
-    resizing.current = {
-      x: e.clientX,
-      width: parseInt(selectedImage.style.width) || selectedImage.width || 240,
-    };
-  };
+
   return (
     <div className="editor-overlay">
       <div className="editor-shell">
         <header className="editor-header">
+          <button
+            className="mobile-editor-back"
+            type="button"
+            onClick={onClose}
+            aria-label={t("back")}
+          >
+            <ArrowLeft />
+          </button>
           <div>
             <span className="eyebrow">
               {template ? t("editTemplate") : t("newTemplate")}
             </span>
             <input
               className="editor-title"
+              maxLength={250}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("templateName")}
@@ -384,7 +596,8 @@ export function TemplateEditor({
           </div>
           <div className="editor-actions">
             <button className="btn secondary" onClick={onClose}>
-              <X size={17} /> {t("close")}
+              <X size={17} />
+              {t("close")}
             </button>
             <button className="btn" disabled={pending} onClick={save}>
               {pending ? t("saving") : t("save")}
@@ -393,373 +606,256 @@ export function TemplateEditor({
         </header>
         <input
           className="editor-description"
+          maxLength={400}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t("description")}
         />
-        <div className="editor-toolbar">
-          <button onClick={() => cmd("undo")} title={t("undo")}>
-            <Undo2 />
-          </button>
-          <button onClick={() => cmd("redo")} title={t("redo")}>
-            <Redo2 />
-          </button>
-          <span />
-          <select
-            onChange={(e) => cmd("formatBlock", e.target.value)}
-            defaultValue="p"
-            aria-label={t("paragraphStyle")}
-          >
-            <option value="p">{t("paragraph")}</option>
-            <option value="h1">{t("heading1")}</option>
-            <option value="h2">{t("heading2")}</option>
-            <option value="h3">{t("heading3")}</option>
-            <option value="h4">{t("heading4")}</option>
-            <option value="h5">{t("subtitle")}</option>
-            <option value="blockquote">{t("quote")}</option>
-          </select>
-          <select
-            defaultValue=""
-            onChange={(e) => setPx(e.target.value)}
-            aria-label={t("fontSize")}
-          >
-            <option value="" disabled>
-              {t("size")}
-            </option>
-            {sizes.map((s) => (
-              <option key={s} value={s}>
-                {s}px
-              </option>
-            ))}
-          </select>
-          <button
-            className="toolbar-bold"
-            onClick={() => cmd("bold")}
-            title={t("bold")}
-          >
-            <Bold strokeWidth={3} />
-          </button>
-          <button onClick={() => cmd("italic")} title={t("italic")}>
-            <Italic />
-          </button>
-          <button onClick={() => cmd("underline")} title={t("underline")}>
-            <Underline />
-          </button>
-          <span />
-          <button onClick={() => cmd("justifyLeft")} title={t("alignLeft")}>
-            <AlignLeft />
-          </button>
-          <button onClick={() => cmd("justifyCenter")} title={t("alignCenter")}>
-            <AlignCenter />
-          </button>
-          <button onClick={() => cmd("justifyRight")} title={t("alignRight")}>
-            <AlignRight />
-          </button>
-          <button onClick={() => cmd("justifyFull")} title={t("justify")}>
-            <AlignJustify />
-          </button>
-          <span />
-          <button
-            onClick={() => cmd("insertUnorderedList")}
-            title={t("bulletList")}
-          >
-            <List />
-          </button>
-          <button
-            onClick={() => cmd("insertOrderedList")}
-            title={t("numberedList")}
-          >
-            <ListOrdered />
-          </button>
-          <button onClick={insertTable} title={t("table")}>
-            <Table2 />
-          </button>
-          <button
-            onMouseDown={rememberSelection}
-            onClick={() => setImageOpen(true)}
-            title={t("image")}
-          >
-            <ImagePlus />
-          </button>
-          <button
-            onMouseDown={rememberSelection}
-            onClick={() => setLinkOpen(true)}
-            title={t("link")}
-          >
-            <Link2 />
-          </button>
-          <button
-            className="variable-btn"
-            onMouseDown={rememberSelection}
-            onClick={() => setVariableOpen(true)}
-          >
-            <Variable /> {t("variable")}
-          </button>
-        </div>
+        <EditorToolbar
+          t={t}
+          cmd={cmd}
+          setPx={setPx}
+          insertTable={() =>
+            cmd(
+              "insertHTML",
+              "<table><tbody><tr><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td></tr></tbody></table><p><br></p>",
+            )
+          }
+          rememberSelection={rememberSelection}
+          openImage={() => setImageOpen(true)}
+          openLink={() => setLinkOpen(true)}
+          openVariable={() => {
+            setEditingVariable(undefined);
+            setVariableOpen(true);
+          }}
+          state={toolbarState}
+        />
         {selectedImage && (
-          <div className="image-context-bar">
-            <strong>{t("selectedImage")}</strong>
-            <label>
-              {t("width")}{" "}
-              <input
-                type="number"
-                min="32"
-                max="1200"
-                value={imageWidth}
-                onChange={(e) =>
-                  updateSelectedImage(e.target.value, imageAlign)
-                }
-              />{" "}
-              px
-            </label>
-            <select
-              value={imageAlign}
-              onChange={(e) => updateSelectedImage(imageWidth, e.target.value)}
-            >
-              <option value="inline">{t("inline")}</option>
-              <option value="left">{t("leftWrap")}</option>
-              <option value="center">{t("center")}</option>
-              <option value="right">{t("rightWrap")}</option>
-            </select>
-            <button
-              onClick={() => {
-                selectedImage.remove();
-                setSelectedImage(null);
-              }}
-            >
-              <Trash2 size={15} /> {t("remove")}
-            </button>
-          </div>
-        )}
-        <div className="editor-mobile-hint">{t("mobileHint")}</div>
-        <div className="zoom-bar">
-          <button
-            type="button"
-            onClick={() => setZoom((z) => Math.max(25, z - 25))}
-            aria-label={t("zoomOut")}
-          >
-            <Minus />
-          </button>
-          <strong>{zoom}%</strong>
-          <button
-            type="button"
-            onClick={() => setZoom((z) => Math.min(200, z + 25))}
-            aria-label={t("zoomIn")}
-          >
-            <Plus />
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setZoom(
-                Math.max(
-                  25,
-                  Math.floor(
-                    (((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25,
-                  ) * 25,
-                ),
-              )
-            }
-          >
-            {t("fitPage")}
-          </button>
-        </div>
-        <div className="paper-stage">
-          <div className="paper-zoom" style={{ zoom: zoom / 100 }}>
-            <div
-              ref={editor}
-              className="a4-paper"
-              contentEditable
-              suppressContentEditableWarning
-              onKeyUp={rememberSelection}
-              onMouseUp={rememberSelection}
-              onClick={(e) => {
-                const target = e.target as HTMLElement;
-                if (target.tagName === "IMG") {
-                  editor.current
-                    ?.querySelectorAll("img[data-selected=true]")
-                    .forEach((node) => node.removeAttribute("data-selected"));
-                  const img = target as HTMLImageElement;
-                  img.dataset.selected = "true";
-                  setSelectedImage(img);
-                  const w = parseInt(img.style.width) || img.width || 240;
-                  setImageWidth(String(w));
-                  setImageAlign(
-                    img.style.float === "left"
-                      ? "left"
-                      : img.style.float === "right"
-                        ? "right"
-                        : img.style.display === "inline-block"
-                          ? "inline"
-                          : "center",
-                  );
-                } else {
-                  editor.current
-                    ?.querySelectorAll("img[data-selected=true]")
-                    .forEach((node) => node.removeAttribute("data-selected"));
-                  setSelectedImage(null);
-                }
-              }}
-            />
-          </div>
-        </div>
-        {selectedImage && resizeBox && (
-          <button
-            type="button"
-            className="image-resize-handle"
-            aria-label={t("resizeImage")}
-            title={t("resizeImage")}
-            onMouseDown={startResize}
-            style={{ left: resizeBox.right - 10, top: resizeBox.bottom - 10 }}
+          <ImageContextBar
+            t={t}
+            width={imageWidth}
+            height={imageHeight}
+            fit={imageFit}
+            align={imageAlign}
+            onChange={updateSelectedImage}
+            onMoveBefore={() => moveImage(-1)}
+            onMoveAfter={() => moveImage(1)}
+            onRemove={() => {
+              selectedImage.remove();
+              setSelectedImage(null);
+            }}
           />
         )}
+        <VariableShelf
+          t={t}
+          variables={variables}
+          rememberSelection={rememberSelection}
+          insertVariable={insertVariable}
+          editVariable={(variable) => {
+            setEditingVariable(variable);
+            setVariableOpen(true);
+          }}
+          removeVariable={(variableName) =>
+            setVariables((current) =>
+              current.filter((variable) => variable.name !== variableName),
+            )
+          }
+        />
+        <DocumentOptions
+          t={t}
+          header={headerEnabled}
+          footer={footerEnabled}
+          pageNumbers={pageNumbers}
+          setHeader={setHeaderEnabled}
+          setFooter={setFooterEnabled}
+          setPageNumbers={setPageNumbers}
+        />
+        <div className="editor-mobile-hint">{t("mobileHint")}</div>
+        <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+        <div className="paper-stage">
+          <div className="paper-zoom" style={{ zoom: zoom / 100 }}>
+            <div className="a4-page-shell">
+              {headerEnabled && (
+                <div
+                  ref={headerEditor}
+                  className="page-header-editor"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onFocus={() => {
+                    activeEditor.current = headerEditor.current;
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => dropIntoRegion(e, headerEditor.current)}
+                  onDragStart={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === "IMG") {
+                      draggedImage.current = target as HTMLImageElement;
+                      e.dataTransfer.effectAllowed = "move";
+                    }
+                  }}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === "IMG")
+                      selectImage(target as HTMLImageElement);
+                  }}
+                  onKeyUp={rememberSelection}
+                  onMouseUp={rememberSelection}
+                  data-placeholder={t("headerPlaceholder")}
+                />
+              )}
+              <div
+                ref={editor}
+                className="a4-paper"
+                contentEditable
+                suppressContentEditableWarning
+                onDragOver={(e) => e.preventDefault()}
+                onDragStart={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.tagName === "IMG") {
+                    draggedImage.current = target as HTMLImageElement;
+                    e.dataTransfer.effectAllowed = "move";
+                  }
+                }}
+                onDrop={dropIntoEditor}
+                onFocus={() => {
+                  activeEditor.current = editor.current;
+                }}
+                onKeyUp={rememberSelection}
+                onMouseUp={rememberSelection}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.tagName === "IMG")
+                    selectImage(target as HTMLImageElement);
+                  else {
+                    editor.current
+                      ?.querySelectorAll("img[data-selected=true]")
+                      .forEach((node) => node.removeAttribute("data-selected"));
+                    setSelectedImage(null);
+                  }
+                }}
+              />
+              {footerEnabled && (
+                <div
+                  ref={footerEditor}
+                  className="page-footer-editor"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onFocus={() => {
+                    activeEditor.current = footerEditor.current;
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => dropIntoRegion(e, footerEditor.current)}
+                  onDragStart={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === "IMG") {
+                      draggedImage.current = target as HTMLImageElement;
+                      e.dataTransfer.effectAllowed = "move";
+                    }
+                  }}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target.tagName === "IMG")
+                      selectImage(target as HTMLImageElement);
+                  }}
+                  onKeyUp={rememberSelection}
+                  onMouseUp={rememberSelection}
+                  data-placeholder={t("footerPlaceholder")}
+                />
+              )}{" "}
+              {pageNumbers && <div className="page-number-preview">1 / 1</div>}
+            </div>
+          </div>
+          {selectedImage && resizeBox && (
+            <>
+              <button
+                type="button"
+                className="image-resize-handle"
+                aria-label={t("resizeImage")}
+                title={t("resizeImage")}
+                onMouseDown={(e) => startResize(e, "both")}
+                style={{
+                  left: resizeBox.right - 10,
+                  top: resizeBox.bottom - 10,
+                }}
+              />
+              <button
+                type="button"
+                className="image-resize-handle image-resize-width"
+                aria-label="Resize image width"
+                onMouseDown={(e) => startResize(e, "width")}
+                style={{
+                  left: resizeBox.right - 10,
+                  top: resizeBox.top + resizeBox.height / 2 - 10,
+                }}
+              />
+              <button
+                type="button"
+                className="image-resize-handle image-resize-height"
+                aria-label="Resize image height"
+                onMouseDown={(e) => startResize(e, "height")}
+                style={{
+                  left: resizeBox.left + resizeBox.width / 2 - 10,
+                  top: resizeBox.bottom - 10,
+                }}
+              />
+            </>
+          )}
+        </div>
         {variableOpen && (
           <VariableModal
-            onClose={() => setVariableOpen(false)}
-            onInsert={insertVariable}
+            onClose={() => {
+              setVariableOpen(false);
+              setEditingVariable(undefined);
+            }}
+            onInsert={saveVariableDefinition}
+            initial={editingVariable}
             t={t}
           />
         )}
         {linkOpen && (
-          <div className="dialog-backdrop">
-            <div className="dialog">
-              <span className="eyebrow">
-                <Link2 size={14} /> {t("link")}
-              </span>
-              <h3>{t("addLink")}</h3>
-              <p>{t("linkHelp")}</p>
-              <label className="field">
-                URL
-                <input
-                  autoFocus
-                  value={linkUrl}
-                  onChange={(e) => {
-                    setLinkUrl(e.target.value);
-                    setLinkError("");
-                  }}
-                  placeholder="https://example.com"
-                />
-              </label>
-              <label className="field">
-                {t("linkText")}
-                <input
-                  value={linkText}
-                  onChange={(e) => setLinkText(e.target.value)}
-                  placeholder={t("linkTextPlaceholder")}
-                />
-              </label>
-              {linkError && <p className="form-error">{linkError}</p>}
-              <div className="dialog-actions">
-                <button
-                  className="btn secondary"
-                  onClick={() => setLinkOpen(false)}
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  className="btn"
-                  onClick={insertLink}
-                  disabled={!linkUrl.trim()}
-                >
-                  {t("insertLink")}
-                </button>
-              </div>
-            </div>
-          </div>
+          <LinkDialog
+            t={t}
+            url={linkUrl}
+            text={linkText}
+            error={linkError}
+            setUrl={(value) => {
+              setLinkUrl(value);
+              setLinkError("");
+            }}
+            setText={setLinkText}
+            onClose={() => setLinkOpen(false)}
+            onInsert={insertLink}
+          />
         )}
         {imageOpen && (
-          <div className="dialog-backdrop">
-            <div className="dialog image-dialog">
-              <span className="eyebrow">
-                <ImagePlus size={14} /> {t("image")}
-              </span>
-              <h3>{t("addImage")}</h3>
-              <p>{t("imageHelp")}</p>
-              <div className="image-source-grid">
-                <div
-                  className={`image-source ${dragging ? "dragging" : ""}`}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => fileRef.current?.click()}
-                  onKeyDown={(e) =>
-                    (e.key === "Enter" || e.key === " ") &&
-                    fileRef.current?.click()
-                  }
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragging(true);
-                  }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={dropFile}
-                >
-                  <Upload />
-                  <strong>{t("dropImage")}</strong>
-                  <small>{t("imageTypes")}</small>
-                </div>
-                <div className="image-url-box">
-                  <strong>{t("imageUrl")}</strong>
-                  <input
-                    value={imageUrl}
-                    onChange={(e) => {
-                      setImageUrl(e.target.value);
-                      setImageError("");
-                    }}
-                    placeholder="https://example.com/logo.png"
-                  />
-                  <button
-                    className="btn secondary"
-                    onClick={validateRemoteImage}
-                    disabled={!imageUrl.trim() || validatingImage}
-                  >
-                    {validatingImage ? t("validating") : t("useImageUrl")}
-                  </button>
-                </div>
-              </div>
-              <div className="image-options">
-                <label>
-                  {t("widthPx")}
-                  <input
-                    type="number"
-                    min="32"
-                    max="1200"
-                    value={imageWidth}
-                    onChange={(e) => setImageWidth(e.target.value)}
-                  />
-                </label>
-                <label>
-                  {t("placement")}
-                  <select
-                    value={imageAlign}
-                    onChange={(e) => setImageAlign(e.target.value)}
-                  >
-                    <option value="inline">{t("inline")}</option>
-                    <option value="left">{t("leftWrap")}</option>
-                    <option value="center">{t("center")}</option>
-                    <option value="right">{t("rightWrap")}</option>
-                  </select>
-                </label>
-              </div>
-              {imageError && <p className="form-error">{imageError}</p>}
-              <input
-                ref={fileRef}
-                hidden
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                onChange={chooseFile}
-              />
-              <div className="dialog-actions">
-                <button
-                  className="btn secondary"
-                  onClick={() => {
-                    setImageOpen(false);
-                    setImageError("");
-                  }}
-                >
-                  {t("cancel")}
-                </button>
-              </div>
-            </div>
-          </div>
+          <ImageDialog
+            t={t}
+            fileRef={fileRef}
+            url={imageUrl}
+            error={imageError}
+            dragging={dragging}
+            validating={validatingImage}
+            width={imageWidth}
+            height={imageHeight}
+            fit={imageFit}
+            align={imageAlign}
+            setUrl={(value) => {
+              setImageUrl(value);
+              setImageError("");
+            }}
+            setDragging={setDragging}
+            setWidth={setImageWidth}
+            setHeight={setImageHeight}
+            setFit={setImageFit}
+            setAlign={setImageAlign}
+            chooseFile={chooseFile}
+            dropFile={dropFile}
+            validateRemote={validateRemoteImage}
+            onClose={() => {
+              setImageOpen(false);
+              setImageError("");
+            }}
+          />
         )}
       </div>
     </div>

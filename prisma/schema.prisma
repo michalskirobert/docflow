@@ -181,6 +181,9 @@ model Template {
   content        String
   variablesJson  String       @default("[]")
   isExample      Boolean      @default(false)
+  headerContent  String?
+  footerContent  String?
+  pageNumbers    Boolean      @default(false)
   documents      Document[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -192,12 +195,15 @@ model Document {
   id              String         @id @default(cuid())
   organizationId  String
   organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  templateId      String
-  template        Template       @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateId      String?
+  template        Template?      @relation(fields: [templateId], references: [id], onDelete: SetNull)
   name            String
   status          DocumentStatus @default(GENERATED)
   payloadJson     String
   renderedContent String
+  renderedHeader  String?
+  renderedFooter  String?
+  pageNumbers     Boolean        @default(false)
   createdAt       DateTime       @default(now())
 
   @@index([organizationId])

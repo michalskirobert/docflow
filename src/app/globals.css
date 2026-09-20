@@ -2193,3 +2193,315 @@ body {
     transform-origin: top left;
   }
 }
+
+/* v1.7 document editor */
+.mobile-editor-back {
+  display: none;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  color: #334155;
+}
+.variable-shelf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #fafbff;
+  overflow-x: auto;
+}
+.variable-shelf > strong {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.variable-shelf-list {
+  display: flex;
+  gap: 7px;
+}
+.variable-chip {
+  display: flex;
+  align-items: center;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  background: #eef2ff;
+  overflow: hidden;
+}
+.variable-chip button {
+  border: 0;
+  background: transparent;
+  padding: 6px 8px;
+  color: #4338ca;
+  font:
+    700 11px ui-monospace,
+    monospace;
+  cursor: pointer;
+}
+.variable-chip button + button {
+  padding-left: 2px;
+}
+.variable-chip svg {
+  width: 13px;
+  height: 13px;
+}
+.document-regions {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+  font-size: 12px;
+}
+.document-regions label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.a4-page-shell {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  margin: auto;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(15 23 42 / 12%);
+}
+.a4-page-shell .a4-paper {
+  margin: 0;
+  box-shadow: none;
+  border: 0;
+  min-height: 257mm;
+}
+.page-header-editor,
+.page-footer-editor {
+  min-height: 18mm;
+  padding: 6mm 20mm 3mm;
+  outline: 0;
+  color: #475569;
+  font-size: 11px;
+}
+.page-footer-editor {
+  padding: 3mm 20mm 6mm;
+}
+.page-header-editor:empty:before,
+.page-footer-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+}
+.page-number-preview {
+  position: absolute;
+  right: 20mm;
+  bottom: 6mm;
+  color: #64748b;
+  font-size: 10px;
+}
+.option-builder {
+  display: grid;
+  gap: 8px;
+}
+.option-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px;
+}
+.icon-btn {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+  color: #dc2626;
+}
+.icon-btn svg,
+.btn.compact svg {
+  width: 15px;
+  height: 15px;
+}
+.btn.compact {
+  width: max-content;
+  padding: 8px 10px;
+}
+.document-image-dropzone {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 150px;
+  padding: 22px;
+  border: 2px dashed #c7d2fe;
+  border-radius: 14px;
+  background: #f8faff;
+  text-align: center;
+  cursor: pointer;
+}
+.document-image-dropzone:hover {
+  border-color: #818cf8;
+  background: #f5f3ff;
+}
+.document-image-dropzone svg {
+  color: #6366f1;
+}
+.document-image-dropzone .variable-upload-preview {
+  max-width: 100%;
+  max-height: 220px;
+}
+.settings-card .license-summary {
+  padding: 14px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 760px) {
+  .mobile-editor-back {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+  .editor-actions .secondary {
+    display: none;
+  }
+  .variable-shelf {
+    padding-inline: 10px;
+  }
+  .document-regions {
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .a4-page-shell {
+    margin: 0;
+  }
+  .paper-zoom {
+    padding-right: 12px;
+  }
+  .page-header-editor,
+  .page-footer-editor {
+    min-height: 18mm;
+  }
+  .variable-dialog {
+    max-height: 92dvh;
+    overflow: auto;
+  }
+}
+.license-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.license-summary > div {
+  display: grid;
+  gap: 5px;
+}
+.license-expiry {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+}
+.license-reminder {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+}
+.settings-card > .field {
+  margin-top: 18px;
+}
+
+/* Image variables are real editor images, so they share the same selection,
+   resize and wrap controls as uploaded images. */
+.a4-paper img[data-variable-type="image"] {
+  background: linear-gradient(
+    135deg,
+    #f8fafc 25%,
+    #eef2f7 25%,
+    #eef2f7 50%,
+    #f8fafc 50%,
+    #f8fafc 75%,
+    #eef2f7 75%
+  );
+  background-size: 20px 20px;
+  border: 2px dashed #94a3b8;
+  min-height: 48px;
+}
+.a4-paper img[data-variable-type="image"][data-selected="true"] {
+  outline: 2px solid var(--accent, #4f46e5);
+  outline-offset: 2px;
+}
+
+/* v1.7.2 editor interaction fixes */
+.paper-stage {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+.a4-paper,
+.page-header-editor,
+.page-footer-editor {
+  touch-action: pan-y;
+}
+.a4-paper img {
+  cursor: grab;
+}
+.a4-paper img:active {
+  cursor: grabbing;
+}
+.variable-image-name {
+  display: inline-block;
+  margin: 2px 6px;
+  padding: 2px 6px;
+  border: 1px dashed #a5b4fc;
+  border-radius: 6px;
+  background: #eef2ff;
+  color: #4338ca;
+  font:
+    700 11px ui-monospace,
+    monospace;
+  vertical-align: middle;
+}
+.page-header-editor,
+.page-footer-editor {
+  font-size: inherit;
+}
+@media (max-width: 760px) {
+  .paper-stage {
+    overflow-y: auto !important;
+    touch-action: pan-y;
+  }
+  .a4-paper {
+    touch-action: pan-y;
+  }
+}
+
+/* v1.7.3 editor selection and image sizing */
+.editor-toolbar button.active {
+  background: #e0e7ff;
+  color: #4338ca;
+  box-shadow: inset 0 0 0 1px #a5b4fc;
+}
+.editor-toolbar button[aria-pressed="true"] {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.image-resize-width {
+  cursor: ew-resize;
+}
+.image-resize-height {
+  cursor: ns-resize;
+}
+.variable-upload-current {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+}
+.page-header-editor img,
+.page-footer-editor img {
+  max-width: 100%;
+  cursor: grab;
+}
+.page-header-editor img[data-selected="true"],
+.page-footer-editor img[data-selected="true"] {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+}

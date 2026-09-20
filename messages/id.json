@@ -237,6 +237,19 @@
     "imagePlaceholder": "Placeholder gambar",
     "requiredField": "Wajib diisi",
     "requiredMessage": "Pesan wajib",
-    "requiredDefault": "Kolom ini wajib diisi."
+    "requiredDefault": "Kolom ini wajib diisi.",
+    "back": "Kembali",
+    "variables": "Variabel",
+    "removeVariable": "Hapus variabel",
+    "header": "Header",
+    "footer": "Footer",
+    "pageNumbers": "Nomor halaman",
+    "headerPlaceholder": "Klik untuk mengedit header",
+    "footerPlaceholder": "Klik untuk mengedit footer",
+    "option": "Opsi",
+    "addOption": "Tambah opsi",
+    "imageFit": "Penyesuaian gambar",
+    "contain": "Muat",
+    "cover": "Penuhi"
   }
 }

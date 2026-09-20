@@ -48,7 +48,7 @@ export default function TemplateList() {
               onEdit={() => setEditing(t)}
               onDuplicate={() =>
                 create.mutate({
-                  name: `${t.name} copy`,
+                  name: `${t.name.replace(/(?: copy)+$/i, "")} copy`,
                   description: t.description ?? "",
                   content: t.content,
                   variables: parseTemplateVariables(t.variablesJson),

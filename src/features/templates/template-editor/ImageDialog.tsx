@@ -1,0 +1,154 @@
+import type { ChangeEvent, DragEvent, RefObject } from "react";
+import { ImagePlus, Upload } from "lucide-react";
+import type { ImageAlign, ImageFit } from "./utils";
+type Props = {
+  t: (key: string) => string;
+  fileRef: RefObject<HTMLInputElement | null>;
+  url: string;
+  error: string;
+  dragging: boolean;
+  validating: boolean;
+  width: string;
+  height: string;
+  fit: ImageFit;
+  align: ImageAlign;
+  setUrl: (v: string) => void;
+  setDragging: (v: boolean) => void;
+  setWidth: (v: string) => void;
+  setHeight: (v: string) => void;
+  setFit: (v: ImageFit) => void;
+  setAlign: (v: ImageAlign) => void;
+  chooseFile: (e: ChangeEvent<HTMLInputElement>) => void;
+  dropFile: (e: DragEvent) => void;
+  validateRemote: () => void;
+  onClose: () => void;
+};
+export function ImageDialog({
+  t,
+  fileRef,
+  url,
+  error,
+  dragging,
+  validating,
+  width,
+  height,
+  fit,
+  align,
+  setUrl,
+  setDragging,
+  setWidth,
+  setHeight,
+  setFit,
+  setAlign,
+  chooseFile,
+  dropFile,
+  validateRemote,
+  onClose,
+}: Props) {
+  return (
+    <div className="dialog-backdrop">
+      <div className="dialog image-dialog">
+        <span className="eyebrow">
+          <ImagePlus size={14} /> {t("image")}
+        </span>
+        <h3>{t("addImage")}</h3>
+        <p>{t("imageHelp")}</p>
+        <div className="image-source-grid">
+          <div
+            className={`image-source ${dragging ? "dragging" : ""}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => fileRef.current?.click()}
+            onKeyDown={(e) =>
+              (e.key === "Enter" || e.key === " ") && fileRef.current?.click()
+            }
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={dropFile}
+          >
+            <Upload />
+            <strong>{t("dropImage")}</strong>
+            <small>{t("imageTypes")}</small>
+          </div>
+          <div className="image-url-box">
+            <strong>{t("imageUrl")}</strong>
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com/logo.png"
+            />
+            <button
+              className="btn secondary"
+              onClick={validateRemote}
+              disabled={!url.trim() || validating}
+            >
+              {validating ? t("validating") : t("useImageUrl")}
+            </button>
+          </div>
+        </div>
+        <div className="image-options">
+          <label>
+            {t("widthPx")}
+            <input
+              type="number"
+              min="32"
+              max="1200"
+              value={width}
+              onChange={(e) => setWidth(e.target.value)}
+            />
+          </label>
+          <label>
+            {t("heightPx")}
+            <input
+              type="number"
+              min="32"
+              max="1600"
+              value={height}
+              placeholder="auto"
+              onChange={(e) => setHeight(e.target.value)}
+            />
+          </label>
+          <label>
+            {t("imageFit")}
+            <select
+              value={fit}
+              onChange={(e) => setFit(e.target.value as ImageFit)}
+            >
+              <option value="contain">contain</option>
+              <option value="cover">cover</option>
+              <option value="fill">fill</option>
+            </select>
+          </label>
+          <label>
+            {t("placement")}
+            <select
+              value={align}
+              onChange={(e) => setAlign(e.target.value as ImageAlign)}
+            >
+              <option value="inline">{t("inline")}</option>
+              <option value="left">{t("leftWrap")}</option>
+              <option value="center">{t("center")}</option>
+              <option value="right">{t("rightWrap")}</option>
+            </select>
+          </label>
+        </div>
+        {error && <p className="form-error">{error}</p>}
+        <input
+          ref={fileRef}
+          hidden
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          onChange={chooseFile}
+        />
+        <div className="dialog-actions">
+          <button className="btn secondary" onClick={onClose}>
+            {t("cancel")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -3,5 +3,5 @@ export type Document = {
   name: string;
   renderedContent: string;
   createdAt: string;
-  template: { name: string };
+  template: { name: string } | null;
 };

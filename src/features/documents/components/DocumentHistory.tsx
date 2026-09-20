@@ -12,7 +12,7 @@ export function DocumentHistory({ documents }: { documents: Document[] }) {
     () =>
       documents
         .filter((d) =>
-          `${d.name} ${d.template.name}`
+          `${d.name} ${d.template?.name ?? ""}`
             .toLowerCase()
             .includes(q.toLowerCase()),
         )
@@ -86,7 +86,8 @@ function DocumentRow({ document: d }: { document: Document }) {
       <div className="document-meta">
         <strong>{d.name}</strong>
         <span>
-          {d.template.name} · {new Date(d.createdAt).toLocaleDateString()}
+          {d.template?.name ?? "Deleted template"} ·{" "}
+          {new Date(d.createdAt).toLocaleDateString()}
         </span>
       </div>
       <div className="document-actions">

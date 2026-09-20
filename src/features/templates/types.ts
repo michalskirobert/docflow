@@ -10,6 +10,8 @@ export type TemplateVariable = {
   options?: string[];
   imageWidth?: number;
   imageHeight?: number;
+  imageAlign?: "inline" | "left" | "center" | "right";
+  imageFit?: "contain" | "cover" | "fill";
 };
 export type Template = {
   id: string;
@@ -18,6 +20,9 @@ export type Template = {
   content: string;
   variablesJson: string;
   isExample: boolean;
+  headerContent?: string | null;
+  footerContent?: string | null;
+  pageNumbers?: boolean;
   createdAt: string;
 };
 export function parseTemplateVariables(value: string): TemplateVariable[] {

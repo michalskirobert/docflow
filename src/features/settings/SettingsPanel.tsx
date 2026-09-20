@@ -58,11 +58,42 @@ export default function SettingsPanel() {
           </div>
         </div>
         <div className="license-summary">
-          <strong>{billing.data?.subscription?.plan ?? "FREE"}</strong>
+          <div>
+            <strong>{billing.data?.subscription?.plan ?? "FREE"}</strong>
+            {billing.data?.subscription?.currentPeriodEndsAt && (
+              <small className="license-expiry">
+                Valid until{" "}
+                {new Date(
+                  billing.data.subscription.currentPeriodEndsAt,
+                ).toLocaleDateString()}{" "}
+                ·{" "}
+                {Math.max(
+                  0,
+                  Math.ceil(
+                    (new Date(
+                      billing.data.subscription.currentPeriodEndsAt,
+                    ).getTime() -
+                      Date.now()) /
+                      86400000,
+                  ),
+                )}{" "}
+                days remaining
+              </small>
+            )}
+          </div>
           <span className="status-active">
             {billing.data?.subscription?.status ?? "ACTIVE"}
           </span>
         </div>
+        {billing.data?.subscription?.currentPeriodEndsAt &&
+          new Date(billing.data.subscription.currentPeriodEndsAt).getTime() -
+            Date.now() <=
+            7 * 86400000 && (
+            <div className="license-reminder">
+              Your license expires soon. Renew it to keep the annual document
+              limit. We also send an email reminder during the final 7 days.
+            </div>
+          )}
         {pending.map((p) => (
           <div className="payment-row" key={p.id}>
             <div>
