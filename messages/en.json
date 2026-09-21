@@ -96,7 +96,8 @@
     "payuCopy": "Online payment. The license is activated automatically after payment confirmation.",
     "bankTransfer": "Bank transfer",
     "bankTransferCopy": "We will verify the payment after the transfer is received.",
-    "freeWhilePaymentPending": "Until payment is confirmed, your account uses the Free license with a 10-document monthly limit."
+    "freeWhilePaymentPending": "Until payment is confirmed, your account uses the Free license with a 10-document monthly limit.",
+    "alreadyAccount": "Already have an account?"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -157,11 +158,11 @@
     "editDocument": "Edit document",
     "generateTitle": "Generate document",
     "generateDescription": "Choose a template and complete the fields defined by its author.",
-    "generate": "Generate document",
+    "generate": "Create",
     "generating": "Generating…",
     "generateSuccess": "Document generated successfully.",
     "generateError": "Document generation failed. Please try again.",
-    "backToDocuments": "Back to documents",
+    "backToDocuments": "Back",
     "history": "Document history",
     "historyDescription": "Search, sort, preview, edit or download generated documents.",
     "searchPlaceholder": "Search documents…",
@@ -185,7 +186,7 @@
     "documentName": "Document name",
     "nameRequired": "Enter a document name.",
     "contentRequired": "Document content cannot be empty.",
-    "saveDocument": "Save document",
+    "saveDocument": "Save",
     "saving": "Saving…",
     "updateSuccess": "Document saved successfully.",
     "updateError": "Could not save the document.",
@@ -206,7 +207,12 @@
     "invalidImageSignature": "The file content does not match a supported image format.",
     "imageReadError": "Could not read the image.",
     "documentNamePlaceholder": "Enter document name",
-    "documentNameRequired": "Document name is required"
+    "documentNameRequired": "Document name is required",
+    "downloadError": "Could not download the PDF. Please try again.",
+    "unsavedChangesWarning": "You have unsaved changes. If you leave this page, your changes will be lost.",
+    "unsavedChangesTitle": "Unsaved changes",
+    "unsavedChangesLeave": "Leave",
+    "unsavedChangesStay": "Stay"
   },
   "settings": {
     "title": "Settings",

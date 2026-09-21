@@ -96,7 +96,8 @@
     "payuCopy": "Płatność online. Licencja zostanie aktywowana automatycznie po potwierdzeniu płatności.",
     "bankTransfer": "Przelew bankowy",
     "bankTransferCopy": "Po zaksięgowaniu przelewu płatność zostanie przez nas zweryfikowana.",
-    "freeWhilePaymentPending": "Do czasu potwierdzenia płatności konto korzysta z darmowej licencji z limitem 10 dokumentów miesięcznie."
+    "freeWhilePaymentPending": "Do czasu potwierdzenia płatności konto korzysta z darmowej licencji z limitem 10 dokumentów miesięcznie.",
+    "alreadyAccount": "Masz już konto?"
   },
   "dashboard": {
     "title": "Panel",
@@ -157,11 +158,11 @@
     "editDocument": "Edytuj dokument",
     "generateTitle": "Generuj dokument",
     "generateDescription": "Wybierz szablon i uzupełnij pola zdefiniowane przez jego autora.",
-    "generate": "Generuj dokument",
+    "generate": "Utwórz",
     "generating": "Generowanie…",
     "generateSuccess": "Dokument został wygenerowany poprawnie.",
     "generateError": "Nie udało się wygenerować dokumentu. Spróbuj ponownie.",
-    "backToDocuments": "Wróć do dokumentów",
+    "backToDocuments": "Wróć",
     "history": "Historia dokumentów",
     "historyDescription": "Wyszukuj, sortuj, podglądaj, edytuj i pobieraj wygenerowane dokumenty.",
     "searchPlaceholder": "Szukaj dokumentów…",
@@ -185,7 +186,7 @@
     "documentName": "Nazwa dokumentu",
     "nameRequired": "Podaj nazwę dokumentu.",
     "contentRequired": "Treść dokumentu nie może być pusta.",
-    "saveDocument": "Zapisz dokument",
+    "saveDocument": "Zapisz",
     "saving": "Zapisywanie…",
     "updateSuccess": "Dokument został zapisany.",
     "updateError": "Nie udało się zapisać dokumentu.",
@@ -206,7 +207,12 @@
     "invalidImageSignature": "Zawartość pliku nie odpowiada obsługiwanemu formatowi obrazu.",
     "imageReadError": "Nie udało się odczytać obrazu.",
     "documentNamePlaceholder": "Wprowadź nazwę dokumentu",
-    "documentNameRequired": "Nazwa dokumentu jest wymagana"
+    "documentNameRequired": "Nazwa dokumentu jest wymagana",
+    "downloadError": "Nie udało się pobrać PDF. Spróbuj ponownie.",
+    "unsavedChangesWarning": "Masz niezapisane zmiany. Jeśli opuścisz tę stronę, zmiany zostaną utracone.",
+    "unsavedChangesTitle": "Niezapisane zmiany",
+    "unsavedChangesLeave": "Opuść",
+    "unsavedChangesStay": "Zostań"
   },
   "settings": {
     "title": "Ustawienia",

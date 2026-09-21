@@ -1,3 +1,4 @@
+import { InputControl, SelectControl } from "@/components/shared/form";
 import type { ChangeEvent, DragEvent, RefObject } from "react";
 import { ImagePlus, Upload } from "lucide-react";
 import type { ImageAlign, ImageFit } from "./utils";
@@ -75,7 +76,7 @@ export function ImageDialog({
           </div>
           <div className="image-url-box">
             <strong>{t("imageUrl")}</strong>
-            <input
+            <InputControl
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com/logo.png"
@@ -92,7 +93,7 @@ export function ImageDialog({
         <div className="image-options">
           <label>
             {t("widthPx")}
-            <input
+            <InputControl
               type="number"
               min="32"
               max="1200"
@@ -102,7 +103,7 @@ export function ImageDialog({
           </label>
           <label>
             {t("heightPx")}
-            <input
+            <InputControl
               type="number"
               min="32"
               max="1600"
@@ -113,18 +114,18 @@ export function ImageDialog({
           </label>
           <label>
             {t("imageFit")}
-            <select
+            <SelectControl
               value={fit}
               onChange={(e) => setFit(e.target.value as ImageFit)}
             >
               <option value="contain">contain</option>
               <option value="cover">cover</option>
               <option value="fill">fill</option>
-            </select>
+            </SelectControl>
           </label>
           <label>
             {t("placement")}
-            <select
+            <SelectControl
               value={align}
               onChange={(e) => setAlign(e.target.value as ImageAlign)}
             >
@@ -132,11 +133,11 @@ export function ImageDialog({
               <option value="left">{t("leftWrap")}</option>
               <option value="center">{t("center")}</option>
               <option value="right">{t("rightWrap")}</option>
-            </select>
+            </SelectControl>
           </label>
         </div>
         {error && <p className="form-error">{error}</p>}
-        <input
+        <InputControl
           ref={fileRef}
           hidden
           type="file"

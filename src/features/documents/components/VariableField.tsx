@@ -1,10 +1,15 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useRef, useState } from "react";
-import { CalendarDays, Clock3, Trash2, Upload } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
+import {
+  DateTimePicker,
+  InputControl,
+  SelectControl,
+} from "@/components/shared/form";
 import {
   MAX_TEMPLATE_IMAGE_BYTES,
   SAFE_TEMPLATE_IMAGE_TYPES,
@@ -411,7 +416,6 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   const variableType = String(variable.type) as VariableType;
 
   const file = useRef<HTMLInputElement>(null);
-  const nativeDateTimePicker = useRef<HTMLInputElement>(null);
 
   const [uploadError, setUploadError] = useState("");
 
@@ -469,7 +473,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
         <Label />
 
-        <select
+        <SelectControl
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -482,7 +486,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
               {x}
             </option>
           ))}
-        </select>
+        </SelectControl>
 
         {error && <small className="form-error">{error}</small>}
       </label>
@@ -495,12 +499,8 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     variableType === "time"
   ) {
     const type = variableType as DateTimeVariableType;
-
     const format = getDateTimeFormat(variable, type);
     const formattedValue = formatCanonicalValue(value, format, type);
-    const nativeType = type === "datetime" ? "datetime-local" : type;
-    const Icon = type === "time" ? Clock3 : CalendarDays;
-
     const pickerLabel =
       type === "date"
         ? t("chooseDate")
@@ -512,7 +512,6 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       <div className={`field ${error ? "field-error" : ""}`}>
         <label className="field-label" htmlFor={id}>
           {label}
-
           {variable.required && (
             <span className="required" aria-hidden="true">
               {" "}
@@ -527,40 +526,25 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             className="native-date-input"
             value={formattedValue}
             mask={formatToMask(format)}
-            definitions={{
-              "9": /[0-9]/,
-            }}
+            definitions={{ "9": /[0-9]/ }}
             placeholder={format}
             aria-invalid={Boolean(error)}
             onAccept={(nextValue) => {
               const next = String(nextValue);
-
               if (!next.trim()) {
                 onChange("");
                 return;
               }
-
               const canonicalValue = parseToCanonicalValue(next, format, type);
-
-              if (canonicalValue !== null) {
-                onChange(canonicalValue);
-              }
+              if (canonicalValue !== null) onChange(canonicalValue);
             }}
           />
-
-          <span className="date-picker-trigger">
-            <Icon size={18} aria-hidden="true" />
-
-            <input
-              ref={nativeDateTimePicker}
-              type={nativeType}
-              value={value}
-              tabIndex={-1}
-              aria-label={pickerLabel}
-              className="native-date-picker"
-              onChange={(e) => onChange(e.target.value)}
-            />
-          </span>
+          <DateTimePicker
+            type={type}
+            value={value}
+            label={pickerLabel}
+            onChange={onChange}
+          />
         </div>
 
         {error && <small className="form-error">{error}</small>}
@@ -620,7 +604,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           )}
         </div>
 
-        <input
+        <InputControl
           id={id}
           ref={file}
           hidden
@@ -659,7 +643,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           onAccept={(nextValue) => onChange(String(nextValue))}
         />
       ) : (
-        <input
+        <InputControl
           id={id}
           value={value}
           aria-invalid={Boolean(error)}

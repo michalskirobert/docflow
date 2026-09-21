@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import type { FieldError } from "react-hook-form";
+import { InputControl } from "./InputControl";
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
@@ -32,7 +33,7 @@ export function FormField({
         )}
       </span>
       <div className="field-control">
-        <input
+        <InputControl
           {...inputProps}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}

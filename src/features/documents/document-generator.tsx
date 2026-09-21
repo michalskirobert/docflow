@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { InputControl } from "@/components/shared/form";
 import { ArrowLeft, LoaderCircle, Save, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
+import { PendingOverlay } from "@/components/ui/pending-overlay";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { parseTemplateVariables } from "@/features/templates/types";
 import { TemplatePicker } from "./components/TemplatePicker";
 import { VariableField } from "./components/VariableField";
@@ -23,7 +27,7 @@ export default function DocumentGenerator({
 }) {
   const t = useTranslations("documents");
   const router = useRouter();
-  const { notify } = useFeedback();
+  const { notify, confirm } = useFeedback();
 
   const templates = useDocumentTemplatesService();
   const documentQuery = useDocumentService(documentId ?? "");
@@ -38,6 +42,8 @@ export default function DocumentGenerator({
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [initialized, setInitialized] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const documentNameRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +71,7 @@ export default function DocumentGenerator({
     }
 
     setInitialized(true);
+    setDirty(false);
   }, [documentQuery.data, initialized, isEditing]);
 
   const selected = templates.data?.find(
@@ -75,6 +82,20 @@ export default function DocumentGenerator({
     () => (selected ? parseTemplateVariables(selected.variablesJson) : []),
     [selected],
   );
+
+  const confirmLeave = useCallback(
+    () =>
+      confirm({
+        title: t("unsavedChangesTitle"),
+        message: t("unsavedChangesWarning"),
+        confirmLabel: t("unsavedChangesLeave"),
+        cancelLabel: t("unsavedChangesStay"),
+        kind: "danger",
+      }),
+    [confirm, t],
+  );
+
+  useUnsavedChanges(dirty && !isRedirecting, confirmLeave);
 
   const save = () => {
     if (!selected) return;
@@ -138,6 +159,8 @@ export default function DocumentGenerator({
         },
         {
           onSuccess: () => {
+            setDirty(false);
+            setIsRedirecting(true);
             notify(t("updateSuccess"), "success");
             router.push("/documents");
           },
@@ -158,6 +181,8 @@ export default function DocumentGenerator({
       },
       {
         onSuccess: () => {
+          setDirty(false);
+          setIsRedirecting(true);
           notify(t("generateSuccess"), "success");
           router.push("/documents");
         },
@@ -170,9 +195,28 @@ export default function DocumentGenerator({
 
   if (isEditing && (documentQuery.isLoading || !initialized)) {
     return (
-      <div className="card loading-card">
-        <LoaderCircle className="spinner" />
-        {t("loadingDocument")}
+      <div
+        className="document-generator-shell document-generator-loading"
+        aria-busy="true"
+      >
+        <div
+          className="document-sticky-actions document-actions-skeleton"
+          aria-hidden="true"
+        >
+          <span className="skeleton-action" />
+          <span className="skeleton-action" />
+        </div>
+        <section className="card document-form-card">
+          <div className="document-loading-heading">
+            <span className="skeleton-icon" />
+            <div>
+              <span className="skeleton-line wide" />
+              <span className="skeleton-line" />
+            </div>
+          </div>
+          <ListSkeleton rows={6} />
+          <span className="sr-only">{t("loadingDocument")}</span>
+        </section>
       </div>
     );
   }
@@ -185,112 +229,22 @@ export default function DocumentGenerator({
     );
   }
 
-  const pending = generateMutation.isPending || updateMutation.isPending;
+  const pending =
+    generateMutation.isPending || updateMutation.isPending || isRedirecting;
 
   return (
-    <section className="card document-form-card">
-      <div className="section-heading">
-        {isEditing ? <Save /> : <Sparkles />}
-
-        <div>
-          <h2>{isEditing ? t("editFormTitle") : t("generateTitle")}</h2>
-
-          <p>
-            {isEditing ? t("editFormDescription") : t("generateDescription")}
-          </p>
-        </div>
-      </div>
-
-      {!isEditing && (
-        <TemplatePicker
-          templates={templates.data ?? []}
-          loading={templates.isLoading}
-          value={templateId}
-          disabled={isEditing}
-          onChange={(id) => {
-            if (isEditing) return;
-
-            const nextTemplateId = id === templateId ? "" : id;
-
-            const nextTemplate = templates.data?.find(
-              (template) => template.id === nextTemplateId,
-            );
-
-            setTemplateId(nextTemplateId);
-
-            setDocumentName(
-              nextTemplate
-                ? `${nextTemplate.name} - ${new Date().toLocaleDateString()}`
-                : "",
-            );
-
-            setDocumentNameError("");
-            setValues({});
-            setErrors({});
-          }}
-        />
-      )}
-      {selected && (
-        <label
-          className={`field ${documentNameError ? "field-error" : ""}`}
-          htmlFor="document-name"
-        >
-          <span>
-            {t("documentName")} <strong className="required">*</strong>
-          </span>
-
-          <input
-            id="document-name"
-            ref={documentNameRef}
-            type="text"
-            value={documentName}
-            placeholder={t("documentNamePlaceholder")}
-            aria-invalid={Boolean(documentNameError)}
-            aria-describedby={
-              documentNameError ? "document-name-error" : undefined
-            }
-            onChange={(event) => {
-              setDocumentName(event.target.value);
-
-              if (documentNameError) {
-                setDocumentNameError("");
-              }
-            }}
-          />
-
-          {documentNameError && (
-            <small id="document-name-error" className="form-error">
-              {documentNameError}
-            </small>
-          )}
-        </label>
-      )}
-
-      {variables.map((variable) => (
-        <VariableField
-          key={variable.name}
-          variable={variable}
-          value={values[variable.name] ?? ""}
-          error={errors[variable.name]}
-          onChange={(value) => {
-            setValues((current) => ({
-              ...current,
-              [variable.name]: value,
-            }));
-
-            setErrors((current) => ({
-              ...current,
-              [variable.name]: "",
-            }));
-          }}
-        />
-      ))}
-
-      <div className="form-actions">
+    <div className="document-generator-shell pending-form" aria-busy={pending}>
+      <PendingOverlay active={pending} label={t("saving")} />
+      <div className="form-actions document-sticky-actions">
         <button
           className="btn secondary"
           type="button"
-          onClick={() => router.push("/documents")}
+          disabled={pending}
+          onClick={async () => {
+            if (dirty && !(await confirmLeave())) return;
+            setDirty(false);
+            router.push("/documents");
+          }}
         >
           <ArrowLeft size={17} />
           {t("backToDocuments")}
@@ -319,6 +273,107 @@ export default function DocumentGenerator({
           </button>
         )}
       </div>
-    </section>
+
+      <section className="card document-form-card">
+        <div className="section-heading">
+          {isEditing ? <Save /> : <Sparkles />}
+          <div>
+            <h2>{isEditing ? t("editFormTitle") : t("generateTitle")}</h2>
+            <p>
+              {isEditing ? t("editFormDescription") : t("generateDescription")}
+            </p>
+          </div>
+        </div>
+
+        {!isEditing && (
+          <TemplatePicker
+            templates={templates.data ?? []}
+            loading={templates.isLoading}
+            value={templateId}
+            disabled={isEditing}
+            onChange={(id) => {
+              if (isEditing) return;
+
+              const nextTemplateId = id === templateId ? "" : id;
+
+              const nextTemplate = templates.data?.find(
+                (template) => template.id === nextTemplateId,
+              );
+
+              setTemplateId(nextTemplateId);
+              setDirty(true);
+
+              setDocumentName(
+                nextTemplate
+                  ? `${nextTemplate.name} - ${new Date().toLocaleDateString()}`
+                  : "",
+              );
+
+              setDocumentNameError("");
+              setValues({});
+              setErrors({});
+            }}
+          />
+        )}
+        {selected && (
+          <label
+            className={`field ${documentNameError ? "field-error" : ""}`}
+            htmlFor="document-name"
+          >
+            <span>
+              {t("documentName")} <strong className="required">*</strong>
+            </span>
+
+            <InputControl
+              id="document-name"
+              ref={documentNameRef}
+              type="text"
+              value={documentName}
+              placeholder={t("documentNamePlaceholder")}
+              aria-invalid={Boolean(documentNameError)}
+              aria-describedby={
+                documentNameError ? "document-name-error" : undefined
+              }
+              onChange={(event) => {
+                const nextName = event.target.value;
+                if (nextName !== documentName) setDirty(true);
+                setDocumentName(nextName);
+
+                if (documentNameError) {
+                  setDocumentNameError("");
+                }
+              }}
+            />
+
+            {documentNameError && (
+              <small id="document-name-error" className="form-error">
+                {documentNameError}
+              </small>
+            )}
+          </label>
+        )}
+
+        {variables.map((variable) => (
+          <VariableField
+            key={variable.name}
+            variable={variable}
+            value={values[variable.name] ?? ""}
+            error={errors[variable.name]}
+            onChange={(value) => {
+              if (value !== (values[variable.name] ?? "")) setDirty(true);
+              setValues((current) => ({
+                ...current,
+                [variable.name]: value,
+              }));
+
+              setErrors((current) => ({
+                ...current,
+                [variable.name]: "",
+              }));
+            }}
+          />
+        ))}
+      </section>
+    </div>
   );
 }

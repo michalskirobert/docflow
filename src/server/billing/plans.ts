@@ -35,7 +35,10 @@ export function getPlan(code: PlanCode): PlanPrice {
   };
 }
 export function publicPlans(customerType: CustomerType) {
-  return (["FREE", "YEARLY"] as PlanCode[]).map((code) => {
+  const codes: PlanCode[] =
+    customerType === "BUSINESS" ? ["YEARLY"] : ["FREE", "YEARLY"];
+
+  return codes.map((code) => {
     const plan = getPlan(code);
     return {
       ...plan,

@@ -5,7 +5,9 @@ import {
   Layers,
   LogOut,
   Settings,
+  UserRound,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -22,7 +24,8 @@ const links = [
 export function Sidebar() {
   const t = useTranslations("common"),
     pathname = usePathname(),
-    router = useRouter();
+    router = useRouter(),
+    [profileOpen, setProfileOpen] = useState(false);
   async function logout() {
     await api.post("/auth/logout");
     router.replace("/login");
@@ -40,7 +43,7 @@ export function Sidebar() {
       <nav>
         {links.map(({ href, key, icon: Icon }) => (
           <Link
-            className={pathname === href ? "active" : undefined}
+            className={`${pathname === href ? "active" : ""} nav-${key}`.trim()}
             href={href}
             key={href}
           >
@@ -50,11 +53,50 @@ export function Sidebar() {
         ))}
       </nav>
       <div className="sidebar-bottom">
-        <span className="version">DocFlow v{version}</span>
         <button className="logout" onClick={logout}>
           <LogOut size={18} />
           <span>{t("logout")}</span>
         </button>
+        <span className="version desktop-version">DocFlow v{version}</span>
+      </div>
+
+      <div className="mobile-profile">
+        {profileOpen && (
+          <>
+            <button
+              className="mobile-profile-backdrop"
+              type="button"
+              aria-label="Close"
+              onClick={() => setProfileOpen(false)}
+            />
+            <div className="mobile-profile-menu">
+              <Link href="/settings" onClick={() => setProfileOpen(false)}>
+                <Settings size={18} />
+                <span>{t("settings")}</span>
+              </Link>
+              <button type="button" onClick={logout}>
+                <LogOut size={18} />
+                <span>{t("logout")}</span>
+              </button>
+            </div>
+          </>
+        )}
+        <button
+          className={`mobile-profile-trigger ${profileOpen || pathname === "/settings" ? "active" : ""}`}
+          type="button"
+          aria-expanded={profileOpen}
+          onClick={() => setProfileOpen((open) => !open)}
+        >
+          <UserRound size={20} />
+          <span>{t("settings")}</span>
+        </button>
+      </div>
+
+      <div
+        className="mobile-product-meta"
+        aria-label={`DocFlow by NurByte, version ${version}`}
+      >
+        <span>DocFlow · NurByte · v{version}</span>
       </div>
     </aside>
   );

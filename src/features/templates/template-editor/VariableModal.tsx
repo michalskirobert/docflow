@@ -1,4 +1,5 @@
 "use client";
+import { InputControl, SelectControl } from "@/components/shared/form";
 import { useRef, useState } from "react";
 import { Plus, Trash2, Variable } from "lucide-react";
 import type { TemplateVariable, VariableType } from "../types";
@@ -98,7 +99,7 @@ export function VariableModal({
         <div className="form-grid two">
           <label className="field">
             {t("variableLabel")}
-            <input
+            <InputControl
               ref={labelRef}
               autoFocus
               maxLength={120}
@@ -115,7 +116,7 @@ export function VariableModal({
           </label>
           <label className="field">
             {t("variableName")}
-            <input
+            <InputControl
               ref={nameRef}
               maxLength={80}
               value={name}
@@ -131,7 +132,7 @@ export function VariableModal({
           </label>
           <label className="field">
             {t("variableType")}
-            <select
+            <SelectControl
               value={type}
               onChange={(e) => {
                 const next = e.target.value as VariableType;
@@ -151,13 +152,13 @@ export function VariableModal({
               <option value="time">{t("typeTime")}</option>
               <option value="image">{t("typeImage")}</option>
               <option value="select">{t("typeSelect")}</option>
-            </select>
+            </SelectControl>
           </label>
         </div>
         {type === "text" && (
           <label className="field">
             {t("inputMask")}
-            <input
+            <InputControl
               value={mask}
               onChange={(e) => setMask(e.target.value)}
               placeholder="AAA-999 / 99-999"
@@ -168,7 +169,7 @@ export function VariableModal({
         {["date", "datetime", "time"].includes(type) && (
           <label className="field">
             {t("dateFormat")}
-            <select
+            <SelectControl
               value={dateFormat}
               onChange={(e) => setDateFormat(e.target.value)}
             >
@@ -192,7 +193,7 @@ export function VariableModal({
                   <option>HH:mm:ss</option>
                 </>
               )}
-            </select>
+            </SelectControl>
           </label>
         )}
         {type === "select" && (
@@ -201,7 +202,7 @@ export function VariableModal({
             <div className="option-builder option-builder-fixed">
               {options.map((option, index) => (
                 <div className="option-row" key={index}>
-                  <input
+                  <InputControl
                     value={option}
                     onChange={(e) =>
                       setOptions((list) =>
@@ -237,7 +238,7 @@ export function VariableModal({
             <div className="form-grid two">
               <label className="field">
                 {t("widthPx")}
-                <input
+                <InputControl
                   type="number"
                   min="32"
                   value={imageWidth}
@@ -246,7 +247,7 @@ export function VariableModal({
               </label>
               <label className="field">
                 {t("heightPx")}
-                <input
+                <InputControl
                   type="number"
                   min="32"
                   value={imageHeight ?? ""}
@@ -258,7 +259,7 @@ export function VariableModal({
               </label>
               <label className="field">
                 {t("placement")}
-                <select
+                <SelectControl
                   value={imageAlign}
                   onChange={(e) =>
                     setImageAlign(e.target.value as typeof imageAlign)
@@ -268,11 +269,11 @@ export function VariableModal({
                   <option value="left">{t("leftWrap")}</option>
                   <option value="center">{t("center")}</option>
                   <option value="right">{t("rightWrap")}</option>
-                </select>
+                </SelectControl>
               </label>
               <label className="field">
                 {t("imageFit")}
-                <select
+                <SelectControl
                   value={imageFit}
                   onChange={(e) =>
                     setImageFit(e.target.value as typeof imageFit)
@@ -281,7 +282,7 @@ export function VariableModal({
                   <option value="contain">{t("contain")}</option>
                   <option value="cover">{t("cover")}</option>
                   <option value="fill">fill</option>
-                </select>
+                </SelectControl>
               </label>
             </div>
             <div
@@ -296,7 +297,7 @@ export function VariableModal({
           </>
         )}
         <label className="check-row">
-          <input
+          <InputControl
             type="checkbox"
             checked={required}
             onChange={(e) => setRequired(e.target.checked)}
@@ -306,7 +307,7 @@ export function VariableModal({
         {required && (
           <label className="field">
             {t("requiredMessage")}
-            <input
+            <InputControl
               value={requiredMessage}
               onChange={(e) => setRequiredMessage(e.target.value)}
             />

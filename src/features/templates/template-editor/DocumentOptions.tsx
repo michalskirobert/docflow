@@ -1,3 +1,5 @@
+import { ChoiceField } from "@/components/shared/form";
+
 type Props = {
   t: (key: string) => string;
   header: boolean;
@@ -18,30 +20,24 @@ export function DocumentOptions({
 }: Props) {
   return (
     <div className="document-regions">
-      <label>
-        <input
-          type="checkbox"
-          checked={header}
-          onChange={(e) => setHeader(e.target.checked)}
-        />
-        {t("header")}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={footer}
-          onChange={(e) => setFooter(e.target.checked)}
-        />
-        {t("footer")}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={pageNumbers}
-          onChange={(e) => setPageNumbers(e.target.checked)}
-        />
-        {t("pageNumbers")}
-      </label>
+      <ChoiceField
+        type="checkbox"
+        checked={header}
+        onChange={(e) => setHeader(e.target.checked)}
+        label={t("header")}
+      />
+      <ChoiceField
+        type="checkbox"
+        checked={footer}
+        onChange={(e) => setFooter(e.target.checked)}
+        label={t("footer")}
+      />
+      <ChoiceField
+        type="checkbox"
+        checked={pageNumbers}
+        onChange={(e) => setPageNumbers(e.target.checked)}
+        label={t("pageNumbers")}
+      />
     </div>
   );
 }

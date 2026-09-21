@@ -1,3 +1,4 @@
+import { SelectControl } from "@/components/shared/form";
 import {
   AlignCenter,
   AlignJustify,
@@ -72,7 +73,7 @@ export function EditorToolbar({
         <Redo2 />
       </button>
       <span />
-      <select
+      <SelectControl
         onPointerDown={rememberSelection}
         onChange={(e) => cmd("formatBlock", e.target.value)}
         value={state.block}
@@ -85,8 +86,8 @@ export function EditorToolbar({
         <option value="h4">{t("heading4")}</option>
         <option value="h5">{t("subtitle")}</option>
         <option value="blockquote">{t("quote")}</option>
-      </select>
-      <select
+      </SelectControl>
+      <SelectControl
         value={state.fontSize}
         onPointerDown={rememberSelection}
         onChange={(e) => setPx(e.target.value)}
@@ -98,8 +99,8 @@ export function EditorToolbar({
             {size}px
           </option>
         ))}
-      </select>
-      <select
+      </SelectControl>
+      <SelectControl
         value={state.lineHeight}
         onPointerDown={rememberSelection}
         onChange={(e) => setLineHeight(e.target.value)}
@@ -112,7 +113,7 @@ export function EditorToolbar({
             {value}
           </option>
         ))}
-      </select>
+      </SelectControl>
       <button
         className={b(state.bold)}
         aria-pressed={state.bold}

@@ -1,5 +1,6 @@
 "use client";
 
+import { InputControl } from "@/components/shared/form";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -804,6 +805,32 @@ export function TemplateEditor({ template, onClose }: Props) {
     return range;
   };
 
+  const dropVariableAtPoint = (
+    variable: TemplateVariable,
+    x: number,
+    y: number,
+  ): boolean => {
+    const range = rangeAtPoint(x, y);
+    if (!range) return false;
+
+    const region = [
+      headerEditor.current,
+      editor.current,
+      footerEditor.current,
+    ].find((candidate) => candidate?.contains(range.startContainer));
+    if (!region) return false;
+
+    activeEditor.current = region;
+    savedRange.current = range;
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    document.execCommand("insertHTML", false, variableHtml(variable));
+    if (variable.type === "image") normalizeEditorVariableImages(region);
+    rememberSelection();
+    return true;
+  };
+
   const dropIntoRegion = (
     event: DragEvent<HTMLDivElement>,
     region: HTMLDivElement | null,
@@ -974,7 +1001,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               {template ? t("editTemplate") : t("newTemplate")}
             </span>
 
-            <input
+            <InputControl
               ref={nameRef}
               className="editor-title"
               maxLength={250}
@@ -1007,7 +1034,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           </div>
         </header>
 
-        <input
+        <InputControl
           className="editor-description"
           maxLength={400}
           value={description}
@@ -1069,6 +1096,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               current.filter((variable) => variable.name !== variableName),
             )
           }
+          dropVariableAtPoint={dropVariableAtPoint}
           reorderVariable={(from, to) =>
             setVariables((current) => {
               if (

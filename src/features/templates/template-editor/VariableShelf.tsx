@@ -16,6 +16,11 @@ type Props = {
   editVariable: (v: TemplateVariable) => void;
   removeVariable: (name: string) => void;
   reorderVariable: (from: number, to: number) => void;
+  dropVariableAtPoint: (
+    variable: TemplateVariable,
+    x: number,
+    y: number,
+  ) => boolean;
 };
 
 type DragState = {
@@ -31,6 +36,7 @@ export function VariableShelf({
   editVariable,
   removeVariable,
   reorderVariable,
+  dropVariableAtPoint,
 }: Props) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -130,6 +136,17 @@ export function VariableShelf({
 
       if (!drag || event.pointerId !== drag.pointerId) {
         return;
+      }
+
+      if (dropIndexRef.current === null) {
+        const variable = variables[drag.index];
+        if (
+          variable &&
+          dropVariableAtPoint(variable, event.clientX, event.clientY)
+        ) {
+          clearDrag();
+          return;
+        }
       }
 
       finishReorder();
@@ -239,6 +256,14 @@ export function VariableShelf({
 
               <button
                 type="button"
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = "copy";
+                  event.dataTransfer.setData(
+                    "text/docflow-variable",
+                    variable.name,
+                  );
+                }}
                 onMouseDown={rememberSelection}
                 onClick={() => insertVariable(variable)}
                 title={`{{${variable.name}}}`}

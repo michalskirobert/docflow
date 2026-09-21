@@ -1,4 +1,5 @@
 "use client";
+import { InputControl } from "@/components/shared/form";
 import { useMemo, useState } from "react";
 import {
   Copy,
@@ -39,7 +40,7 @@ export default function TemplateList() {
       <div className="page-actions template-list-actions">
         <label className="search-field">
           <Search size={16} />
-          <input
+          <InputControl
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("search")}

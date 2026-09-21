@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/config";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { useUpdateLocale } from "./service";
+import { SelectControl } from "@/components/shared/form";
 
 const labels: Record<Locale, string> = {
   pl: "Polski",
@@ -38,7 +39,7 @@ export default function LanguageSwitcher() {
   return (
     <label className="field language-field">
       {t("language")}
-      <select
+      <SelectControl
         value={locale}
         onChange={(event) => change(event.target.value as Locale)}
       >
@@ -47,7 +48,7 @@ export default function LanguageSwitcher() {
             {label}
           </option>
         ))}
-      </select>
+      </SelectControl>
     </label>
   );
 }

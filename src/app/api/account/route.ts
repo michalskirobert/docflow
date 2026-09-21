@@ -99,49 +99,22 @@ export async function PATCH(request: Request) {
           where: { id: s.organizationId },
           data: { name: data.organizationName },
         });
-        await tx.billingProfile.upsert({
-          where: { organizationId: s.organizationId },
-          create: {
-            organizationId: s.organizationId,
-            customerType: data.customerType,
-            billingEmail: data.billingEmail.toLowerCase(),
-            firstName:
-              data.customerType === "INDIVIDUAL" ? data.firstName : null,
-            lastName: data.customerType === "INDIVIDUAL" ? data.lastName : null,
-            companyName:
-              data.customerType === "BUSINESS"
-                ? data.companyName || null
-                : null,
-            taxId: data.customerType === "BUSINESS" ? data.taxId || null : null,
-            vatId: data.customerType === "BUSINESS" ? data.vatId || null : null,
-            countryCode: data.countryCode.toUpperCase(),
-            street: data.street,
-            buildingNumber: data.buildingNumber,
-            apartmentNumber: data.apartmentNumber || null,
-            postalCode: data.postalCode,
-            city: data.city,
-          },
-          update: {
-            customerType: data.customerType,
-            billingEmail: data.billingEmail.toLowerCase(),
-            firstName:
-              data.customerType === "INDIVIDUAL" ? data.firstName : null,
-            lastName: data.customerType === "INDIVIDUAL" ? data.lastName : null,
-            companyName:
-              data.customerType === "BUSINESS"
-                ? data.companyName || null
-                : null,
-            taxId: data.customerType === "BUSINESS" ? data.taxId || null : null,
-            vatId: data.customerType === "BUSINESS" ? data.vatId || null : null,
-            countryCode: data.countryCode.toUpperCase(),
-            street: data.street,
-            buildingNumber: data.buildingNumber,
-            apartmentNumber: data.apartmentNumber || null,
-            postalCode: data.postalCode,
-            city: data.city,
-          },
-        });
       }
+      await tx.billingProfile.update({
+        where: { organizationId: s.organizationId },
+        data: {
+          billingEmail: data.billingEmail.toLowerCase(),
+          companyName: data.companyName || null,
+          taxId: data.taxId || null,
+          vatId: data.vatId || null,
+          countryCode: data.countryCode.toUpperCase(),
+          street: data.street,
+          buildingNumber: data.buildingNumber,
+          apartmentNumber: data.apartmentNumber || null,
+          postalCode: data.postalCode,
+          city: data.city,
+        },
+      });
       return updated;
     });
     if (emailChanged) await sendVerificationEmail(user);

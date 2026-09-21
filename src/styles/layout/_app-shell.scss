@@ -686,3 +686,381 @@ body {
     border-radius: 18px;
   }
 }
+
+/* Mobile navigation utilities */
+@media (max-width: 900px) {
+  .sidebar {
+    height: 76px;
+    display: grid;
+    grid-template-columns: 1fr 62px;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .sidebar nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-width: 0;
+  }
+  .sidebar-bottom {
+    display: flex;
+    position: static;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
+  }
+  .sidebar-bottom .version {
+    display: block;
+    padding: 0;
+    color: #94a3b8;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+  .sidebar-bottom .logout {
+    display: flex;
+    width: 100%;
+    min-height: 48px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px;
+    color: #cbd5e1;
+    font-size: 9px;
+  }
+  .sidebar-bottom .logout svg {
+    width: 17px;
+    height: 17px;
+  }
+  .auth-language {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 18px;
+  }
+  .auth-language .language-field {
+    width: auto;
+    min-width: 170px;
+    margin: 0;
+  }
+  .auth-language .field-label {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .auth-switch-page {
+    margin: 20px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar-bottom {
+    position: relative;
+    gap: 0;
+  }
+
+  .sidebar-bottom .version {
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 5px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 7%);
+    color: #94a3b8;
+    font-size: 7px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  .sidebar-bottom .logout {
+    padding-top: 13px;
+  }
+}
+
+.mobile-product-meta {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    height: 96px;
+    padding-bottom: 22px;
+  }
+
+  .sidebar-bottom .desktop-version {
+    display: none;
+  }
+
+  .sidebar-bottom .logout {
+    padding-top: 4px;
+  }
+
+  .mobile-product-meta {
+    position: fixed;
+    right: 0;
+    bottom: 3px;
+    left: 0;
+    z-index: 101;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+    height: 17px;
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .mobile-product-meta strong {
+    color: #cbd5e1;
+    font-size: 9px;
+    font-weight: 700;
+  }
+}
+
+/* 2.1.5 interaction polish */
+.btn,
+.card-actions button,
+.document-actions a,
+.sidebar a,
+.sidebar button {
+  transition:
+    transform 160ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+.btn:hover:not(:disabled),
+.card-actions button:hover:not(:disabled),
+.document-actions a:hover {
+  transform: translateY(-2px);
+}
+.btn:active:not(:disabled),
+.card-actions button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+.btn:focus-visible,
+.card-actions button:focus-visible,
+.document-actions a:focus-visible {
+  outline: 3px solid rgb(99 102 241 / 24%);
+  outline-offset: 2px;
+}
+.btn.secondary:hover:not(:disabled) {
+  background: #e8edf5;
+  box-shadow: 0 8px 18px rgb(15 23 42 / 8%);
+}
+
+/* A long registration card must breathe above and below instead of touching the viewport edge. */
+.login-page:has(.login-card.wide) {
+  place-items: start center;
+  padding-top: clamp(36px, 6vh, 72px);
+  padding-bottom: clamp(36px, 6vh, 72px);
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding-bottom: 92px;
+  }
+  .sidebar {
+    height: 92px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 7px 8px 20px;
+  }
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    flex: 4 1 0;
+    gap: 2px;
+  }
+  .sidebar nav a,
+  .sidebar-bottom .logout {
+    min-width: 0;
+    min-height: 62px;
+    padding: 6px 2px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+  .sidebar nav a svg,
+  .sidebar-bottom .logout svg {
+    width: 20px;
+    height: 20px;
+  }
+  .sidebar-bottom {
+    display: flex;
+    position: static;
+    flex: 1 1 0;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    align-items: stretch;
+    justify-content: stretch;
+  }
+  .sidebar-bottom .logout {
+    width: 100%;
+    color: #cbd5e1;
+  }
+  .sidebar-bottom .desktop-version {
+    display: none;
+  }
+  .mobile-product-meta {
+    bottom: 3px;
+    height: 14px;
+    font-size: 8px;
+  }
+  .app-footer {
+    display: none;
+  }
+}
+.mobile-profile {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding-bottom: 92px;
+  }
+
+  .sidebar {
+    height: 92px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(64px, 0.34fr);
+    align-items: stretch;
+    gap: 2px;
+    padding: 7px 8px 20px;
+  }
+
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .sidebar nav .nav-settings {
+    display: none;
+  }
+
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .mobile-profile {
+    position: relative;
+    display: block;
+    min-width: 0;
+  }
+
+  .mobile-profile-trigger,
+  .sidebar nav a {
+    width: 100%;
+    min-width: 0;
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px 2px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #cbd5e1;
+    font: inherit;
+    font-size: 10px;
+    line-height: 1.1;
+  }
+
+  .mobile-profile-trigger.active {
+    background: rgb(99 102 241 / 20%);
+    color: #fff;
+  }
+
+  .mobile-profile-trigger svg,
+  .sidebar nav a svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-profile-backdrop {
+    position: fixed;
+    z-index: 98;
+    inset: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .mobile-profile-menu {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    z-index: 102;
+    width: 176px;
+    overflow: hidden;
+    border: 1px solid rgb(148 163 184 / 20%);
+    border-radius: 14px;
+    padding: 6px;
+    background: #10182b;
+    box-shadow: 0 18px 44px rgb(2 6 23 / 32%);
+  }
+
+  .mobile-profile-menu a,
+  .mobile-profile-menu button {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #e2e8f0;
+    font: inherit;
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+  .mobile-profile-menu a:hover,
+  .mobile-profile-menu button:hover {
+    background: rgb(255 255 255 / 8%);
+  }
+}
+
+/* Registration: reduce the oversized top whitespace inside the wide auth card. */
+.login-card.wide {
+  padding-top: 24px;
+}
+
+.login-card.wide .auth-topbar {
+  margin-bottom: 12px;
+}
+
+.login-card.wide .login-brand {
+  margin-top: 4px;
+}
+
+.login-page:has(.login-card.wide) {
+  padding-top: clamp(20px, 3vh, 36px);
+}
+
+@media (max-width: 760px) {
+  .login-card.wide {
+    padding-top: 18px;
+  }
+
+  .login-page:has(.login-card.wide) {
+    padding-top: 14px;
+  }
+}

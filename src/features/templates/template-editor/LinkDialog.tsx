@@ -1,3 +1,4 @@
+import { InputControl } from "@/components/shared/form";
 import { Link2 } from "lucide-react";
 type Props = {
   t: (key: string) => string;
@@ -29,7 +30,7 @@ export function LinkDialog({
         <p>{t("linkHelp")}</p>
         <label className="field">
           URL
-          <input
+          <InputControl
             autoFocus
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -38,7 +39,7 @@ export function LinkDialog({
         </label>
         <label className="field">
           {t("linkText")}
-          <input
+          <InputControl
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={t("linkTextPlaceholder")}

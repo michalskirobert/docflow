@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "./service";
+import { renderEmailTemplate } from "./template";
 import type { AppLocale } from "@/types/auth";
 const hash = (token: string) =>
   createHash("sha256").update(token).digest("hex");
@@ -38,10 +39,21 @@ export async function sendVerificationEmail(user: {
       : locale === "id"
         ? `Halo ${user.firstName}, klik tautan di bawah untuk memverifikasi email Anda.`
         : `Hi ${user.firstName}, click below to verify your email address.`;
+  const actionLabel =
+    locale === "pl"
+      ? "Potwierdź adres e-mail"
+      : locale === "id"
+        ? "Verifikasi email"
+        : "Verify email";
   await sendEmail({
     to: user.email,
     subject,
-    html: `<p>${intro}</p><p><a href="${url}">${url}</a></p><p>DocFlow · NurByte</p>`,
+    html: renderEmailTemplate({
+      title: subject,
+      intro,
+      actionLabel,
+      actionUrl: url,
+    }),
   });
 }
 export async function consumeVerificationToken(token: string) {

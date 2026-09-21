@@ -1,39 +1,21 @@
 import { z } from "zod";
 const required = (min = 1) => z.string().trim().min(min, "required");
-export const accountSchema = z
-  .object({
-    firstName: required(2).max(60),
-    lastName: required(2).max(80),
-    organizationName: required(2).max(120),
-    email: z.string().trim().min(1, "required").email("invalidEmail"),
-    customerType: z.enum(["INDIVIDUAL", "BUSINESS"]),
-    billingEmail: z.string().trim().email("invalidEmail"),
-    companyName: z.string().trim().optional(),
-    taxId: z.string().trim().optional(),
-    vatId: z.string().trim().optional(),
-    countryCode: z.string().trim().length(2, "countryCode"),
-    street: required(2).max(120),
-    buildingNumber: required().max(20),
-    apartmentNumber: z.string().trim().max(20).optional(),
-    postalCode: required(2).max(20),
-    city: required(2).max(100),
-  })
-  .superRefine((data, ctx) => {
-    if (data.customerType === "BUSINESS") {
-      if (!data.companyName?.trim())
-        ctx.addIssue({
-          code: "custom",
-          message: "required",
-          path: ["companyName"],
-        });
-      if (!data.taxId?.trim() && !data.vatId?.trim())
-        ctx.addIssue({
-          code: "custom",
-          message: "taxRequired",
-          path: ["taxId"],
-        });
-    }
-  });
+export const accountSchema = z.object({
+  firstName: required(2).max(60),
+  lastName: required(2).max(80),
+  organizationName: required(2).max(120),
+  email: z.string().trim().min(1, "required").email("invalidEmail"),
+  billingEmail: z.string().trim().min(1, "required").email("invalidEmail"),
+  companyName: z.string().trim().max(120),
+  taxId: z.string().trim().max(32),
+  vatId: z.string().trim().max(32),
+  countryCode: required(2).max(3),
+  street: required(2).max(120),
+  buildingNumber: required(1).max(20),
+  apartmentNumber: z.string().trim().max(20),
+  postalCode: required(2).max(20),
+  city: required(2).max(100),
+});
 export const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "required"),

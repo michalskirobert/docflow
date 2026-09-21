@@ -5,3 +5,228 @@
 .settings-form .form-grid {
   margin-bottom: 4px;
 }
+
+/* Shared form controls */
+.choice-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.choice-field > input {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+  pointer-events: none;
+}
+.choice-indicator {
+  display: grid;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  place-items: center;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+  transition: 0.15s ease;
+}
+.choice-field > input[type="radio"] + .choice-indicator {
+  border-radius: 999px;
+}
+.choice-field > input:checked + .choice-indicator {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: inset 0 0 0 4px #fff;
+}
+.choice-field > input[type="checkbox"]:checked + .choice-indicator {
+  box-shadow: none;
+}
+.choice-field > input[type="checkbox"]:checked + .choice-indicator::after {
+  content: "✓";
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+.choice-field > input:focus-visible + .choice-indicator {
+  outline: 3px solid rgb(99 102 241 / 18%);
+  outline-offset: 2px;
+}
+.choice-copy {
+  display: grid;
+  gap: 2px;
+  font-weight: 500;
+}
+.choice-copy strong {
+  font-size: 14px;
+}
+.choice-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.segmented .choice-field {
+  flex: 1;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+.plan-radio-choice {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  min-height: 20px;
+  z-index: 2;
+}
+.payment-option > .choice-field {
+  min-height: 20px;
+}
+
+/* Controlled calendar/time popover; replaces browser-native date popup. */
+.native-date-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.native-date-input {
+  padding-right: 48px !important;
+}
+.date-time-picker {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 48px;
+  pointer-events: none;
+}
+.date-time-picker .date-picker-trigger {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 48px !important;
+  height: 100% !important;
+  display: grid !important;
+  place-items: center;
+  transform: none !important;
+  border: 0;
+  border-left: 1px solid #eef2f7;
+  border-radius: 0 10px 10px 0 !important;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  pointer-events: auto !important;
+}
+.date-picker-popover {
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(330px, calc(100vw - 32px));
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 18px 55px rgb(15 23 42 / 18%);
+  pointer-events: auto;
+}
+.date-picker-heading {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.date-picker-heading button,
+.date-picker-grid button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.date-picker-heading button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 9px;
+}
+.date-picker-heading button:hover,
+.date-picker-grid button:hover {
+  background: #f1f5f9;
+}
+.date-picker-weekdays,
+.date-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.date-picker-weekdays {
+  margin-bottom: 4px;
+  color: #94a3b8;
+  font-size: 11px;
+  text-align: center;
+}
+.date-picker-grid button {
+  aspect-ratio: 1;
+  border-radius: 9px;
+  color: #334155;
+}
+.date-picker-grid button.outside {
+  color: #cbd5e1;
+}
+.date-picker-grid button.selected {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+}
+.date-picker-time {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 7px;
+  padding-top: 12px;
+}
+.date-picker-time label {
+  display: grid;
+  gap: 3px;
+  color: #64748b;
+  font-size: 10px;
+}
+.date-picker-time input {
+  width: 64px !important;
+  padding: 8px !important;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  input,
+  select,
+  textarea,
+  [contenteditable="true"] {
+    font-size: 16px !important;
+  }
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [contenteditable="true"] {
+    touch-action: manipulation;
+  }
+  .date-picker-popover {
+    position: fixed;
+    top: 50%;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    transform: translateY(-50%);
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+  }
+}

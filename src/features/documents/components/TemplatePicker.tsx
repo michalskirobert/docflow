@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { InputControl } from "@/components/shared/form";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
@@ -37,7 +38,7 @@ export function TemplatePicker({
     <div className="template-picker">
       <label className="search-field">
         <Search size={16} />
-        <input
+        <InputControl
           value={q}
           onChange={(event) => setQ(event.target.value)}
           placeholder={t("searchTemplates")}

@@ -96,7 +96,8 @@
     "payuCopy": "Pembayaran online. Lisensi aktif otomatis setelah pembayaran dikonfirmasi.",
     "bankTransfer": "Transfer bank",
     "bankTransferCopy": "Kami akan memverifikasi pembayaran setelah transfer diterima.",
-    "freeWhilePaymentPending": "Sampai pembayaran dikonfirmasi, akun menggunakan lisensi Gratis dengan batas 10 dokumen per bulan."
+    "freeWhilePaymentPending": "Sampai pembayaran dikonfirmasi, akun menggunakan lisensi Gratis dengan batas 10 dokumen per bulan.",
+    "alreadyAccount": "Sudah punya akun?"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -157,11 +158,11 @@
     "editDocument": "Edit dokumen",
     "generateTitle": "Buat dokumen",
     "generateDescription": "Pilih templat dan lengkapi bidang yang ditentukan oleh pembuatnya.",
-    "generate": "Buat dokumen",
+    "generate": "Buat",
     "generating": "Membuat…",
     "generateSuccess": "Dokumen berhasil dibuat.",
     "generateError": "Dokumen gagal dibuat. Silakan coba lagi.",
-    "backToDocuments": "Kembali ke dokumen",
+    "backToDocuments": "Kembali",
     "history": "Riwayat dokumen",
     "historyDescription": "Cari, urutkan, pratinjau, edit, atau unduh dokumen yang dibuat.",
     "searchPlaceholder": "Cari dokumen…",
@@ -185,7 +186,7 @@
     "documentName": "Nama dokumen",
     "nameRequired": "Masukkan nama dokumen.",
     "contentRequired": "Isi dokumen tidak boleh kosong.",
-    "saveDocument": "Simpan dokumen",
+    "saveDocument": "Simpan",
     "saving": "Menyimpan…",
     "updateSuccess": "Dokumen berhasil disimpan.",
     "updateError": "Dokumen tidak dapat disimpan.",
@@ -206,7 +207,12 @@
     "invalidImageSignature": "Isi file tidak sesuai dengan format gambar yang didukung.",
     "imageReadError": "Gambar tidak dapat dibaca.",
     "documentNamePlaceholder": "Masukkan nama dokumen",
-    "documentNameRequired": "Nama dokumen wajib diisi"
+    "documentNameRequired": "Nama dokumen wajib diisi",
+    "downloadError": "PDF tidak dapat diunduh. Silakan coba lagi.",
+    "unsavedChangesWarning": "Anda memiliki perubahan yang belum disimpan. Jika meninggalkan halaman ini, perubahan akan hilang.",
+    "unsavedChangesTitle": "Perubahan belum disimpan",
+    "unsavedChangesLeave": "Keluar",
+    "unsavedChangesStay": "Tetap di sini"
   },
   "settings": {
     "title": "Pengaturan",

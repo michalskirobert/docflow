@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
@@ -10,6 +11,7 @@ import { LoaderCircle } from "lucide-react";
 import type { ApiError } from "@/types/api";
 import type { AppLocale } from "@/types/auth";
 import { FormField } from "./form-field";
+import { ChoiceField } from "@/components/shared/form";
 import { loginSchema, type LoginFormValues } from "./schema";
 import { useLogin } from "./service";
 export default function LoginForm() {
@@ -18,6 +20,7 @@ export default function LoginForm() {
   const locale = useLocale() as AppLocale;
   const mutation = useLogin();
   const { notify } = useFeedback();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -31,6 +34,7 @@ export default function LoginForm() {
   const submit = handleSubmit(async (values) => {
     try {
       const user = await mutation.mutateAsync(values);
+      setIsRedirecting(true);
       notify(t("loginSuccess"), "success");
       router.replace("/dashboard", { locale: user.locale ?? locale });
       router.refresh();
@@ -46,15 +50,17 @@ export default function LoginForm() {
       notify(msg, code === "EMAIL_NOT_VERIFIED" ? "warning" : "error");
     }
   });
+  const pending = mutation.isPending || isRedirecting;
+
   return (
     <form
       onSubmit={submit}
       className="auth-form pending-form"
       noValidate
-      aria-busy={mutation.isPending}
+      aria-busy={pending}
     >
-      <PendingOverlay active={mutation.isPending} label={t("signingIn")} />
-      <fieldset disabled={mutation.isPending} className="pending-fieldset">
+      <PendingOverlay active={pending} label={t("signingIn")} />
+      <fieldset disabled={pending} className="pending-fieldset">
         <FormField
           label={t("email")}
           type="email"
@@ -80,16 +86,15 @@ export default function LoginForm() {
               : undefined
           }
         />
-        <label className="checkbox">
-          <input type="checkbox" {...register("rememberMe")} />
-          {t("rememberMe")}
-        </label>
+        <ChoiceField
+          type="checkbox"
+          label={t("rememberMe")}
+          {...register("rememberMe")}
+        />
         {errors.root && <p className="form-error">{errors.root.message}</p>}
-        <button className="btn full" disabled={mutation.isPending}>
-          {mutation.isPending && (
-            <LoaderCircle className="spinner" aria-hidden="true" />
-          )}
-          {mutation.isPending ? t("signingIn") : t("signIn")}
+        <button className="btn full" disabled={pending}>
+          {pending && <LoaderCircle className="spinner" aria-hidden="true" />}
+          {pending ? t("signingIn") : t("signIn")}
         </button>
         <p className="auth-switch">
           {t("noAccount")} <Link href="/register">{t("createAccount")}</Link>

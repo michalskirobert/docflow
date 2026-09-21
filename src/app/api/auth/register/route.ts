@@ -27,6 +27,16 @@ export async function POST(request: Request) {
 
     const data = parsed.data;
 
+    if (data.customerType === "BUSINESS" && data.plan === "FREE") {
+      return NextResponse.json(
+        {
+          code: "PLAN_UNAVAILABLE",
+          message: "Business accounts require a paid plan",
+        },
+        { status: 400 },
+      );
+    }
+
     if (!verifyCaptcha(data.captchaToken, data.captchaAnswer.trim())) {
       return NextResponse.json(
         {

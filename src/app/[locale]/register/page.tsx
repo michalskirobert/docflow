@@ -28,6 +28,9 @@ export default async function RegisterPage({
         <h1>{t("registerTitle")}</h1>
         <p className="muted">{t("registerDescription")}</p>
         <RegisterForm />
+        <p className="auth-switch auth-switch-page">
+          {t("alreadyAccount")} <Link href="/login">{t("signIn")}</Link>
+        </p>
       </section>
     </main>
   );

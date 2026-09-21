@@ -1,5 +1,6 @@
 import type { SelectHTMLAttributes } from "react";
 import type { ReactNode } from "react";
+import { SelectControl } from "./SelectControl";
 
 type Props = SelectHTMLAttributes<HTMLSelectElement> & {
   label: string;
@@ -29,13 +30,13 @@ export function SelectField({
           </span>
         )}
       </span>
-      <select
+      <SelectControl
         {...props}
         aria-invalid={Boolean(error)}
         aria-describedby={error ? errorId : undefined}
       >
         {children}
-      </select>
+      </SelectControl>
       {error && (
         <span id={errorId} className="field-error-message" role="alert">
           {error}

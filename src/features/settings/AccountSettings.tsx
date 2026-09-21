@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/shared/button";
 import { FormField, SelectField } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -20,10 +20,8 @@ export function AccountSettings() {
     handleSubmit,
     reset,
     setError,
-    control,
     formState: { errors },
   } = useForm<AccountFormValues>({ resolver: zodResolver(accountSchema) });
-  const customerType = useWatch({ control, name: "customerType" });
   useEffect(() => {
     if (account.data) reset(account.data);
   }, [account.data, reset]);
@@ -57,7 +55,7 @@ export function AccountSettings() {
       <h2>{t("accountData")}</h2>
       <p className="muted">{t("accountDataHelp")}</p>
       <form onSubmit={submit} className="settings-form" noValidate>
-        <div className="form-grid">
+        <div className="form-grid account-details-grid">
           <FormField
             label={t("firstName")}
             requiredMark
@@ -86,10 +84,9 @@ export function AccountSettings() {
           />
           <SelectField
             label={t("customerType")}
-            requiredMark
-            disabled={!account.data?.canEditOrganization}
-            {...register("customerType")}
-            error={msg(errors.customerType)}
+            value={account.data?.customerType ?? "INDIVIDUAL"}
+            disabled
+            onChange={() => {}}
           >
             <option value="INDIVIDUAL">{t("individual")}</option>
             <option value="BUSINESS">{t("business")}</option>
@@ -98,28 +95,23 @@ export function AccountSettings() {
             label={t("billingEmail")}
             type="email"
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("billingEmail")}
             error={msg(errors.billingEmail)}
           />
-          {customerType === "BUSINESS" && (
+          {account.data?.customerType === "BUSINESS" && (
             <>
               <FormField
                 label={t("companyName")}
-                requiredMark
-                disabled={!account.data?.canEditOrganization}
                 {...register("companyName")}
                 error={msg(errors.companyName)}
               />
               <FormField
                 label={t("taxId")}
-                disabled={!account.data?.canEditOrganization}
                 {...register("taxId")}
                 error={msg(errors.taxId)}
               />
               <FormField
                 label={t("vatId")}
-                disabled={!account.data?.canEditOrganization}
                 {...register("vatId")}
                 error={msg(errors.vatId)}
               />
@@ -128,41 +120,35 @@ export function AccountSettings() {
           <FormField
             label={t("countryCode")}
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("countryCode")}
             error={msg(errors.countryCode)}
           />
           <FormField
             label={t("street")}
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("street")}
             error={msg(errors.street)}
           />
           <FormField
             label={t("buildingNumber")}
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("buildingNumber")}
             error={msg(errors.buildingNumber)}
           />
           <FormField
             label={t("apartmentNumber")}
-            disabled={!account.data?.canEditOrganization}
             {...register("apartmentNumber")}
             error={msg(errors.apartmentNumber)}
           />
           <FormField
             label={t("postalCode")}
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("postalCode")}
             error={msg(errors.postalCode)}
           />
           <FormField
             label={t("city")}
             requiredMark
-            disabled={!account.data?.canEditOrganization}
             {...register("city")}
             error={msg(errors.city)}
           />

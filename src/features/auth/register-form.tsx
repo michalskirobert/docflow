@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
+import { ChoiceField, InputControl } from "@/components/shared/form";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
@@ -39,6 +40,7 @@ export default function RegisterForm() {
   const { notify } = useFeedback();
   const captcha = useCaptcha();
   const mutation = useRegister();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const {
     register,
@@ -129,6 +131,12 @@ export default function RegisterForm() {
   useEffect(() => {
     setValue("locale", locale);
   }, [locale, setValue]);
+
+  useEffect(() => {
+    if (customerType === "BUSINESS" && selectedPlan === "FREE") {
+      setValue("plan", "YEARLY", { shouldDirty: true, shouldValidate: true });
+    }
+  }, [customerType, selectedPlan, setValue]);
 
   useEffect(() => {
     if (!email) {
@@ -231,6 +239,7 @@ export default function RegisterForm() {
         captchaAnswer: values.captchaAnswer.trim(),
       });
 
+      setIsRedirecting(true);
       notify(t("registrationCreated"), "success");
 
       if (result.redirectUri) {
@@ -295,21 +304,20 @@ export default function RegisterForm() {
     }
   });
 
+  const pending = mutation.isPending || isRedirecting;
+
   return (
     <form
       onSubmit={submit}
       className="auth-form wide pending-form"
       noValidate
-      aria-busy={mutation.isPending}
+      aria-busy={pending}
     >
-      <PendingOverlay
-        active={mutation.isPending}
-        label={t("creatingAccount")}
-      />
-      <fieldset disabled={mutation.isPending} className="pending-fieldset">
-        <input type="hidden" {...register("locale")} />
+      <PendingOverlay active={pending} label={t("creatingAccount")} />
+      <fieldset disabled={pending} className="pending-fieldset">
+        <InputControl type="hidden" {...register("locale")} />
 
-        <input type="hidden" {...register("captchaToken")} />
+        <InputControl type="hidden" {...register("captchaToken")} />
 
         <h2>{t("accountDetails")}</h2>
 
@@ -368,25 +376,18 @@ export default function RegisterForm() {
         <h2>{t("billing")}</h2>
 
         <div className="segmented">
-          <label>
-            <input
-              type="radio"
-              value="INDIVIDUAL"
-              {...register("customerType")}
-            />
-
-            {t("privatePerson")}
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              value="BUSINESS"
-              {...register("customerType")}
-            />
-
-            {t("business")}
-          </label>
+          <ChoiceField
+            type="radio"
+            value="INDIVIDUAL"
+            label={t("privatePerson")}
+            {...register("customerType")}
+          />
+          <ChoiceField
+            type="radio"
+            value="BUSINESS"
+            label={t("business")}
+            {...register("customerType")}
+          />
         </div>
 
         {customerType === "BUSINESS" && (
@@ -490,8 +491,8 @@ export default function RegisterForm() {
               key={plan.code}
               className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
             >
-              <input
-                className="plan-radio"
+              <ChoiceField
+                className="plan-radio-choice"
                 type="radio"
                 value={plan.code}
                 disabled={!plan.available}
@@ -547,7 +548,7 @@ export default function RegisterForm() {
               <label
                 className={`payment-option ${paymentMethod === "PAYU" ? "selected" : ""}`}
               >
-                <input
+                <ChoiceField
                   type="radio"
                   value="PAYU"
                   {...register("paymentMethod")}
@@ -560,7 +561,7 @@ export default function RegisterForm() {
               <label
                 className={`payment-option ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
               >
-                <input
+                <ChoiceField
                   type="radio"
                   value="BANK_TRANSFER"
                   {...register("paymentMethod")}
@@ -611,9 +612,7 @@ export default function RegisterForm() {
 
         <button
           className="btn full"
-          disabled={
-            mutation.isPending || captcha.isLoading || !captcha.data?.token
-          }
+          disabled={pending || captcha.isLoading || !captcha.data?.token}
         >
           {mutation.isPending && (
             <LoaderCircle className="spinner" aria-hidden="true" />

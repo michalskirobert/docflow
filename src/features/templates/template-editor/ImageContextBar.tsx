@@ -1,3 +1,4 @@
+import { InputControl, SelectControl } from "@/components/shared/form";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import type { ImageAlign, ImageFit } from "./utils";
 
@@ -34,7 +35,7 @@ export function ImageContextBar({
       <strong>{t("selectedImage")}</strong>
       <label>
         {t("width")}
-        <input
+        <InputControl
           type="number"
           min="32"
           max="1200"
@@ -45,7 +46,7 @@ export function ImageContextBar({
       </label>
       <label>
         {t("heightPx")}
-        <input
+        <InputControl
           type="number"
           min="32"
           max="1600"
@@ -56,7 +57,7 @@ export function ImageContextBar({
       </label>
       <label>
         {t("imageFit")}
-        <select
+        <SelectControl
           value={fit}
           onChange={(e) =>
             onChange(width, height, e.target.value as ImageFit, align)
@@ -65,11 +66,11 @@ export function ImageContextBar({
           <option value="contain">contain</option>
           <option value="cover">cover</option>
           <option value="fill">fill</option>
-        </select>
+        </SelectControl>
       </label>
       <label>
         {t("placement")}
-        <select
+        <SelectControl
           value={align}
           onChange={(e) =>
             onChange(width, height, fit, e.target.value as ImageAlign)
@@ -79,7 +80,7 @@ export function ImageContextBar({
           <option value="left">{t("leftWrap")}</option>
           <option value="center">{t("center")}</option>
           <option value="right">{t("rightWrap")}</option>
-        </select>
+        </SelectControl>
       </label>
       <button type="button" onClick={onMoveBefore} title={t("moveImageBefore")}>
         <ArrowLeft size={15} />

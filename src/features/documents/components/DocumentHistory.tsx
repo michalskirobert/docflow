@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Download,
   Edit3,
   Eye,
   FileText,
@@ -9,6 +8,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import { InputControl, SelectControl } from "@/components/shared/form";
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -16,6 +16,7 @@ import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useDeleteDocumentService } from "../service";
 import type { Document } from "../types";
+import { DownloadPdfButton } from "./DownloadPdfButton";
 
 export function DocumentHistory({
   documents,
@@ -63,14 +64,14 @@ export function DocumentHistory({
         <label className="search-field">
           <Search size={16} />
 
-          <input
+          <InputControl
             value={q}
             onChange={(event) => setQ(event.target.value)}
             placeholder={t("searchPlaceholder")}
           />
         </label>
 
-        <select
+        <SelectControl
           value={sort}
           onChange={(event) => setSort(event.target.value)}
           aria-label={t("sort")}
@@ -82,7 +83,7 @@ export function DocumentHistory({
           <option value="nameAsc">{t("nameAsc")}</option>
 
           <option value="nameDesc">{t("nameDesc")}</option>
-        </select>
+        </SelectControl>
       </div>
 
       {loading ? (
@@ -157,10 +158,12 @@ function DocumentRow({ document: d }: { document: Document }) {
           {t("edit")}
         </Link>
 
-        <a href={`/api/documents/${d.id}/pdf`} download>
-          <Download />
-          {t("pdf")}
-        </a>
+        <DownloadPdfButton
+          documentId={d.id}
+          fileName={d.name}
+          label={t("pdf")}
+          errorLabel={t("downloadError")}
+        />
 
         <button
           className="danger-link"

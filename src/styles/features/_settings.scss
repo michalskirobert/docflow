@@ -1,1 +1,81 @@
-/* Settings-specific additions live here; legacy rules remain compatible during migration. */
+/* Settings layout */
+.settings-grid {
+  align-items: start;
+}
+
+.settings-card {
+  align-self: start;
+}
+
+.settings-card .settings-form {
+  align-content: start;
+}
+
+.account-details-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 760px) {
+  .account-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Independent settings columns avoid grid-row gaps caused by cards with different heights. */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.settings-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-card input:disabled,
+.settings-card select:disabled {
+  cursor: not-allowed;
+  color: var(--muted);
+  background: #f8fafc;
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 2.1.4: balanced independent columns with compact spacing. */
+.settings-grid {
+  gap: 14px;
+}
+.settings-column {
+  gap: 14px;
+}
+.settings-card {
+  margin: 0;
+}
+
+/* 2.1.5: balanced settings columns. Every card fills the same column width; only height varies. */
+.settings-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.settings-column {
+  width: 100%;
+  gap: 16px;
+}
+.settings-column > .settings-card {
+  width: 100%;
+  max-width: none;
+}
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
