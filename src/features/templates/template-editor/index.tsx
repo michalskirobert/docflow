@@ -3,6 +3,7 @@
 import { InputControl } from "@/components/shared/form";
 import {
   type ChangeEvent,
+  type CSSProperties,
   type DragEvent,
   type MouseEvent as ReactMouseEvent,
   useEffect,
@@ -1134,16 +1135,17 @@ export function TemplateEditor({ template, onClose }: Props) {
           setPageNumbers={setPageNumbers}
         />
 
-        <div className="editor-mobile-hint">{t("mobileHint")}</div>
-
         <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
 
         <div className="paper-stage">
           <div
             className="paper-zoom"
-            style={{
-              zoom: zoom / 100,
-            }}
+            style={
+              {
+                zoom: zoom / 100,
+                "--editor-zoom": zoom / 100,
+              } as CSSProperties
+            }
           >
             <div className="a4-page-shell">
               {headerEnabled && (

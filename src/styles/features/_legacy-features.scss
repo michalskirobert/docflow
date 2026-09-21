@@ -237,17 +237,10 @@
 }
 
 /* v1.3 editor + license UX */
-.editor-mobile-hint {
-  display: none;
-  padding: 7px 14px;
-  background: #eef2ff;
-  color: #4f46e5;
-  font-size: 11px;
-  text-align: center;
-}
 .image-dialog {
   max-width: 620px;
 }
+
 .image-source-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1184,6 +1177,7 @@
   .document-regions {
     justify-content: flex-start;
     overflow-x: auto;
+    overflow-y: hidden;
     white-space: nowrap;
   }
   .a4-page-shell {
@@ -2357,5 +2351,91 @@
     -webkit-text-size-adjust: none !important;
     text-size-adjust: none !important;
     touch-action: manipulation;
+  }
+}
+
+/* v2.0.2 mobile template editor: isolate document zoom from editor chrome.
+   The A4 canvas scales visually inside its own scroll viewport; toolbar, variables,
+   document options and zoom controls never participate in the scale. */
+@media (max-width: 760px) {
+  .editor-overlay {
+    overflow: hidden !important;
+  }
+
+  .editor-shell {
+    display: flex !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .editor-header,
+  .editor-description,
+  .editor-toolbar,
+  .image-context-bar,
+  .variable-shelf,
+  .document-options,
+  .zoom-bar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10;
+    flex: 0 0 auto !important;
+    transform: none !important;
+  }
+
+  .editor-toolbar,
+  .image-context-bar,
+  .variable-shelf,
+  .document-options,
+  .zoom-bar {
+    background-clip: padding-box;
+  }
+
+  .paper-stage {
+    position: relative !important;
+    z-index: 1;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    flex: 1 1 0 !important;
+    overflow: auto !important;
+    overflow-anchor: none;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    contain: strict;
+    padding: 12px !important;
+    background: #dfe3ea;
+  }
+
+  .paper-zoom {
+    /* CSS zoom changes layout size on iOS and can push the editor chrome away.
+       Transform keeps the scale entirely inside the workspace viewport. */
+    zoom: 1 !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    transform: scale(var(--editor-zoom, 1));
+    transform-origin: top left !important;
+    will-change: transform;
+  }
+
+  .a4-page-shell {
+    width: max-content;
+    min-width: max-content;
+  }
+
+  .a4-paper {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    transform: none !important;
+    zoom: 1 !important;
   }
 }
