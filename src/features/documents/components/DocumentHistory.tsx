@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { InputControl, SelectControl } from "@/components/shared/form";
-import { useMemo, useState } from "react";
+import { type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
@@ -21,34 +21,21 @@ import { DownloadPdfButton } from "./DownloadPdfButton";
 export function DocumentHistory({
   documents,
   loading = false,
+  action,
+  q,
+  sort,
+  onQueryChange,
+  onSortChange,
 }: {
   documents: Document[];
   loading?: boolean;
+  action?: ReactNode;
+  q: string;
+  sort: string;
+  onQueryChange: (value: string) => void;
+  onSortChange: (value: string) => void;
 }) {
   const t = useTranslations("documents");
-
-  const [q, setQ] = useState("");
-  const [sort, setSort] = useState("newest");
-
-  const filtered = useMemo(
-    () =>
-      documents
-        .filter((document) =>
-          `${document.name} ${document.template?.name ?? ""}`
-            .toLowerCase()
-            .includes(q.toLowerCase()),
-        )
-        .sort((a, b) =>
-          sort === "oldest"
-            ? +new Date(a.createdAt) - +new Date(b.createdAt)
-            : sort === "nameAsc"
-              ? a.name.localeCompare(b.name)
-              : sort === "nameDesc"
-                ? b.name.localeCompare(a.name)
-                : +new Date(b.createdAt) - +new Date(a.createdAt),
-        ),
-    [documents, q, sort],
-  );
 
   return (
     <section className="document-history">
@@ -67,14 +54,14 @@ export function DocumentHistory({
 
           <InputControl
             value={q}
-            onChange={(event) => setQ(event.target.value)}
+            onChange={(event) => onQueryChange(event.target.value)}
             placeholder={t("searchPlaceholder")}
           />
         </label>
 
         <SelectControl
           value={sort}
-          onChange={(event) => setSort(event.target.value)}
+          onChange={(event) => onSortChange(event.target.value)}
           aria-label={t("sort")}
         >
           <option value="newest">{t("newest")}</option>
@@ -85,12 +72,13 @@ export function DocumentHistory({
 
           <option value="nameDesc">{t("nameDesc")}</option>
         </SelectControl>
+        {action}
       </div>
 
       {loading ? (
         <ListSkeleton rows={5} />
-      ) : filtered.length ? (
-        filtered.map((document) => (
+      ) : documents.length ? (
+        documents.map((document) => (
           <DocumentRow key={document.id} document={document} />
         ))
       ) : (

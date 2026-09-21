@@ -267,3 +267,31 @@ Editor fixes: variables can be dropped into body/header/footer at the pointer po
 - Editor toolbar now reflects paragraph/heading, computed font size and line height, and supports line-height values 1–2.
 - Improved selection preservation around toolbar controls.
 - Removed the unconditional non-breaking-space insertion after moving images and prevent headings from wrapping around floated images.
+
+# DocFlow 1.8.0 refactor notes
+
+- Variable shelf reorder uses Pointer Events and displays a floating drag preview plus an expanded target slot.
+- Settings now include editable registration/account data and password change.
+- Account email changes are checked for uniqueness; changed emails are marked unverified and receive a new verification message.
+- Shared form controls live in `src/components/shared/form` and shared buttons in `src/components/shared/button`.
+- Global styling moved from `src/app/globals.css` to Sass under `src/styles`, with base, component, layout and feature partials.
+- `sass` was added to dependencies. Run `yarn install` after unpacking so Yarn can update the lockfile for the new direct dependency.
+
+## v2.1.0
+
+- Variable tags are generated automatically from labels, normalized, read-only and checked case-insensitively for duplicates.
+- Variable validation is grouped in a collapsible section: required/custom message, text length, numeric min/max and date range.
+- Added NUMBER variables and variable-level typography (font size, bold, italic, underline and text color).
+- Contextual help in the variable dialog uses compact question-mark tooltips instead of persistent hint text.
+- Mobile editor zoom no longer resets when the viewport changes because of the keyboard/browser chrome; zoom changes only through zoom controls/Fit page.
+- Company lookup errors use the same inline field error presentation as the rest of registration.
+- Individual registration labels the internal organization/workspace as Workspace rather than Organization.
+- Template list now includes sorting; list filter bars are sticky. Query data remains warm briefly across navigation to reduce repeated loading.
+
+### 2.1.0 editor/list hotfix
+
+- Variable default values now use the same date/time formatting, numeric precision and text masks as generated document fields.
+- Fixed variable modal alignment for validation errors, locked controls, checkbox alignment and help tooltip hover targets.
+- Template editor now guards unsaved changes consistently with the document editor.
+- Template and document search/sort are backed by API query parameters and Prisma ordering/filtering.
+- Documents list spacing now matches the templates page rhythm more closely.

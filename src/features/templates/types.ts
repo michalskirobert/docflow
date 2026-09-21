@@ -1,5 +1,5 @@
 export type VariableType =
-  "text" | "date" | "datetime" | "time" | "image" | "select";
+  "text" | "number" | "date" | "datetime" | "time" | "image" | "select";
 export type TemplateVariable = {
   name: string;
   label?: string;
@@ -7,6 +7,20 @@ export type TemplateVariable = {
   required?: boolean;
   requiredMessage?: string;
   mask?: string;
+  minLength?: number;
+  maxLength?: number;
+  minNumber?: number;
+  maxNumber?: number;
+  minDate?: string;
+  maxDate?: string;
+  defaultValue?: string;
+  locked?: boolean;
+  decimalPlaces?: number;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  color?: string;
   dateFormat?: string;
   options?: string[];
   imageWidth?: number;

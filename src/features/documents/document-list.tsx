@@ -1,6 +1,7 @@
 "use client";
 
 import { FilePlus2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useDocumentsService } from "./service";
@@ -8,18 +9,22 @@ import { DocumentHistory } from "./components/DocumentHistory";
 
 export default function DocumentList() {
   const t = useTranslations("documents");
-  const documents = useDocumentsService();
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState("newest");
+  const documents = useDocumentsService(q, sort);
   return (
-    <>
-      <div className="page-actions">
+    <DocumentHistory
+      documents={documents.data ?? []}
+      loading={documents.isLoading || documents.isFetching}
+      q={q}
+      sort={sort}
+      onQueryChange={setQ}
+      onSortChange={setSort}
+      action={
         <Link className="btn" href="/documents/new">
           <FilePlus2 size={18} /> {t("newDocument")}
         </Link>
-      </div>
-      <DocumentHistory
-        documents={documents.data ?? []}
-        loading={documents.isLoading}
-      />
-    </>
+      }
+    />
   );
 }

@@ -10,13 +10,20 @@ type Props = {
   value: string;
   label: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 };
 
 const pad = (value: number) => String(value).padStart(2, "0");
 const dateValue = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-export function DateTimePicker({ type, value, label, onChange }: Props) {
+export function DateTimePicker({
+  type,
+  value,
+  label,
+  onChange,
+  disabled = false,
+}: Props) {
   const root = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const parsed = value
@@ -83,6 +90,7 @@ export function DateTimePicker({ type, value, label, onChange }: Props) {
         className="date-picker-trigger"
         aria-label={label}
         aria-expanded={open}
+        disabled={disabled}
         onClick={() => setOpen((current) => !current)}
       >
         {type === "time" ? <Clock3 size={18} /> : <CalendarDays size={18} />}

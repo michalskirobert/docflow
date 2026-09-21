@@ -95,7 +95,7 @@ export default function RegisterForm() {
   const lookupCompany = async () => {
     const nip = (taxId ?? "").replace(/\D/g, "");
     if (nip.length !== 10) {
-      setCompanyMessage(t("invalidNipLookup"));
+      setError("taxId", { type: "manual", message: "invalidNipLookup" });
       return;
     }
     setCompanyLoading(true);
@@ -111,7 +111,7 @@ export default function RegisterForm() {
       if (data.city) setValue("city", data.city);
       setCompanyMessage(t("companyLoaded"));
     } catch {
-      setCompanyMessage(t("companyNotFound"));
+      setError("taxId", { type: "manual", message: "companyNotFound" });
     } finally {
       setCompanyLoading(false);
     }
@@ -338,7 +338,11 @@ export default function RegisterForm() {
         </div>
 
         <FormField
-          label={t("organization")}
+          label={
+            customerType === "INDIVIDUAL"
+              ? t("workspaceName")
+              : t("organization")
+          }
           requiredMark
           {...register("organizationName")}
           error={fieldError(errors.organizationName)}

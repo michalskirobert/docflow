@@ -215,7 +215,6 @@ export default function DocumentGenerator({
             </div>
           </div>
           <ListSkeleton rows={6} />
-          <span className="sr-only">{t("loadingDocument")}</span>
         </section>
       </div>
     );
@@ -310,7 +309,18 @@ export default function DocumentGenerator({
               );
 
               setDocumentNameError("");
-              setValues({});
+              setValues(
+                nextTemplate
+                  ? Object.fromEntries(
+                      parseTemplateVariables(nextTemplate.variablesJson).map(
+                        (variable) => [
+                          variable.name,
+                          variable.defaultValue ?? "",
+                        ],
+                      ),
+                    )
+                  : {},
+              );
               setErrors({});
             }}
           />

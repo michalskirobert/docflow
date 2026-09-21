@@ -19,5 +19,29 @@ export function applyInputMask(value: string, mask?: string) {
 export function validateVariable(v: TemplateVariable, value: string) {
   if (v.required && !value.trim())
     return v.requiredMessage || "This field is required.";
+  if (!value) return "";
+  if ((v.minLength ?? 0) > 0 && value.length < v.minLength!)
+    return `Minimum ${v.minLength} characters.`;
+  if ((v.maxLength ?? 0) > 0 && value.length > v.maxLength!)
+    return `Maximum ${v.maxLength} characters.`;
+  if (v.type === "number") {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "Enter a valid number.";
+    if ((v.minNumber ?? 0) > 0 && number < v.minNumber!)
+      return `Minimum value is ${v.minNumber}.`;
+    if ((v.maxNumber ?? 0) > 0 && number > v.maxNumber!)
+      return `Maximum value is ${v.maxNumber}.`;
+    if ((v.decimalPlaces ?? 0) > 0) {
+      const decimals = (value.split(".")[1] ?? "").length;
+      if (decimals > v.decimalPlaces!)
+        return `Maximum ${v.decimalPlaces} decimal places.`;
+    }
+  }
+  if (["date", "datetime"].includes(v.type)) {
+    if (v.minDate && value < v.minDate)
+      return `Date must be on or after ${v.minDate}.`;
+    if (v.maxDate && value > v.maxDate)
+      return `Date must be on or before ${v.maxDate}.`;
+  }
   return "";
 }

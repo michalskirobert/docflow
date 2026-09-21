@@ -3,8 +3,15 @@ import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
 import type { Document } from "./types";
 import type { Template } from "@/features/templates/types";
 
-export const useDocumentsService = () =>
-  useGet<Document[]>(["documents"], "/documents");
+export const useDocumentsService = (q = "", sort = "newest") => {
+  const params = new URLSearchParams();
+  if (q.trim()) params.set("q", q.trim());
+  params.set("sort", sort);
+  return useGet<Document[]>(
+    ["documents", q, sort],
+    `/documents?${params.toString()}`,
+  );
+};
 export const useDocumentService = (id: string) =>
   useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id));
 export const useDocumentTemplatesService = () =>

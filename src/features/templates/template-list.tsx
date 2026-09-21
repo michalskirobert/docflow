@@ -1,6 +1,6 @@
 "use client";
-import { InputControl } from "@/components/shared/form";
-import { useMemo, useState } from "react";
+import { InputControl, SelectControl } from "@/components/shared/form";
+import { useState } from "react";
 import {
   Copy,
   Edit3,
@@ -22,19 +22,11 @@ import { parseTemplateVariables } from "./types";
 import { TemplateEditor } from "./template-editor";
 export default function TemplateList() {
   const t = useTranslations("templates");
-  const query = useTemplatesService();
   const create = useCreateTemplateService();
   const [editing, setEditing] = useState<Template | null | "new">(null);
   const [q, setQ] = useState("");
-  const filtered = useMemo(
-    () =>
-      query.data?.filter((item) =>
-        `${item.name} ${item.description ?? ""}`
-          .toLowerCase()
-          .includes(q.toLowerCase()),
-      ) ?? [],
-    [query.data, q],
-  );
+  const [sort, setSort] = useState("newest");
+  const query = useTemplatesService(q, sort);
   return (
     <>
       <div className="page-actions template-list-actions">
@@ -46,15 +38,25 @@ export default function TemplateList() {
             placeholder={t("search")}
           />
         </label>
+        <SelectControl
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          aria-label={t("sort")}
+        >
+          <option value="newest">{t("newest")}</option>
+          <option value="oldest">{t("oldest")}</option>
+          <option value="nameAsc">{t("nameAsc")}</option>
+          <option value="nameDesc">{t("nameDesc")}</option>
+        </SelectControl>
         <button className="btn" onClick={() => setEditing("new")}>
           <FilePlus2 size={18} /> {t("new")}
         </button>
       </div>
       {query.isLoading ? (
         <ListSkeleton rows={6} cards />
-      ) : filtered.length ? (
+      ) : (query.data?.length ?? 0) > 0 ? (
         <div className="template-grid">
-          {filtered.map((item) => (
+          {query.data!.map((item) => (
             <TemplateCard
               key={item.id}
               template={item}

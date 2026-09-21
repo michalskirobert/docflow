@@ -11,6 +11,9 @@ export function useGet<T>(key: QueryKey, url: string, enabled = true) {
     queryKey: key,
     queryFn: async () => (await api.get<T>(url)).data,
     enabled,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 }
 function useWrite<TData, TBody>(

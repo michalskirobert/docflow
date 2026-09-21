@@ -147,7 +147,18 @@ export function imageStyle(
 
 export function variableHtml(v: TemplateVariable) {
   if (v.type !== "image") {
-    return `{{${v.name}}}`;
+    const styles = [
+      v.fontSize ? `font-size:${v.fontSize}px` : "",
+      v.bold ? "font-weight:700" : "",
+      v.italic ? "font-style:italic" : "",
+      v.underline ? "text-decoration:underline" : "",
+      v.color ? `color:${v.color}` : "",
+    ]
+      .filter(Boolean)
+      .join(";");
+    return styles
+      ? `<span data-variable-name="${escapeHtmlAttribute(v.name)}" style="${styles}">{{${v.name}}}</span>`
+      : `{{${v.name}}}`;
   }
 
   const name = escapeHtmlAttribute(v.name);

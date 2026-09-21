@@ -6,12 +6,14 @@ import {
   type CSSProperties,
   type DragEvent,
   type MouseEvent as ReactMouseEvent,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/components/ui/feedback-provider";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { ArrowLeft, LoaderCircle, Save, Trash2, X } from "lucide-react";
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
@@ -63,7 +65,7 @@ type Props = {
 export function TemplateEditor({ template, onClose }: Props) {
   const t = useTranslations("templateEditor");
 
-  const { notify } = useFeedback();
+  const { notify, confirm } = useFeedback();
   const nameRef = useRef<HTMLInputElement>(null);
   const editor = useRef<HTMLDivElement>(null);
   const headerEditor = useRef<HTMLDivElement>(null);
@@ -144,9 +146,29 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [resizeBox, setResizeBox] = useState<DOMRect | null>(null);
   const [zoom, setZoom] = useState(100);
+  const [dirty, setDirty] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const create = useCreateTemplateService();
   const update = useUpdateTemplateService(template?.id ?? "");
+
+  const confirmLeave = useCallback(
+    () =>
+      confirm({
+        title: t("unsavedChangesTitle"),
+        message: t("unsavedChangesWarning"),
+        confirmLabel: t("unsavedChangesLeave"),
+        cancelLabel: t("unsavedChangesStay"),
+        kind: "danger",
+      }),
+    [confirm, t],
+  );
+  useUnsavedChanges(dirty && !isClosing, confirmLeave);
+  const closeEditor = async () => {
+    if (dirty && !(await confirmLeave())) return;
+    setIsClosing(true);
+    onClose();
+  };
 
   useEffect(() => {
     if (editor.current) {
@@ -169,23 +191,14 @@ export function TemplateEditor({ template, onClose }: Props) {
   }, [template, t]);
 
   useEffect(() => {
-    const fit = () =>
-      setZoom(
-        window.matchMedia("(max-width: 760px)").matches
-          ? Math.max(
-              25,
-              Math.floor(
-                (((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25,
-              ) * 25,
-            )
-          : 100,
-      );
-
-    fit();
-
-    window.addEventListener("resize", fit);
-
-    return () => window.removeEventListener("resize", fit);
+    if (!window.matchMedia("(max-width: 760px)").matches) return;
+    const initialFit = Math.max(
+      25,
+      Math.floor((((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25) * 25,
+    );
+    setZoom(initialFit);
+    // Deliberately do not recompute on resize: mobile keyboards and browser chrome
+    // change the viewport and must not reset a zoom explicitly chosen by the user.
   }, []);
 
   useEffect(() => {
@@ -398,6 +411,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   };
 
   const saveVariableDefinition = (variable: TemplateVariable) => {
+    setDirty(true);
     if (!editingVariable) {
       insertVariable(variable);
       return;
@@ -974,6 +988,8 @@ export function TemplateEditor({ template, onClose }: Props) {
         ? await update.mutateAsync(payload)
         : await create.mutateAsync(payload);
       notify(t(template ? "updateSuccess" : "createSuccess"), "success");
+      setDirty(false);
+      setIsClosing(true);
       onClose();
     } catch {
       notify(t("saveError"), "error");
@@ -984,12 +1000,22 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   return (
     <div className="editor-overlay">
-      <div className="editor-shell">
+      <div
+        className="editor-shell"
+        onInputCapture={(event) => {
+          const target = event.target as Element;
+          if (!target.closest(".variable-dialog")) setDirty(true);
+        }}
+        onChangeCapture={(event) => {
+          const target = event.target as Element;
+          if (!target.closest(".variable-dialog")) setDirty(true);
+        }}
+      >
         <header className="editor-header">
           <button
             className="mobile-editor-back"
             type="button"
-            onClick={onClose}
+            onClick={() => void closeEditor()}
             aria-label={t("back")}
           >
             <ArrowLeft size={18} />
@@ -1013,7 +1039,10 @@ export function TemplateEditor({ template, onClose }: Props) {
           </div>
 
           <div className="editor-actions">
-            <button className="btn secondary" onClick={onClose}>
+            <button
+              className="btn secondary"
+              onClick={() => void closeEditor()}
+            >
               <X size={17} />
               {t("close")}
             </button>

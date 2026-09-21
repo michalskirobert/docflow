@@ -97,7 +97,8 @@
     "bankTransfer": "Transfer bank",
     "bankTransferCopy": "Kami akan memverifikasi pembayaran setelah transfer diterima.",
     "freeWhilePaymentPending": "Sampai pembayaran dikonfirmasi, akun menggunakan lisensi Gratis dengan batas 10 dokumen per bulan.",
-    "alreadyAccount": "Sudah punya akun?"
+    "alreadyAccount": "Sudah punya akun?",
+    "workspaceName": "Nama ruang kerja"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -149,7 +150,23 @@
     "deleteTitle": "Hapus templat?",
     "deleteMessage": "{name} akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.",
     "deletePermanently": "Hapus permanen",
-    "duplicateSuffix": "salinan"
+    "duplicateSuffix": "salinan",
+    "typeNumber": "Angka",
+    "validationSettings": "Validasi",
+    "minLength": "Karakter minimum",
+    "maxLength": "Karakter maksimum",
+    "minNumber": "Nilai minimum",
+    "maxNumber": "Nilai maksimum",
+    "minDate": "Tanggal minimum",
+    "maxDate": "Tanggal maksimum",
+    "variableStyle": "Gaya variabel",
+    "fontSize": "Ukuran font",
+    "textColor": "Warna teks",
+    "sort": "Urutkan",
+    "newest": "Terbaru",
+    "oldest": "Terlama",
+    "nameAsc": "Nama A–Z",
+    "nameDesc": "Nama Z–A"
   },
   "documents": {
     "close": "Zamknij",
@@ -403,6 +420,29 @@
     "resizeImageWidth": "Ubah lebar gambar",
     "resizeImageHeight": "Ubah tinggi gambar",
     "moveImageBefore": "Pindahkan gambar ke sebelumnya",
-    "moveImageAfter": "Pindahkan gambar ke sesudahnya"
+    "moveImageAfter": "Pindahkan gambar ke sesudahnya",
+    "typeNumber": "Angka",
+    "validationSettings": "Validasi",
+    "minLength": "Karakter minimum",
+    "maxLength": "Karakter maksimum",
+    "minNumber": "Nilai minimum",
+    "maxNumber": "Nilai maksimum",
+    "minDate": "Tanggal minimum",
+    "maxDate": "Tanggal maksimum",
+    "variableStyle": "Gaya variabel",
+    "textColor": "Warna teks",
+    "generalSettings": "Umum",
+    "fieldSettings": "Pengaturan bidang",
+    "defaultValueOption": "Nilai bawaan",
+    "defaultValue": "Nilai bawaan",
+    "lockedField": "Bidang terkunci",
+    "lockedFieldHelp": "Bidang tetap terlihat tetapi tidak dapat diedit oleh pengguna.",
+    "decimalPlaces": "Angka desimal",
+    "yes": "Ya",
+    "no": "Tidak",
+    "unsavedChangesWarning": "Anda memiliki perubahan yang belum disimpan. Jika meninggalkan halaman ini, perubahan akan hilang.",
+    "unsavedChangesTitle": "Perubahan belum disimpan",
+    "unsavedChangesLeave": "Keluar",
+    "unsavedChangesStay": "Tetap di sini"
   }
 }

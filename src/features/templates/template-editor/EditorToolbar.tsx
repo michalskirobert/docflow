@@ -141,6 +141,15 @@ export function EditorToolbar({
       >
         <Underline />
       </button>
+      <label className="editor-color-control" title={t("textColor")}>
+        <input
+          type="color"
+          defaultValue="#111827"
+          aria-label={t("textColor")}
+          onPointerDown={rememberSelection}
+          onChange={(e) => cmd("foreColor", e.target.value)}
+        />
+      </label>
       <span />
       <button
         className={b(state.justifyLeft)}

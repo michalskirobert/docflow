@@ -10,8 +10,15 @@ export type TemplateInput = {
   pageNumbers?: boolean;
   variables?: TemplateVariable[];
 };
-export const useTemplatesService = () =>
-  useGet<Template[]>(["templates"], "/templates");
+export const useTemplatesService = (q = "", sort = "newest") => {
+  const params = new URLSearchParams();
+  if (q.trim()) params.set("q", q.trim());
+  params.set("sort", sort);
+  return useGet<Template[]>(
+    ["templates", q, sort],
+    `/templates?${params.toString()}`,
+  );
+};
 export const useCreateTemplateService = () =>
   usePost<Template, TemplateInput>("/templates", [["templates"]]);
 export const useUpdateTemplateService = (id: string) =>

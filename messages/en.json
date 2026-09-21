@@ -97,7 +97,8 @@
     "bankTransfer": "Bank transfer",
     "bankTransferCopy": "We will verify the payment after the transfer is received.",
     "freeWhilePaymentPending": "Until payment is confirmed, your account uses the Free license with a 10-document monthly limit.",
-    "alreadyAccount": "Already have an account?"
+    "alreadyAccount": "Already have an account?",
+    "workspaceName": "Workspace name"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -149,7 +150,23 @@
     "deleteTitle": "Delete template?",
     "deleteMessage": "{name} will be permanently deleted. This action cannot be undone.",
     "deletePermanently": "Delete permanently",
-    "duplicateSuffix": "copy"
+    "duplicateSuffix": "copy",
+    "typeNumber": "Number",
+    "validationSettings": "Validation",
+    "minLength": "Minimum characters",
+    "maxLength": "Maximum characters",
+    "minNumber": "Minimum value",
+    "maxNumber": "Maximum value",
+    "minDate": "Minimum date",
+    "maxDate": "Maximum date",
+    "variableStyle": "Variable style",
+    "fontSize": "Font size",
+    "textColor": "Text color",
+    "sort": "Sort",
+    "newest": "Newest first",
+    "oldest": "Oldest first",
+    "nameAsc": "Name A–Z",
+    "nameDesc": "Name Z–A"
   },
   "documents": {
     "close": "Zamknij",
@@ -403,6 +420,29 @@
     "resizeImageWidth": "Resize image width",
     "resizeImageHeight": "Resize image height",
     "moveImageBefore": "Move image before",
-    "moveImageAfter": "Move image after"
+    "moveImageAfter": "Move image after",
+    "typeNumber": "Number",
+    "validationSettings": "Validation",
+    "minLength": "Minimum characters",
+    "maxLength": "Maximum characters",
+    "minNumber": "Minimum value",
+    "maxNumber": "Maximum value",
+    "minDate": "Minimum date",
+    "maxDate": "Maximum date",
+    "variableStyle": "Variable style",
+    "textColor": "Text color",
+    "generalSettings": "General",
+    "fieldSettings": "Field settings",
+    "defaultValueOption": "Default value",
+    "defaultValue": "Default value",
+    "lockedField": "Locked field",
+    "lockedFieldHelp": "The generated field is visible but cannot be edited.",
+    "decimalPlaces": "Decimal places",
+    "yes": "Yes",
+    "no": "No",
+    "unsavedChangesWarning": "You have unsaved changes. If you leave this page, your changes will be lost.",
+    "unsavedChangesTitle": "Unsaved changes",
+    "unsavedChangesLeave": "Leave",
+    "unsavedChangesStay": "Stay"
   }
 }

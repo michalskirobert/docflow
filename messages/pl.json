@@ -97,7 +97,8 @@
     "bankTransfer": "Przelew bankowy",
     "bankTransferCopy": "Po zaksięgowaniu przelewu płatność zostanie przez nas zweryfikowana.",
     "freeWhilePaymentPending": "Do czasu potwierdzenia płatności konto korzysta z darmowej licencji z limitem 10 dokumentów miesięcznie.",
-    "alreadyAccount": "Masz już konto?"
+    "alreadyAccount": "Masz już konto?",
+    "workspaceName": "Nazwa obszaru roboczego"
   },
   "dashboard": {
     "title": "Panel",
@@ -149,7 +150,23 @@
     "deleteTitle": "Usunąć szablon?",
     "deleteMessage": "Szablon „{name}” zostanie trwale usunięty. Tej operacji nie można cofnąć.",
     "deletePermanently": "Usuń trwale",
-    "duplicateSuffix": "kopia"
+    "duplicateSuffix": "kopia",
+    "typeNumber": "Liczba",
+    "validationSettings": "Walidacja",
+    "minLength": "Minimalna liczba znaków",
+    "maxLength": "Maksymalna liczba znaków",
+    "minNumber": "Minimalna wartość",
+    "maxNumber": "Maksymalna wartość",
+    "minDate": "Data od",
+    "maxDate": "Data do",
+    "variableStyle": "Styl zmiennej",
+    "fontSize": "Rozmiar czcionki",
+    "textColor": "Kolor tekstu",
+    "sort": "Sortowanie",
+    "newest": "Najnowsze",
+    "oldest": "Najstarsze",
+    "nameAsc": "Nazwa A–Z",
+    "nameDesc": "Nazwa Z–A"
   },
   "documents": {
     "close": "Zamknij",
@@ -403,6 +420,29 @@
     "resizeImageWidth": "Zmień szerokość obrazu",
     "resizeImageHeight": "Zmień wysokość obrazu",
     "moveImageBefore": "Przenieś obraz wcześniej",
-    "moveImageAfter": "Przenieś obraz dalej"
+    "moveImageAfter": "Przenieś obraz dalej",
+    "typeNumber": "Liczba",
+    "validationSettings": "Walidacja",
+    "minLength": "Minimalna liczba znaków",
+    "maxLength": "Maksymalna liczba znaków",
+    "minNumber": "Minimalna wartość",
+    "maxNumber": "Maksymalna wartość",
+    "minDate": "Data od",
+    "maxDate": "Data do",
+    "variableStyle": "Styl zmiennej",
+    "textColor": "Kolor tekstu",
+    "generalSettings": "Ogólne",
+    "fieldSettings": "Ustawienia pola",
+    "defaultValueOption": "Domyślna wartość",
+    "defaultValue": "Wartość domyślna",
+    "lockedField": "Zablokowane pole",
+    "lockedFieldHelp": "Pole będzie widoczne w formularzu, ale użytkownik nie będzie mógł go edytować.",
+    "decimalPlaces": "Miejsca po przecinku",
+    "yes": "Tak",
+    "no": "Nie",
+    "unsavedChangesWarning": "Masz niezapisane zmiany. Jeśli opuścisz tę stronę, zmiany zostaną utracone.",
+    "unsavedChangesTitle": "Niezapisane zmiany",
+    "unsavedChangesLeave": "Opuść",
+    "unsavedChangesStay": "Zostań"
   }
 }

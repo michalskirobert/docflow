@@ -10,14 +10,41 @@ const schema = z.object({
   name: z.string().min(2),
   data: z.record(z.string(), z.union([z.string(), z.number()])),
 });
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const s = await requireSession();
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q")?.trim() ?? "";
+    const sort = searchParams.get("sort") ?? "newest";
+    const orderBy =
+      sort === "oldest"
+        ? { createdAt: "asc" as const }
+        : sort === "nameAsc"
+          ? { name: "asc" as const }
+          : sort === "nameDesc"
+            ? { name: "desc" as const }
+            : { createdAt: "desc" as const };
     return NextResponse.json(
       await prisma.document.findMany({
-        where: { organizationId: s.organizationId },
+        where: {
+          organizationId: s.organizationId,
+          ...(q
+            ? {
+                OR: [
+                  { name: { contains: q, mode: "insensitive" as const } },
+                  {
+                    template: {
+                      is: {
+                        name: { contains: q, mode: "insensitive" as const },
+                      },
+                    },
+                  },
+                ],
+              }
+            : {}),
+        },
         include: { template: { select: { name: true } } },
-        orderBy: { createdAt: "desc" },
+        orderBy,
       }),
     );
   } catch {

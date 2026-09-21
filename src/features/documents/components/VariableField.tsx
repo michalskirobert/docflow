@@ -27,7 +27,8 @@ const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
 
 type DateTimeVariableType = "date" | "datetime" | "time";
 
-type VariableType = "text" | "select" | "image" | DateTimeVariableType;
+type VariableType =
+  "text" | "number" | "select" | "image" | DateTimeVariableType;
 
 type DateTimeParts = {
   year?: string;
@@ -52,7 +53,7 @@ const TOKEN_LENGTH: Record<FormatToken, number> = {
   ss: 2,
 };
 
-function userMaskToIMask(mask: string): string {
+export function userMaskToIMask(mask: string): string {
   let result = "";
 
   for (const char of mask) {
@@ -104,7 +105,7 @@ function getFormatToken(
   return FORMAT_TOKENS.find((token) => format.startsWith(token, position));
 }
 
-function formatToMask(format: string): string {
+export function formatToMask(format: string): string {
   let result = "";
   let position = 0;
 
@@ -217,7 +218,7 @@ function formatParts(parts: DateTimeParts, format: string): string {
   return result;
 }
 
-function formatCanonicalValue(
+export function formatCanonicalValue(
   value: string,
   format: string,
   type: DateTimeVariableType,
@@ -361,7 +362,7 @@ function isValidTimeParts(parts: DateTimeParts): boolean {
   return true;
 }
 
-function parseToCanonicalValue(
+export function parseToCanonicalValue(
   value: string,
   format: string,
   type: DateTimeVariableType,
@@ -470,12 +471,16 @@ export function VariableField({ variable, value, error, onChange }: Props) {
 
   if (variableType === "select") {
     return (
-      <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
+      <label
+        className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
+        htmlFor={id}
+      >
         <Label />
 
         <SelectControl
           id={id}
           value={value}
+          disabled={variable.locked}
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={Boolean(error)}
         >
@@ -509,7 +514,9 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           : t("chooseTime");
 
     return (
-      <div className={`field ${error ? "field-error" : ""}`}>
+      <div
+        className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
+      >
         <label className="field-label" htmlFor={id}>
           {label}
           {variable.required && (
@@ -529,6 +536,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             definitions={{ "9": /[0-9]/ }}
             placeholder={format}
             aria-invalid={Boolean(error)}
+            disabled={variable.locked}
             onAccept={(nextValue) => {
               const next = String(nextValue);
               if (!next.trim()) {
@@ -543,6 +551,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             type={type}
             value={value}
             label={pickerLabel}
+            disabled={variable.locked}
             onChange={onChange}
           />
         </div>
@@ -555,7 +564,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   if (variableType === "image") {
     return (
       <div
-        className={`field ${error ? "field-error" : ""}`}
+        className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
         data-variable-field={variable.name}
       >
         <Label />
@@ -563,16 +572,20 @@ export function VariableField({ variable, value, error, onChange }: Props) {
         <div
           className="document-image-dropzone"
           role="button"
-          tabIndex={0}
-          onClick={() => file.current?.click()}
+          aria-disabled={variable.locked}
+          tabIndex={variable.locked ? -1 : 0}
+          onClick={() => {
+            if (!variable.locked) file.current?.click();
+          }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (!variable.locked && (e.key === "Enter" || e.key === " ")) {
               file.current?.click();
             }
           }}
           onDragOver={(e: DragEvent) => e.preventDefault()}
           onDrop={(e: DragEvent) => {
             e.preventDefault();
+            if (variable.locked) return;
 
             void load(e.dataTransfer.files?.[0]);
           }}
@@ -624,10 +637,37 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     );
   }
 
+  if (variableType === "number") {
+    return (
+      <label
+        className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
+        htmlFor={id}
+      >
+        <Label />
+        <InputControl
+          id={id}
+          type="number"
+          inputMode="decimal"
+          min={variable.minNumber || undefined}
+          max={variable.maxNumber || undefined}
+          step={variable.decimalPlaces ? 1 / 10 ** variable.decimalPlaces : 1}
+          disabled={variable.locked}
+          value={value}
+          aria-invalid={Boolean(error)}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        {error && <small className="form-error">{error}</small>}
+      </label>
+    );
+  }
+
   const mask = variable.mask?.trim();
 
   return (
-    <label className={`field ${error ? "field-error" : ""}`} htmlFor={id}>
+    <label
+      className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
+      htmlFor={id}
+    >
       <Label />
 
       {mask ? (
@@ -640,6 +680,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           }}
           placeholder={variable.mask}
           aria-invalid={Boolean(error)}
+          disabled={variable.locked}
           onAccept={(nextValue) => onChange(String(nextValue))}
         />
       ) : (
@@ -647,6 +688,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           id={id}
           value={value}
           aria-invalid={Boolean(error)}
+          disabled={variable.locked}
           onChange={(e) => onChange(e.target.value)}
         />
       )}

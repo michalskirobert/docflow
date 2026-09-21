@@ -16,10 +16,35 @@ const schema = z.object({
       z.object({
         name: z.string(),
         label: z.string().optional(),
-        type: z.enum(["text", "date", "datetime", "time", "image", "select"]),
+        type: z.enum([
+          "text",
+          "number",
+          "date",
+          "datetime",
+          "time",
+          "image",
+          "select",
+        ]),
         required: z.boolean().optional(),
         requiredMessage: z.string().optional(),
         mask: z.string().optional(),
+        minLength: z.number().int().nonnegative().optional(),
+        maxLength: z.number().int().nonnegative().optional(),
+        minNumber: z.number().optional(),
+        maxNumber: z.number().optional(),
+        minDate: z.string().optional(),
+        maxDate: z.string().optional(),
+        defaultValue: z.string().optional(),
+        locked: z.boolean().optional(),
+        decimalPlaces: z.number().int().min(0).max(12).optional(),
+        fontSize: z.number().min(8).max(96).optional(),
+        bold: z.boolean().optional(),
+        italic: z.boolean().optional(),
+        underline: z.boolean().optional(),
+        color: z
+          .string()
+          .regex(/^#[0-9a-fA-F]{6}$/)
+          .optional(),
         dateFormat: z.string().optional(),
         options: z.array(z.string()).optional(),
         imageWidth: z.number().optional(),
@@ -30,15 +55,38 @@ const schema = z.object({
     )
     .optional(),
 });
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const s = await getSession();
     if (!s)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q")?.trim() ?? "";
+    const sort = searchParams.get("sort") ?? "newest";
+    const orderBy =
+      sort === "oldest"
+        ? { createdAt: "asc" as const }
+        : sort === "nameAsc"
+          ? { name: "asc" as const }
+          : sort === "nameDesc"
+            ? { name: "desc" as const }
+            : { createdAt: "desc" as const };
     return NextResponse.json(
       await prisma.template.findMany({
-        where: { organizationId: s.organizationId },
-        orderBy: { createdAt: "desc" },
+        where: {
+          organizationId: s.organizationId,
+          ...(q
+            ? {
+                OR: [
+                  { name: { contains: q, mode: "insensitive" as const } },
+                  {
+                    description: { contains: q, mode: "insensitive" as const },
+                  },
+                ],
+              }
+            : {}),
+        },
+        orderBy,
       }),
     );
   } catch {
