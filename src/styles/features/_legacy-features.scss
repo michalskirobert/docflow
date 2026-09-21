@@ -2315,3 +2315,47 @@
     font-size: 11px;
   }
 }
+
+/* 2.0.1 visual/mobile recovery: plan cards and iOS editor focus. */
+.plan-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 760px);
+  margin-inline: auto;
+  align-items: stretch;
+}
+
+.plan-card {
+  width: 100%;
+}
+
+.plan-card .plan-check {
+  display: grid;
+  place-items: center;
+  color: transparent !important;
+}
+
+.plan-card.selected .plan-check {
+  color: #fff !important;
+}
+
+.plan-card.selected .plan-check::after {
+  content: none !important;
+}
+
+@media (max-width: 600px) {
+  .plan-grid {
+    grid-template-columns: 1fr !important;
+    width: min(100%, 420px);
+  }
+}
+
+@media (max-width: 760px) {
+  /* Keep Safari from treating the scaled A4 editor as a tiny text field on focus. */
+  .a4-paper[contenteditable="true"],
+  .page-header-editor[contenteditable="true"],
+  .page-footer-editor[contenteditable="true"] {
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+    touch-action: manipulation;
+  }
+}
