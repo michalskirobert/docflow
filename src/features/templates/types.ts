@@ -17,6 +17,8 @@ export type TemplateVariable = {
   defaultValueMode?: "fixed" | "current";
   locked?: boolean;
   decimalPlaces?: number;
+  decimalSeparator?: "." | ",";
+  thousandsSeparator?: "none" | "." | "," | "space";
   fontSize?: number;
   bold?: boolean;
   italic?: boolean;

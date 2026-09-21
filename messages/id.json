@@ -439,6 +439,12 @@
     "lockedField": "Bidang terkunci",
     "lockedFieldHelp": "Bidang tetap terlihat tetapi tidak dapat diedit oleh pengguna.",
     "decimalPlaces": "Angka desimal",
+    "decimalSeparator": "Pemisah desimal",
+    "thousandsSeparator": "Pemisah ribuan",
+    "separatorComma": "Koma (,)",
+    "separatorDot": "Titik (.)",
+    "separatorNone": "Tidak ada",
+    "separatorSpace": "Spasi",
     "yes": "Ya",
     "no": "Tidak",
     "unsavedChangesWarning": "Anda memiliki perubahan yang belum disimpan. Jika meninggalkan halaman ini, perubahan akan hilang.",
@@ -447,6 +453,8 @@
     "unsavedChangesStay": "Tetap di sini",
     "currentValue": "Tanggal / waktu saat ini",
     "currentValueHelp": "Isi awal dengan tanggal atau waktu saat ini saat dokumen dimulai. Pengguna tetap dapat mengubah atau menghapusnya kecuali bidang dikunci.",
-    "clearValue": "Hapus nilai"
+    "clearValue": "Hapus nilai",
+    "templateDetails": "Detail template",
+    "editTemplateDetails": "Edit nama dan deskripsi"
   }
 }

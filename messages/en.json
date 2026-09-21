@@ -439,6 +439,12 @@
     "lockedField": "Locked field",
     "lockedFieldHelp": "The generated field is visible but cannot be edited.",
     "decimalPlaces": "Decimal places",
+    "decimalSeparator": "Decimal separator",
+    "thousandsSeparator": "Thousands separator",
+    "separatorComma": "Comma (,)",
+    "separatorDot": "Dot (.)",
+    "separatorNone": "None",
+    "separatorSpace": "Space",
     "yes": "Yes",
     "no": "No",
     "unsavedChangesWarning": "You have unsaved changes. If you leave this page, your changes will be lost.",
@@ -447,6 +453,8 @@
     "unsavedChangesStay": "Stay",
     "currentValue": "Current date / time",
     "currentValueHelp": "Prefill with the current date or time when a document is started. The user can still edit or clear it unless the field is locked.",
-    "clearValue": "Clear value"
+    "clearValue": "Clear value",
+    "templateDetails": "Template details",
+    "editTemplateDetails": "Edit name and description"
   }
 }

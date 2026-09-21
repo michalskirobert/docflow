@@ -5,6 +5,7 @@ import { Check, ChevronDown, Trash2, Upload, X } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
+import { parseFormattedNumber } from "@/features/documents/helpers";
 import { DateTimePicker, InputControl } from "@/components/shared/form";
 import {
   MAX_TEMPLATE_IMAGE_BYTES,
@@ -450,22 +451,27 @@ function VariableSelect({
         <span className={!value ? "variable-select-placeholder" : undefined}>
           {value || "—"}
         </span>
-        <ChevronDown size={18} aria-hidden="true" />
+        <span className="variable-select-actions" aria-hidden="true">
+          {value && !disabled && (
+            <span
+              className="variable-select-clear"
+              role="button"
+              aria-label={clearLabel}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onChange("");
+                setOpen(false);
+              }}
+            >
+              <X size={16} />
+            </span>
+          )}
+          <span className="variable-select-chevron">
+            <ChevronDown size={18} aria-hidden="true" />
+          </span>
+        </span>
       </button>
-      {value && !disabled && (
-        <button
-          type="button"
-          className="variable-select-clear"
-          aria-label={clearLabel}
-          onClick={(event) => {
-            event.stopPropagation();
-            onChange("");
-            setOpen(false);
-          }}
-        >
-          <X size={16} />
-        </button>
-      )}
       {open && !disabled && (
         <div
           className="variable-select-options"
@@ -742,15 +748,26 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     const decimalPlaces = Math.max(0, variable.decimalPlaces ?? 0);
 
     const formatNumberOnBlur = () => {
-      const normalizedValue = value.trim().replace(",", ".");
-
-      if (!normalizedValue) return;
-
-      const parsedValue = Number(normalizedValue);
-
+      if (!value.trim()) return;
+      const { number: parsedValue } = parseFormattedNumber(value, variable);
       if (!Number.isFinite(parsedValue)) return;
 
-      onChange(parsedValue.toFixed(decimalPlaces));
+      const [integerPart, fractionPart] = Math.abs(parsedValue)
+        .toFixed(decimalPlaces)
+        .split(".");
+      const separator = variable.thousandsSeparator ?? "none";
+      const grouping =
+        separator === "space" ? " " : separator === "none" ? "" : separator;
+      const groupedInteger = grouping
+        ? integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, grouping)
+        : integerPart;
+      const sign = parsedValue < 0 ? "-" : "";
+      const decimal = variable.decimalSeparator ?? ",";
+      onChange(
+        decimalPlaces > 0
+          ? `${sign}${groupedInteger}${decimal}${fractionPart}`
+          : `${sign}${groupedInteger}`,
+      );
     };
 
     return (
@@ -771,7 +788,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             const nextValue = e.target.value;
 
             // Keep typing permissive. Formatting happens only when the user leaves the field.
-            if (/^-?\d*(?:[.,]\d*)?$/.test(nextValue)) {
+            if (/^-?[\d\s.,]*$/.test(nextValue)) {
               onChange(nextValue);
             }
           }}

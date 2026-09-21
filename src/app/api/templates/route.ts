@@ -38,6 +38,8 @@ const schema = z.object({
         defaultValueMode: z.enum(["fixed", "current"]).optional(),
         locked: z.boolean().optional(),
         decimalPlaces: z.number().int().min(0).max(12).optional(),
+        decimalSeparator: z.enum([".", ","]).optional(),
+        thousandsSeparator: z.enum(["none", ".", ",", "space"]).optional(),
         fontSize: z.number().min(8).max(96).optional(),
         bold: z.boolean().optional(),
         italic: z.boolean().optional(),

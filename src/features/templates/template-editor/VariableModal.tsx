@@ -78,6 +78,12 @@ export function VariableModal({
   const [decimalPlaces, setDecimalPlaces] = useState(
     initial?.decimalPlaces ?? 0,
   );
+  const [decimalSeparator, setDecimalSeparator] = useState<"." | ",">(
+    initial?.decimalSeparator ?? ",",
+  );
+  const [thousandsSeparator, setThousandsSeparator] = useState<
+    "none" | "." | "," | "space"
+  >(initial?.thousandsSeparator ?? "none");
   const [minDate, setMinDate] = useState(initial?.minDate ?? "");
   const [maxDate, setMaxDate] = useState(initial?.maxDate ?? "");
   const [fontSize, setFontSize] = useState(initial?.fontSize ?? 16);
@@ -117,6 +123,8 @@ export function VariableModal({
       minNumber: type === "number" ? minNumber : undefined,
       maxNumber: type === "number" ? maxNumber : undefined,
       decimalPlaces: type === "number" ? decimalPlaces : undefined,
+      decimalSeparator: type === "number" ? decimalSeparator : undefined,
+      thousandsSeparator: type === "number" ? thousandsSeparator : undefined,
       minDate:
         ["date", "datetime"].includes(type) && minDate ? minDate : undefined,
       maxDate:
@@ -361,19 +369,56 @@ export function VariableModal({
               </label>
             )}
             {type === "number" && (
-              <label className="field">
-                {t("decimalPlaces")}
-                <InputControl
-                  type="number"
-                  min="0"
-                  max="12"
-                  inputMode="numeric"
-                  value={decimalPlaces}
-                  onChange={(e) =>
-                    setDecimalPlaces(Math.min(12, num0(e.target.value)))
-                  }
-                />
-              </label>
+              <div className="form-grid two">
+                <label className="field">
+                  {t("decimalPlaces")}
+                  <InputControl
+                    type="number"
+                    min="0"
+                    max="12"
+                    inputMode="numeric"
+                    value={decimalPlaces}
+                    onChange={(e) =>
+                      setDecimalPlaces(Math.min(12, num0(e.target.value)))
+                    }
+                  />
+                </label>
+                <label className="field">
+                  {t("decimalSeparator")}
+                  <SelectControl
+                    value={decimalSeparator}
+                    onChange={(e) => {
+                      const next = e.target.value as "." | ",";
+                      setDecimalSeparator(next);
+                      if (thousandsSeparator === next)
+                        setThousandsSeparator("none");
+                    }}
+                  >
+                    <option value=",">{t("separatorComma")}</option>
+                    <option value=".">{t("separatorDot")}</option>
+                  </SelectControl>
+                </label>
+                <label className="field">
+                  {t("thousandsSeparator")}
+                  <SelectControl
+                    value={thousandsSeparator}
+                    onChange={(e) =>
+                      setThousandsSeparator(
+                        e.target.value as "none" | "." | "," | "space",
+                      )
+                    }
+                  >
+                    <option value="none">{t("separatorNone")}</option>
+                    <option value="." disabled={decimalSeparator === "."}>
+                      {t("separatorDot")}
+                    </option>
+                    <option value="," disabled={decimalSeparator === ","}>
+                      {t("separatorComma")}
+                    </option>
+                    <option value="space">{t("separatorSpace")}</option>
+                  </SelectControl>
+                </label>
+              </div>
             )}
             {["date", "datetime", "time"].includes(type) && (
               <label className="field">

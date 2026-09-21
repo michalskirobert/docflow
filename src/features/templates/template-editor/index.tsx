@@ -86,6 +86,7 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
+  const [detailsOpen, setDetailsOpen] = useState(true);
 
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
@@ -1023,19 +1024,10 @@ export function TemplateEditor({ template, onClose }: Props) {
             <span className="mobile-editor-back-label">{t("back")}</span>
           </button>
 
-          <div>
+          <div className="editor-header-title">
             <span className="eyebrow">
               {template ? t("editTemplate") : t("newTemplate")}
             </span>
-
-            <InputControl
-              ref={nameRef}
-              className="editor-title"
-              maxLength={250}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={t("templateName")}
-            />
           </div>
 
           <div className="editor-actions">
@@ -1064,13 +1056,50 @@ export function TemplateEditor({ template, onClose }: Props) {
           </div>
         </header>
 
-        <InputControl
-          className="editor-description"
-          maxLength={400}
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          placeholder={t("description")}
-        />
+        <details
+          className="editor-template-details"
+          open={detailsOpen}
+          onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
+        >
+          <summary className="editor-template-details-summary">
+            <div className="editor-template-details-summary-copy">
+              <span className="editor-template-details-kicker">
+                {t("templateDetails")}
+              </span>
+              <strong>{name.trim() || t("templateName")}</strong>
+            </div>
+            <span className="editor-template-details-summary-hint">
+              {t("editTemplateDetails")}
+            </span>
+          </summary>
+
+          <div className="editor-template-meta">
+            <label className="field editor-template-name-field">
+              <span>
+                {t("templateName")} <strong className="required-mark">*</strong>
+              </span>
+              <InputControl
+                ref={nameRef}
+                maxLength={250}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t("templateName")}
+              />
+            </label>
+
+            <label className="field editor-template-description-field">
+              <span>{t("description")}</span>
+              <textarea
+                className="input-control editor-template-description"
+                maxLength={400}
+                rows={2}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder={t("description")}
+              />
+            </label>
+          </div>
+        </details>
 
         <EditorToolbar
           t={t}
@@ -1171,12 +1200,17 @@ export function TemplateEditor({ template, onClose }: Props) {
             className="paper-zoom"
             style={
               {
-                zoom: zoom / 100,
                 "--editor-zoom": zoom / 100,
+                "--scaled-a4-width": `${A4_WIDTH_PX * (zoom / 100)}px`,
+                "--scaled-a4-height": `${Math.round(A4_WIDTH_PX * (297 / 210) * (zoom / 100))}px`,
               } as CSSProperties
             }
           >
-            <div className="a4-page-shell">
+            <div
+              className="a4-page-shell"
+              data-header-enabled={headerEnabled}
+              data-footer-enabled={footerEnabled}
+            >
               {headerEnabled && (
                 <div
                   ref={headerEditor}

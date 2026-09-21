@@ -16,6 +16,17 @@ export function applyInputMask(value: string, mask?: string) {
   }
   return out;
 }
+export function parseFormattedNumber(value: string, v: TemplateVariable) {
+  let normalized = value.trim().replace(/\u00a0/g, " ");
+  const thousands = v.thousandsSeparator ?? "none";
+  if (thousands === "space") normalized = normalized.replace(/\s/g, "");
+  else if (thousands !== "none")
+    normalized = normalized.split(thousands).join("");
+  const decimal = v.decimalSeparator ?? ",";
+  if (decimal !== ".") normalized = normalized.replace(decimal, ".");
+  return { normalized, number: Number(normalized) };
+}
+
 export function validateVariable(v: TemplateVariable, value: string) {
   if (v.required && !value.trim())
     return v.requiredMessage || "This field is required.";
@@ -25,8 +36,10 @@ export function validateVariable(v: TemplateVariable, value: string) {
   if ((v.maxLength ?? 0) > 0 && value.length > v.maxLength!)
     return `Maximum ${v.maxLength} characters.`;
   if (v.type === "number") {
-    const normalizedValue = value.replace(",", ".");
-    const number = Number(normalizedValue);
+    const { normalized: normalizedValue, number } = parseFormattedNumber(
+      value,
+      v,
+    );
     if (!Number.isFinite(number)) return "Enter a valid number.";
     if ((v.minNumber ?? 0) > 0 && number < v.minNumber!)
       return `Minimum value is ${v.minNumber}.`;

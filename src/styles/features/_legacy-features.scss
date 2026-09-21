@@ -3129,3 +3129,495 @@
     max-height: min(240px, 34dvh);
   }
 }
+
+/* v2.1.1 numeric/select/editor region hotfix */
+.a4-page-shell,
+.a4-page-shell .a4-paper,
+.a4-page-shell .page-header-editor,
+.a4-page-shell .page-footer-editor {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.a4-page-shell .page-header-editor,
+.a4-page-shell .page-footer-editor {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+}
+.variable-select-trigger {
+  padding-right: 82px;
+}
+.variable-select-trigger > svg {
+  margin-left: auto;
+  margin-right: 0;
+}
+.variable-select-clear {
+  right: 42px;
+}
+
+/* v2.1.1 layout hotfix: keep clearable controls tidy and all A4 regions in one geometry. */
+.variable-select-trigger {
+  padding-right: 12px !important;
+}
+.variable-select-actions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: stretch;
+  align-self: stretch;
+  margin: -10px -12px -10px 0;
+}
+.variable-select-clear,
+.variable-select-chevron {
+  position: static;
+  width: 44px;
+  min-width: 44px;
+  height: auto;
+  transform: none;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: #64748b;
+}
+.variable-select-clear {
+  border-radius: 0;
+  cursor: pointer;
+}
+.variable-select-clear:hover {
+  background: #f1f5f9;
+}
+.variable-select-chevron {
+  border-left: 1px solid #eef2f7;
+  color: var(--text);
+}
+
+.variable-clearable-control > .native-date-input {
+  padding-right: 92px !important;
+}
+.variable-clearable-control .variable-clear-button {
+  right: 48px;
+  width: 44px;
+  height: 100%;
+  border-radius: 0;
+}
+.variable-clearable-control .date-time-picker {
+  width: 48px;
+}
+
+.a4-page-shell {
+  width: 210mm !important;
+  min-width: 210mm !important;
+  max-width: 210mm !important;
+  min-height: 297mm;
+  box-sizing: border-box !important;
+  overflow: hidden;
+}
+.a4-page-shell > .page-header-editor,
+.a4-page-shell > .a4-paper,
+.a4-page-shell > .page-footer-editor {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+.a4-page-shell > .a4-paper {
+  min-height: 257mm !important;
+}
+.a4-page-shell > .page-header-editor,
+.a4-page-shell > .page-footer-editor {
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.a4-page-shell > .page-header-editor > *,
+.a4-page-shell > .page-footer-editor > * {
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .a4-page-shell {
+    margin: 0 !important;
+  }
+  .a4-page-shell > .a4-paper {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 257mm !important;
+    padding: 20mm !important;
+  }
+}
+
+/* v2.1.1 template metadata hierarchy + centered A4 workspace hotfix */
+.editor-header-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+.editor-template-meta {
+  width: min(760px, calc(100% - 48px));
+  margin: 16px auto;
+  display: grid;
+  gap: 12px;
+}
+.editor-template-meta .field {
+  margin: 0;
+}
+.editor-template-name-field input {
+  font-size: 17px;
+  font-weight: 750;
+}
+.required-mark {
+  color: #dc2626;
+}
+
+/* Auto margins center the complete A4 page whenever it fits. When it is
+   wider than the viewport, auto margins collapse and normal horizontal
+   scrolling starts from the left edge instead of hiding part of the page. */
+.paper-zoom > .a4-page-shell {
+  margin-inline: auto !important;
+}
+
+@media (max-width: 760px) {
+  .editor-header-title {
+    text-align: center;
+  }
+  .editor-template-meta {
+    width: calc(100% - 24px);
+    margin: 12px auto;
+    gap: 10px;
+    flex: 0 0 auto;
+  }
+  .editor-template-name-field input {
+    font-size: 16px;
+  }
+  .paper-zoom > .a4-page-shell {
+    margin-inline: auto !important;
+  }
+}
+
+/* v2.1.1 compact template metadata + exact A4 region sizing hotfix */
+.editor-template-meta {
+  width: min(1000px, calc(100% - 40px));
+  margin: 10px auto 12px;
+  grid-template-columns: minmax(260px, 1.15fr) minmax(260px, 0.85fr);
+  gap: 12px;
+  align-items: end;
+}
+.editor-template-meta .field {
+  gap: 5px;
+  font-size: 13px;
+}
+.editor-template-meta .field > span {
+  line-height: 1.2;
+}
+.editor-template-meta input {
+  min-height: 44px !important;
+  height: 44px;
+  padding-block: 8px;
+}
+.editor-template-name-field input {
+  font-size: 15px;
+  font-weight: 750;
+}
+
+/* Header/body/footer are one physical A4 page. Disabled regions are not
+   represented in the DOM, so the body consumes their space automatically. */
+.a4-page-shell {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
+  max-height: 297mm !important;
+}
+.a4-page-shell > .page-header-editor,
+.a4-page-shell > .page-footer-editor {
+  flex: 0 0 auto !important;
+}
+.a4-page-shell > .a4-paper {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .editor-template-meta {
+    width: calc(100% - 24px);
+    margin: 8px auto 9px;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .editor-template-meta .field {
+    gap: 4px;
+    font-size: 12px;
+  }
+  .editor-template-meta input {
+    min-height: 42px !important;
+    height: 42px;
+    padding: 7px 11px;
+    font-size: 16px;
+  }
+  .editor-template-name-field input {
+    font-size: 16px;
+  }
+
+  .a4-page-shell > .a4-paper {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+}
+
+/* v2.1.1 mobile workspace scroll + metadata-in-workspace hotfix */
+.editor-template-meta-workspace {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
+}
+
+/* The wrapper owns the *scaled* dimensions, while only the A4 child is
+   transformed. This makes the browser's scroll area match the visible page. */
+@media (max-width: 760px) {
+  .paper-stage {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    contain: none !important;
+    padding: 12px !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .editor-template-meta-workspace {
+    width: 100% !important;
+    margin: 0 0 12px !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+  }
+
+  .paper-zoom {
+    --a4-width: 210mm;
+    --a4-height: 297mm;
+    position: relative !important;
+    display: block !important;
+    width: calc(var(--a4-width) * var(--editor-zoom, 1)) !important;
+    min-width: calc(var(--a4-width) * var(--editor-zoom, 1)) !important;
+    height: calc(var(--a4-height) * var(--editor-zoom, 1)) !important;
+    min-height: calc(var(--a4-height) * var(--editor-zoom, 1)) !important;
+    margin-inline: auto !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+
+  .paper-zoom > .a4-page-shell {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: var(--a4-width) !important;
+    min-width: var(--a4-width) !important;
+    max-width: var(--a4-width) !important;
+    height: var(--a4-height) !important;
+    min-height: var(--a4-height) !important;
+    max-height: var(--a4-height) !important;
+    margin: 0 !important;
+    transform: scale(var(--editor-zoom, 1)) !important;
+    transform-origin: top left !important;
+  }
+}
+
+/* v2.1.1 mobile horizontal workspace scroll hotfix
+   Safari does not reliably support multiplying a CSS length by a custom
+   number inside calc(). The scaled A4 dimensions are therefore provided by
+   React as concrete px values. The wrapper participates in layout at the
+   scaled size, while the physical A4 page itself is transformed. */
+@media (max-width: 760px) {
+  .paper-stage {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    touch-action: pan-x pan-y !important;
+    scrollbar-gutter: auto;
+  }
+
+  .paper-zoom {
+    width: var(--scaled-a4-width) !important;
+    min-width: var(--scaled-a4-width) !important;
+    max-width: none !important;
+    height: var(--scaled-a4-height) !important;
+    min-height: var(--scaled-a4-height) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+/* v2.1.1 template editor metadata UX redesign.
+   Metadata belongs to the editor chrome, never to the scrollable/scaled A4 stage. */
+.editor-template-details {
+  position: relative;
+  z-index: 12;
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+
+.editor-template-details-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+  padding: 9px max(24px, calc((100% - 1120px) / 2));
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.editor-template-details-summary::-webkit-details-marker {
+  display: none;
+}
+.editor-template-details-summary::after {
+  content: "⌄";
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+.editor-template-details[open] > .editor-template-details-summary::after {
+  transform: rotate(180deg);
+}
+.editor-template-details-summary-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 10px;
+}
+.editor-template-details-summary-copy strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.editor-template-details-kicker {
+  flex: 0 0 auto;
+  color: var(--accent, #4f46e5);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.editor-template-details-summary-hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.editor-template-details .editor-template-meta {
+  width: min(760px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 2px 0 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.editor-template-details .editor-template-meta .field {
+  margin: 0;
+  gap: 5px;
+  font-size: 13px;
+}
+.editor-template-details .editor-template-meta input {
+  height: 42px;
+  min-height: 42px !important;
+}
+.editor-template-details .editor-template-name-field input {
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.editor-template-details .editor-template-description {
+  box-sizing: border-box;
+  height: 56px !important;
+  min-height: 50px !important;
+  max-height: 50px !important;
+  overflow-y: auto;
+  resize: none;
+  padding: 8px 10px;
+  line-height: 1.25;
+}
+
+.editor-template-description:focus {
+  border-color: var(--accent, #4f46e5);
+  box-shadow: 0 0 0 3px rgb(79 70 229 / 10%);
+}
+
+/* The A4 stage starts only after all editor chrome. It owns document panning. */
+.paper-stage {
+  isolation: isolate;
+}
+
+@media (max-width: 760px) {
+  .editor-template-details {
+    z-index: 12;
+  }
+  .editor-template-details-summary {
+    min-height: 46px;
+    padding: 7px 14px;
+    gap: 8px;
+  }
+  .editor-template-details-summary-copy {
+    display: grid;
+    gap: 1px;
+  }
+  .editor-template-details-kicker {
+    font-size: 10px;
+  }
+  .editor-template-details-summary-copy strong {
+    max-width: 56vw;
+    font-size: 13px;
+  }
+  .editor-template-details-summary-hint {
+    display: none;
+  }
+  .editor-template-details .editor-template-meta {
+    width: 100%;
+    padding: 4px 14px 12px;
+    gap: 8px;
+  }
+  .editor-template-details .editor-template-meta .field {
+    font-size: 12px;
+  }
+  .editor-template-details .editor-template-meta input {
+    height: 40px;
+    min-height: 40px !important;
+    padding-block: 7px;
+  }
+  .editor-template-description {
+    min-height: 64px;
+    max-height: 64px;
+    resize: none;
+  }
+
+  /* Metadata no longer lives in the stage; this removes the old floating card. */
+  .editor-template-meta-workspace {
+    display: none !important;
+  }
+
+  .paper-stage {
+    z-index: 1 !important;
+  }
+}
