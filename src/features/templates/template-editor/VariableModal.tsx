@@ -42,9 +42,13 @@ export function VariableModal({
   );
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
   const [hasDefault, setHasDefault] = useState(
-    initial?.defaultValue !== undefined,
+    initial?.defaultValue !== undefined ||
+      initial?.defaultValueMode === "current",
   );
   const [defaultValue, setDefaultValue] = useState(initial?.defaultValue ?? "");
+  const [defaultValueMode, setDefaultValueMode] = useState<"fixed" | "current">(
+    initial?.defaultValueMode ?? "fixed",
+  );
   const [locked, setLocked] = useState(initial?.locked ?? false);
   const [required, setRequired] = useState(initial?.required ?? false);
   const [requiredMessage, setRequiredMessage] = useState(
@@ -93,12 +97,17 @@ export function VariableModal({
     setter(!value);
   const submit = () => {
     if (!label.trim() || !generatedName || duplicate) return;
-    const nextDefault = hasDefault ? defaultValue : undefined;
+    const nextDefault =
+      hasDefault && defaultValueMode === "fixed" ? defaultValue : undefined;
     onInsert({
       name: generatedName,
       label: label.trim(),
       type,
       defaultValue: nextDefault,
+      defaultValueMode:
+        hasDefault && ["date", "datetime", "time"].includes(type)
+          ? defaultValueMode
+          : undefined,
       locked,
       required,
       requiredMessage: required ? requiredMessage : undefined,
@@ -253,6 +262,7 @@ export function VariableModal({
                     const n = e.target.value as VariableType;
                     setType(n);
                     setDefaultValue("");
+                    setDefaultValueMode("fixed");
                     setDateFormat(
                       n === "time"
                         ? "HH:mm"
@@ -289,10 +299,40 @@ export function VariableModal({
               )}
             </div>
             {hasDefault && type !== "image" && (
-              <label className="field">
-                {t("defaultValue")}
-                {defaultControl}
-              </label>
+              <div className="field">
+                <span className="default-value-heading">
+                  <span>{t("defaultValue")}</span>
+                  {["date", "datetime", "time"].includes(type) && (
+                    <button
+                      type="button"
+                      className={`btn secondary compact current-value-toggle ${defaultValueMode === "current" ? "active" : ""}`}
+                      onClick={() =>
+                        setDefaultValueMode(
+                          defaultValueMode === "current" ? "fixed" : "current",
+                        )
+                      }
+                      title={t("currentValueHelp")}
+                    >
+                      {t("currentValue")}
+                    </button>
+                  )}
+                </span>
+                <div
+                  className={
+                    defaultValueMode === "current"
+                      ? "default-value-current"
+                      : ""
+                  }
+                >
+                  {defaultValueMode === "current" ? (
+                    <div className="current-value-preview">
+                      {t("currentValue")}
+                    </div>
+                  ) : (
+                    defaultControl
+                  )}
+                </div>
+              </div>
             )}
             <label className="check-row">
               <InputControl
@@ -317,6 +357,21 @@ export function VariableModal({
                   value={mask}
                   onChange={(e) => setMask(e.target.value)}
                   placeholder="AAA-999 / 99-999"
+                />
+              </label>
+            )}
+            {type === "number" && (
+              <label className="field">
+                {t("decimalPlaces")}
+                <InputControl
+                  type="number"
+                  min="0"
+                  max="12"
+                  inputMode="numeric"
+                  value={decimalPlaces}
+                  onChange={(e) =>
+                    setDecimalPlaces(Math.min(12, num0(e.target.value)))
+                  }
                 />
               </label>
             )}
@@ -502,18 +557,6 @@ export function VariableModal({
                       min="0"
                       value={maxNumber}
                       onChange={(e) => setMaxNumber(num0(e.target.value))}
-                    />
-                  </label>
-                  <label className="field">
-                    {t("decimalPlaces")}
-                    <InputControl
-                      type="number"
-                      min="0"
-                      max="12"
-                      value={decimalPlaces}
-                      onChange={(e) =>
-                        setDecimalPlaces(Math.min(12, num0(e.target.value)))
-                      }
                     />
                   </label>
                 </div>

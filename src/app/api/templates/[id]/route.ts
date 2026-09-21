@@ -35,6 +35,7 @@ const schema = z.object({
         minDate: z.string().optional(),
         maxDate: z.string().optional(),
         defaultValue: z.string().optional(),
+        defaultValueMode: z.enum(["fixed", "current"]).optional(),
         locked: z.boolean().optional(),
         decimalPlaces: z.number().int().min(0).max(12).optional(),
         fontSize: z.number().min(8).max(96).optional(),

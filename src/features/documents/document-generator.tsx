@@ -20,6 +20,41 @@ import {
   useUpdateDocumentService,
 } from "./service";
 
+const padDatePart = (value: number) => String(value).padStart(2, "0");
+const currentVariableValue = (type: string, now = new Date()) => {
+  const date = `${now.getFullYear()}-${padDatePart(now.getMonth() + 1)}-${padDatePart(now.getDate())}`;
+  const time = `${padDatePart(now.getHours())}:${padDatePart(now.getMinutes())}`;
+  if (type === "date") return date;
+  if (type === "time") return time;
+  if (type === "datetime") return `${date}T${time}`;
+  return "";
+};
+
+const getInitialVariableValue = (
+  variable: ReturnType<typeof parseTemplateVariables>[number],
+  now: Date,
+) => {
+  // `current` is the persisted 2.1.x value. Keep the aliases so templates
+  // created by an earlier hotfix still resolve instead of rendering empty.
+  const mode = String(variable.defaultValueMode ?? "");
+  if (["current", "currentDate", "now"].includes(mode)) {
+    return currentVariableValue(variable.type, now);
+  }
+  return variable.defaultValue ?? "";
+};
+
+const getInitialTemplateValues = (variablesJson: string) => {
+  // Use one Date instance for the whole form so date/time defaults are
+  // internally consistent even when the minute changes during initialization.
+  const now = new Date();
+  return Object.fromEntries(
+    parseTemplateVariables(variablesJson).map((variable) => [
+      variable.name,
+      getInitialVariableValue(variable, now),
+    ]),
+  );
+};
+
 export default function DocumentGenerator({
   documentId,
 }: {
@@ -313,14 +348,7 @@ export default function DocumentGenerator({
               setDocumentNameError("");
               setValues(
                 nextTemplate
-                  ? Object.fromEntries(
-                      parseTemplateVariables(nextTemplate.variablesJson).map(
-                        (variable) => [
-                          variable.name,
-                          variable.defaultValue ?? "",
-                        ],
-                      ),
-                    )
+                  ? getInitialTemplateValues(nextTemplate.variablesJson)
                   : {},
               );
               setErrors({});

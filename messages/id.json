@@ -229,7 +229,8 @@
     "unsavedChangesWarning": "Anda memiliki perubahan yang belum disimpan. Jika meninggalkan halaman ini, perubahan akan hilang.",
     "unsavedChangesTitle": "Perubahan belum disimpan",
     "unsavedChangesLeave": "Keluar",
-    "unsavedChangesStay": "Tetap di sini"
+    "unsavedChangesStay": "Tetap di sini",
+    "clearValue": "Hapus nilai"
   },
   "settings": {
     "title": "Pengaturan",
@@ -443,6 +444,9 @@
     "unsavedChangesWarning": "Anda memiliki perubahan yang belum disimpan. Jika meninggalkan halaman ini, perubahan akan hilang.",
     "unsavedChangesTitle": "Perubahan belum disimpan",
     "unsavedChangesLeave": "Keluar",
-    "unsavedChangesStay": "Tetap di sini"
+    "unsavedChangesStay": "Tetap di sini",
+    "currentValue": "Tanggal / waktu saat ini",
+    "currentValueHelp": "Isi awal dengan tanggal atau waktu saat ini saat dokumen dimulai. Pengguna tetap dapat mengubah atau menghapusnya kecuali bidang dikunci.",
+    "clearValue": "Hapus nilai"
   }
 }

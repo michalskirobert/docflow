@@ -25,14 +25,15 @@ export function validateVariable(v: TemplateVariable, value: string) {
   if ((v.maxLength ?? 0) > 0 && value.length > v.maxLength!)
     return `Maximum ${v.maxLength} characters.`;
   if (v.type === "number") {
-    const number = Number(value);
+    const normalizedValue = value.replace(",", ".");
+    const number = Number(normalizedValue);
     if (!Number.isFinite(number)) return "Enter a valid number.";
     if ((v.minNumber ?? 0) > 0 && number < v.minNumber!)
       return `Minimum value is ${v.minNumber}.`;
     if ((v.maxNumber ?? 0) > 0 && number > v.maxNumber!)
       return `Maximum value is ${v.maxNumber}.`;
     if ((v.decimalPlaces ?? 0) > 0) {
-      const decimals = (value.split(".")[1] ?? "").length;
+      const decimals = (normalizedValue.split(".")[1] ?? "").length;
       if (decimals > v.decimalPlaces!)
         return `Maximum ${v.decimalPlaces} decimal places.`;
     }

@@ -229,7 +229,8 @@
     "unsavedChangesWarning": "Masz niezapisane zmiany. Jeśli opuścisz tę stronę, zmiany zostaną utracone.",
     "unsavedChangesTitle": "Niezapisane zmiany",
     "unsavedChangesLeave": "Opuść",
-    "unsavedChangesStay": "Zostań"
+    "unsavedChangesStay": "Zostań",
+    "clearValue": "Wyczyść wartość"
   },
   "settings": {
     "title": "Ustawienia",
@@ -443,6 +444,9 @@
     "unsavedChangesWarning": "Masz niezapisane zmiany. Jeśli opuścisz tę stronę, zmiany zostaną utracone.",
     "unsavedChangesTitle": "Niezapisane zmiany",
     "unsavedChangesLeave": "Opuść",
-    "unsavedChangesStay": "Zostań"
+    "unsavedChangesStay": "Zostań",
+    "currentValue": "Bieżąca data / czas",
+    "currentValueHelp": "Wstępnie uzupełnia bieżącą datą lub czasem przy rozpoczęciu dokumentu. Użytkownik nadal może zmienić lub usunąć wartość, chyba że pole jest zablokowane.",
+    "clearValue": "Wyczyść wartość"
   }
 }

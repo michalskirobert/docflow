@@ -14,6 +14,7 @@ export type TemplateVariable = {
   minDate?: string;
   maxDate?: string;
   defaultValue?: string;
+  defaultValueMode?: "fixed" | "current";
   locked?: boolean;
   decimalPlaces?: number;
   fontSize?: number;

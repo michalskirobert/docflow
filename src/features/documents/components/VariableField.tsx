@@ -1,15 +1,11 @@
 "use client";
 
-import { ChangeEvent, DragEvent, useRef, useState } from "react";
-import { Trash2, Upload } from "lucide-react";
+import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Trash2, Upload, X } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
-import {
-  DateTimePicker,
-  InputControl,
-  SelectControl,
-} from "@/components/shared/form";
+import { DateTimePicker, InputControl } from "@/components/shared/form";
 import {
   MAX_TEMPLATE_IMAGE_BYTES,
   SAFE_TEMPLATE_IMAGE_TYPES,
@@ -410,6 +406,107 @@ type Props = {
   onChange: (v: string) => void;
 };
 
+function VariableSelect({
+  id,
+  value,
+  options,
+  disabled,
+  invalid,
+  onChange,
+  clearLabel,
+}: {
+  id: string;
+  value: string;
+  options: string[];
+  disabled?: boolean;
+  invalid?: boolean;
+  onChange: (value: string) => void;
+  clearLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [open]);
+
+  return (
+    <div ref={root} className={`variable-select ${open ? "is-open" : ""}`}>
+      <button
+        id={id}
+        type="button"
+        className="variable-select-trigger"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-invalid={invalid || undefined}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className={!value ? "variable-select-placeholder" : undefined}>
+          {value || "—"}
+        </span>
+        <ChevronDown size={18} aria-hidden="true" />
+      </button>
+      {value && !disabled && (
+        <button
+          type="button"
+          className="variable-select-clear"
+          aria-label={clearLabel}
+          onClick={(event) => {
+            event.stopPropagation();
+            onChange("");
+            setOpen(false);
+          }}
+        >
+          <X size={16} />
+        </button>
+      )}
+      {open && !disabled && (
+        <div
+          className="variable-select-options"
+          role="listbox"
+          aria-labelledby={id}
+        >
+          <button
+            type="button"
+            role="option"
+            aria-selected={!value}
+            className={!value ? "selected" : undefined}
+            onClick={() => {
+              onChange("");
+              setOpen(false);
+            }}
+          >
+            <span>—</span>
+            {!value && <Check size={16} />}
+          </button>
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="option"
+              aria-selected={value === option}
+              className={value === option ? "selected" : undefined}
+              onClick={() => {
+                onChange(option);
+                setOpen(false);
+              }}
+            >
+              <span>{option}</span>
+              {value === option && <Check size={16} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function VariableField({ variable, value, error, onChange }: Props) {
   const t = useTranslations("documents");
   const label = variable.label || variable.name;
@@ -477,21 +574,15 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       >
         <Label />
 
-        <SelectControl
+        <VariableSelect
           id={id}
           value={value}
+          options={variable.options ?? []}
           disabled={variable.locked}
-          onChange={(e) => onChange(e.target.value)}
-          aria-invalid={Boolean(error)}
-        >
-          <option value="">—</option>
-
-          {variable.options?.map((x) => (
-            <option key={x} value={x}>
-              {x}
-            </option>
-          ))}
-        </SelectControl>
+          invalid={Boolean(error)}
+          onChange={onChange}
+          clearLabel={t("clearValue")}
+        />
 
         {error && <small className="form-error">{error}</small>}
       </label>
@@ -527,7 +618,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           )}
         </label>
 
-        <div className="native-date-control">
+        <div className="native-date-control variable-clearable-control">
           <IMaskInput
             id={id}
             className="native-date-input"
@@ -554,6 +645,16 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             disabled={variable.locked}
             onChange={onChange}
           />
+          {value && !variable.locked && (
+            <button
+              type="button"
+              className="variable-clear-button"
+              aria-label={t("clearValue")}
+              onClick={() => onChange("")}
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         {error && <small className="form-error">{error}</small>}
@@ -638,24 +739,45 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   }
 
   if (variableType === "number") {
+    const decimalPlaces = Math.max(0, variable.decimalPlaces ?? 0);
+
+    const formatNumberOnBlur = () => {
+      const normalizedValue = value.trim().replace(",", ".");
+
+      if (!normalizedValue) return;
+
+      const parsedValue = Number(normalizedValue);
+
+      if (!Number.isFinite(parsedValue)) return;
+
+      onChange(parsedValue.toFixed(decimalPlaces));
+    };
+
     return (
       <label
         className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
         htmlFor={id}
       >
         <Label />
+
         <InputControl
           id={id}
-          type="number"
+          type="text"
           inputMode="decimal"
-          min={variable.minNumber || undefined}
-          max={variable.maxNumber || undefined}
-          step={variable.decimalPlaces ? 1 / 10 ** variable.decimalPlaces : 1}
           disabled={variable.locked}
           value={value}
           aria-invalid={Boolean(error)}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+
+            // Keep typing permissive. Formatting happens only when the user leaves the field.
+            if (/^-?\d*(?:[.,]\d*)?$/.test(nextValue)) {
+              onChange(nextValue);
+            }
+          }}
+          onBlur={formatNumberOnBlur}
         />
+
         {error && <small className="form-error">{error}</small>}
       </label>
     );

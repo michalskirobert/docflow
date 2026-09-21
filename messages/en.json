@@ -229,7 +229,8 @@
     "unsavedChangesWarning": "You have unsaved changes. If you leave this page, your changes will be lost.",
     "unsavedChangesTitle": "Unsaved changes",
     "unsavedChangesLeave": "Leave",
-    "unsavedChangesStay": "Stay"
+    "unsavedChangesStay": "Stay",
+    "clearValue": "Clear value"
   },
   "settings": {
     "title": "Settings",
@@ -443,6 +444,9 @@
     "unsavedChangesWarning": "You have unsaved changes. If you leave this page, your changes will be lost.",
     "unsavedChangesTitle": "Unsaved changes",
     "unsavedChangesLeave": "Leave",
-    "unsavedChangesStay": "Stay"
+    "unsavedChangesStay": "Stay",
+    "currentValue": "Current date / time",
+    "currentValueHelp": "Prefill with the current date or time when a document is started. The user can still edit or clear it unless the field is locked.",
+    "clearValue": "Clear value"
   }
 }

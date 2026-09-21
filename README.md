@@ -295,3 +295,10 @@ Editor fixes: variables can be dropped into body/header/footer at the pointer po
 - Template editor now guards unsaved changes consistently with the document editor.
 - Template and document search/sort are backed by API query parameters and Prisma ordering/filtering.
 - Documents list spacing now matches the templates page rhythm more closely.
+
+## v2.1.1
+
+- Mobile template combobox hotfix: searchable options remain attached to the control and usable with the iOS keyboard open.
+- Variable modal constrained to the mobile visual viewport.
+- Date/time variables can use a dynamic current date/time default resolved when a document is started.
+- Date, datetime, time and select document fields can be cleared when they are not locked.
