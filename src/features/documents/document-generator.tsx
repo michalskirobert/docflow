@@ -300,7 +300,9 @@ export default function DocumentGenerator({
               );
 
               setTemplateId(nextTemplateId);
-              setDirty(true);
+              // Choosing a template establishes the initial form state. It is
+              // not a user edit by itself, so do not enable the leave guard.
+              setDirty(false);
 
               setDocumentName(
                 nextTemplate

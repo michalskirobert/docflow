@@ -26,6 +26,7 @@ export default function TemplateList() {
   const [editing, setEditing] = useState<Template | null | "new">(null);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
+  const [cardActionPending, setCardActionPending] = useState(false);
   const query = useTemplatesService(q, sort);
   return (
     <>
@@ -60,15 +61,22 @@ export default function TemplateList() {
             <TemplateCard
               key={item.id}
               template={item}
+              actionsDisabled={cardActionPending}
+              onActionPendingChange={setCardActionPending}
               onEdit={() => setEditing(item)}
-              onDuplicate={() =>
-                create.mutate({
-                  name: `${item.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
-                  description: item.description ?? "",
-                  content: item.content,
-                  variables: parseTemplateVariables(item.variablesJson),
-                })
-              }
+              onDuplicate={async () => {
+                setCardActionPending(true);
+                try {
+                  await create.mutateAsync({
+                    name: `${item.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                    description: item.description ?? "",
+                    content: item.content,
+                    variables: parseTemplateVariables(item.variablesJson),
+                  });
+                } finally {
+                  setCardActionPending(false);
+                }
+              }}
             />
           ))}
         </div>
@@ -92,10 +100,14 @@ function TemplateCard({
   template,
   onEdit,
   onDuplicate,
+  actionsDisabled,
+  onActionPendingChange,
 }: {
   template: Template;
   onEdit: () => void;
-  onDuplicate: () => void;
+  onDuplicate: () => Promise<void>;
+  actionsDisabled: boolean;
+  onActionPendingChange: (pending: boolean) => void;
 }) {
   const t = useTranslations("templates");
   const remove = useDeleteTemplateService(template.id);
@@ -109,8 +121,14 @@ function TemplateCard({
         confirmLabel: t("deletePermanently"),
         kind: "danger",
       })
-    )
-      await remove.mutateAsync(undefined);
+    ) {
+      onActionPendingChange(true);
+      try {
+        await remove.mutateAsync(undefined);
+      } finally {
+        onActionPendingChange(false);
+      }
+    }
   };
   return (
     <article className="template-card">
@@ -134,16 +152,24 @@ function TemplateCard({
           ))}
         </div>
         <div className="card-actions">
-          <button onClick={onEdit}>
+          <button
+            className="template-action-edit"
+            onClick={onEdit}
+            disabled={actionsDisabled}
+          >
             <Edit3 /> {t("edit")}
           </button>
-          <button onClick={onDuplicate}>
+          <button
+            className="template-action-duplicate"
+            onClick={() => void onDuplicate()}
+            disabled={actionsDisabled}
+          >
             <Copy /> {t("duplicate")}
           </button>
           <button
             className="danger-link"
             onClick={del}
-            disabled={remove.isPending}
+            disabled={actionsDisabled || remove.isPending}
             aria-busy={remove.isPending}
           >
             {remove.isPending ? (

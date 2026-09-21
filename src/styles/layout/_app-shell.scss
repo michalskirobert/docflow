@@ -119,11 +119,14 @@ body {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 8px 30px rgb(15 23 42 / 4%);
-  transition: 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
+/* Cards are containers, not navigation targets: no lift-on-hover affordance. */
 .template-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 38px rgb(15 23 42 / 8%);
+  transform: none;
+  box-shadow: 0 8px 30px rgb(15 23 42 / 4%);
 }
 .template-preview {
   height: 190px;
@@ -1273,4 +1276,30 @@ body {
     right: 0;
     bottom: calc(100% + 8px);
   }
+}
+
+/* 2.1.0 final button interaction: color/contrast, never layout movement. */
+.btn,
+.card-actions button,
+.document-actions a {
+  text-decoration: none;
+  transform: none;
+  transition:
+    background-color 170ms ease,
+    border-color 170ms ease,
+    color 170ms ease,
+    box-shadow 170ms ease,
+    opacity 170ms ease;
+}
+.btn:hover:not(:disabled),
+.card-actions button:hover:not(:disabled),
+.document-actions a:hover {
+  transform: none;
+  text-decoration: none;
+  filter: brightness(0.96);
+}
+.btn:active:not(:disabled),
+.card-actions button:active:not(:disabled) {
+  transform: none;
+  filter: brightness(0.92);
 }

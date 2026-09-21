@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { InputControl, SelectControl } from "@/components/shared/form";
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
@@ -36,6 +36,7 @@ export function DocumentHistory({
   onSortChange: (value: string) => void;
 }) {
   const t = useTranslations("documents");
+  const [actionPending, setActionPending] = useState(false);
 
   return (
     <section className="document-history">
@@ -79,7 +80,12 @@ export function DocumentHistory({
         <ListSkeleton rows={5} />
       ) : documents.length ? (
         documents.map((document) => (
-          <DocumentRow key={document.id} document={document} />
+          <DocumentRow
+            key={document.id}
+            document={document}
+            actionsDisabled={actionPending}
+            onActionPendingChange={setActionPending}
+          />
         ))
       ) : (
         <div className="empty-state compact">
@@ -91,7 +97,15 @@ export function DocumentHistory({
   );
 }
 
-function DocumentRow({ document: d }: { document: Document }) {
+function DocumentRow({
+  document: d,
+  actionsDisabled,
+  onActionPendingChange,
+}: {
+  document: Document;
+  actionsDisabled: boolean;
+  onActionPendingChange: (pending: boolean) => void;
+}) {
   const t = useTranslations("documents");
   const remove = useDeleteDocumentService(d.id);
   const { confirm, notify } = useFeedback();
@@ -108,11 +122,14 @@ function DocumentRow({ document: d }: { document: Document }) {
         kind: "danger",
       })
     ) {
+      onActionPendingChange(true);
       try {
         await remove.mutateAsync(undefined);
         notify(t("deleteSuccess"), "success");
       } catch {
         notify(t("deleteError"), "error");
+      } finally {
+        onActionPendingChange(false);
       }
     }
   };
@@ -135,6 +152,8 @@ function DocumentRow({ document: d }: { document: Document }) {
       <div className="document-actions">
         <a
           href={`/${locale}/documents/${d.id}/preview`}
+          aria-disabled={actionsDisabled}
+          onClick={(event) => actionsDisabled && event.preventDefault()}
           target="_blank"
           rel="noreferrer"
         >
@@ -142,7 +161,11 @@ function DocumentRow({ document: d }: { document: Document }) {
           {t("preview")}
         </a>
 
-        <Link href={`/documents/${d.id}/edit`}>
+        <Link
+          href={`/documents/${d.id}/edit`}
+          aria-disabled={actionsDisabled}
+          onClick={(event) => actionsDisabled && event.preventDefault()}
+        >
           <Edit3 />
           {t("edit")}
         </Link>
@@ -152,11 +175,13 @@ function DocumentRow({ document: d }: { document: Document }) {
           fileName={d.name}
           label={t("pdf")}
           errorLabel={t("downloadError")}
+          disabled={actionsDisabled}
+          onPendingChange={onActionPendingChange}
         />
 
         <button
           className="danger-link"
-          disabled={remove.isPending}
+          disabled={actionsDisabled || remove.isPending}
           onClick={del}
         >
           {remove.isPending ? <LoaderCircle className="spinner" /> : <Trash2 />}

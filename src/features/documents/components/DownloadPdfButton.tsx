@@ -9,17 +9,22 @@ export function DownloadPdfButton({
   fileName,
   label,
   errorLabel,
+  disabled = false,
+  onPendingChange,
 }: {
   documentId: string;
   fileName: string;
   label: string;
   errorLabel: string;
+  disabled?: boolean;
+  onPendingChange?: (pending: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
 
   const download = async () => {
-    if (loading) return;
+    if (loading || disabled) return;
     setLoading(true);
+    onPendingChange?.(true);
     try {
       const response = await fetch(`/api/documents/${documentId}/pdf`);
       if (!response.ok) throw new Error("PDF download failed");
@@ -36,11 +41,18 @@ export function DownloadPdfButton({
       window.alert(errorLabel);
     } finally {
       setLoading(false);
+      onPendingChange?.(false);
     }
   };
 
   return (
-    <Button type="button" variant="ghost" loading={loading} onClick={download}>
+    <Button
+      type="button"
+      variant="ghost"
+      loading={loading}
+      disabled={disabled}
+      onClick={download}
+    >
       {!loading && <Download size={18} />}
       {label}
     </Button>

@@ -33,7 +33,12 @@ export function useUnsavedChanges(active: boolean, confirmLeave: ConfirmLeave) {
       event.preventDefault();
       event.stopPropagation();
       void confirmLeave().then((leave) => {
-        if (leave) window.location.assign(url.href);
+        if (leave) {
+          // Avoid showing the browser native beforeunload dialog after the
+          // application confirmation has already been accepted.
+          window.removeEventListener("beforeunload", beforeUnload);
+          window.location.assign(url.href);
+        }
       });
     };
 
