@@ -57,6 +57,7 @@ export function DocumentHistory({
 
         <div>
           <h2>{t("history")}</h2>
+          <p className="section-subtitle">{t("historyDescription")}</p>
         </div>
       </div>
 

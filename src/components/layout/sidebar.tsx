@@ -84,11 +84,12 @@ export function Sidebar() {
         <button
           className={`mobile-profile-trigger ${profileOpen || pathname === "/settings" ? "active" : ""}`}
           type="button"
+          aria-label={t("settings")}
+          title={t("settings")}
           aria-expanded={profileOpen}
           onClick={() => setProfileOpen((open) => !open)}
         >
-          <UserRound size={20} />
-          <span>{t("settings")}</span>
+          <UserRound size={19} />
         </button>
       </div>
 

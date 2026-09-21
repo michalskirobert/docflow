@@ -1364,7 +1364,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sparticuz/chromium@npm:153.0.0":
+"@sparticuz/chromium@npm:^153.0.0":
   version: 153.0.0
   resolution: "@sparticuz/chromium@npm:153.0.0"
   dependencies:
@@ -2724,7 +2724,7 @@ __metadata:
   dependencies:
     "@hookform/resolvers": "npm:^5.2.1"
     "@prisma/client": "npm:^6.16.2"
-    "@sparticuz/chromium": "npm:153.0.0"
+    "@sparticuz/chromium": "npm:^153.0.0"
     "@tanstack/react-query": "npm:^5.87.4"
     "@types/node": "npm:^24.5.2"
     "@types/nodemailer": "npm:^7.0.1"

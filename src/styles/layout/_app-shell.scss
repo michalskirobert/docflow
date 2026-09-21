@@ -922,34 +922,34 @@ body {
     display: none;
   }
 }
+
+/* 2.1.8 mobile navigation: four equal, compact icon-only actions. */
 .mobile-profile {
   display: none;
 }
 
 @media (max-width: 900px) {
   .shell {
-    padding-bottom: 92px;
+    padding-bottom: 72px;
   }
 
   .sidebar {
-    height: 92px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(64px, 0.34fr);
+    height: 72px;
+    display: flex;
     align-items: stretch;
     gap: 2px;
-    padding: 7px 8px 20px;
+    padding: 6px 8px 8px;
   }
 
   .sidebar nav {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex: 3 1 0;
+    min-width: 0;
     gap: 2px;
   }
 
-  .sidebar nav .nav-settings {
-    display: none;
-  }
-
+  .sidebar nav .nav-settings,
   .sidebar-bottom {
     display: none;
   }
@@ -957,27 +957,28 @@ body {
   .mobile-profile {
     position: relative;
     display: block;
+    flex: 1 1 0;
     min-width: 0;
   }
 
   .mobile-profile-trigger,
   .sidebar nav a {
     width: 100%;
+    height: 100%;
     min-width: 0;
-    min-height: 62px;
+    min-height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 3px;
-    padding: 6px 2px;
+    padding: 6px;
     border: 0;
     border-radius: 12px;
     background: transparent;
     color: #cbd5e1;
-    font: inherit;
-    font-size: 10px;
-    line-height: 1.1;
+  }
+
+  .sidebar nav a > span {
+    display: none;
   }
 
   .mobile-profile-trigger.active {
@@ -987,14 +988,15 @@ body {
 
   .mobile-profile-trigger svg,
   .sidebar nav a svg {
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
+    flex: 0 0 19px;
   }
 
   .mobile-profile-backdrop {
     position: fixed;
-    z-index: 98;
     inset: 0;
+    z-index: 98;
     border: 0;
     background: transparent;
   }
@@ -1032,35 +1034,243 @@ body {
     text-decoration: none;
   }
 
+  .mobile-profile-menu a svg,
+  .mobile-profile-menu button svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
   .mobile-profile-menu a:hover,
   .mobile-profile-menu button:hover {
     background: rgb(255 255 255 / 8%);
   }
 }
 
-/* Registration: reduce the oversized top whitespace inside the wide auth card. */
+/* 2.1.8 registration: compact topbar with balanced navigation and language control. */
+.login-page:has(.login-card.wide) {
+  place-items: start center;
+  padding-top: 18px;
+  padding-bottom: 32px;
+}
+
 .login-card.wide {
+  margin-top: 0;
   padding-top: 24px;
 }
 
 .login-card.wide .auth-topbar {
-  margin-bottom: 12px;
+  min-height: 62px;
+  align-items: center;
+  margin: 0 0 14px;
+}
+
+.login-card.wide .auth-back {
+  align-self: center;
+  margin: 0;
+}
+
+.login-card.wide .auth-topbar .language-field,
+.login-card.wide .auth-topbar .field {
+  width: min(180px, 42vw);
+  margin: 0;
 }
 
 .login-card.wide .login-brand {
-  margin-top: 4px;
+  margin-top: 0;
 }
 
-.login-page:has(.login-card.wide) {
-  padding-top: clamp(20px, 3vh, 36px);
+.login-card.wide > .brand-by {
+  margin-bottom: 0;
+}
+
+.login-card.wide > h1 {
+  margin-top: 28px;
 }
 
 @media (max-width: 760px) {
+  .login-page:has(.login-card.wide) {
+    padding-top: 10px;
+    padding-bottom: 20px;
+  }
+
   .login-card.wide {
     padding-top: 18px;
   }
 
-  .login-page:has(.login-card.wide) {
-    padding-top: 14px;
+  .login-card.wide .auth-topbar {
+    min-height: 56px;
+    margin-bottom: 12px;
+  }
+}
+
+/* 2.1.9 mobile navigation: exactly four equal icon-only slots. */
+@media (max-width: 900px) {
+  .shell {
+    padding-bottom: 78px;
+  }
+
+  .sidebar {
+    height: 78px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(
+        0,
+        1fr
+      );
+    align-items: stretch;
+    gap: 4px;
+    padding: 6px 8px 18px;
+  }
+
+  .sidebar-brand,
+  .sidebar-bottom {
+    display: none !important;
+  }
+
+  .sidebar nav {
+    display: contents;
+  }
+
+  .sidebar nav .nav-settings {
+    display: none !important;
+  }
+
+  .sidebar nav a,
+  .mobile-profile,
+  .mobile-profile-trigger {
+    min-width: 0;
+    width: 100%;
+    height: 54px;
+  }
+
+  .sidebar nav a,
+  .mobile-profile-trigger {
+    min-height: 54px;
+    padding: 0;
+    border-radius: 12px;
+  }
+
+  .sidebar nav a > span {
+    display: none !important;
+  }
+
+  .sidebar nav a svg,
+  .mobile-profile-trigger svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 19px !important;
+  }
+
+  .mobile-profile {
+    position: relative;
+    display: block;
+  }
+
+  .mobile-product-meta {
+    bottom: 3px;
+    height: 11px;
+    font-size: 8px;
+    line-height: 1;
+  }
+}
+
+/* 2.1.10: stable four-slot mobile bottom navigation. */
+@media (max-width: 900px) {
+  .shell {
+    padding-bottom: 76px;
+  }
+
+  .sidebar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: 56px 12px;
+    width: 100%;
+    height: 76px !important;
+    gap: 0 4px !important;
+    padding: 5px 8px 3px !important;
+  }
+
+  .sidebar-brand,
+  .sidebar-bottom,
+  .sidebar nav .nav-settings {
+    display: none !important;
+  }
+
+  .sidebar nav {
+    display: contents !important;
+  }
+
+  .sidebar nav a {
+    grid-row: 1;
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .sidebar nav a:nth-child(1) {
+    grid-column: 1;
+  }
+  .sidebar nav a:nth-child(2) {
+    grid-column: 2;
+  }
+  .sidebar nav a:nth-child(3) {
+    grid-column: 3;
+  }
+
+  .sidebar nav a > span {
+    display: none !important;
+  }
+
+  .mobile-profile {
+    position: relative !important;
+    grid-column: 4;
+    grid-row: 1;
+    display: block !important;
+    width: 100% !important;
+    height: 56px !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-profile-trigger {
+    display: flex !important;
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .sidebar nav a svg,
+  .mobile-profile-trigger svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 19px !important;
+  }
+
+  .mobile-product-meta {
+    position: static !important;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex !important;
+    width: 100%;
+    height: 12px !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-profile-menu {
+    right: 0;
+    bottom: calc(100% + 8px);
   }
 }

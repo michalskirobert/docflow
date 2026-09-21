@@ -45,9 +45,22 @@ export function AccountSettings() {
   });
   if (account.isLoading)
     return (
-      <section className="card settings-card">
+      <section
+        className="card settings-card settings-skeleton"
+        aria-busy="true"
+        aria-label={t("accountData")}
+      >
+        <div className="skeleton-line wide" />
         <div className="skeleton-line" />
-        <div className="skeleton-line" />
+        <div className="settings-skeleton-grid">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div className="settings-skeleton-field" key={index}>
+              <div className="skeleton-line short" />
+              <div className="settings-skeleton-input" />
+            </div>
+          ))}
+        </div>
+        <div className="settings-skeleton-button" />
       </section>
     );
   return (

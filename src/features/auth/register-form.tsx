@@ -491,11 +491,14 @@ export default function RegisterForm() {
               key={plan.code}
               className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
             >
-              <ChoiceField
-                className="plan-radio-choice"
+              <input
+                className="plan-radio"
                 type="radio"
                 value={plan.code}
                 disabled={!plan.available}
+                aria-label={
+                  plan.code === "FREE" ? t("freeLicense") : t("annualLicense")
+                }
                 {...register("plan")}
               />
 
