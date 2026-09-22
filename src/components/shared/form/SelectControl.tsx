@@ -11,11 +11,16 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
   type ReactElement,
+  type ReactNode,
   type SelectHTMLAttributes,
 } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
-type Option = { value: string; label: string; disabled?: boolean };
+type Option = {
+  value: string;
+  label: string;
+  disabled?: boolean;
+};
 
 export const SelectControl = forwardRef<
   HTMLSelectElement,
@@ -39,20 +44,24 @@ export const SelectControl = forwardRef<
   const selectId = id ?? generatedId;
   const rootRef = useRef<HTMLDivElement>(null);
   const nativeRef = useRef<HTMLSelectElement | null>(null);
+
   const [open, setOpen] = useState(false);
   const [uncontrolledValue, setUncontrolledValue] = useState(
     String(defaultValue ?? ""),
   );
 
   const options: Option[] = [];
+
   Children.forEach(children, (child) => {
     if (!isValidElement(child)) return;
+
     if (child.type === "option") {
       const option = child as ReactElement<{
         value?: string | number;
         disabled?: boolean;
-        children?: unknown;
+        children?: ReactNode;
       }>;
+
       options.push({
         value: String(option.props.value ?? ""),
         label: Children.toArray(option.props.children).join(""),
@@ -62,39 +71,59 @@ export const SelectControl = forwardRef<
   });
 
   const currentValue = String(value ?? uncontrolledValue ?? "");
+
   const current =
     options.find((option) => option.value === currentValue) ?? options[0];
 
   useEffect(() => {
     if (!open) return;
+
     const close = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
     };
+
     document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
+
+    return () => {
+      document.removeEventListener("pointerdown", close);
+    };
   }, [open]);
 
   const assignRef = (node: HTMLSelectElement | null) => {
     nativeRef.current = node;
-    if (typeof forwardedRef === "function") forwardedRef(node);
-    else if (forwardedRef) forwardedRef.current = node;
+
+    if (typeof forwardedRef === "function") {
+      forwardedRef(node);
+    } else if (forwardedRef) {
+      forwardedRef.current = node;
+    }
   };
 
   const choose = (nextValue: string) => {
     const node = nativeRef.current;
+
     if (!node) return;
+
     node.value = nextValue;
-    if (value === undefined) setUncontrolledValue(nextValue);
+
+    if (value === undefined) {
+      setUncontrolledValue(nextValue);
+    }
+
     onChange?.({
       target: node,
       currentTarget: node,
     } as ChangeEvent<HTMLSelectElement>);
+
     setOpen(false);
-    requestAnimationFrame(() =>
+
+    requestAnimationFrame(() => {
       rootRef.current
         ?.querySelector<HTMLButtonElement>(".shared-select-trigger")
-        ?.focus(),
-    );
+        ?.focus();
+    });
   };
 
   const onTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
@@ -102,13 +131,18 @@ export const SelectControl = forwardRef<
       event.preventDefault();
       setOpen(true);
     }
-    if (event.key === "Escape") setOpen(false);
+
+    if (event.key === "Escape") {
+      setOpen(false);
+    }
   };
 
   return (
     <div
       ref={rootRef}
-      className={`shared-select${open ? " is-open" : ""}${disabled ? " is-disabled" : ""}${className ? ` ${className}` : ""}`}
+      className={`shared-select${open ? " is-open" : ""}${
+        disabled ? " is-disabled" : ""
+      }${className ? ` ${className}` : ""}`}
     >
       <select
         {...props}
@@ -125,6 +159,7 @@ export const SelectControl = forwardRef<
       >
         {children}
       </select>
+
       <button
         type="button"
         className="shared-select-trigger"
@@ -138,20 +173,23 @@ export const SelectControl = forwardRef<
         onClick={() => setOpen((state) => !state)}
         onKeyDown={onTriggerKeyDown}
         onBlur={(event) => {
-          if (!rootRef.current?.contains(event.relatedTarget as Node))
+          if (!rootRef.current?.contains(event.relatedTarget as Node)) {
             onBlur?.({
               target: nativeRef.current!,
               currentTarget: nativeRef.current!,
             } as never);
+          }
         }}
       >
         <span>{current?.label ?? ""}</span>
+
         <ChevronDown
           size={17}
           className="shared-select-chevron"
           aria-hidden="true"
         />
       </button>
+
       {open && !disabled && (
         <div
           id={`${selectId}-options`}
@@ -169,6 +207,7 @@ export const SelectControl = forwardRef<
               onClick={() => choose(option.value)}
             >
               <span>{option.label}</span>
+
               {option.value === currentValue && (
                 <Check size={16} aria-hidden="true" />
               )}
