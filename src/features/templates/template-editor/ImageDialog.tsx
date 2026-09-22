@@ -1,7 +1,8 @@
 import { InputControl, SelectControl } from "@/components/shared/form";
 import type { ChangeEvent, DragEvent, RefObject } from "react";
-import { ImagePlus, Upload } from "lucide-react";
+import { ImagePlus, LoaderCircle, Upload } from "lucide-react";
 import type { ImageAlign, ImageFit } from "./utils";
+import { TEMPLATE_IMAGE_ACCEPT } from "@/lib/image-file";
 type Props = {
   t: (key: string) => string;
   fileRef: RefObject<HTMLInputElement | null>;
@@ -9,6 +10,7 @@ type Props = {
   error: string;
   dragging: boolean;
   validating: boolean;
+  processing: boolean;
   width: string;
   height: string;
   fit: ImageFit;
@@ -31,6 +33,7 @@ export function ImageDialog({
   error,
   dragging,
   validating,
+  processing,
   width,
   height,
   fit,
@@ -56,23 +59,43 @@ export function ImageDialog({
         <p>{t("imageHelp")}</p>
         <div className="image-source-grid">
           <div
-            className={`image-source ${dragging ? "dragging" : ""}`}
+            className={`image-source ${dragging ? "dragging" : ""} ${processing ? "is-processing" : ""}`}
             role="button"
             tabIndex={0}
-            onClick={() => fileRef.current?.click()}
+            onClick={() => !processing && fileRef.current?.click()}
             onKeyDown={(e) =>
-              (e.key === "Enter" || e.key === " ") && fileRef.current?.click()
+              !processing &&
+              (e.key === "Enter" || e.key === " ") &&
+              fileRef.current?.click()
             }
             onDragOver={(e) => {
               e.preventDefault();
               setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
-            onDrop={dropFile}
+            onDrop={(e) => {
+              if (!processing) dropFile(e);
+              else e.preventDefault();
+            }}
+            aria-busy={processing}
+            aria-disabled={processing}
           >
-            <Upload />
-            <strong>{t("dropImage")}</strong>
-            <small>{t("imageTypes")}</small>
+            {processing ? (
+              <div
+                className="image-processing-state"
+                role="status"
+                aria-live="polite"
+              >
+                <LoaderCircle className="spinner" />
+                <strong>{t("processingImage")}</strong>
+              </div>
+            ) : (
+              <>
+                <Upload />
+                <strong>{t("dropImage")}</strong>
+                <small>{t("imageTypes")}</small>
+              </>
+            )}
           </div>
           <div className="image-url-box">
             <strong>{t("imageUrl")}</strong>
@@ -141,7 +164,7 @@ export function ImageDialog({
           ref={fileRef}
           hidden
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif"
+          accept={TEMPLATE_IMAGE_ACCEPT}
           onChange={chooseFile}
         />
         <div className="dialog-actions">

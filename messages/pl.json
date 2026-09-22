@@ -214,7 +214,7 @@
     "searchTemplates": "Szukaj szablonów…",
     "noDescription": "Brak opisu",
     "dropImage": "Upuść obraz tutaj lub kliknij, aby wybrać",
-    "imageTypes": "PNG, JPG, WEBP lub GIF",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · plik źródłowy do 20 MB · automatyczna optymalizacja",
     "removeImage": "Usuń obraz",
     "chooseDate": "Wybierz datę",
     "chooseDateTime": "Wybierz datę i czas",
@@ -232,7 +232,8 @@
     "unsavedChangesTitle": "Niezapisane zmiany",
     "unsavedChangesLeave": "Opuść",
     "unsavedChangesStay": "Zostań",
-    "clearValue": "Wyczyść wartość"
+    "clearValue": "Wyczyść wartość",
+    "processingImage": "Przetwarzanie i optymalizacja obrazu…"
   },
   "settings": {
     "title": "Ustawienia",
@@ -365,14 +366,14 @@
     "addImage": "Dodaj obraz",
     "imageHelp": "Przeciągnij plik lub wybierz go z dysku albo podaj publiczny adres URL. Pliki są sprawdzane po typie i sygnaturze, nie tylko rozszerzeniu.",
     "dropImage": "Upuść obraz tutaj lub kliknij, aby wybrać",
-    "imageTypes": "PNG, JPG, WEBP, GIF · maks. 2 MB",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · plik źródłowy do 20 MB · automatyczna optymalizacja",
     "imageUrl": "Adres URL obrazu",
     "validating": "Sprawdzanie…",
     "useImageUrl": "Użyj obrazu z URL",
     "widthPx": "Szerokość (px)",
     "placement": "Położenie",
     "imageInvalidType": "Dozwolone są tylko pliki PNG, JPG, WEBP i GIF.",
-    "imageTooLarge": "Obraz jest za duży. Maksymalny rozmiar to 2 MB.",
+    "imageTooLarge": "Plik źródłowy może mieć maks. 20 MB. Po optymalizacji DocFlow utrzymuje osadzony obraz poniżej 2 MB.",
     "imageSignatureInvalid": "Zawartość pliku nie odpowiada formatowi obrazu. Plik został odrzucony.",
     "imageReadError": "Nie udało się odczytać obrazu.",
     "urlInvalid": "Podaj prawidłowy adres http:// lub https://.",
@@ -473,6 +474,7 @@
     "clearValue": "Wyczyść wartość",
     "templateDetails": "Szczegóły szablonu",
     "editTemplateDetails": "Edytuj nazwę i opis",
-    "done": "Gotowe"
+    "done": "Gotowe",
+    "processingImage": "Przetwarzanie i optymalizacja obrazu…"
   }
 }

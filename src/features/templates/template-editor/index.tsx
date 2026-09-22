@@ -27,11 +27,7 @@ import {
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
-import {
-  A4_WIDTH_PX,
-  MAX_TEMPLATE_IMAGE_BYTES,
-  SAFE_TEMPLATE_IMAGE_TYPES,
-} from "@/utils/constants";
+import { A4_WIDTH_PX } from "@/utils/constants";
 import { VariableModal } from "./VariableModal";
 import { EditorToolbar, type ToolbarState } from "./EditorToolbar";
 import { VariableShelf } from "./VariableShelf";
@@ -40,6 +36,11 @@ import { DocumentOptions } from "./DocumentOptions";
 import { ZoomBar } from "./ZoomBar";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
+import {
+  normalizedImageType,
+  optimizeTemplateImage,
+  SUPPORTED_TEMPLATE_IMAGE_TYPES,
+} from "@/lib/image-file";
 import {
   createImageVariablePlaceholder,
   getImageAlign,
@@ -64,6 +65,27 @@ const MAGIC: Record<string, (bytes: Uint8Array) => boolean> = {
   "image/webp": (b) =>
     String.fromCharCode(...b.slice(0, 4)) === "RIFF" &&
     String.fromCharCode(...b.slice(8, 12)) === "WEBP",
+  "image/heic": (b) => {
+    if (String.fromCharCode(...b.slice(4, 8)) !== "ftyp") return false;
+    const brand = String.fromCharCode(...b.slice(8, 12));
+    return ["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand);
+  },
+  "image/heif": (b) => {
+    if (String.fromCharCode(...b.slice(4, 8)) !== "ftyp") return false;
+    const brand = String.fromCharCode(...b.slice(8, 12));
+    return ["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand);
+  },
+  "image/jxl": (b) =>
+    (b[0] === 0xff && b[1] === 0x0a) ||
+    (b[0] === 0x00 &&
+      b[1] === 0x00 &&
+      b[2] === 0x00 &&
+      b[3] === 0x0c &&
+      String.fromCharCode(...b.slice(4, 8)) === "JXL " &&
+      b[8] === 0x0d &&
+      b[9] === 0x0a &&
+      b[10] === 0x87 &&
+      b[11] === 0x0a),
 };
 
 type Props = {
@@ -155,6 +177,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [imageError, setImageError] = useState("");
   const [dragging, setDragging] = useState(false);
   const [validatingImage, setValidatingImage] = useState(false);
+  const [processingImage, setProcessingImage] = useState(false);
 
   const [imageWidth, setImageWidth] = useState("240");
   const [imageHeight, setImageHeight] = useState("");
@@ -550,36 +573,42 @@ export function TemplateEditor({ template, onClose }: Props) {
   const validateFile = async (file: File) => {
     try {
       setImageError("");
+      setProcessingImage(true);
 
-      if (!SAFE_TEMPLATE_IMAGE_TYPES.some((type) => type === file.type)) {
+      const type = normalizedImageType(file);
+
+      if (!SUPPORTED_TEMPLATE_IMAGE_TYPES.has(type)) {
         setImageError(t("imageInvalidType"));
-        return;
-      }
-
-      if (file.size > MAX_TEMPLATE_IMAGE_BYTES) {
-        setImageError(t("imageTooLarge"));
         return;
       }
 
       const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
 
-      if (!MAGIC[file.type]?.(bytes)) {
+      if (!MAGIC[type]?.(bytes)) {
         setImageError(t("imageSignatureInvalid"));
         return;
       }
 
+      const optimized = await optimizeTemplateImage(file);
       const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
 
         reader.onload = () => resolve(String(reader.result));
         reader.onerror = () => reject(reader.error);
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(optimized);
       });
 
       insertImage(dataUrl);
-    } catch {
-      setImageError(t("imageReadError"));
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      setImageError(
+        code === "IMAGE_SOURCE_TOO_LARGE" || code === "IMAGE_OUTPUT_TOO_LARGE"
+          ? t("imageTooLarge")
+          : t("imageReadError"),
+      );
+    } finally {
+      setProcessingImage(false);
     }
   };
 
@@ -1482,6 +1511,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             error={imageError}
             dragging={dragging}
             validating={validatingImage}
+            processing={processingImage}
             width={imageWidth}
             height={imageHeight}
             fit={imageFit}

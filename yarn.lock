@@ -2734,6 +2734,7 @@ __metadata:
     bcryptjs: "npm:^3.0.2"
     eslint: "npm:^9.35.0"
     eslint-config-next: "npm:16.3.3"
+    heic2any: "npm:^0.0.4"
     jose: "npm:^6.1.0"
     lucide-react: "npm:^0.544.0"
     next: "npm:16.3.3"
@@ -6233,3 +6234,10 @@ __metadata:
   checksum: 10c0/32eb6c5e98becbe045675b2141c3611451c16ba567f9779231d79af41c4d651ca1c22f154aef7e6c6e77b929f23e43f1154ca05b82e119e922353725d6776af5
   languageName: node
   linkType: hard
+
+"heic2any@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "heic2any@npm:0.0.4"
+  languageName: node
+  linkType: hard
+

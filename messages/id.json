@@ -214,7 +214,7 @@
     "searchTemplates": "Cari templat…",
     "noDescription": "Tanpa deskripsi",
     "dropImage": "Letakkan gambar di sini atau klik untuk memilih",
-    "imageTypes": "PNG, JPG, WEBP atau GIF",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · sumber hingga 20 MB · dioptimalkan otomatis",
     "removeImage": "Hapus gambar",
     "chooseDate": "Pilih tanggal",
     "chooseDateTime": "Pilih tanggal dan waktu",
@@ -232,7 +232,8 @@
     "unsavedChangesTitle": "Perubahan belum disimpan",
     "unsavedChangesLeave": "Keluar",
     "unsavedChangesStay": "Tetap di sini",
-    "clearValue": "Hapus nilai"
+    "clearValue": "Hapus nilai",
+    "processingImage": "Memproses dan mengoptimalkan gambar…"
   },
   "settings": {
     "title": "Pengaturan",
@@ -365,14 +366,14 @@
     "addImage": "Tambah gambar",
     "imageHelp": "Tarik file, pilih dari perangkat, atau masukkan URL publik. File diperiksa berdasarkan tipe dan signature file, bukan hanya ekstensi.",
     "dropImage": "Tarik gambar ke sini atau klik untuk memilih",
-    "imageTypes": "PNG, JPG, WEBP, GIF · maks. 2 MB",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · sumber hingga 20 MB · dioptimalkan otomatis",
     "imageUrl": "URL gambar",
     "validating": "Memeriksa…",
     "useImageUrl": "Gunakan URL gambar",
     "widthPx": "Lebar (px)",
     "placement": "Posisi",
     "imageInvalidType": "Hanya file PNG, JPG, WEBP, dan GIF yang diizinkan.",
-    "imageTooLarge": "Gambar terlalu besar. Ukuran maksimum 2 MB.",
+    "imageTooLarge": "Gambar sumber dapat berukuran hingga 20 MB. Setelah optimasi, DocFlow menjaga gambar tertanam di bawah 2 MB.",
     "imageSignatureInvalid": "Isi file tidak sesuai dengan format gambar yang dinyatakan. File ditolak.",
     "imageReadError": "Gambar tidak dapat dibaca.",
     "urlInvalid": "Masukkan URL http:// atau https:// yang valid.",
@@ -473,6 +474,7 @@
     "clearValue": "Hapus nilai",
     "templateDetails": "Detail template",
     "editTemplateDetails": "Edit nama dan deskripsi",
-    "done": "Selesai"
+    "done": "Selesai",
+    "processingImage": "Memproses dan mengoptimalkan gambar…"
   }
 }

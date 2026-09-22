@@ -214,7 +214,7 @@
     "searchTemplates": "Search templates…",
     "noDescription": "No description",
     "dropImage": "Drop an image here or click to choose",
-    "imageTypes": "PNG, JPG, WEBP or GIF",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · source up to 20 MB · optimized automatically",
     "removeImage": "Remove image",
     "chooseDate": "Choose date",
     "chooseDateTime": "Choose date and time",
@@ -232,7 +232,8 @@
     "unsavedChangesTitle": "Unsaved changes",
     "unsavedChangesLeave": "Leave",
     "unsavedChangesStay": "Stay",
-    "clearValue": "Clear value"
+    "clearValue": "Clear value",
+    "processingImage": "Processing and optimizing image…"
   },
   "settings": {
     "title": "Settings",
@@ -365,14 +366,14 @@
     "addImage": "Add an image",
     "imageHelp": "Drop a file, choose it from your device, or provide a public URL. Files are checked by type and file signature, not just extension.",
     "dropImage": "Drop image here or click to choose",
-    "imageTypes": "PNG, JPG, WEBP, GIF · max 2 MB",
+    "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · source up to 20 MB · optimized automatically",
     "imageUrl": "Image URL",
     "validating": "Validating…",
     "useImageUrl": "Use image URL",
     "widthPx": "Width (px)",
     "placement": "Placement",
     "imageInvalidType": "Only PNG, JPG, WEBP and GIF files are allowed.",
-    "imageTooLarge": "Image is too large. Maximum size is 2 MB.",
+    "imageTooLarge": "The source image can be up to 20 MB. After optimization DocFlow keeps the embedded image below 2 MB.",
     "imageSignatureInvalid": "The file contents do not match the declared image format. The file was rejected.",
     "imageReadError": "Could not read this image.",
     "urlInvalid": "Enter a valid http:// or https:// URL.",
@@ -473,6 +474,7 @@
     "clearValue": "Clear value",
     "templateDetails": "Template details",
     "editTemplateDetails": "Edit name and description",
-    "done": "Done"
+    "done": "Done",
+    "processingImage": "Processing and optimizing image…"
   }
 }

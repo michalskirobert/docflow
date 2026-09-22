@@ -496,3 +496,53 @@
     font-weight: 700;
   }
 }
+
+.image-processing-state {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.image-processing-state .spinner {
+  width: 28px;
+  height: 28px;
+}
+
+// Once an IMAGE variable has a value, replacement is intentionally disabled.
+// The user must remove the current image before choosing/dropping another one.
+.document-image-dropzone.has-image {
+  cursor: default;
+}
+
+.document-image-dropzone.has-image:hover {
+  border-color: #c7d2fe;
+  background: #f8faff;
+}
+
+// Image processing is an actual disabled state: no pointer affordance or hover feedback.
+.document-image-dropzone.is-processing {
+  cursor: not-allowed;
+  opacity: 0.72;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.document-image-dropzone.is-processing:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.image-source.is-processing {
+  cursor: not-allowed;
+  opacity: 0.72;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.image-source.is-processing:hover,
+.image-source.is-processing.dragging {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}

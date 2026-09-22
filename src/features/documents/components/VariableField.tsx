@@ -1,26 +1,26 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Trash2, Upload, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  LoaderCircle,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
 import { parseFormattedNumber } from "@/features/documents/helpers";
 import { DateTimePicker, InputControl } from "@/components/shared/form";
 import {
-  MAX_TEMPLATE_IMAGE_BYTES,
-  SAFE_TEMPLATE_IMAGE_TYPES,
-} from "@/utils/constants";
-
-const MAGIC: Record<string, (b: Uint8Array) => boolean> = {
-  "image/png": (b) =>
-    b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47,
-  "image/jpeg": (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
-  "image/gif": (b) => String.fromCharCode(...b.slice(0, 3)) === "GIF",
-  "image/webp": (b) =>
-    String.fromCharCode(...b.slice(0, 4)) === "RIFF" &&
-    String.fromCharCode(...b.slice(8, 12)) === "WEBP",
-};
+  hasValidImageSignature,
+  normalizedImageType,
+  optimizeTemplateImage,
+  SUPPORTED_TEMPLATE_IMAGE_TYPES,
+  TEMPLATE_IMAGE_ACCEPT,
+} from "@/lib/image-file";
 
 type DateTimeVariableType = "date" | "datetime" | "time";
 
@@ -522,6 +522,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   const file = useRef<HTMLInputElement>(null);
 
   const [uploadError, setUploadError] = useState("");
+  const [imageProcessing, setImageProcessing] = useState(false);
 
   const id = `document-variable-${variable.name.replace(
     /[^a-zA-Z0-9_-]/g,
@@ -534,29 +535,35 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     }
 
     setUploadError("");
+    setImageProcessing(true);
 
-    if (
-      !SAFE_TEMPLATE_IMAGE_TYPES.includes(f.type as never) ||
-      f.size > MAX_TEMPLATE_IMAGE_BYTES
-    ) {
-      setUploadError(t("invalidImage"));
-      return;
+    try {
+      const type = normalizedImageType(f);
+
+      if (!SUPPORTED_TEMPLATE_IMAGE_TYPES.has(type)) {
+        setUploadError(t("invalidImage"));
+        return;
+      }
+
+      const bytes = new Uint8Array(await f.slice(0, 16).arrayBuffer());
+      if (!hasValidImageSignature(type, bytes)) {
+        setUploadError(t("invalidImageSignature"));
+        return;
+      }
+
+      const optimized = await optimizeTemplateImage(f);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(optimized);
+      });
+      onChange(dataUrl);
+    } catch {
+      setUploadError(t("imageReadError"));
+    } finally {
+      setImageProcessing(false);
     }
-
-    const b = new Uint8Array(await f.slice(0, 16).arrayBuffer());
-
-    if (!MAGIC[f.type]?.(b)) {
-      setUploadError(t("invalidImageSignature"));
-      return;
-    }
-
-    const r = new FileReader();
-
-    r.onload = () => onChange(String(r.result));
-
-    r.onerror = () => setUploadError(t("imageReadError"));
-
-    r.readAsDataURL(f);
   };
 
   const Label = () => (
@@ -677,22 +684,28 @@ export function VariableField({ variable, value, error, onChange }: Props) {
         <Label />
 
         <div
-          className="document-image-dropzone"
+          className={`document-image-dropzone ${value ? "has-image" : ""} ${imageProcessing ? "is-processing" : ""}`}
           role="button"
-          aria-disabled={variable.locked}
-          tabIndex={variable.locked ? -1 : 0}
+          aria-disabled={variable.locked || imageProcessing || Boolean(value)}
+          tabIndex={variable.locked || imageProcessing || value ? -1 : 0}
           onClick={() => {
-            if (!variable.locked) file.current?.click();
+            if (!variable.locked && !imageProcessing && !value)
+              file.current?.click();
           }}
           onKeyDown={(e) => {
-            if (!variable.locked && (e.key === "Enter" || e.key === " ")) {
+            if (
+              !variable.locked &&
+              !imageProcessing &&
+              !value &&
+              (e.key === "Enter" || e.key === " ")
+            ) {
               file.current?.click();
             }
           }}
           onDragOver={(e: DragEvent) => e.preventDefault()}
           onDrop={(e: DragEvent) => {
             e.preventDefault();
-            if (variable.locked) return;
+            if (variable.locked || imageProcessing || value) return;
 
             void load(e.dataTransfer.files?.[0]);
           }}
@@ -713,6 +726,15 @@ export function VariableField({ variable, value, error, onChange }: Props) {
                 {t("removeImage")}
               </button>
             </div>
+          ) : imageProcessing ? (
+            <div
+              className="image-processing-state"
+              role="status"
+              aria-live="polite"
+            >
+              <LoaderCircle className="spinner" />
+              <strong>{t("processingImage")}</strong>
+            </div>
           ) : (
             <>
               <Upload />
@@ -729,7 +751,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           ref={file}
           hidden
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif"
+          accept={TEMPLATE_IMAGE_ACCEPT}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             void load(e.target.files?.[0]);
 
