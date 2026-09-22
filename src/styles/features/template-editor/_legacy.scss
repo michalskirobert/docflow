@@ -1,0 +1,492 @@
+/* v1.3 editor + license UX */
+.image-dialog {
+  max-width: 620px;
+}
+
+.image-source-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+.image-source {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 150px;
+  border: 1px dashed #a5b4fc;
+  border-radius: 0;
+  background: #f8faff;
+  color: #4338ca;
+  cursor: pointer;
+}
+.image-source svg {
+  width: 28px;
+  height: 28px;
+}
+.image-source small {
+  color: #64748b;
+}
+.image-url-box {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+.image-url-box input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  padding: 10px;
+}
+.license-card.active > svg {
+  background: #ecfdf5;
+  color: #059669;
+}
+.payment-review {
+  margin-top: 10px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 9px 11px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
+}
+.nip-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+}
+.nip-row .btn {
+  margin-bottom: 14px;
+  white-space: nowrap;
+}
+.plan-card .plan-name {
+  font-size: 18px;
+  font-weight: 850;
+}
+.plan-card .plan-copy {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.plan-card.yearly .plan-visual {
+  background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+}
+.payment-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.payment-option {
+  position: relative;
+  display: flex;
+  gap: 11px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  cursor: pointer;
+}
+.payment-option.selected {
+  border: 2px solid #6366f1;
+  padding: 13px;
+  background: #f8faff;
+}
+.payment-option input {
+  position: absolute;
+  opacity: 0;
+}
+.payment-option strong {
+  display: block;
+}
+.payment-option small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  line-height: 1.4;
+}
+@media (max-width: 760px) {
+  .editor-mobile-hint {
+    display: block;
+  }
+  .editor-toolbar {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: thin;
+  }
+  .editor-toolbar > * {
+    flex: 0 0 auto;
+  }
+  .paper-stage {
+    overflow: hidden;
+    padding: 16px 8px 50px;
+  }
+  .a4-paper {
+    width: 210mm;
+    min-height: 297mm;
+    transform: scale(calc((100vw - 24px) / 793.7));
+    transform-origin: top left;
+    margin: 0;
+  }
+  .paper-stage {
+    height: calc(1122px * ((100vw - 24px) / 793.7) + 70px);
+  }
+  .image-source-grid,
+  .payment-methods,
+  .nip-row {
+    grid-template-columns: 1fr;
+  }
+  .nip-row .btn {
+    margin-top: -8px;
+  }
+  .editor-header {
+    position: sticky;
+  }
+  .editor-description {
+    width: calc(100% - 24px);
+  }
+}
+
+/* v1.4 document editor UX */
+.image-source.dragging {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 10%);
+}
+.image-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.image-options label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+.image-options input,
+.image-options select,
+.image-context-bar input,
+.image-context-bar select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+}
+.image-context-bar {
+  position: sticky;
+  z-index: 2;
+  top: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+}
+.image-context-bar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.image-context-bar input {
+  width: 80px;
+}
+.image-context-bar button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+}
+.a4-paper img {
+  cursor: pointer;
+}
+.a4-paper img:hover {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .paper-stage {
+    height: auto;
+    overflow: visible;
+    padding: 10px 0 80px;
+  }
+  .a4-paper {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: calc(100vh - 220px);
+    margin: 0;
+    border-inline: 0;
+    padding: 24px 18px;
+    transform: none;
+    box-shadow: none;
+  }
+  .editor-toolbar {
+    top: 61px;
+  }
+  .image-context-bar {
+    top: 103px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .image-options {
+    grid-template-columns: 1fr;
+  }
+  .dialog.image-dialog {
+    max-height: 90vh;
+    overflow: auto;
+  }
+  .editor-overlay {
+    background: #fff;
+  }
+  .editor-description {
+    margin: 10px 12px;
+  }
+  .editor-mobile-hint {
+    display: block;
+  }
+}
+/* v1.4.1 editor fixes */
+.image-dialog {
+  width: min(760px, calc(100vw - 32px));
+  padding: 26px;
+}
+.image-source-grid {
+  gap: 18px;
+}
+.image-source {
+  padding: 28px 22px;
+  min-height: 190px;
+}
+.image-source.dragging {
+  border-style: solid;
+  background: #eef2ff;
+}
+.image-url-box {
+  padding: 20px;
+}
+.image-options {
+  margin-top: 18px;
+}
+@media (max-width: 760px) {
+  .dialog.image-dialog {
+    width: calc(100vw - 20px);
+    padding: 18px 14px;
+  }
+  .image-source-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .image-source {
+    min-height: 132px;
+    padding: 22px 16px;
+  }
+  .paper-stage {
+    overflow-x: auto;
+    padding: 12px 8px 80px;
+  }
+  .a4-paper {
+    box-sizing: border-box;
+    width: 210mm;
+    min-width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 20mm;
+    border: 1px solid #d9dde5;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 10%);
+    transform: none;
+  }
+  .editor-mobile-hint {
+    position: sticky;
+    left: 0;
+  }
+}
+@media (max-width: 760px) {
+  /* Keep the complete A4 canvas visible on phones. zoom scales layout dimensions too,
+    so the stage height follows the full page instead of cropping it. */
+  .paper-stage {
+    display: block;
+    overflow: visible;
+    padding: 10px 8px 80px;
+  }
+  .a4-paper {
+    width: 210mm;
+    min-width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 20mm;
+    border: 1px solid #d9dde5;
+    box-shadow: 0 12px 32px rgb(15 23 42 / 10%);
+    transform: none;
+    zoom: calc((100vw - 16px) / 793.7);
+  }
+}
+
+/* v1.5 document editor viewport + direct image resizing */
+.zoom-bar {
+  position: sticky;
+  z-index: 2;
+  top: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #f8fafc;
+}
+.zoom-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.zoom-bar button:last-child {
+  padding: 0 10px;
+}
+.zoom-bar svg {
+  width: 15px;
+}
+.zoom-bar strong {
+  min-width: 52px;
+  text-align: center;
+  font-size: 12px;
+}
+.paper-stage {
+  max-width: 100%;
+  overflow: auto !important;
+  overscroll-behavior: contain;
+}
+.paper-zoom {
+  width: max-content;
+  min-width: 100%;
+  padding: 1px;
+}
+.image-resize-handle {
+  position: fixed;
+  z-index: 120;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #6366f1;
+  box-shadow: 0 1px 6px rgb(15 23 42 / 35%);
+  cursor: nwse-resize;
+}
+.a4-paper img[data-selected="true"],
+.a4-paper img:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+}
+.bank-instructions {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+.transfer-reference {
+  display: grid;
+  gap: 5px;
+  margin-top: 4px;
+  border-radius: 10px;
+  padding: 11px;
+  background: #fff;
+}
+.transfer-reference span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.transfer-reference code {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.transfer-reference small {
+  color: #64748b;
+  line-height: 1.4;
+}
+@media (max-width: 760px) {
+  .editor-overlay {
+    overflow: hidden;
+  }
+  .editor-shell {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .editor-header {
+    position: relative;
+    flex: 0 0 auto;
+  }
+  .editor-description {
+    flex: 0 0 auto;
+  }
+  .editor-toolbar {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+  }
+  .image-context-bar {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+  }
+  .editor-mobile-hint {
+    flex: 0 0 auto;
+  }
+  .zoom-bar {
+    position: relative;
+    top: auto;
+    flex: 0 0 auto;
+  }
+  .paper-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto !important;
+    padding: 12px !important;
+    background: #dfe3ea;
+  }
+  .paper-zoom {
+    min-width: 0;
+    padding: 0;
+  }
+  .a4-paper {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 20mm !important;
+    border: 1px solid #cbd1db !important;
+    box-shadow: 0 8px 28px rgb(15 23 42 / 14%) !important;
+    transform: none !important;
+  }
+  .editor-mobile-hint {
+    font-size: 10px;
+  }
+  .zoom-bar {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}

@@ -9,6 +9,7 @@ import { getPlan } from "@/server/billing/plans";
 import { verifyCaptcha } from "@/server/captcha/challenge";
 import { sendVerificationEmail } from "@/server/email/verification";
 import { createPayUOrder } from "@/server/payu/client";
+import { exampleTemplateCreateData } from "@/server/templates/examples";
 
 export async function POST(request: Request) {
   try {
@@ -134,6 +135,10 @@ export async function POST(request: Request) {
 
           city: data.city,
         },
+      });
+
+      await tx.template.createMany({
+        data: exampleTemplateCreateData(organization.id),
       });
 
       await tx.subscription.create({

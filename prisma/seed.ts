@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { EXAMPLE_TEMPLATES } from "../src/server/templates/examples";
 const prisma = new PrismaClient();
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL ?? "owner@example.com";
@@ -38,6 +39,29 @@ async function main() {
       },
     });
   }
+  for (const template of EXAMPLE_TEMPLATES) {
+    const existing = await prisma.template.findFirst({
+      where: {
+        organizationId: org.id,
+        name: template.name,
+        isExample: true,
+      },
+    });
+
+    if (!existing) {
+      await prisma.template.create({
+        data: {
+          organizationId: org.id,
+          name: template.name,
+          description: template.description,
+          content: template.content,
+          variablesJson: JSON.stringify(template.variables),
+          isExample: true,
+        },
+      });
+    }
+  }
+
   console.log({ user: user.email, organization: org.name });
 }
 main().finally(() => prisma.$disconnect());

@@ -1,7 +1,16 @@
 @use "base/base";
 @use "components/feedback-billing";
 @use "layout/app-shell";
-@use "features/legacy-features";
+@use "components/widgets";
+@use "features/template-editor/legacy";
+@use "components/content-widgets";
+@use "features/template-editor/interactions";
+@use "features/documents/editor";
+@use "components/history-plans";
+@use "components/variable-dialog";
+@use "features/templates/list";
+@use "components/variable-controls";
+@use "features/template-editor/workspace";
 @use "components/forms";
 @use "components/buttons";
 @use "features/settings";

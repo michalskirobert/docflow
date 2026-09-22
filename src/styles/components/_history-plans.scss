@@ -1,0 +1,361 @@
+/* 2.1.6 document actions stay side-by-side on phones. */
+@media (max-width: 760px) {
+  .document-generator-shell .document-sticky-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .document-generator-shell .document-sticky-actions .btn {
+    width: auto !important;
+    min-width: 0;
+    flex: 1 1 0;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+/* 2.1.9 visual regression fixes */
+.plan-card .plan-radio-choice {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 25px;
+  height: 25px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 3;
+}
+.plan-card .plan-radio-choice .choice-indicator {
+  display: none;
+}
+.plan-card .plan-check {
+  pointer-events: none;
+  color: transparent;
+}
+.plan-card.selected .plan-check {
+  border-color: #6366f1;
+  background: #fff;
+  color: transparent;
+  box-shadow: 0 0 0 5px rgb(99 102 241 / 12%);
+}
+.plan-card.selected .plan-check::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #6366f1;
+}
+
+/* Keep document history compact and predictable at every breakpoint. */
+.document-history .document-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.document-history .document-actions {
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-left: 0;
+}
+.document-history .document-actions a,
+.document-history .document-actions button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #f8fafc;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.document-history .document-actions button.danger-link {
+  color: #dc2626;
+}
+
+@media (max-width: 760px) {
+  .document-history .document-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+  .document-history .document-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+  .document-history .document-actions a,
+  .document-history .document-actions button {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 5px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 420px) {
+  .document-history .document-actions a,
+  .document-history .document-actions button {
+    gap: 4px;
+    font-size: 10px;
+  }
+  .document-history .document-actions svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 2.1.10: plan selector and document history visual recovery. */
+.plan-card .plan-radio {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+}
+
+.plan-card .plan-check {
+  top: 16px;
+  right: 16px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  box-shadow: none;
+}
+
+.plan-card.selected .plan-check {
+  border-color: #5b5cf0;
+  background: #5b5cf0;
+  box-shadow: 0 0 0 5px rgb(91 92 240 / 10%);
+}
+
+.plan-card.selected .plan-check::after {
+  width: 8px;
+  height: 8px;
+  background: #fff;
+}
+
+.document-history {
+  width: 100%;
+  margin-inline: 0;
+}
+
+.document-history .section-heading {
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.document-history .section-heading h2 {
+  margin-bottom: 3px;
+}
+
+.document-history .section-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.document-history .filter-bar {
+  margin: 0 0 12px;
+}
+
+.document-history .document-row {
+  min-height: 76px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(15 23 42 / 3%);
+}
+
+.document-history .document-meta strong {
+  font-size: 14px;
+}
+
+.document-history .document-meta span {
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .document-history .section-heading {
+    margin-bottom: 14px;
+  }
+
+  .document-history .section-subtitle {
+    font-size: 11px;
+  }
+
+  .document-history .filter-bar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .document-history .filter-bar select {
+    min-height: 40px;
+  }
+
+  .document-history .document-row {
+    padding: 13px;
+    border-radius: 14px;
+  }
+
+  .document-history .document-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .document-history .document-actions a,
+  .document-history .document-actions button {
+    min-height: 38px;
+    font-size: 11px;
+  }
+}
+
+/* 2.0.1 visual/mobile recovery: plan cards and iOS editor focus. */
+.plan-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 760px);
+  margin-inline: auto;
+  align-items: stretch;
+}
+
+.plan-card {
+  width: 100%;
+}
+
+.plan-card .plan-check {
+  display: grid;
+  place-items: center;
+  color: transparent !important;
+}
+
+.plan-card.selected .plan-check {
+  color: #fff !important;
+}
+
+.plan-card.selected .plan-check::after {
+  content: none !important;
+}
+
+@media (max-width: 600px) {
+  .plan-grid {
+    grid-template-columns: 1fr !important;
+    width: min(100%, 420px);
+  }
+}
+
+@media (max-width: 760px) {
+  /* Keep Safari from treating the scaled A4 editor as a tiny text field on focus. */
+  .a4-paper[contenteditable="true"],
+  .page-header-editor[contenteditable="true"],
+  .page-footer-editor[contenteditable="true"] {
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+    touch-action: manipulation;
+  }
+}
+
+/* v2.0.2 mobile template editor: isolate document zoom from editor chrome.
+   The A4 canvas scales visually inside its own scroll viewport; toolbar, variables,
+   document options and zoom controls never participate in the scale. */
+@media (max-width: 760px) {
+  .editor-overlay {
+    overflow: hidden !important;
+  }
+
+  .editor-shell {
+    display: flex !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .editor-header,
+  .editor-description,
+  .editor-toolbar,
+  .image-context-bar,
+  .variable-shelf,
+  .document-options,
+  .zoom-bar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 10;
+    flex: 0 0 auto !important;
+    transform: none !important;
+  }
+
+  .editor-toolbar,
+  .image-context-bar,
+  .variable-shelf,
+  .document-options,
+  .zoom-bar {
+    background-clip: padding-box;
+  }
+
+  .paper-stage {
+    position: relative !important;
+    z-index: 1;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    flex: 1 1 0 !important;
+    overflow: auto !important;
+    overflow-anchor: none;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    contain: strict;
+    padding: 12px !important;
+    background: #dfe3ea;
+  }
+
+  .paper-zoom {
+    /* CSS zoom changes layout size on iOS and can push the editor chrome away.
+       Transform keeps the scale entirely inside the workspace viewport. */
+    zoom: 1 !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    transform: scale(var(--editor-zoom, 1));
+    transform-origin: top left !important;
+    will-change: transform;
+  }
+
+  .a4-page-shell {
+    width: max-content;
+    min-width: max-content;
+  }
+
+  .a4-paper {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    transform: none !important;
+    zoom: 1 !important;
+  }
+}

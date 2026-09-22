@@ -14,7 +14,15 @@ import {
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
-import { ArrowLeft, LoaderCircle, Save, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  LoaderCircle,
+  Pencil,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
@@ -86,7 +94,7 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
-  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [editingName, setEditingName] = useState(false);
 
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
@@ -974,7 +982,8 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     if (!payload.name) {
       notify(t("nameRequired"), "error");
-      nameRef.current?.focus();
+      setEditingName(true);
+      requestAnimationFrame(() => nameRef.current?.focus());
       return;
     }
 
@@ -1025,9 +1034,54 @@ export function TemplateEditor({ template, onClose }: Props) {
           </button>
 
           <div className="editor-header-title">
-            <span className="eyebrow">
-              {template ? t("editTemplate") : t("newTemplate")}
-            </span>
+            {editingName ? (
+              <div className="editor-header-name-edit">
+                <InputControl
+                  ref={nameRef}
+                  className="editor-header-name-input"
+                  maxLength={250}
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  onBlur={() => setEditingName(false)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      setEditingName(false);
+                    }
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      setName(template?.name ?? "");
+                      setEditingName(false);
+                    }
+                  }}
+                  aria-label={t("templateName")}
+                />
+                <button
+                  type="button"
+                  className="editor-header-name-confirm"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => setEditingName(false)}
+                  aria-label={t("save")}
+                  title={t("save")}
+                >
+                  <Check size={16} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="editor-header-name-button"
+                onClick={() => {
+                  setEditingName(true);
+                  requestAnimationFrame(() => nameRef.current?.focus());
+                }}
+                title={name.trim() || t("templateName")}
+                aria-label={`${t("templateName")}: ${name.trim() || t("templateName")}`}
+              >
+                <span>{name.trim() || t("templateName")}</span>
+                <Pencil aria-hidden="true" />
+              </button>
+            )}
           </div>
 
           <div className="editor-actions">
@@ -1055,51 +1109,6 @@ export function TemplateEditor({ template, onClose }: Props) {
             </button>
           </div>
         </header>
-
-        <details
-          className="editor-template-details"
-          open={detailsOpen}
-          onToggle={(event) => setDetailsOpen(event.currentTarget.open)}
-        >
-          <summary className="editor-template-details-summary">
-            <div className="editor-template-details-summary-copy">
-              <span className="editor-template-details-kicker">
-                {t("templateDetails")}
-              </span>
-              <strong>{name.trim() || t("templateName")}</strong>
-            </div>
-            <span className="editor-template-details-summary-hint">
-              {t("editTemplateDetails")}
-            </span>
-          </summary>
-
-          <div className="editor-template-meta">
-            <label className="field editor-template-name-field">
-              <span>
-                {t("templateName")} <strong className="required-mark">*</strong>
-              </span>
-              <InputControl
-                ref={nameRef}
-                maxLength={250}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder={t("templateName")}
-              />
-            </label>
-
-            <label className="field editor-template-description-field">
-              <span>{t("description")}</span>
-              <textarea
-                className="input-control editor-template-description"
-                maxLength={400}
-                rows={2}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder={t("description")}
-              />
-            </label>
-          </div>
-        </details>
 
         <EditorToolbar
           t={t}
