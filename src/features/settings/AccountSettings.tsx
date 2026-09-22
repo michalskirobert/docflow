@@ -3,14 +3,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/shared/button";
 import { FormField, SelectField } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { accountSchema, type AccountFormValues } from "./schema";
 import { useAccountDetails, useUpdateAccount } from "./service";
+import { useLocale } from "next-intl";
+import {
+  formatPostalCode,
+  getCountryOptions,
+  getPostalMaxLength,
+  getPostalPlaceholder,
+  isPostalNumeric,
+} from "@/lib/countries";
 export function AccountSettings() {
   const t = useTranslations("settings");
+  const locale = useLocale();
   const auth = useTranslations("auth");
   const { notify } = useFeedback();
   const account = useAccountDetails();
@@ -20,8 +29,12 @@ export function AccountSettings() {
     handleSubmit,
     reset,
     setError,
+    control,
+    setValue,
     formState: { errors },
   } = useForm<AccountFormValues>({ resolver: zodResolver(accountSchema) });
+  const countryCode = useWatch({ control, name: "countryCode" }) || "PL";
+  const countryOptions = getCountryOptions(locale);
   useEffect(() => {
     if (account.data) reset(account.data);
   }, [account.data, reset]);
@@ -130,12 +143,21 @@ export function AccountSettings() {
               />
             </>
           )}
-          <FormField
-            label={t("countryCode")}
+          <SelectField
+            label={t("country")}
             requiredMark
-            {...register("countryCode")}
+            {...register("countryCode", {
+              onChange: () =>
+                setValue("postalCode", "", { shouldValidate: true }),
+            })}
             error={msg(errors.countryCode)}
-          />
+          >
+            {countryOptions.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.label}
+              </option>
+            ))}
+          </SelectField>
           <FormField
             label={t("street")}
             requiredMark
@@ -156,6 +178,16 @@ export function AccountSettings() {
           <FormField
             label={t("postalCode")}
             requiredMark
+            autoComplete="postal-code"
+            placeholder={getPostalPlaceholder(countryCode)}
+            maxLength={getPostalMaxLength(countryCode)}
+            inputMode={isPostalNumeric(countryCode) ? "numeric" : "text"}
+            onInput={(event) => {
+              event.currentTarget.value = formatPostalCode(
+                countryCode,
+                event.currentTarget.value,
+              );
+            }}
             {...register("postalCode")}
             error={msg(errors.postalCode)}
           />

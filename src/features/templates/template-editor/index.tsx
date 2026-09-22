@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { useTranslations } from "next-intl";
+import { createPortal } from "react-dom";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import {
@@ -95,6 +96,22 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
   const [editingName, setEditingName] = useState(false);
+  const metadataSnapshot = useRef({
+    name: template?.name ?? "",
+    description: template?.description ?? "",
+  });
+
+  const openMetadataEditor = () => {
+    metadataSnapshot.current = { name, description };
+    setEditingName(true);
+    requestAnimationFrame(() => nameRef.current?.focus());
+  };
+
+  const cancelMetadataEditor = () => {
+    setName(metadataSnapshot.current.name);
+    setDescription(metadataSnapshot.current.description);
+    setEditingName(false);
+  };
 
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
@@ -1034,55 +1051,92 @@ export function TemplateEditor({ template, onClose }: Props) {
           </button>
 
           <div className="editor-header-title">
-            {editingName ? (
-              <div className="editor-header-name-edit">
-                <InputControl
-                  ref={nameRef}
-                  className="editor-header-name-input"
-                  maxLength={250}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  onBlur={() => setEditingName(false)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      setEditingName(false);
-                    }
-                    if (event.key === "Escape") {
-                      event.preventDefault();
-                      setName(template?.name ?? "");
-                      setEditingName(false);
-                    }
-                  }}
-                  aria-label={t("templateName")}
-                />
+            <button
+              type="button"
+              className="editor-header-name-button"
+              onClick={() =>
+                editingName ? cancelMetadataEditor() : openMetadataEditor()
+              }
+              title={name.trim() || t("templateName")}
+              aria-expanded={editingName}
+            >
+              <span>{name.trim() || t("templateName")}</span>
+              <Pencil aria-hidden="true" />
+            </button>
+          </div>
+
+          {editingName &&
+            typeof document !== "undefined" &&
+            createPortal(
+              <>
                 <button
                   type="button"
-                  className="editor-header-name-confirm"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => setEditingName(false)}
-                  aria-label={t("save")}
-                  title={t("save")}
+                  className="editor-header-meta-backdrop"
+                  aria-label={t("cancel")}
+                  onClick={cancelMetadataEditor}
+                />
+                <div
+                  className="editor-header-meta-popover"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label={t("templateName")}
                 >
-                  <Check size={16} />
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="editor-header-name-button"
-                onClick={() => {
-                  setEditingName(true);
-                  requestAnimationFrame(() => nameRef.current?.focus());
-                }}
-                title={name.trim() || t("templateName")}
-                aria-label={`${t("templateName")}: ${name.trim() || t("templateName")}`}
-              >
-                <span>{name.trim() || t("templateName")}</span>
-                <Pencil aria-hidden="true" />
-              </button>
+                  <label className="field">
+                    <span>
+                      {t("templateName")}{" "}
+                      <strong className="required-mark">*</strong>
+                    </span>
+                    <InputControl
+                      ref={nameRef}
+                      className="editor-header-name-input"
+                      maxLength={250}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          setEditingName(false);
+                        }
+                        if (event.key === "Escape") {
+                          event.preventDefault();
+                          cancelMetadataEditor();
+                        }
+                      }}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>{t("description")}</span>
+                    <textarea
+                      className="input-control editor-header-description-input"
+                      maxLength={400}
+                      rows={3}
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      placeholder={t("description")}
+                    />
+                  </label>
+
+                  <div className="editor-header-meta-actions">
+                    <button
+                      type="button"
+                      className="btn secondary compact"
+                      onClick={cancelMetadataEditor}
+                    >
+                      <X size={16} /> {t("cancel")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn compact editor-header-meta-done"
+                      onClick={() => setEditingName(false)}
+                    >
+                      <Check size={16} /> {t("done")}
+                    </button>
+                  </div>
+                </div>
+              </>,
+              document.body,
             )}
-          </div>
 
           <div className="editor-actions">
             <button

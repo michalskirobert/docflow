@@ -48,6 +48,22 @@ export const useChangePaymentMethod = () =>
     { paymentId: string; paymentMethod: "PAYU" | "BANK_TRANSFER" }
   >("/billing", [["billing"]]);
 
+export type PublicPlan = {
+  code: "FREE" | "YEARLY";
+  documentLimit: number;
+  net: number;
+  vat: number;
+  gross: number;
+  vatRate: number;
+  available: boolean;
+  displayAmount: number;
+  displayNet: boolean;
+};
+export const usePublicPlans = (customerType: "INDIVIDUAL" | "BUSINESS") =>
+  useGet<PublicPlan[]>(
+    ["plans", customerType],
+    `/plans?customerType=${customerType}`,
+  );
 export type AccountDetails = {
   firstName: string;
   lastName: string;

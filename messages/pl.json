@@ -55,7 +55,8 @@
       "emailExists": "Konto z tym adresem e-mail już istnieje.",
       "taxRequired": "Podaj NIP lub VAT ID.",
       "countryCode": "Podaj dwuliterowy kod kraju.",
-      "planUnavailable": "Ten płatny plan nie jest jeszcze skonfigurowany."
+      "planUnavailable": "Ten płatny plan nie jest jeszcze skonfigurowany.",
+      "invalidPostalCode": "Wprowadź pełny, prawidłowy kod pocztowy dla wybranego kraju."
     },
     "firstName": "Imię",
     "lastName": "Nazwisko",
@@ -98,7 +99,8 @@
     "bankTransferCopy": "Po zaksięgowaniu przelewu płatność zostanie przez nas zweryfikowana.",
     "freeWhilePaymentPending": "Do czasu potwierdzenia płatności konto korzysta z darmowej licencji z limitem 10 dokumentów miesięcznie.",
     "alreadyAccount": "Masz już konto?",
-    "workspaceName": "Nazwa obszaru roboczego"
+    "workspaceName": "Nazwa obszaru roboczego",
+    "country": "Kraj"
   },
   "dashboard": {
     "title": "Panel",
@@ -291,7 +293,22 @@
     "deleteAccount": "Usuń konto",
     "deleteAccountTitle": "Usunąć konto?",
     "deleteAccountMessage": "Konto, organizacja, szablony, dokumenty i historia rozliczeń zostaną trwale usunięte. Tej operacji nie można cofnąć.",
-    "deleteAccountConfirm": "Usuń konto na stałe"
+    "deleteAccountConfirm": "Usuń konto na stałe",
+    "plan": "Plan",
+    "freePlan": "FREE",
+    "yearlyPlan": "Roczny",
+    "upgradePlan": "Przejdź na plan roczny",
+    "freeLicense": "Darmowa licencja",
+    "annualLicense": "Licencja roczna",
+    "freeLicenseCopy": "Na start i do lekkiego użycia. Bez opłat i bez daty wygaśnięcia.",
+    "annualLicenseCopy": "Pełny dostęp przez 365 dni z większym miesięcznym limitem.",
+    "documentsPerMonth": "dokumentów / miesiąc",
+    "net": "netto",
+    "gross": "brutto",
+    "vatIncluded": "VAT wliczony",
+    "choosePlan": "Wybierz plan",
+    "choosePlanHelp": "Porównaj ofertę i wybierz plan odpowiedni dla Twojej organizacji.",
+    "country": "Kraj"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -455,6 +472,7 @@
     "currentValueHelp": "Wstępnie uzupełnia bieżącą datą lub czasem przy rozpoczęciu dokumentu. Użytkownik nadal może zmienić lub usunąć wartość, chyba że pole jest zablokowane.",
     "clearValue": "Wyczyść wartość",
     "templateDetails": "Szczegóły szablonu",
-    "editTemplateDetails": "Edytuj nazwę i opis"
+    "editTemplateDetails": "Edytuj nazwę i opis",
+    "done": "Gotowe"
   }
 }

@@ -55,7 +55,8 @@
       "emailExists": "Akun dengan email ini sudah ada.",
       "taxRequired": "Masukkan ID pajak atau VAT ID.",
       "countryCode": "Gunakan kode negara dua huruf.",
-      "planUnavailable": "Paket berbayar ini belum dikonfigurasi."
+      "planUnavailable": "Paket berbayar ini belum dikonfigurasi.",
+      "invalidPostalCode": "Masukkan kode pos yang lengkap dan valid untuk negara yang dipilih."
     },
     "firstName": "Nama depan",
     "lastName": "Nama belakang",
@@ -98,7 +99,8 @@
     "bankTransferCopy": "Kami akan memverifikasi pembayaran setelah transfer diterima.",
     "freeWhilePaymentPending": "Sampai pembayaran dikonfirmasi, akun menggunakan lisensi Gratis dengan batas 10 dokumen per bulan.",
     "alreadyAccount": "Sudah punya akun?",
-    "workspaceName": "Nama ruang kerja"
+    "workspaceName": "Nama ruang kerja",
+    "country": "Negara"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -291,7 +293,22 @@
     "deleteAccount": "Hapus akun",
     "deleteAccountTitle": "Hapus akun?",
     "deleteAccountMessage": "Akun, organisasi, template, dokumen, dan riwayat penagihan akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.",
-    "deleteAccountConfirm": "Hapus akun permanen"
+    "deleteAccountConfirm": "Hapus akun permanen",
+    "plan": "Paket",
+    "freePlan": "FREE",
+    "yearlyPlan": "Tahunan",
+    "upgradePlan": "Upgrade ke paket tahunan",
+    "freeLicense": "Lisensi gratis",
+    "annualLicense": "Lisensi tahunan",
+    "freeLicenseCopy": "Untuk memulai dan penggunaan ringan. Gratis dan tanpa tanggal kedaluwarsa.",
+    "annualLicenseCopy": "Akses penuh selama 365 hari dengan batas bulanan yang lebih besar.",
+    "documentsPerMonth": "dokumen / bulan",
+    "net": "neto",
+    "gross": "bruto",
+    "vatIncluded": "Termasuk VAT",
+    "choosePlan": "Pilih paket",
+    "choosePlanHelp": "Bandingkan penawaran dan pilih paket yang sesuai untuk organisasi Anda.",
+    "country": "Negara"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -455,6 +472,7 @@
     "currentValueHelp": "Isi awal dengan tanggal atau waktu saat ini saat dokumen dimulai. Pengguna tetap dapat mengubah atau menghapusnya kecuali bidang dikunci.",
     "clearValue": "Hapus nilai",
     "templateDetails": "Detail template",
-    "editTemplateDetails": "Edit nama dan deskripsi"
+    "editTemplateDetails": "Edit nama dan deskripsi",
+    "done": "Selesai"
   }
 }

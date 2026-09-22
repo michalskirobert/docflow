@@ -2,6 +2,7 @@
 
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { InputControl } from "./InputControl";
 
 type PickerType = "date" | "datetime" | "time";
@@ -12,7 +13,6 @@ type Props = {
   onChange: (value: string) => void;
   disabled?: boolean;
 };
-
 const pad = (value: number) => String(value).padStart(2, "0");
 const dateValue = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
@@ -24,27 +24,31 @@ export function DateTimePicker({
   onChange,
   disabled = false,
 }: Props) {
+  const t = useTranslations("templateEditor");
   const root = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const parsed = value
-    ? new Date(
-        type === "date"
-          ? `${value}T12:00:00`
-          : type === "datetime"
-            ? value
-            : Date.now(),
-      )
-    : new Date();
+  const [draftDate, setDraftDate] = useState("");
+  const [hour, setHour] = useState(0);
+  const [minute, setMinute] = useState(0);
   const [view, setView] = useState(
-    () => new Date(parsed.getFullYear(), parsed.getMonth(), 1),
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
-  const [hour, setHour] = useState(() =>
-    type === "time" ? Number(value.split(":")[0] || 0) : parsed.getHours(),
-  );
-  const [minute, setMinute] = useState(() =>
-    type === "time" ? Number(value.split(":")[1] || 0) : parsed.getMinutes(),
-  );
-
+  const syncDraft = () => {
+    const now = new Date();
+    const datePart =
+      type === "time" ? dateValue(now) : value.split("T")[0] || dateValue(now);
+    const timePart =
+      type === "date"
+        ? `${pad(now.getHours())}:${pad(now.getMinutes())}`
+        : (type === "time" ? value : value.split("T")[1]) ||
+          `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const [h, m] = timePart.split(":");
+    setDraftDate(datePart);
+    setHour(Number(h || 0));
+    setMinute(Number(m || 0));
+    const d = new Date(`${datePart}T12:00:00`);
+    setView(new Date(d.getFullYear(), d.getMonth(), 1));
+  };
   useEffect(() => {
     const close = (event: PointerEvent) => {
       if (root.current && !root.current.contains(event.target as Node))
@@ -53,36 +57,22 @@ export function DateTimePicker({
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
   }, []);
-
   const days = useMemo(() => {
     const first = new Date(view.getFullYear(), view.getMonth(), 1);
     const start = new Date(first);
     start.setDate(1 - ((first.getDay() + 6) % 7));
-    return Array.from({ length: 42 }, (_, index) => {
-      const day = new Date(start);
-      day.setDate(start.getDate() + index);
-      return day;
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
     });
   }, [view]);
-
-  const commitTime = (nextHour = hour, nextMinute = minute) => {
-    if (type === "time") onChange(`${pad(nextHour)}:${pad(nextMinute)}`);
-    else if (type === "datetime") {
-      const date = value.split("T")[0] || dateValue(new Date());
-      onChange(`${date}T${pad(nextHour)}:${pad(nextMinute)}`);
-    }
+  const apply = () => {
+    if (type === "date") onChange(draftDate);
+    else if (type === "time") onChange(`${pad(hour)}:${pad(minute)}`);
+    else onChange(`${draftDate}T${pad(hour)}:${pad(minute)}`);
+    setOpen(false);
   };
-
-  const selectDay = (day: Date) => {
-    const date = dateValue(day);
-    if (type === "date") {
-      onChange(date);
-      setOpen(false);
-      return;
-    }
-    onChange(`${date}T${pad(hour)}:${pad(minute)}`);
-  };
-
   return (
     <div className="date-time-picker" ref={root}>
       <button
@@ -91,7 +81,13 @@ export function DateTimePicker({
         aria-label={label}
         aria-expanded={open}
         disabled={disabled}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() =>
+          setOpen((current) => {
+            const next = !current;
+            if (next) syncDraft();
+            return next;
+          })
+        }
       >
         {type === "time" ? <Clock3 size={18} /> : <CalendarDays size={18} />}
       </button>
@@ -128,20 +124,20 @@ export function DateTimePicker({
                 </button>
               </div>
               <div className="date-picker-weekdays">
-                {["M", "T", "W", "T", "F", "S", "S"].map((day, index) => (
-                  <span key={`${day}-${index}`}>{day}</span>
+                {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                  <span key={`${d}-${i}`}>{d}</span>
                 ))}
               </div>
               <div className="date-picker-grid">
                 {days.map((day) => {
                   const canonical = dateValue(day);
-                  const selected = value.startsWith(canonical);
+                  const selected = draftDate === canonical;
                   return (
                     <button
                       type="button"
                       key={canonical}
                       className={`${day.getMonth() !== view.getMonth() ? "outside" : ""}${selected ? " selected" : ""}`}
-                      onClick={() => selectDay(day)}
+                      onClick={() => setDraftDate(canonical)}
                     >
                       {day.getDate()}
                     </button>
@@ -160,14 +156,9 @@ export function DateTimePicker({
                   max={23}
                   type="number"
                   value={hour}
-                  onChange={(e) => {
-                    const next = Math.max(
-                      0,
-                      Math.min(23, Number(e.target.value)),
-                    );
-                    setHour(next);
-                    commitTime(next, minute);
-                  }}
+                  onChange={(e) =>
+                    setHour(Math.max(0, Math.min(23, Number(e.target.value))))
+                  }
                 />
               </label>
               <span>:</span>
@@ -179,25 +170,25 @@ export function DateTimePicker({
                   max={59}
                   type="number"
                   value={minute}
-                  onChange={(e) => {
-                    const next = Math.max(
-                      0,
-                      Math.min(59, Number(e.target.value)),
-                    );
-                    setMinute(next);
-                    commitTime(hour, next);
-                  }}
+                  onChange={(e) =>
+                    setMinute(Math.max(0, Math.min(59, Number(e.target.value))))
+                  }
                 />
               </label>
-              <button
-                type="button"
-                className="btn compact"
-                onClick={() => setOpen(false)}
-              >
-                OK
-              </button>
             </div>
           )}
+          <div className="date-picker-actions">
+            <button
+              type="button"
+              className="btn secondary compact"
+              onClick={() => setOpen(false)}
+            >
+              {t("cancel")}
+            </button>
+            <button type="button" className="btn compact" onClick={apply}>
+              {t("done")}
+            </button>
+          </div>
         </div>
       )}
     </div>

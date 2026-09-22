@@ -8,11 +8,22 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
-import { ChoiceField, InputControl } from "@/components/shared/form";
+import {
+  ChoiceField,
+  InputControl,
+  SelectField,
+} from "@/components/shared/form";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/axios";
+import {
+  formatPostalCode,
+  getCountryOptions,
+  getPostalMaxLength,
+  getPostalPlaceholder,
+  isPostalNumeric,
+} from "@/lib/countries";
 import type { ApiError } from "@/types/api";
 import type { AppLocale, CustomerType } from "@/types/auth";
 
@@ -88,6 +99,8 @@ export default function RegisterForm() {
     name: "email",
   });
   const selectedPlan = useWatch({ control, name: "plan" });
+  const countryCode = useWatch({ control, name: "countryCode" }) || "PL";
+  const countryOptions = getCountryOptions(locale);
   const paymentMethod = useWatch({ control, name: "paymentMethod" });
   const taxId = useWatch({ control, name: "taxId" });
   const [companyLoading, setCompanyLoading] = useState(false);
@@ -160,11 +173,11 @@ export default function RegisterForm() {
   }, [captcha.data?.token, setValue]);
 
   const translateValidation = (key?: string) => {
-    if (!key) {
-      return "";
-    }
-
-    return t(`validation.${key}`);
+    if (!key) return "";
+    const normalizedKey = key
+      .replace(/^auth\.validation\./, "")
+      .replace(/^validation\./, "");
+    return t(`validation.${normalizedKey}`);
   };
 
   const fieldError = (error: any) => {
@@ -438,12 +451,21 @@ export default function RegisterForm() {
         />
 
         <div className="form-grid">
-          <FormField
-            label={t("countryCode")}
+          <SelectField
+            label={t("country")}
             requiredMark
-            {...register("countryCode")}
+            {...register("countryCode", {
+              onChange: () =>
+                setValue("postalCode", "", { shouldValidate: true }),
+            })}
             error={fieldError(errors.countryCode)}
-          />
+          >
+            {countryOptions.map((country) => (
+              <option key={country.code} value={country.code}>
+                {country.label}
+              </option>
+            ))}
+          </SelectField>
 
           <FormField
             label={t("city")}
@@ -482,6 +504,15 @@ export default function RegisterForm() {
             label={t("postalCode")}
             requiredMark
             autoComplete="postal-code"
+            placeholder={getPostalPlaceholder(countryCode)}
+            maxLength={getPostalMaxLength(countryCode)}
+            inputMode={isPostalNumeric(countryCode) ? "numeric" : "text"}
+            onInput={(event) => {
+              event.currentTarget.value = formatPostalCode(
+                countryCode,
+                event.currentTarget.value,
+              );
+            }}
             {...register("postalCode")}
             error={fieldError(errors.postalCode)}
           />

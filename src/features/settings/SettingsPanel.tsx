@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreditCard, FileText, ShieldAlert, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { SelectControl } from "@/components/shared/form";
@@ -9,7 +9,9 @@ import LanguageSwitcher from "@/features/language/language-switcher";
 import { AccountSettings } from "./AccountSettings";
 import { PasswordSettings } from "./PasswordSettings";
 import {
+  useAccountDetails,
   useBillingOverview,
+  usePublicPlans,
   useChangePaymentMethod,
   useDeleteAccount,
   useStartLicensePayment,
@@ -32,11 +34,23 @@ function SettingsCardSkeleton({ rows = 3 }: { rows?: number }) {
 export default function SettingsPanel() {
   const t = useTranslations("settings");
   const billing = useBillingOverview();
+  const account = useAccountDetails();
+  const plans = usePublicPlans(account.data?.customerType ?? "INDIVIDUAL");
   const remove = useDeleteAccount();
   const start = useStartLicensePayment();
   const change = useChangePaymentMethod();
   const { confirm } = useFeedback();
   const [method, setMethod] = useState<"PAYU" | "BANK_TRANSFER">("PAYU");
+  const currentPlan = billing.data?.subscription?.plan ?? "FREE";
+  const [selectedPlan, setSelectedPlan] = useState<"FREE" | "YEARLY">("FREE");
+  const effectiveSelectedPlan =
+    currentPlan === "YEARLY" ? "YEARLY" : selectedPlan;
+
+  useEffect(() => {
+    if (account.data?.customerType === "BUSINESS" && currentPlan === "FREE") {
+      setSelectedPlan("YEARLY");
+    }
+  }, [account.data?.customerType, currentPlan]);
 
   const deleteAccount = async () => {
     if (
@@ -150,26 +164,86 @@ export default function SettingsPanel() {
                 </div>
               ))}
 
-              <label className="field">
-                {t("paymentMethod")}
-                <SelectControl
-                  value={method}
-                  onChange={(event) =>
-                    setMethod(event.target.value as "PAYU" | "BANK_TRANSFER")
-                  }
-                >
-                  <option value="PAYU">PayU</option>
-                  <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
-                </SelectControl>
-              </label>
+              <div className="settings-plan-section">
+                <div className="settings-plan-heading">
+                  <strong>{t("choosePlan")}</strong>
+                  <small>{t("choosePlanHelp")}</small>
+                </div>
 
-              <button
-                className="btn secondary"
-                disabled={start.isPending || change.isPending}
-                onClick={runPayment}
-              >
-                {pending.length ? t("continuePayment") : t("renewLicense")}
-              </button>
+                <div className="plan-grid settings-plan-grid">
+                  {plans.data?.map((plan) => (
+                    <button
+                      type="button"
+                      key={plan.code}
+                      className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
+                      disabled={!plan.available || currentPlan === "YEARLY"}
+                      onClick={() => setSelectedPlan(plan.code)}
+                    >
+                      <div className="plan-visual" aria-hidden="true">
+                        <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+                      </div>
+                      <div className="plan-check">✓</div>
+                      <strong className="plan-name">
+                        {plan.code === "FREE"
+                          ? t("freeLicense")
+                          : t("annualLicense")}
+                      </strong>
+                      <small className="plan-copy">
+                        {plan.code === "FREE"
+                          ? t("freeLicenseCopy")
+                          : t("annualLicenseCopy")}
+                      </small>
+                      <span className="settings-plan-price">
+                        {(plan.displayAmount / 100).toLocaleString(undefined, {
+                          style: "currency",
+                          currency: "PLN",
+                        })}{" "}
+                        {plan.displayNet ? t("net") : t("gross")}
+                      </span>
+                      {plan.code !== "FREE" && (
+                        <small>
+                          {plan.displayNet
+                            ? `+ ${plan.vatRate}% VAT`
+                            : t("vatIncluded")}
+                        </small>
+                      )}
+                      <small>
+                        {plan.documentLimit} {t("documentsPerMonth")}
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {effectiveSelectedPlan === "YEARLY" && (
+                <>
+                  <label className="field">
+                    {t("paymentMethod")}
+                    <SelectControl
+                      value={method}
+                      onChange={(event) =>
+                        setMethod(
+                          event.target.value as "PAYU" | "BANK_TRANSFER",
+                        )
+                      }
+                    >
+                      <option value="PAYU">PayU</option>
+                      <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
+                    </SelectControl>
+                  </label>
+                  <button
+                    className="btn secondary"
+                    disabled={start.isPending || change.isPending}
+                    onClick={runPayment}
+                  >
+                    {pending.length
+                      ? t("continuePayment")
+                      : currentPlan === "FREE"
+                        ? t("upgradePlan")
+                        : t("renewLicense")}
+                  </button>
+                </>
+              )}
 
               {(start.data?.transferReference ||
                 change.data?.transferReference) && (

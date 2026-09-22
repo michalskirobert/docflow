@@ -55,7 +55,8 @@
       "emailExists": "An account with this email already exists.",
       "taxRequired": "Enter Tax ID or VAT ID.",
       "countryCode": "Use a two-letter country code.",
-      "planUnavailable": "This paid plan is not configured yet."
+      "planUnavailable": "This paid plan is not configured yet.",
+      "invalidPostalCode": "Enter a complete, valid postal code for the selected country."
     },
     "firstName": "First name",
     "lastName": "Last name",
@@ -98,7 +99,8 @@
     "bankTransferCopy": "We will verify the payment after the transfer is received.",
     "freeWhilePaymentPending": "Until payment is confirmed, your account uses the Free license with a 10-document monthly limit.",
     "alreadyAccount": "Already have an account?",
-    "workspaceName": "Workspace name"
+    "workspaceName": "Workspace name",
+    "country": "Country"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -291,7 +293,22 @@
     "deleteAccount": "Delete account",
     "deleteAccountTitle": "Delete account?",
     "deleteAccountMessage": "Your account, organization, templates, documents and billing history will be permanently deleted. This action cannot be undone.",
-    "deleteAccountConfirm": "Delete account permanently"
+    "deleteAccountConfirm": "Delete account permanently",
+    "plan": "Plan",
+    "freePlan": "FREE",
+    "yearlyPlan": "Annual",
+    "upgradePlan": "Upgrade to annual plan",
+    "freeLicense": "Free license",
+    "annualLicense": "Annual license",
+    "freeLicenseCopy": "For getting started and light use. No fee and no expiry date.",
+    "annualLicenseCopy": "Full access for 365 days with a larger monthly limit.",
+    "documentsPerMonth": "documents / month",
+    "net": "net",
+    "gross": "gross",
+    "vatIncluded": "VAT included",
+    "choosePlan": "Choose a plan",
+    "choosePlanHelp": "Compare the offer and choose the plan that fits your organization.",
+    "country": "Country"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -455,6 +472,7 @@
     "currentValueHelp": "Prefill with the current date or time when a document is started. The user can still edit or clear it unless the field is locked.",
     "clearValue": "Clear value",
     "templateDetails": "Template details",
-    "editTemplateDetails": "Edit name and description"
+    "editTemplateDetails": "Edit name and description",
+    "done": "Done"
   }
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPostalCode } from "@/lib/countries";
 
 const required = (min = 1) => z.string().trim().min(min, "required");
 
@@ -44,6 +45,12 @@ export const registerSchema = z
       .regex(/^\d+$/, "captchaNumber"),
   })
   .superRefine((data, ctx) => {
+    if (!isValidPostalCode(data.countryCode, data.postalCode))
+      ctx.addIssue({
+        code: "custom",
+        message: "invalidPostalCode",
+        path: ["postalCode"],
+      });
     if (data.password !== data.confirmPassword)
       ctx.addIssue({
         code: "custom",

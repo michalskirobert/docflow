@@ -39,26 +39,53 @@ async function main() {
       },
     });
   }
-  for (const template of EXAMPLE_TEMPLATES) {
-    const existing = await prisma.template.findFirst({
+  const organizations = await prisma.organization.findMany({
+    select: { id: true },
+  });
+
+  for (const targetOrg of organizations) {
+    const legacyReception = await prisma.template.findFirst({
       where: {
-        organizationId: org.id,
-        name: template.name,
+        organizationId: targetOrg.id,
+        name: "Protokół odbioru",
         isExample: true,
       },
     });
 
-    if (!existing) {
-      await prisma.template.create({
-        data: {
-          organizationId: org.id,
+    if (legacyReception) {
+      await prisma.template.update({
+        where: { id: legacyReception.id },
+        data: { name: "Protokół zdawczo-odbiorczy" },
+      });
+    }
+
+    for (const template of EXAMPLE_TEMPLATES) {
+      const existing = await prisma.template.findFirst({
+        where: {
+          organizationId: targetOrg.id,
           name: template.name,
-          description: template.description,
-          content: template.content,
-          variablesJson: JSON.stringify(template.variables),
           isExample: true,
         },
       });
+
+      const data = {
+        description: template.description,
+        content: template.content,
+        variablesJson: JSON.stringify(template.variables),
+        isExample: true,
+      };
+
+      if (existing) {
+        await prisma.template.update({ where: { id: existing.id }, data });
+      } else {
+        await prisma.template.create({
+          data: {
+            organizationId: targetOrg.id,
+            name: template.name,
+            ...data,
+          },
+        });
+      }
     }
   }
 

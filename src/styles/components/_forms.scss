@@ -230,3 +230,12 @@
     overflow: auto;
   }
 }
+
+.date-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  margin-top: 10px;
+  border-top: 1px solid #eef2f7;
+}
