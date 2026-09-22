@@ -27,6 +27,7 @@ export default async function DashboardPage() {
     access,
     pendingPayment,
     subscription,
+    organization,
   ] = await Promise.all([
     prisma.template.count({
       where: { organizationId: session.organizationId },
@@ -52,6 +53,10 @@ export default async function DashboardPage() {
     prisma.subscription.findUnique({
       where: { organizationId: session.organizationId },
     }),
+    prisma.organization.findUnique({
+      where: { id: session.organizationId },
+      select: { name: true },
+    }),
   ]);
 
   const limit = access.monthlyDocumentLimit;
@@ -69,7 +74,9 @@ export default async function DashboardPage() {
 
           <h1>{t("title")}</h1>
 
-          <p className="muted">{session.organizationName}</p>
+          <p className="muted">
+            {organization?.name ?? session.organizationName}
+          </p>
         </div>
 
         <Link href="/templates" className="btn">
