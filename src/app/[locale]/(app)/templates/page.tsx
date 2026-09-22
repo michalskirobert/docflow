@@ -1,9 +1,6 @@
 "use client";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-const TemplateList = dynamic(
-  () => import("@/features/templates/template-list"),
-);
+import TemplateList from "@/features/templates/template-list";
 export default function Page() {
   const t = useTranslations("templates");
   return (

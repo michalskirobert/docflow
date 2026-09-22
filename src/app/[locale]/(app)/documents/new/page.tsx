@@ -1,8 +1,5 @@
-import dynamic from "next/dynamic";
 import { getTranslations } from "next-intl/server";
-const DocumentGenerator = dynamic(
-  () => import("@/features/documents/document-generator"),
-);
+import DocumentGenerator from "@/features/documents/document-generator";
 export default async function Page() {
   const t = await getTranslations("documents");
   return (

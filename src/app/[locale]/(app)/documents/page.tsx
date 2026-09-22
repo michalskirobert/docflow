@@ -1,9 +1,6 @@
 "use client";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-const DocumentList = dynamic(
-  () => import("@/features/documents/document-list"),
-);
+import DocumentList from "@/features/documents/document-list";
 export default function Page() {
   const t = useTranslations("documents");
   return (

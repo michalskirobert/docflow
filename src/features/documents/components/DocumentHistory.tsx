@@ -150,8 +150,8 @@ function DocumentRow({
       </div>
 
       <div className="document-actions">
-        <a
-          href={`/${locale}/documents/${d.id}/preview`}
+        <Link
+          href={`/documents/${d.id}/preview`}
           aria-disabled={actionsDisabled}
           onClick={(event) => actionsDisabled && event.preventDefault()}
           target="_blank"
@@ -159,7 +159,7 @@ function DocumentRow({
         >
           <Eye />
           {t("preview")}
-        </a>
+        </Link>
 
         <Link
           href={`/documents/${d.id}/edit`}
