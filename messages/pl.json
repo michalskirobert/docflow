@@ -9,7 +9,8 @@
     "language": "Język",
     "loading": "Ładowanie...",
     "company": "NurByte",
-    "companyTagline": "Produkt rozwijany przez NurByte."
+    "companyTagline": "Produkt rozwijany przez NurByte.",
+    "account": "Moje konto"
   },
   "home": {
     "title": "Automatyzacja dokumentów dla firm",
@@ -309,7 +310,19 @@
     "vatIncluded": "VAT wliczony",
     "choosePlan": "Wybierz plan",
     "choosePlanHelp": "Porównaj ofertę i wybierz plan odpowiedni dla Twojej organizacji.",
-    "country": "Kraj"
+    "country": "Kraj",
+    "accountTitle": "Moje konto",
+    "accountDescription": "Dane osobowe, bezpieczeństwo, licencja, płatności i faktury.",
+    "preferencesDescription": "Preferencje aplikacji i interfejsu.",
+    "language": "Język",
+    "appearance": "Wygląd",
+    "appearanceHelp": "Wybierz wygląd DocFlow na tym urządzeniu.",
+    "themeSystem": "Auto / System",
+    "themeSystemHelp": "Automatycznie dopasuj motyw do ustawień urządzenia.",
+    "themeLight": "Jasny",
+    "themeLightHelp": "Zawsze używaj jasnego motywu.",
+    "themeDark": "Ciemny",
+    "themeDarkHelp": "Zawsze używaj ciemnego motywu."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",

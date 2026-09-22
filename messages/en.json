@@ -9,7 +9,8 @@
     "language": "Language",
     "loading": "Loading...",
     "company": "NurByte",
-    "companyTagline": "A product developed by NurByte."
+    "companyTagline": "A product developed by NurByte.",
+    "account": "My account"
   },
   "home": {
     "title": "Document automation for businesses",
@@ -309,7 +310,19 @@
     "vatIncluded": "VAT included",
     "choosePlan": "Choose a plan",
     "choosePlanHelp": "Compare the offer and choose the plan that fits your organization.",
-    "country": "Country"
+    "country": "Country",
+    "accountTitle": "My account",
+    "accountDescription": "Personal information, security, license, payments and invoices.",
+    "preferencesDescription": "Application and interface preferences.",
+    "language": "Language",
+    "appearance": "Appearance",
+    "appearanceHelp": "Choose how DocFlow looks on this device.",
+    "themeSystem": "Auto / System",
+    "themeSystemHelp": "Follow your device appearance automatically.",
+    "themeLight": "Light",
+    "themeLightHelp": "Always use the light appearance.",
+    "themeDark": "Dark",
+    "themeDarkHelp": "Always use the dark appearance."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

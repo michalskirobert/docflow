@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { FeedbackProvider } from "@/components/ui/feedback-provider";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -14,7 +15,9 @@ export function Providers({ children }: { children: ReactNode }) {
   );
   return (
     <QueryClientProvider client={queryClient}>
-      <FeedbackProvider>{children}</FeedbackProvider>
+      <ThemeProvider>
+        <FeedbackProvider>{children}</FeedbackProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

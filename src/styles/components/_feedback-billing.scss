@@ -12,8 +12,8 @@
 .field.field-error input,
 .field.field-error textarea,
 .field.field-error select {
-  border-color: var(--danger);
-  background: #fffafa;
+  border-color: var(--status-error-border);
+  background: var(--status-error-bg);
 }
 .field.field-error input:focus,
 .field.field-error textarea:focus,
@@ -29,16 +29,16 @@
 }
 .form-error {
   margin: 0;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--status-error-border);
   border-radius: 9px;
   padding: 10px 12px;
-  background: #fef2f2;
-  color: var(--danger);
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
   font-size: 13px;
 }
 .captcha-box.captcha-error {
-  border-color: var(--danger);
-  background: #fffafa;
+  border-color: var(--status-error-border);
+  background: var(--status-error-bg);
 }
 
 /* Feedback, billing and plan UI */
@@ -91,28 +91,45 @@
   gap: 0.75rem;
   align-items: center;
   padding: 0.9rem 1rem;
-  background: #fff;
-  border: 1px solid #d9dde5;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
-  color: #111827;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 24%);
+  color: var(--text);
 }
 .toast button {
   border: 0;
+  border-radius: 8px;
   background: transparent;
+  color: currentColor;
   cursor: pointer;
 }
 .toast-success {
-  border-left: 4px solid #15803d;
+  border-color: var(--status-success-border);
+  border-left: 4px solid var(--status-success-border);
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 .toast-error {
-  border-left: 4px solid #b91c1c;
+  border-color: var(--status-error-border);
+  border-left: 4px solid var(--status-error-border);
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
 }
 .toast-warning {
-  border-left: 4px solid #b45309;
+  border-color: var(--status-warning-border);
+  border-left: 4px solid var(--status-warning-border);
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 .toast-info {
-  border-left: 4px solid #2563eb;
+  border-color: var(--status-info-border);
+  border-left: 4px solid var(--status-info-border);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+}
+.toast button:hover {
+  background: rgb(255 255 255 / 8%);
 }
 .dialog-backdrop {
   position: fixed;

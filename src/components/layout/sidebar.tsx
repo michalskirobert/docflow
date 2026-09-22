@@ -7,7 +7,7 @@ import {
   Settings,
   UserRound,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -18,6 +18,7 @@ const links = [
   { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
   { href: "/templates", key: "templates", icon: Layers },
   { href: "/documents", key: "documents", icon: FileText },
+  { href: "/account", key: "account", icon: UserRound },
   { href: "/settings", key: "settings", icon: Settings },
 ] as const;
 
@@ -26,6 +27,10 @@ export function Sidebar() {
     pathname = usePathname(),
     router = useRouter(),
     [profileOpen, setProfileOpen] = useState(false);
+
+  useEffect(() => {
+    links.forEach(({ href }) => router.prefetch(href));
+  }, [router]);
   async function logout() {
     await api.post("/auth/logout");
     router.replace("/login");
@@ -70,6 +75,10 @@ export function Sidebar() {
               onClick={() => setProfileOpen(false)}
             />
             <div className="mobile-profile-menu">
+              <Link href="/account" onClick={() => setProfileOpen(false)}>
+                <UserRound size={18} />
+                <span>{t("account")}</span>
+              </Link>
               <Link href="/settings" onClick={() => setProfileOpen(false)}>
                 <Settings size={18} />
                 <span>{t("settings")}</span>
@@ -82,7 +91,7 @@ export function Sidebar() {
           </>
         )}
         <button
-          className={`mobile-profile-trigger ${profileOpen || pathname === "/settings" ? "active" : ""}`}
+          className={`mobile-profile-trigger ${profileOpen || pathname === "/settings" || pathname === "/account" ? "active" : ""}`}
           type="button"
           aria-label={t("settings")}
           title={t("settings")}

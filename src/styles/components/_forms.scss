@@ -30,9 +30,9 @@
   height: 19px;
   flex: 0 0 19px;
   place-items: center;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--control-bg, var(--surface-muted));
   box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
   transition: 0.15s ease;
 }
@@ -238,4 +238,129 @@
   padding-top: 12px;
   margin-top: 10px;
   border-top: 1px solid #eef2f7;
+}
+
+/* Shared SelectControl: one deterministic dropdown for the whole application. */
+.shared-select {
+  position: relative;
+  min-width: 0;
+  color: var(--text);
+}
+.shared-select-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.shared-select-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  background: var(--control-bg, var(--surface-muted));
+  color: var(--control-text, var(--text));
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.shared-select-trigger:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: var(--hover, var(--surface-muted));
+}
+.shared-select.is-open .shared-select-trigger,
+.shared-select-trigger:focus-visible {
+  border-color: #6366f1;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 18%);
+}
+.shared-select-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform 0.15s ease;
+}
+.shared-select.is-open .shared-select-chevron {
+  transform: rotate(180deg);
+}
+.shared-select-options {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 18px 48px rgb(0 0 0 / 24%);
+}
+.shared-select-options button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 11px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.shared-select-options button:hover,
+.shared-select-options button:focus-visible {
+  outline: 0;
+  background: var(--hover, var(--surface-muted));
+}
+.shared-select-options button.selected {
+  background: color-mix(in srgb, #6366f1 14%, var(--surface));
+  color: var(--text);
+}
+.shared-select-options button.selected svg {
+  color: #6366f1;
+}
+.shared-select.is-disabled {
+  opacity: 0.65;
+}
+.shared-select.is-disabled .shared-select-trigger {
+  cursor: not-allowed;
+}
+.field > .shared-select {
+  width: 100%;
+}
+.filter-bar > .shared-select,
+.template-list-actions > .shared-select {
+  min-width: 180px;
+}
+.editor-toolbar .shared-select {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 96px;
+}
+.editor-toolbar .shared-select-trigger {
+  min-height: 34px;
+  padding: 6px 9px;
+  border-radius: 7px;
+}
+
+/* Shared checkbox/radio primitive. Offer/payment cards intentionally keep their card-level layout. */
+:root[data-theme="dark"] .choice-indicator {
+  border-color: color-mix(in srgb, var(--muted) 52%, var(--border));
+  background: color-mix(in srgb, var(--surface-muted) 88%, #000);
+  box-shadow: none;
+}
+.choice-field:hover .choice-indicator {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
 }

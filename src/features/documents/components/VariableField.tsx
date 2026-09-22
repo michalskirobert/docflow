@@ -1,19 +1,16 @@
 "use client";
 
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
-import {
-  Check,
-  ChevronDown,
-  LoaderCircle,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
+import { LoaderCircle, Trash2, Upload, X } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import type { TemplateVariable } from "@/features/templates/types";
 import { parseFormattedNumber } from "@/features/documents/helpers";
-import { DateTimePicker, InputControl } from "@/components/shared/form";
+import {
+  DateTimePicker,
+  InputControl,
+  SelectControl,
+} from "@/components/shared/form";
 import {
   hasValidImageSignature,
   normalizedImageType,
@@ -414,7 +411,6 @@ function VariableSelect({
   disabled,
   invalid,
   onChange,
-  clearLabel,
 }: {
   id: string;
   value: string;
@@ -424,92 +420,21 @@ function VariableSelect({
   onChange: (value: string) => void;
   clearLabel: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
-  }, [open]);
-
   return (
-    <div ref={root} className={`variable-select ${open ? "is-open" : ""}`}>
-      <button
-        id={id}
-        type="button"
-        className="variable-select-trigger"
-        disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-invalid={invalid || undefined}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className={!value ? "variable-select-placeholder" : undefined}>
-          {value || "—"}
-        </span>
-        <span className="variable-select-actions" aria-hidden="true">
-          {value && !disabled && (
-            <span
-              className="variable-select-clear"
-              role="button"
-              aria-label={clearLabel}
-              onPointerDown={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onChange("");
-                setOpen(false);
-              }}
-            >
-              <X size={16} />
-            </span>
-          )}
-          <span className="variable-select-chevron">
-            <ChevronDown size={18} aria-hidden="true" />
-          </span>
-        </span>
-      </button>
-      {open && !disabled && (
-        <div
-          className="variable-select-options"
-          role="listbox"
-          aria-labelledby={id}
-        >
-          <button
-            type="button"
-            role="option"
-            aria-selected={!value}
-            className={!value ? "selected" : undefined}
-            onClick={() => {
-              onChange("");
-              setOpen(false);
-            }}
-          >
-            <span>—</span>
-            {!value && <Check size={16} />}
-          </button>
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="option"
-              aria-selected={value === option}
-              className={value === option ? "selected" : undefined}
-              onClick={() => {
-                onChange(option);
-                setOpen(false);
-              }}
-            >
-              <span>{option}</span>
-              {value === option && <Check size={16} />}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <SelectControl
+      id={id}
+      value={value}
+      disabled={disabled}
+      aria-invalid={invalid || undefined}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      <option value="">—</option>
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </SelectControl>
   );
 }
 

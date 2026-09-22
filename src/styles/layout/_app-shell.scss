@@ -170,8 +170,9 @@ body {
 .variable-list span {
   padding: 4px 7px;
   border-radius: 7px;
-  background: #eef2ff;
-  color: #4338ca;
+  border: 1px solid color-mix(in srgb, #6366f1 28%, var(--border));
+  background: color-mix(in srgb, #6366f1 10%, var(--surface-muted));
+  color: color-mix(in srgb, #4f46e5 82%, var(--text));
   font:
     600 11px ui-monospace,
     monospace;
@@ -299,8 +300,9 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #eef2ff;
-  color: #4338ca;
+  border: 1px solid color-mix(in srgb, #6366f1 28%, var(--border));
+  background: color-mix(in srgb, #6366f1 10%, var(--surface-muted));
+  color: color-mix(in srgb, #4f46e5 82%, var(--text));
   font-weight: 700;
 }
 .paper-stage {
@@ -953,6 +955,7 @@ body {
   }
 
   .sidebar nav .nav-settings,
+  .sidebar nav .nav-account,
   .sidebar-bottom {
     display: none;
   }
@@ -1134,7 +1137,8 @@ body {
     display: contents;
   }
 
-  .sidebar nav .nav-settings {
+  .sidebar nav .nav-settings,
+  .sidebar nav .nav-account {
     display: none !important;
   }
 
@@ -1200,7 +1204,8 @@ body {
 
   .sidebar-brand,
   .sidebar-bottom,
-  .sidebar nav .nav-settings {
+  .sidebar nav .nav-settings,
+  .sidebar nav .nav-account {
     display: none !important;
   }
 
@@ -1302,4 +1307,10 @@ body {
 .card-actions button:active:not(:disabled) {
   transform: none;
   filter: brightness(0.92);
+}
+
+:root[data-theme="dark"] .variable-list span {
+  border-color: color-mix(in srgb, #818cf8 42%, var(--border));
+  background: color-mix(in srgb, #6366f1 16%, var(--surface-muted));
+  color: #c7d2fe;
 }

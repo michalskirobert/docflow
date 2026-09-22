@@ -8,7 +8,7 @@ import { FormField } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { passwordSchema, type PasswordFormValues } from "./schema";
 import { useChangePassword } from "./service";
-export function PasswordSettings() {
+export function PasswordSettings({ embedded = false }: { embedded?: boolean }) {
   const t = useTranslations("settings");
   const auth = useTranslations("auth");
   const { notify } = useFeedback();
@@ -47,7 +47,7 @@ export function PasswordSettings() {
     }
   });
   return (
-    <section className="card settings-card">
+    <section className={embedded ? "account-security" : "card settings-card"}>
       <h2>{t("changePassword")}</h2>
       <p className="muted">{t("changePasswordHelp")}</p>
       <form onSubmit={submit} className="settings-form" noValidate>

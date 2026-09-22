@@ -118,6 +118,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
   const [editingName, setEditingName] = useState(false);
+  const [mobileMetadataSheet, setMobileMetadataSheet] = useState(false);
   const metadataSnapshot = useRef({
     name: template?.name ?? "",
     description: template?.description ?? "",
@@ -134,6 +135,14 @@ export function TemplateEditor({ template, onClose }: Props) {
     setDescription(metadataSnapshot.current.description);
     setEditingName(false);
   };
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 760px)");
+    const sync = () => setMobileMetadataSheet(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
 
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
@@ -1095,8 +1104,78 @@ export function TemplateEditor({ template, onClose }: Props) {
           </div>
 
           {editingName &&
-            typeof document !== "undefined" &&
-            createPortal(
+            (mobileMetadataSheet && typeof document !== "undefined" ? (
+              createPortal(
+                <>
+                  <button
+                    type="button"
+                    className="editor-header-meta-backdrop"
+                    aria-label={t("cancel")}
+                    onClick={cancelMetadataEditor}
+                  />
+                  <div
+                    className="editor-header-meta-popover"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t("templateName")}
+                  >
+                    <label className="field">
+                      <span>
+                        {t("templateName")}{" "}
+                        <strong className="required-mark">*</strong>
+                      </span>
+                      <InputControl
+                        ref={nameRef}
+                        className="editor-header-name-input"
+                        maxLength={250}
+                        value={name}
+                        onChange={(event) => setName(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            setEditingName(false);
+                          }
+                          if (event.key === "Escape") {
+                            event.preventDefault();
+                            cancelMetadataEditor();
+                          }
+                        }}
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>{t("description")}</span>
+                      <textarea
+                        className="input-control editor-header-description-input"
+                        maxLength={400}
+                        rows={3}
+                        value={description}
+                        onChange={(event) => setDescription(event.target.value)}
+                        placeholder={t("description")}
+                      />
+                    </label>
+
+                    <div className="editor-header-meta-actions">
+                      <button
+                        type="button"
+                        className="btn secondary compact"
+                        onClick={cancelMetadataEditor}
+                      >
+                        <X size={16} /> {t("cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn compact editor-header-meta-done"
+                        onClick={() => setEditingName(false)}
+                      >
+                        <Check size={16} /> {t("done")}
+                      </button>
+                    </div>
+                  </div>
+                </>,
+                document.body,
+              )
+            ) : (
               <>
                 <button
                   type="button"
@@ -1163,9 +1242,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                     </button>
                   </div>
                 </div>
-              </>,
-              document.body,
-            )}
+              </>
+            ))}
 
           <div className="editor-actions">
             <button

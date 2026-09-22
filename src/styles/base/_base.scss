@@ -426,3 +426,38 @@ h3 {
   padding: 0;
   cursor: pointer;
 }
+
+/* Global appearance. Theme is set before hydration to avoid a light-mode flash. */
+:root[data-theme="dark"] {
+  --background: #0b1020;
+  --surface: #121a2b;
+  --surface-muted: #182236;
+  --border: #2b3850;
+  --text: #eef2ff;
+  --muted: #a8b3c7;
+  --sidebar: #080d1a;
+  --sidebar-hover: #182236;
+  --primary: #6366f1;
+  --danger: #ef4444;
+}
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  background: var(--surface-muted);
+  color: var(--text);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .btn.secondary {
+  background: #26334a;
+  color: var(--text);
+}
+:root[data-theme="dark"] .badge {
+  background: #26334a;
+  color: var(--text);
+}
+:root[data-theme="dark"] .settings-plan-card {
+  background: var(--surface);
+}
+:root[data-theme="dark"] .settings-plan-card.selected {
+  background: #18203d;
+}

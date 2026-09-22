@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   ChartNoAxesColumnIncreasing,
   FileText,
@@ -7,7 +7,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { AppShell } from "@/components/layout/app-shell";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { getSubscriptionAccess } from "@/server/subscription/access";
@@ -67,7 +66,7 @@ export default async function DashboardPage() {
     subscription?.plan === "YEARLY" && subscription.status === "ACTIVE";
 
   return (
-    <AppShell>
+    <>
       <div className="row between dashboard-heading">
         <div>
           <span className="eyebrow">WORKSPACE</span>
@@ -86,7 +85,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid dashboard-stats">
-        <div className="card stat-card">
+        <Link href="/templates" className="card stat-card stat-card-link">
           <div className="stat-card-icon">
             <Layers size={20} />
           </div>
@@ -95,9 +94,9 @@ export default async function DashboardPage() {
             <b>{t("templates")}</b>
             <h2>{templates}</h2>
           </div>
-        </div>
+        </Link>
 
-        <div className="card stat-card">
+        <Link href="/documents" className="card stat-card stat-card-link">
           <div className="stat-card-icon">
             <FileText size={20} />
           </div>
@@ -106,7 +105,7 @@ export default async function DashboardPage() {
             <b>{t("documents")}</b>
             <h2>{documents}</h2>
           </div>
-        </div>
+        </Link>
 
         <div className="card stat-card license-card active">
           <div className="stat-card-icon stat-card-icon-success">
@@ -188,6 +187,6 @@ export default async function DashboardPage() {
 
         <p className="muted">{t("quickDescription")}</p>
       </div>
-    </AppShell>
+    </>
   );
 }

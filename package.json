@@ -1,6 +1,6 @@
 {
   "name": "docflow",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "private": true,
   "packageManager": "yarn@4.6.0",
   "engines": {

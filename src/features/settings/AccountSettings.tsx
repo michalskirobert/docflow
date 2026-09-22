@@ -10,6 +10,7 @@ import { useFeedback } from "@/components/ui/feedback-provider";
 import { accountSchema, type AccountFormValues } from "./schema";
 import { useAccountDetails, useUpdateAccount } from "./service";
 import { useLocale } from "next-intl";
+import { PasswordSettings } from "./PasswordSettings";
 import {
   formatPostalCode,
   getCountryOptions,
@@ -202,6 +203,8 @@ export function AccountSettings() {
           {t("saveChanges")}
         </Button>
       </form>
+      <div className="account-security-divider" />
+      <PasswordSettings embedded />
     </section>
   );
 }

@@ -243,3 +243,35 @@
     padding: 18px 18px 18px 22px;
   }
 }
+
+.stat-card-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+
+  &:hover {
+    border-color: #c7d2fe;
+    background: #fafbff;
+    box-shadow: 0 10px 32px rgb(15 23 42 / 7%);
+  }
+  &:focus-visible {
+    outline: 3px solid rgb(99 102 241 / 22%);
+    outline-offset: 2px;
+  }
+}
+
+.dashboard-route-skeleton {
+  display: grid;
+  gap: 18px;
+}
+.dashboard-route-skeleton > .skeleton-line:first-child {
+  width: min(280px, 55%);
+  height: 38px;
+}
+.dashboard-route-skeleton .skeleton-card {
+  min-height: 142px;
+}

@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import type { SessionUser } from "@/types/auth";
 
 const COOKIE_NAME = "docflow_session";
@@ -35,7 +36,7 @@ export async function destroySession() {
   (await cookies()).delete(COOKIE_NAME);
 }
 
-export async function getSession(): Promise<SessionUser | null> {
+async function readSession(): Promise<SessionUser | null> {
   const token = (await cookies()).get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
@@ -44,3 +45,6 @@ export async function getSession(): Promise<SessionUser | null> {
     return null;
   }
 }
+
+// Deduplicate session verification when a page and AppShell request it during the same render.
+export const getSession = cache(readSession);

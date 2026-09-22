@@ -1,5 +1,9 @@
 "use client";
-import { InputControl, SelectControl } from "@/components/shared/form";
+import {
+  ChoiceField,
+  InputControl,
+  SelectControl,
+} from "@/components/shared/form";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useMemo, useState } from "react";
 import { IMaskInput } from "react-imask";
@@ -342,15 +346,15 @@ export function VariableModal({
                 </div>
               </div>
             )}
-            <label className="check-row">
-              <InputControl
+            <div className="check-row">
+              <ChoiceField
                 type="checkbox"
                 checked={locked}
                 onChange={(e) => setLocked(e.target.checked)}
+                label={t("lockedField")}
               />
-              <span>{t("lockedField")}</span>
               <HelpTooltip text={t("lockedFieldHelp")} />
-            </label>
+            </div>
           </section>
 
           <section className="variable-form-section">
@@ -545,14 +549,14 @@ export function VariableModal({
           <details className="variable-section">
             <summary>{t("validationSettings")}</summary>
             <div className="variable-section-body">
-              <label className="check-row">
-                <InputControl
+              <div className="check-row">
+                <ChoiceField
                   type="checkbox"
                   checked={required}
                   onChange={(e) => setRequired(e.target.checked)}
+                  label={t("requiredField")}
                 />
-                <span>{t("requiredField")}</span>
-              </label>
+              </div>
               {required && (
                 <label className="field">
                   {t("requiredMessage")}

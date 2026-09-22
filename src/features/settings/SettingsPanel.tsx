@@ -5,9 +5,7 @@ import { CreditCard, FileText, ShieldAlert, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { SelectControl } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
-import LanguageSwitcher from "@/features/language/language-switcher";
 import { AccountSettings } from "./AccountSettings";
-import { PasswordSettings } from "./PasswordSettings";
 import {
   useAccountDetails,
   useBillingOverview,
@@ -86,17 +84,9 @@ export default function SettingsPanel() {
     <div className="settings-grid">
       <div className="settings-column">
         <AccountSettings />
-
-        <section className="card settings-card">
-          <h2>{t("preferences")}</h2>
-          <p className="muted">{t("preferencesHelp")}</p>
-          <LanguageSwitcher />
-        </section>
       </div>
 
       <div className="settings-column">
-        <PasswordSettings />
-
         <section className="card settings-card">
           {billing.isLoading ? (
             <SettingsCardSkeleton rows={4} />

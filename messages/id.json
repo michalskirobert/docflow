@@ -9,7 +9,8 @@
     "language": "Bahasa",
     "loading": "Memuat...",
     "company": "NurByte",
-    "companyTagline": "Produk yang dikembangkan oleh NurByte."
+    "companyTagline": "Produk yang dikembangkan oleh NurByte.",
+    "account": "Akun saya"
   },
   "home": {
     "title": "Otomatisasi dokumen untuk bisnis",
@@ -309,7 +310,19 @@
     "vatIncluded": "Termasuk VAT",
     "choosePlan": "Pilih paket",
     "choosePlanHelp": "Bandingkan penawaran dan pilih paket yang sesuai untuk organisasi Anda.",
-    "country": "Negara"
+    "country": "Negara",
+    "accountTitle": "Akun saya",
+    "accountDescription": "Informasi pribadi, keamanan, lisensi, pembayaran, dan faktur.",
+    "preferencesDescription": "Preferensi aplikasi dan antarmuka.",
+    "language": "Bahasa",
+    "appearance": "Tampilan",
+    "appearanceHelp": "Pilih tampilan DocFlow di perangkat ini.",
+    "themeSystem": "Otomatis / Sistem",
+    "themeSystemHelp": "Ikuti tampilan perangkat secara otomatis.",
+    "themeLight": "Terang",
+    "themeLightHelp": "Selalu gunakan tampilan terang.",
+    "themeDark": "Gelap",
+    "themeDarkHelp": "Selalu gunakan tampilan gelap."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
