@@ -33,15 +33,14 @@ function DashboardStatsSkeleton() {
   );
 }
 
+
 async function WorkspaceName() {
   const session = await requireSession();
   const organization = await prisma.organization.findUnique({
     where: { id: session.organizationId },
     select: { name: true },
   });
-  return (
-    <p className="muted">{organization?.name ?? session.organizationName}</p>
-  );
+  return <p className="muted">{organization?.name ?? session.organizationName}</p>;
 }
 
 async function DashboardContent() {
@@ -54,12 +53,8 @@ async function DashboardContent() {
 
   const [templates, documents, usedThisMonth, pendingPayment, subscription] =
     await Promise.all([
-      prisma.template.count({
-        where: { organizationId: session.organizationId },
-      }),
-      prisma.document.count({
-        where: { organizationId: session.organizationId },
-      }),
+      prisma.template.count({ where: { organizationId: session.organizationId } }),
+      prisma.document.count({ where: { organizationId: session.organizationId } }),
       prisma.document.count({
         where: {
           organizationId: session.organizationId,
@@ -88,66 +83,33 @@ async function DashboardContent() {
     <>
       <div className="grid dashboard-stats">
         <Link href="/templates" className="card stat-card stat-card-link">
-          <div className="stat-card-icon">
-            <Layers size={20} />
-          </div>
-          <div>
-            <b>{t("templates")}</b>
-            <h2>{templates}</h2>
-          </div>
+          <div className="stat-card-icon"><Layers size={20} /></div>
+          <div><b>{t("templates")}</b><h2>{templates}</h2></div>
         </Link>
         <Link href="/documents" className="card stat-card stat-card-link">
-          <div className="stat-card-icon">
-            <FileText size={20} />
-          </div>
-          <div>
-            <b>{t("documents")}</b>
-            <h2>{documents}</h2>
-          </div>
+          <div className="stat-card-icon"><FileText size={20} /></div>
+          <div><b>{t("documents")}</b><h2>{documents}</h2></div>
         </Link>
         <div className="card stat-card license-card active">
-          <div className="stat-card-icon stat-card-icon-success">
-            <ShieldCheck size={20} />
-          </div>
+          <div className="stat-card-icon stat-card-icon-success"><ShieldCheck size={20} /></div>
           <div>
             <b>{t("license")}</b>
             <h2>{isAnnual ? t("annualLicense") : t("freeLicense")}</h2>
             <span className="status-pill success">{t("active")}</span>
             {subscription?.currentPeriodEndsAt && (
-              <div className="muted">
-                {t("validUntil", {
-                  date: subscription.currentPeriodEndsAt.toLocaleDateString(),
-                })}
-              </div>
+              <div className="muted">{t("validUntil", { date: subscription.currentPeriodEndsAt.toLocaleDateString() })}</div>
             )}
-            {pendingPayment && (
-              <div className="payment-review">{t("paymentVerification")}</div>
-            )}
+            {pendingPayment && <div className="payment-review">{t("paymentVerification")}</div>}
           </div>
         </div>
         <div className="card stat-card usage-card">
-          <div className="stat-card-icon">
-            <ChartNoAxesColumnIncreasing size={20} />
-          </div>
+          <div className="stat-card-icon"><ChartNoAxesColumnIncreasing size={20} /></div>
           <div>
             <b>{t("monthlyUsage")}</b>
-            <h2>
-              {usedThisMonth}
-              {limit != null ? ` / ${limit}` : ""}
-            </h2>
-            <span className="muted">
-              {remaining == null
-                ? t("unlimited")
-                : t("remaining", { count: remaining })}
-            </span>
+            <h2>{usedThisMonth}{limit != null ? ` / ${limit}` : ""}</h2>
+            <span className="muted">{remaining == null ? t("unlimited") : t("remaining", { count: remaining })}</span>
             {limit != null && (
-              <div className="usage-track">
-                <span
-                  style={{
-                    width: `${Math.min(100, (usedThisMonth / Math.max(1, limit)) * 100)}%`,
-                  }}
-                />
-              </div>
+              <div className="usage-track"><span style={{ width: `${Math.min(100, (usedThisMonth / Math.max(1, limit)) * 100)}%` }} /></div>
             )}
           </div>
         </div>
@@ -178,14 +140,9 @@ export default async function DashboardPage() {
         <div>
           <span className="eyebrow">WORKSPACE</span>
           <h1>{t("title")}</h1>
-          <Suspense fallback={<span className="skeleton-line short" />}>
-            <WorkspaceName />
-          </Suspense>
+          <Suspense fallback={<span className="skeleton-line short" />}><WorkspaceName /></Suspense>
         </div>
-        <Link href="/templates" className="btn">
-          <Sparkles size={17} />
-          {t("createTemplate")}
-        </Link>
+        <Link href="/templates" className="btn"><Sparkles size={17} />{t("createTemplate")}</Link>
       </div>
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardContent />

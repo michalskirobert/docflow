@@ -10,7 +10,8 @@
     "loading": "Ładowanie...",
     "company": "NurByte",
     "companyTagline": "Produkt rozwijany przez NurByte.",
-    "account": "Moje konto"
+    "account": "Moje konto",
+    "help": "Pomoc"
   },
   "home": {
     "title": "Automatyzacja dokumentów dla firm",
@@ -489,5 +490,63 @@
     "editTemplateDetails": "Edytuj nazwę i opis",
     "done": "Gotowe",
     "processingImage": "Przetwarzanie i optymalizacja obrazu…"
+  },
+  "help": {
+    "title": "Pomoc",
+    "description": "Znajdź odpowiedź na najczęstsze pytania lub skontaktuj się z nami.",
+    "faqTitle": "Najczęściej zadawane pytania",
+    "faqDescription": "Szybkie odpowiedzi dotyczące korzystania z DocFlow.",
+    "contactTitle": "Skontaktuj się z nami",
+    "contactDescription": "Opisz problem, propozycję lub pytanie. Odpowiemy na adres e-mail przypisany do Twojego konta.",
+    "type": "Typ zgłoszenia",
+    "message": "Treść wiadomości",
+    "messagePlaceholder": "Opisz szczegółowo swoją sprawę…",
+    "captcha": "Weryfikacja",
+    "captchaLoading": "Ładowanie…",
+    "captchaRefresh": "Odśwież CAPTCHA",
+    "captchaLoadError": "Nie udało się pobrać CAPTCHA.",
+    "caseNumberHint": "Po wysłaniu otrzymasz unikalny numer sprawy.",
+    "send": "Wyślij zgłoszenie",
+    "sending": "Wysyłanie zgłoszenia…",
+    "sent": "Zgłoszenie {caseNumber} zostało wysłane pomyślnie. Potwierdzenie i więcej szczegółów znajdziesz w wiadomości e-mail.",
+    "sendError": "Nie udało się wysłać zgłoszenia. Spróbuj ponownie.",
+    "rateLimit": "Wysłano zbyt wiele zgłoszeń. Spróbuj ponownie za kilka minut.",
+    "types": {
+      "bug": "Bug",
+      "feature": "Propozycja",
+      "support": "Support"
+    },
+    "validation": {
+      "messageTooShort": "Wiadomość musi mieć co najmniej 20 znaków.",
+      "messageTooLong": "Wiadomość może mieć maksymalnie 5000 znaków.",
+      "captchaRequired": "Rozwiąż CAPTCHA.",
+      "invalidCaptcha": "Nieprawidłowa odpowiedź CAPTCHA."
+    },
+    "faq": {
+      "templates": {
+        "question": "Jak utworzyć i edytować szablon?",
+        "answer": "W sekcji Szablony możesz utworzyć nowy szablon, dodać treść, zmienne, obrazy oraz nagłówek i stopkę. Zapisany szablon możesz później ponownie edytować."
+      },
+      "variables": {
+        "question": "Jak działają zmienne w szablonach?",
+        "answer": "Zmienne są polami uzupełnianymi podczas generowania dokumentu. Możesz używać m.in. tekstu, dat, list wyboru i obrazów, a tę samą zmienną umieścić w dokumencie wielokrotnie."
+      },
+      "documents": {
+        "question": "Czy zmiana szablonu zmieni już utworzony dokument?",
+        "answer": "Nie. Utworzony dokument zachowuje zapisany stan treści. Późniejsze zmiany szablonu nie modyfikują istniejących dokumentów."
+      },
+      "pdf": {
+        "question": "Dlaczego podgląd PDF może chwilę się ładować?",
+        "answer": "PDF jest generowany na żądanie na podstawie dokumentu, dlatego pierwsze otwarcie może potrwać chwilę. Podgląd PDF jest wersją referencyjną dla pobieranego pliku."
+      },
+      "billing": {
+        "question": "Gdzie znajdę informacje o planie i płatnościach?",
+        "answer": "Informacje o aktualnym planie, jego ważności, metodzie płatności i dokumentach sprzedażowych znajdziesz w Ustawieniach."
+      },
+      "account": {
+        "question": "Jak zmienić dane konta lub hasło?",
+        "answer": "Dane konta możesz edytować w sekcji Konto, a ustawienia i bezpieczeństwo konta są dostępne w odpowiednich sekcjach profilu."
+      }
+    }
   }
 }

@@ -10,7 +10,8 @@
     "loading": "Loading...",
     "company": "NurByte",
     "companyTagline": "A product developed by NurByte.",
-    "account": "My account"
+    "account": "My account",
+    "help": "Help"
   },
   "home": {
     "title": "Document automation for businesses",
@@ -489,5 +490,63 @@
     "editTemplateDetails": "Edit name and description",
     "done": "Done",
     "processingImage": "Processing and optimizing image…"
+  },
+  "help": {
+    "title": "Help",
+    "description": "Find answers to common questions or contact us.",
+    "faqTitle": "Frequently asked questions",
+    "faqDescription": "Quick answers about using DocFlow.",
+    "contactTitle": "Contact us",
+    "contactDescription": "Describe a bug, suggestion or question. We will reply to the email assigned to your account.",
+    "type": "Request type",
+    "message": "Message",
+    "messagePlaceholder": "Describe your request in detail…",
+    "captcha": "Verification",
+    "captchaLoading": "Loading…",
+    "captchaRefresh": "Refresh CAPTCHA",
+    "captchaLoadError": "Could not load CAPTCHA.",
+    "caseNumberHint": "You will receive a unique case number after sending.",
+    "send": "Send request",
+    "sending": "Sending request…",
+    "sent": "Request {caseNumber} was sent successfully. A confirmation and more details have been sent to your email.",
+    "sendError": "Could not send your request. Please try again.",
+    "rateLimit": "Too many requests were sent. Please try again in a few minutes.",
+    "types": {
+      "bug": "Bug",
+      "feature": "Suggestion",
+      "support": "Support"
+    },
+    "validation": {
+      "messageTooShort": "The message must contain at least 20 characters.",
+      "messageTooLong": "The message can contain at most 5000 characters.",
+      "captchaRequired": "Complete the CAPTCHA.",
+      "invalidCaptcha": "Incorrect CAPTCHA answer."
+    },
+    "faq": {
+      "templates": {
+        "question": "How do I create and edit a template?",
+        "answer": "In Templates you can create a template, add content, variables, images, headers and footers, and edit it again later."
+      },
+      "variables": {
+        "question": "How do template variables work?",
+        "answer": "Variables are fields completed while generating a document. They can contain text, dates, selections or images and may be reused in the document."
+      },
+      "documents": {
+        "question": "Will editing a template change an existing document?",
+        "answer": "No. A generated document keeps its saved content. Later template changes do not modify existing documents."
+      },
+      "pdf": {
+        "question": "Why can PDF preview take a moment to load?",
+        "answer": "The PDF is generated on demand from the document, so the first preview can take a moment. The PDF preview is the reference for the downloaded file."
+      },
+      "billing": {
+        "question": "Where can I find plan and payment information?",
+        "answer": "Your current plan, validity, payment method and sales documents are available in Settings."
+      },
+      "account": {
+        "question": "How do I change account details or my password?",
+        "answer": "Account data can be edited in Account, while preferences and account security are available from your profile sections."
+      }
+    }
   }
 }

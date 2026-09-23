@@ -1,10 +1,12 @@
 "use client";
+
 import {
   FileText,
   LayoutDashboard,
   Layers,
   LogOut,
   Settings,
+  CircleHelp,
   UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,7 +22,10 @@ const links = [
   { href: "/documents", key: "documents", icon: FileText },
   { href: "/account", key: "account", icon: UserRound },
   { href: "/settings", key: "settings", icon: Settings },
+  { href: "/help", key: "help", icon: CircleHelp },
 ] as const;
+
+const mobileHiddenLinks = new Set(["/account", "/settings", "/help"]);
 
 export function Sidebar() {
   const t = useTranslations("common"),
@@ -31,11 +36,13 @@ export function Sidebar() {
   useEffect(() => {
     links.forEach(({ href }) => router.prefetch(href));
   }, [router]);
+
   async function logout() {
     await api.post("/auth/logout");
     router.replace("/login");
     router.refresh();
   }
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -45,10 +52,13 @@ export function Sidebar() {
           <div className="brand-by">by NurByte</div>
         </div>
       </div>
+
       <nav>
         {links.map(({ href, key, icon: Icon }) => (
           <Link
-            className={`${pathname === href ? "active" : ""} nav-${key}`.trim()}
+            className={`${pathname === href ? "active" : ""} nav-${key}${
+              mobileHiddenLinks.has(href) ? " mobile-hidden" : ""
+            }`.trim()}
             href={href}
             key={href}
           >
@@ -57,11 +67,13 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+
       <div className="sidebar-bottom">
         <button className="logout" onClick={logout}>
           <LogOut size={18} />
           <span>{t("logout")}</span>
         </button>
+
         <span className="version desktop-version">DocFlow v{version}</span>
       </div>
 
@@ -74,15 +86,23 @@ export function Sidebar() {
               aria-label="Close"
               onClick={() => setProfileOpen(false)}
             />
+
             <div className="mobile-profile-menu">
               <Link href="/account" onClick={() => setProfileOpen(false)}>
                 <UserRound size={18} />
                 <span>{t("account")}</span>
               </Link>
+
               <Link href="/settings" onClick={() => setProfileOpen(false)}>
                 <Settings size={18} />
                 <span>{t("settings")}</span>
               </Link>
+
+              <Link href="/help" onClick={() => setProfileOpen(false)}>
+                <CircleHelp size={18} />
+                <span>{t("help")}</span>
+              </Link>
+
               <button type="button" onClick={logout}>
                 <LogOut size={18} />
                 <span>{t("logout")}</span>
@@ -90,8 +110,16 @@ export function Sidebar() {
             </div>
           </>
         )}
+
         <button
-          className={`mobile-profile-trigger ${profileOpen || pathname === "/settings" || pathname === "/account" ? "active" : ""}`}
+          className={`mobile-profile-trigger ${
+            profileOpen ||
+            pathname === "/settings" ||
+            pathname === "/account" ||
+            pathname === "/help"
+              ? "active"
+              : ""
+          }`}
           type="button"
           aria-label={t("settings")}
           title={t("settings")}

@@ -10,7 +10,8 @@
     "loading": "Memuat...",
     "company": "NurByte",
     "companyTagline": "Produk yang dikembangkan oleh NurByte.",
-    "account": "Akun saya"
+    "account": "Akun saya",
+    "help": "Bantuan"
   },
   "home": {
     "title": "Otomatisasi dokumen untuk bisnis",
@@ -489,5 +490,63 @@
     "editTemplateDetails": "Edit nama dan deskripsi",
     "done": "Selesai",
     "processingImage": "Memproses dan mengoptimalkan gambar…"
+  },
+  "help": {
+    "title": "Bantuan",
+    "description": "Temukan jawaban untuk pertanyaan umum atau hubungi kami.",
+    "faqTitle": "Pertanyaan yang sering diajukan",
+    "faqDescription": "Jawaban singkat tentang penggunaan DocFlow.",
+    "contactTitle": "Hubungi kami",
+    "contactDescription": "Jelaskan bug, usulan, atau pertanyaan. Kami akan membalas ke email yang terhubung dengan akun Anda.",
+    "type": "Jenis laporan",
+    "message": "Pesan",
+    "messagePlaceholder": "Jelaskan kebutuhan Anda secara rinci…",
+    "captcha": "Verifikasi",
+    "captchaLoading": "Memuat…",
+    "captchaRefresh": "Muat ulang CAPTCHA",
+    "captchaLoadError": "CAPTCHA tidak dapat dimuat.",
+    "caseNumberHint": "Setelah dikirim, Anda akan menerima nomor kasus unik.",
+    "send": "Kirim laporan",
+    "sending": "Mengirim laporan…",
+    "sent": "Laporan {caseNumber} berhasil dikirim. Konfirmasi dan detail lebih lanjut telah dikirim ke email Anda.",
+    "sendError": "Laporan tidak dapat dikirim. Silakan coba lagi.",
+    "rateLimit": "Terlalu banyak laporan dikirim. Silakan coba lagi dalam beberapa menit.",
+    "types": {
+      "bug": "Bug",
+      "feature": "Usulan",
+      "support": "Support"
+    },
+    "validation": {
+      "messageTooShort": "Pesan minimal 20 karakter.",
+      "messageTooLong": "Pesan maksimal 5000 karakter.",
+      "captchaRequired": "Selesaikan CAPTCHA.",
+      "invalidCaptcha": "Jawaban CAPTCHA salah."
+    },
+    "faq": {
+      "templates": {
+        "question": "Bagaimana membuat dan mengedit template?",
+        "answer": "Di bagian Template Anda dapat membuat template, menambahkan konten, variabel, gambar, header dan footer, lalu mengeditnya kembali nanti."
+      },
+      "variables": {
+        "question": "Bagaimana variabel template bekerja?",
+        "answer": "Variabel adalah bidang yang diisi saat membuat dokumen. Variabel dapat berupa teks, tanggal, pilihan, atau gambar dan dapat digunakan berulang kali."
+      },
+      "documents": {
+        "question": "Apakah perubahan template mengubah dokumen yang sudah dibuat?",
+        "answer": "Tidak. Dokumen yang dibuat menyimpan kontennya sendiri. Perubahan template berikutnya tidak mengubah dokumen yang sudah ada."
+      },
+      "pdf": {
+        "question": "Mengapa pratinjau PDF kadang perlu waktu untuk dimuat?",
+        "answer": "PDF dibuat sesuai permintaan dari dokumen, sehingga pembukaan pertama dapat memerlukan sedikit waktu. Pratinjau PDF menjadi acuan file yang diunduh."
+      },
+      "billing": {
+        "question": "Di mana informasi paket dan pembayaran?",
+        "answer": "Paket aktif, masa berlaku, metode pembayaran, dan dokumen penjualan tersedia di Pengaturan."
+      },
+      "account": {
+        "question": "Bagaimana mengubah data akun atau kata sandi?",
+        "answer": "Data akun dapat diedit di bagian Akun, sedangkan preferensi dan keamanan tersedia melalui bagian profil."
+      }
+    }
   }
 }
