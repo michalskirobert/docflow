@@ -230,8 +230,6 @@ export default function DocumentGenerator({
     }
   };
 
-
-
   const sendPreparedEmail = async () => {
     if (!emailSettings.data?.configured) return;
     const recipient = recipientEmail.trim();
@@ -397,7 +395,9 @@ export default function DocumentGenerator({
                 ) : (
                   <Send size={17} />
                 )}
-                {sendEmailMutation.isPending ? t("sendingEmail") : t("sendEmail")}
+                {sendEmailMutation.isPending
+                  ? t("sendingEmail")
+                  : t("sendEmail")}
               </button>
               {!emailSettings.data?.configured && (
                 <HelpTooltip
@@ -480,7 +480,9 @@ export default function DocumentGenerator({
               setDocumentNameError("");
               setEmailSubject(
                 emailSettings.data?.configured
-                  ? nextTemplate?.emailSubject?.trim() || nextTemplate?.name || ""
+                  ? nextTemplate?.emailSubject?.trim() ||
+                      nextTemplate?.name ||
+                      ""
                   : "",
               );
               setValues(
@@ -531,7 +533,13 @@ export default function DocumentGenerator({
         )}
 
         {selected && isEmailMode && (
-          <div className={!emailSettings.data?.configured ? "field-locked email-subject-locked" : undefined}>
+          <div
+            className={
+              !emailSettings.data?.configured
+                ? "field-locked email-subject-locked"
+                : undefined
+            }
+          >
             <FormField
               id="email-subject"
               label={t("emailSubject")}
@@ -555,12 +563,6 @@ export default function DocumentGenerator({
                   ? t("emailSubjectOptional")
                   : t("emailSubjectSetupHelp")}
               </small>
-              {!emailSettings.data?.configured && (
-                <HelpTooltip
-                  text={t("emailSubjectSetupHelp")}
-                  label={t("emailSubjectSetupHelp")}
-                />
-              )}
             </div>
           </div>
         )}

@@ -295,7 +295,12 @@
   width: 100%;
   height: 58px;
   border-radius: 11px;
-  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 45%, var(--skeleton-base) 65%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-highlight) 45%,
+    var(--skeleton-base) 65%
+  );
   background-size: 200% 100%;
   animation: skeletonPulse 1.25s ease-in-out infinite;
 }
@@ -378,13 +383,24 @@
   width: 100%;
   height: 44px;
   border-radius: 10px;
-  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 45%, var(--skeleton-base) 65%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-highlight) 45%,
+    var(--skeleton-base) 65%
+  );
   background-size: 200% 100%;
   animation: skeletonPulse 1.25s ease-in-out infinite;
 }
-.skeleton-control.compact { height: 38px; }
-.skeleton-theme-options { margin-top: 2px; }
-.settings-email-heading-skeleton { margin-bottom: 16px; }
+.skeleton-control.compact {
+  height: 38px;
+}
+.skeleton-theme-options {
+  margin-top: 2px;
+}
+.settings-email-heading-skeleton {
+  margin-bottom: 16px;
+}
 .email-guide-skeleton {
   display: grid;
   gap: 9px;
@@ -394,8 +410,12 @@
   border-radius: 12px;
   background: color-mix(in srgb, var(--surface-muted) 88%, transparent);
 }
-.email-guide-skeleton .skeleton-line { margin: 0; }
-.settings-skeleton-email .email-settings-grid { row-gap: 18px; }
+.email-guide-skeleton .skeleton-line {
+  margin: 0;
+}
+.settings-skeleton-email .email-settings-grid {
+  row-gap: 18px;
+}
 .skeleton-toggle {
   display: block;
   width: min(310px, 75%);
@@ -419,5 +439,7 @@
   margin-top: 16px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-control { animation: none; }
+  .skeleton-control {
+    animation: none;
+  }
 }

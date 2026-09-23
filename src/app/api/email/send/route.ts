@@ -18,8 +18,14 @@ export async function POST(req: Request) {
   try {
     const session = await requireSession();
     const input = schema.parse(await req.json());
-    const settings = await prisma.userEmailSettings.findUnique({ where: { userId: session.id } });
-    if (!settings) return NextResponse.json({ message: "Email is not configured" }, { status: 409 });
+    const settings = await prisma.userEmailSettings.findUnique({
+      where: { userId: session.id },
+    });
+    if (!settings)
+      return NextResponse.json(
+        { message: "Email is not configured" },
+        { status: 409 },
+      );
     const transport = createUserEmailTransport({
       host: settings.host,
       port: settings.port,
@@ -30,7 +36,9 @@ export async function POST(req: Request) {
       fromName: settings.fromName,
     });
     await transport.sendMail({
-      from: settings.fromName ? `"${settings.fromName.replace(/["\\]/g, "")}" <${settings.fromEmail}>` : settings.fromEmail,
+      from: settings.fromName
+        ? `"${settings.fromName.replace(/["\\]/g, "")}" <${settings.fromEmail}>`
+        : settings.fromEmail,
       to: input.to,
       subject: input.subject,
       html: input.html,
@@ -39,7 +47,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
-      { message: error instanceof z.ZodError ? "Invalid email" : "Email could not be sent" },
+      {
+        message:
+          error instanceof z.ZodError
+            ? "Invalid email"
+            : "Email could not be sent",
+      },
       { status: error instanceof z.ZodError ? 400 : 502 },
     );
   }

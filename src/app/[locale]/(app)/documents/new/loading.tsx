@@ -3,7 +3,10 @@ export default function NewDocumentLoading() {
     <div className="document-route-loading" aria-busy="true">
       <span className="skeleton-line document-route-title" />
       <div className="document-generator-shell document-generator-loading">
-        <div className="document-sticky-actions document-actions-skeleton" aria-hidden="true">
+        <div
+          className="document-sticky-actions document-actions-skeleton"
+          aria-hidden="true"
+        >
           <span className="skeleton-action" />
         </div>
         <section className="card document-form-card">

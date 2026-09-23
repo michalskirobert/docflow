@@ -1,4 +1,7 @@
-import { FormFieldSkeleton, SectionSkeleton } from "@/components/shared/skeleton";
+import {
+  FormFieldSkeleton,
+  SectionSkeleton,
+} from "@/components/shared/skeleton";
 
 export default function SettingsLoading() {
   return (
@@ -18,7 +21,9 @@ export default function SettingsLoading() {
             <span className="skeleton-line section-title-skeleton" />
             <span className="skeleton-line section-description-skeleton" />
             <div className="theme-options skeleton-theme-options">
-              {[0, 1, 2].map((item) => <span className="skeleton-settings-option" key={item} />)}
+              {[0, 1, 2].map((item) => (
+                <span className="skeleton-settings-option" key={item} />
+              ))}
             </div>
           </SectionSkeleton>
         </div>
@@ -38,11 +43,15 @@ export default function SettingsLoading() {
               <span className="skeleton-line" />
             </div>
             <div className="email-settings-grid">
-              {[0, 1, 2, 3, 4, 5].map((item) => <FormFieldSkeleton key={item} />)}
+              {[0, 1, 2, 3, 4, 5].map((item) => (
+                <FormFieldSkeleton key={item} />
+              ))}
             </div>
             <span className="skeleton-toggle" />
             <span className="skeleton-warning" />
-            <div className="skeleton-actions"><span className="skeleton-action" /></div>
+            <div className="skeleton-actions">
+              <span className="skeleton-action" />
+            </div>
           </SectionSkeleton>
         </div>
       </div>

@@ -16,7 +16,9 @@ const schema = z.object({
 
 export async function GET() {
   const session = await requireSession();
-  const settings = await prisma.userEmailSettings.findUnique({ where: { userId: session.id } });
+  const settings = await prisma.userEmailSettings.findUnique({
+    where: { userId: session.id },
+  });
   if (!settings) return NextResponse.json({ configured: false });
   return NextResponse.json({
     configured: true,
@@ -32,9 +34,14 @@ export async function GET() {
 export async function PUT(req: Request) {
   const session = await requireSession();
   const parsed = schema.parse(await req.json());
-  const current = await prisma.userEmailSettings.findUnique({ where: { userId: session.id } });
+  const current = await prisma.userEmailSettings.findUnique({
+    where: { userId: session.id },
+  });
   if (!current && !parsed.password) {
-    return NextResponse.json({ message: "Password is required" }, { status: 400 });
+    return NextResponse.json(
+      { message: "Password is required" },
+      { status: 400 },
+    );
   }
   const passwordEncrypted = parsed.password
     ? encryptEmailPassword(parsed.password)

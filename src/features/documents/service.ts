@@ -42,6 +42,7 @@ export type EmailSettingsStatus = { configured: boolean };
 export const useEmailSettingsStatusService = () =>
   useGet<EmailSettingsStatus>(["email-settings"], "/settings/email");
 export const useSendPreparedEmailService = () =>
-  usePost<{ ok: boolean }, { to: string; subject: string; html: string; text?: string }>(
-    "/email/send",
-  );
+  usePost<
+    { ok: boolean },
+    { to: string; subject: string; html: string; text?: string }
+  >("/email/send");

@@ -1,4 +1,9 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+} from "crypto";
 import nodemailer from "nodemailer";
 
 export type UserEmailTransportSettings = {
@@ -22,14 +27,20 @@ function encryptionKey() {
 export function encryptEmailPassword(value: string) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", encryptionKey(), iv);
-  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(value, "utf8"),
+    cipher.final(),
+  ]);
   const tag = cipher.getAuthTag();
-  return [iv, tag, encrypted].map((part) => part.toString("base64url")).join(".");
+  return [iv, tag, encrypted]
+    .map((part) => part.toString("base64url"))
+    .join(".");
 }
 
 export function decryptEmailPassword(value: string) {
   const [ivValue, tagValue, encryptedValue] = value.split(".");
-  if (!ivValue || !tagValue || !encryptedValue) throw new Error("Invalid encrypted email password");
+  if (!ivValue || !tagValue || !encryptedValue)
+    throw new Error("Invalid encrypted email password");
   const decipher = createDecipheriv(
     "aes-256-gcm",
     encryptionKey(),
