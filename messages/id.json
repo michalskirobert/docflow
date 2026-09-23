@@ -243,7 +243,29 @@
     "emailCopied": "Isi email berhasil disalin.",
     "emailSubjectCopied": "Subjek email berhasil disalin.",
     "emailCopyError": "Email tidak dapat disalin.",
-    "emailRenderError": "Isi email tidak dapat disiapkan."
+    "emailRenderError": "Isi email tidak dapat disiapkan.",
+    "prepareEmail": "Siapkan email",
+    "prepareEmailTitle": "Siapkan email",
+    "prepareEmailDescription": "Pilih templat, lengkapi datanya, lalu siapkan pesan berformat untuk klien email Anda.",
+    "emailSubject": "Subjek pesan",
+    "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan 123/2026",
+    "emailSubjectOptional": "Opsional. Jika dikosongkan, nama templat akan digunakan.",
+    "preparingEmail": "Menyiapkan…",
+    "sendEmail": "Kirim email",
+    "sendEmailSetupRequired": "Konfigurasikan pengiriman email di Pengaturan terlebih dahulu.",
+    "sendEmailSetupHint": "Pengiriman langsung akan tersedia setelah Anda secara sukarela mengonfigurasi akun email Anda sendiri di Pengaturan. Menyalin pesan tidak memerlukan konfigurasi.",
+    "recipientEmail": "Email penerima",
+    "recipientEmailPlaceholder": "penerima@example.com",
+    "recipientEmailHelp": "Hanya diperlukan saat mengirim langsung dari DocFlow.",
+    "recipientEmailRequired": "Masukkan alamat email penerima yang valid.",
+    "sendingEmail": "Mengirim…",
+    "emailSent": "Email telah dikirim.",
+    "emailSendError": "Email tidak dapat dikirim. Periksa konfigurasi akun email Anda.",
+    "emailSubjectSetupPlaceholder": "Tersedia setelah pengiriman email dikonfigurasi",
+    "emailSubjectSetupHelp": "Subjek hanya digunakan saat mengirim langsung dari DocFlow. Konfigurasikan akun email di Pengaturan untuk mengaktifkannya.",
+    "emailSetupNoticeTitle": "Ingin mengirim langsung dari DocFlow?",
+    "emailSetupNoticeDescription": "Konfigurasikan akun SMTP Anda sendiri secara opsional di Pengaturan. Tanpa konfigurasi, Anda tetap dapat menyalin konten dan menempelkannya ke klien email.",
+    "openEmailSettings": "Buka pengaturan email"
   },
   "settings": {
     "title": "Pengaturan",
@@ -331,7 +353,32 @@
     "themeLight": "Terang",
     "themeLightHelp": "Selalu gunakan tampilan terang.",
     "themeDark": "Gelap",
-    "themeDarkHelp": "Selalu gunakan tampilan gelap."
+    "themeDarkHelp": "Selalu gunakan tampilan gelap.",
+    "emailSending": "Pengiriman email",
+    "emailSendingHelp": "Secara opsional hubungkan akun SMTP Anda sendiri untuk mengirim pesan langsung dari DocFlow.",
+    "smtpHost": "Server SMTP",
+    "smtpPort": "Port SMTP",
+    "smtpUsername": "Nama pengguna SMTP",
+    "smtpPassword": "Kata sandi / app password",
+    "smtpPasswordKeep": "Kosongkan untuk mempertahankan kata sandi saat ini",
+    "senderEmail": "Email pengirim",
+    "senderName": "Nama pengirim",
+    "smtpSecure": "Gunakan TLS/SSL langsung (biasanya port 465)",
+    "emailSendingResponsibility": "Konfigurasi bersifat opsional. DocFlow menggunakan kredensial ini hanya untuk mengirim pesan dari akun Anda. Anda bertanggung jawab atas konfigurasi dan penggunaan pengiriman. Kata sandi disimpan terenkripsi.",
+    "saveEmailSettings": "Simpan konfigurasi",
+    "emailSettingsSaved": "Konfigurasi email disimpan.",
+    "emailSettingsSaveError": "Konfigurasi email tidak dapat disimpan.",
+    "emailSettingsInvalid": "Lengkapi data SMTP yang diperlukan dengan benar.",
+    "emailPasswordRequired": "Masukkan kata sandi SMTP saat konfigurasi pertama.",
+    "emailSettingsDisconnect": "Hapus konfigurasi",
+    "emailSettingsDisconnectTitle": "Hapus konfigurasi email?",
+    "emailSettingsDisconnectMessage": "Kredensial SMTP yang tersimpan akan dihapus permanen dari DocFlow.",
+    "emailSettingsDisconnected": "Konfigurasi email dihapus.",
+    "emailSetupGuideTitle": "Cara mengatur pengiriman",
+    "emailSetupGuideServer": "Masukkan server SMTP dan port yang diberikan oleh penyedia email Anda.",
+    "emailSetupGuideCredentials": "Masukkan nama pengguna dan kata sandi SMTP. Beberapa penyedia, seperti Gmail, memerlukan kata sandi aplikasi, bukan kata sandi akun biasa.",
+    "emailSetupGuideSender": "Masukkan alamat pengirim dan nama pengirim opsional yang akan digunakan untuk pesan keluar.",
+    "emailSetupGuideProvider": "Pengaturan SMTP tersedia di dokumentasi penyedia email Anda. DocFlow tidak mengubah pengaturan akun email Anda."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -560,7 +607,7 @@
       },
       "email": {
         "question": "Bisakah template dokumen digunakan sebagai email?",
-        "answer": "Ya. Template yang sama dapat digunakan untuk membuat PDF atau email berformat. Setelah variabel diisi, salin subjek dan isi pesan lalu tempelkan ke aplikasi email Anda. Template juga dapat memiliki subjek email opsional dengan variabel."
+        "answer": "Ya. Dari Dokumen pilih “Siapkan email”, pilih templat apa pun dan lengkapi variabelnya. Anda dapat memasukkan subjek opsional lalu menyalin pesan berformat ke Gmail, Outlook, atau klien email lain. Pengiriman langsung memerlukan konfigurasi sukarela akun email Anda sendiri di Pengaturan."
       }
     }
   }

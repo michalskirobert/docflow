@@ -473,6 +473,14 @@ body {
   font-size: 12px;
   padding: 7px 9px;
 }
+.auth-language .shared-select-trigger,
+.auth-language .shared-select-options button {
+  font-size: 12px;
+}
+.auth-language .shared-select-trigger {
+  min-height: 36px;
+  padding: 7px 9px;
+}
 .status-card {
   text-align: center;
 }

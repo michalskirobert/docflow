@@ -9,6 +9,7 @@ import {
 
 const schema = z.object({
   data: z.record(z.string(), z.union([z.string(), z.number()])),
+  subject: z.string().max(250).optional(),
 });
 
 function htmlToPlainText(html: string) {
@@ -53,7 +54,9 @@ export async function POST(
 
     const html = renderTemplate(template.content, parsed.data, variables);
     const subject = renderTextTemplate(
-      template.emailSubject?.trim() || template.name,
+      parsed.subject !== undefined
+        ? parsed.subject.trim()
+        : template.emailSubject?.trim() || template.name,
       parsed.data,
     );
 

@@ -27,7 +27,7 @@ export type RenderedEmail = {
   text: string;
 };
 export const useRenderEmailService = (templateId: string) =>
-  usePost<RenderedEmail, { data: Record<string, string> }>(
+  usePost<RenderedEmail, { data: Record<string, string>; subject?: string }>(
     `/templates/${templateId}/email`,
   );
 export const useUpdateDocumentService = (id: string) =>
@@ -37,3 +37,11 @@ export const useUpdateDocumentService = (id: string) =>
   );
 export const useDeleteDocumentService = (id: string) =>
   useDelete<void>(`/documents/${id}`, [["documents"]]);
+
+export type EmailSettingsStatus = { configured: boolean };
+export const useEmailSettingsStatusService = () =>
+  useGet<EmailSettingsStatus>(["email-settings"], "/settings/email");
+export const useSendPreparedEmailService = () =>
+  usePost<{ ok: boolean }, { to: string; subject: string; html: string; text?: string }>(
+    "/email/send",
+  );

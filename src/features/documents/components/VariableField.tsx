@@ -492,8 +492,9 @@ export function VariableField({ variable, value, error, onChange }: Props) {
   };
 
   const Label = () => (
-    <span className="field-label">
-      {label}
+    <span className="field-label variable-field-label">
+      <span>{label}</span>
+      <code className="variable-field-token">{`{{${variable.name}}}`}</code>
 
       {variable.required && (
         <span className="required" aria-hidden="true">
@@ -546,8 +547,9 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       <div
         className={`field ${error ? "field-error" : ""} ${variable.locked ? "field-locked" : ""}`}
       >
-        <label className="field-label" htmlFor={id}>
-          {label}
+        <label className="field-label variable-field-label" htmlFor={id}>
+          <span>{label}</span>
+          <code className="variable-field-token">{`{{${variable.name}}}`}</code>
           {variable.required && (
             <span className="required" aria-hidden="true">
               {" "}

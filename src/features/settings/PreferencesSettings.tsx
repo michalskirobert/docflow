@@ -3,6 +3,8 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/features/language/language-switcher";
+import { Section } from "@/components/shared/layout";
+import EmailSettingsCard from "./email-settings";
 import {
   type ThemePreference,
   useTheme,
@@ -39,12 +41,12 @@ export default function PreferencesSettings() {
   return (
     <div className="settings-grid preferences-grid">
       <div className="settings-column">
-        <section className="card settings-card">
+        <Section className="settings-card">
           <h2>{t("language")}</h2>
           <p className="muted">{t("languageHelp")}</p>
           <LanguageSwitcher />
-        </section>
-        <section className="card settings-card">
+        </Section>
+        <Section className="settings-card">
           <h2>{t("appearance")}</h2>
           <p className="muted">{t("appearanceHelp")}</p>
           <div
@@ -70,7 +72,10 @@ export default function PreferencesSettings() {
               </button>
             ))}
           </div>
-        </section>
+        </Section>
+      </div>
+      <div className="settings-column">
+        <EmailSettingsCard />
       </div>
     </div>
   );

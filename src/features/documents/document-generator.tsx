@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { InputControl } from "@/components/shared/form";
+import { FormField, InputControl } from "@/components/shared/form";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 import {
   ArrowLeft,
   Clipboard,
-  Copy,
   LoaderCircle,
   Mail,
+  Send,
   Save,
   Sparkles,
 } from "lucide-react";
@@ -26,6 +27,8 @@ import {
   useDocumentTemplatesService,
   useGenerateDocumentService,
   useRenderEmailService,
+  useEmailSettingsStatusService,
+  useSendPreparedEmailService,
   useUpdateDocumentService,
 } from "./service";
 
@@ -66,8 +69,10 @@ const getInitialTemplateValues = (variablesJson: string) => {
 
 export default function DocumentGenerator({
   documentId,
+  mode = "document",
 }: {
   documentId?: string;
+  mode?: "document" | "email";
 }) {
   const t = useTranslations("documents");
   const router = useRouter();
@@ -79,16 +84,21 @@ export default function DocumentGenerator({
   const updateMutation = useUpdateDocumentService(documentId ?? "");
 
   const isEditing = Boolean(documentId);
+  const isEmailMode = mode === "email";
 
   const [templateId, setTemplateId] = useState("");
   const [documentName, setDocumentName] = useState("");
   const [documentNameError, setDocumentNameError] = useState("");
+  const [emailSubject, setEmailSubject] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [initialized, setInitialized] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [dirty, setDirty] = useState(false);
   const emailMutation = useRenderEmailService(templateId);
+  const emailSettings = useEmailSettingsStatusService();
+  const sendEmailMutation = useSendPreparedEmailService();
+  const [recipientEmail, setRecipientEmail] = useState("");
 
   const documentNameRef = useRef<HTMLInputElement>(null);
 
@@ -127,6 +137,21 @@ export default function DocumentGenerator({
     () => (selected ? parseTemplateVariables(selected.variablesJson) : []),
     [selected],
   );
+
+  useEffect(() => {
+    if (!isEmailMode || !selected) return;
+
+    if (!emailSettings.data?.configured) {
+      setEmailSubject("");
+      return;
+    }
+
+    setEmailSubject((current) =>
+      current.trim()
+        ? current
+        : selected.emailSubject?.trim() || selected.name || "",
+    );
+  }, [emailSettings.data?.configured, isEmailMode, selected]);
 
   const confirmLeave = useCallback(
     () =>
@@ -174,7 +199,10 @@ export default function DocumentGenerator({
   const renderEmail = async () => {
     if (!selected || !validateValues()) return null;
     try {
-      return await emailMutation.mutateAsync({ data: values });
+      return await emailMutation.mutateAsync({
+        data: values,
+        subject: emailSubject.trim(),
+      });
     } catch {
       notify(t("emailRenderError"), "error");
       return null;
@@ -202,14 +230,27 @@ export default function DocumentGenerator({
     }
   };
 
-  const copyEmailSubject = async () => {
+
+
+  const sendPreparedEmail = async () => {
+    if (!emailSettings.data?.configured) return;
+    const recipient = recipientEmail.trim();
+    if (!recipient || !recipient.includes("@")) {
+      notify(t("recipientEmailRequired"), "error");
+      return;
+    }
     const email = await renderEmail();
     if (!email) return;
     try {
-      await navigator.clipboard.writeText(email.subject);
-      notify(t("emailSubjectCopied"), "success");
+      await sendEmailMutation.mutateAsync({
+        to: recipient,
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+      });
+      notify(t("emailSent"), "success");
     } catch {
-      notify(t("emailCopyError"), "error");
+      notify(t("emailSendError"), "error");
     }
   };
 
@@ -318,11 +359,15 @@ export default function DocumentGenerator({
     generateMutation.isPending ||
     updateMutation.isPending ||
     emailMutation.isPending ||
+    sendEmailMutation.isPending ||
     isRedirecting;
 
   return (
     <div className="document-generator-shell pending-form" aria-busy={pending}>
-      <PendingOverlay active={pending} label={t("saving")} />
+      <PendingOverlay
+        active={pending}
+        label={isEmailMode ? t("preparingEmail") : t("saving")}
+      />
       <div className="form-actions document-sticky-actions">
         <button
           className="btn secondary"
@@ -338,37 +383,70 @@ export default function DocumentGenerator({
           {t("backToDocuments")}
         </button>
 
-        {selected && (
-          <button
-            className="btn"
-            type="button"
-            disabled={pending}
-            onClick={save}
-          >
-            {pending ? (
-              <LoaderCircle className="spinner" size={17} />
-            ) : isEditing ? (
-              <Save size={17} />
-            ) : (
-              <Sparkles size={17} />
-            )}
+        {selected &&
+          (isEmailMode ? (
+            <div className="email-send-action">
+              <button
+                className="btn email-send-button"
+                type="button"
+                disabled={pending || !emailSettings.data?.configured}
+                onClick={() => void sendPreparedEmail()}
+              >
+                {sendEmailMutation.isPending ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : (
+                  <Send size={17} />
+                )}
+                {sendEmailMutation.isPending ? t("sendingEmail") : t("sendEmail")}
+              </button>
+              {!emailSettings.data?.configured && (
+                <HelpTooltip
+                  text={t("sendEmailSetupRequired")}
+                  label={t("sendEmailSetupRequired")}
+                />
+              )}
+            </div>
+          ) : (
+            <button
+              className="btn"
+              type="button"
+              disabled={pending}
+              onClick={save}
+            >
+              {pending ? (
+                <LoaderCircle className="spinner" size={17} />
+              ) : isEditing ? (
+                <Save size={17} />
+              ) : (
+                <Sparkles size={17} />
+              )}
 
-            {pending
-              ? t("saving")
-              : isEditing
-                ? t("saveDocument")
-                : t("generate")}
-          </button>
-        )}
+              {pending
+                ? t("saving")
+                : isEditing
+                  ? t("saveDocument")
+                  : t("generate")}
+            </button>
+          ))}
       </div>
 
       <section className="card document-form-card">
         <div className="section-heading">
-          {isEditing ? <Save /> : <Sparkles />}
+          {isEmailMode ? <Mail /> : isEditing ? <Save /> : <Sparkles />}
           <div>
-            <h2>{isEditing ? t("editFormTitle") : t("generateTitle")}</h2>
+            <h2>
+              {isEmailMode
+                ? t("prepareEmailTitle")
+                : isEditing
+                  ? t("editFormTitle")
+                  : t("generateTitle")}
+            </h2>
             <p>
-              {isEditing ? t("editFormDescription") : t("generateDescription")}
+              {isEmailMode
+                ? t("prepareEmailDescription")
+                : isEditing
+                  ? t("editFormDescription")
+                  : t("generateDescription")}
             </p>
           </div>
         </div>
@@ -400,6 +478,11 @@ export default function DocumentGenerator({
               );
 
               setDocumentNameError("");
+              setEmailSubject(
+                emailSettings.data?.configured
+                  ? nextTemplate?.emailSubject?.trim() || nextTemplate?.name || ""
+                  : "",
+              );
               setValues(
                 nextTemplate
                   ? getInitialTemplateValues(nextTemplate.variablesJson)
@@ -409,7 +492,7 @@ export default function DocumentGenerator({
             }}
           />
         )}
-        {selected && (
+        {selected && !isEmailMode && (
           <label
             className={`field ${documentNameError ? "field-error" : ""}`}
             htmlFor="document-name"
@@ -447,6 +530,55 @@ export default function DocumentGenerator({
           </label>
         )}
 
+        {selected && isEmailMode && (
+          <div className={!emailSettings.data?.configured ? "field-locked email-subject-locked" : undefined}>
+            <FormField
+              id="email-subject"
+              label={t("emailSubject")}
+              type="text"
+              maxLength={250}
+              value={emailSettings.data?.configured ? emailSubject : ""}
+              disabled={!emailSettings.data?.configured}
+              placeholder={
+                emailSettings.data?.configured
+                  ? t("emailSubjectPlaceholder")
+                  : t("emailSubjectSetupPlaceholder")
+              }
+              onChange={(event) => {
+                setEmailSubject(event.target.value);
+                setDirty(true);
+              }}
+            />
+            <div className="field-help-row">
+              <small className="field-help">
+                {emailSettings.data?.configured
+                  ? t("emailSubjectOptional")
+                  : t("emailSubjectSetupHelp")}
+              </small>
+              {!emailSettings.data?.configured && (
+                <HelpTooltip
+                  text={t("emailSubjectSetupHelp")}
+                  label={t("emailSubjectSetupHelp")}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        {selected && isEmailMode && emailSettings.data?.configured && (
+          <div>
+            <FormField
+              id="recipient-email"
+              label={t("recipientEmail")}
+              type="email"
+              value={recipientEmail}
+              placeholder={t("recipientEmailPlaceholder")}
+              onChange={(event) => setRecipientEmail(event.target.value)}
+            />
+            <small className="field-help">{t("recipientEmailHelp")}</small>
+          </div>
+        )}
+
         {variables.map((variable) => (
           <VariableField
             key={variable.name}
@@ -468,25 +600,25 @@ export default function DocumentGenerator({
           />
         ))}
 
-        {selected && (
-          <div className="card email-export-card">
-            <div className="section-heading">
-              <Mail size={20} />
-              <div>
-                <h3>{t("emailExportTitle")}</h3>
-                <p>{t("emailExportDescription")}</p>
+        {selected && isEmailMode && (
+          <>
+            {!emailSettings.data?.configured && (
+              <div className="email-setup-notice" role="note">
+                <Mail size={18} />
+                <div>
+                  <strong>{t("emailSetupNoticeTitle")}</strong>
+                  <p>{t("emailSetupNoticeDescription")}</p>
+                  <button
+                    className="btn secondary compact"
+                    type="button"
+                    onClick={() => router.push("/settings")}
+                  >
+                    {t("openEmailSettings")}
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="form-actions">
-              <button
-                className="btn secondary"
-                type="button"
-                disabled={pending}
-                onClick={() => void copyEmailSubject()}
-              >
-                <Copy size={17} />
-                {t("copyEmailSubject")}
-              </button>
+            )}
+            <div className="email-composer-actions">
               <button
                 className="btn secondary"
                 type="button"
@@ -497,7 +629,7 @@ export default function DocumentGenerator({
                 {t("copyEmail")}
               </button>
             </div>
-          </div>
+          </>
         )}
       </section>
     </div>

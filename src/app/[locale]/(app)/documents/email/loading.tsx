@@ -1,4 +1,4 @@
-export default function NewDocumentLoading() {
+export default function EmailLoading() {
   return (
     <div className="document-route-loading" aria-busy="true">
       <span className="skeleton-line document-route-title" />

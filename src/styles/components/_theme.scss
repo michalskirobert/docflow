@@ -854,3 +854,32 @@ select {
 .document-history .section-heading {
   margin-bottom: 16px;
 }
+
+/* 2.3.0 quieter loading placeholders. */
+.skeleton-line,
+.skeleton-action,
+.skeleton-icon,
+.skeleton-field,
+.settings-skeleton-input,
+.settings-skeleton-button {
+  animation-duration: 1.65s !important;
+}
+
+.skeleton-row,
+.skeleton-card {
+  box-shadow: none !important;
+}
+
+/* 2.3.0 skeleton rhythm: preserve the vertical geometry of real content. */
+.skeleton-list,
+.skeleton-grid {
+  gap: 14px;
+}
+.skeleton-row,
+.skeleton-card {
+  box-sizing: border-box;
+}
+.skeleton-row .skeleton-line + .skeleton-line,
+.skeleton-card .skeleton-line + .skeleton-line {
+  margin-top: 10px;
+}

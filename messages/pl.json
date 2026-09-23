@@ -243,7 +243,29 @@
     "emailCopied": "Treść e-maila została skopiowana.",
     "emailSubjectCopied": "Temat e-maila został skopiowany.",
     "emailCopyError": "Nie udało się skopiować e-maila.",
-    "emailRenderError": "Nie udało się przygotować treści e-maila."
+    "emailRenderError": "Nie udało się przygotować treści e-maila.",
+    "prepareEmail": "Przygotuj e-mail",
+    "prepareEmailTitle": "Przygotuj e-mail",
+    "prepareEmailDescription": "Wybierz szablon, uzupełnij dane i przygotuj gotową wiadomość do wklejenia w swoim kliencie pocztowym.",
+    "emailSubject": "Temat wiadomości",
+    "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia 123/2026",
+    "emailSubjectOptional": "Opcjonalnie. Jeśli pozostawisz pole puste, użyta zostanie nazwa szablonu.",
+    "preparingEmail": "Przygotowywanie…",
+    "sendEmail": "Wyślij e-mail",
+    "sendEmailSetupRequired": "Najpierw skonfiguruj wysyłkę e-mail w Ustawieniach.",
+    "sendEmailSetupHint": "Bezpośrednia wysyłka będzie dostępna po dobrowolnym skonfigurowaniu własnego konta e-mail w Ustawieniach. Kopiowanie wiadomości nie wymaga konfiguracji.",
+    "recipientEmail": "Adres odbiorcy",
+    "recipientEmailPlaceholder": "odbiorca@example.com",
+    "recipientEmailHelp": "Wymagany tylko przy bezpośredniej wysyłce z DocFlow.",
+    "recipientEmailRequired": "Podaj prawidłowy adres e-mail odbiorcy.",
+    "sendingEmail": "Wysyłanie…",
+    "emailSent": "E-mail został wysłany.",
+    "emailSendError": "Nie udało się wysłać e-maila. Sprawdź konfigurację konta pocztowego.",
+    "emailSubjectSetupPlaceholder": "Dostępne po skonfigurowaniu wysyłki e-mail",
+    "emailSubjectSetupHelp": "Temat jest używany tylko przy bezpośredniej wysyłce z DocFlow. Skonfiguruj konto pocztowe w Ustawieniach, aby go włączyć.",
+    "emailSetupNoticeTitle": "Chcesz wysyłać bezpośrednio z DocFlow?",
+    "emailSetupNoticeDescription": "Skonfiguruj dobrowolnie własne konto SMTP w Ustawieniach. Bez konfiguracji nadal możesz skopiować gotową treść i wkleić ją do swojego klienta pocztowego.",
+    "openEmailSettings": "Przejdź do ustawień poczty"
   },
   "settings": {
     "title": "Ustawienia",
@@ -331,7 +353,32 @@
     "themeLight": "Jasny",
     "themeLightHelp": "Zawsze używaj jasnego motywu.",
     "themeDark": "Ciemny",
-    "themeDarkHelp": "Zawsze używaj ciemnego motywu."
+    "themeDarkHelp": "Zawsze używaj ciemnego motywu.",
+    "emailSending": "Wysyłka e-mail",
+    "emailSendingHelp": "Opcjonalnie połącz własne konto SMTP, aby wysyłać przygotowane wiadomości bezpośrednio z DocFlow.",
+    "smtpHost": "Serwer SMTP",
+    "smtpPort": "Port SMTP",
+    "smtpUsername": "Login SMTP",
+    "smtpPassword": "Hasło / hasło aplikacji",
+    "smtpPasswordKeep": "Pozostaw puste, aby zachować obecne",
+    "senderEmail": "Adres nadawcy",
+    "senderName": "Nazwa nadawcy",
+    "smtpSecure": "Używaj bezpośredniego TLS/SSL (zwykle port 465)",
+    "emailSendingResponsibility": "Konfiguracja jest dobrowolna. DocFlow używa podanych danych wyłącznie do wysyłki wiadomości z Twojego konta. Użytkownik odpowiada za poprawność konfiguracji i sposób korzystania z wysyłki. Hasło jest przechowywane w postaci zaszyfrowanej.",
+    "saveEmailSettings": "Zapisz konfigurację",
+    "emailSettingsSaved": "Konfiguracja e-mail została zapisana.",
+    "emailSettingsSaveError": "Nie udało się zapisać konfiguracji e-mail.",
+    "emailSettingsInvalid": "Uzupełnij poprawnie wymagane dane SMTP.",
+    "emailPasswordRequired": "Przy pierwszej konfiguracji podaj hasło SMTP.",
+    "emailSettingsDisconnect": "Usuń konfigurację",
+    "emailSettingsDisconnectTitle": "Usunąć konfigurację e-mail?",
+    "emailSettingsDisconnectMessage": "Zapisane dane SMTP zostaną trwale usunięte z DocFlow.",
+    "emailSettingsDisconnected": "Konfiguracja e-mail została usunięta.",
+    "emailSetupGuideTitle": "Jak skonfigurować wysyłkę?",
+    "emailSetupGuideServer": "Wpisz serwer SMTP i port podany przez dostawcę Twojej poczty.",
+    "emailSetupGuideCredentials": "Podaj login oraz hasło SMTP. Niektórzy dostawcy, np. Gmail, wymagają hasła aplikacji zamiast zwykłego hasła do konta.",
+    "emailSetupGuideSender": "Podaj adres i opcjonalną nazwę nadawcy, które będą używane przy wysyłce.",
+    "emailSetupGuideProvider": "Ustawienia SMTP znajdziesz w dokumentacji swojego dostawcy poczty. DocFlow nie zmienia ustawień Twojego konta pocztowego."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -560,7 +607,7 @@
       },
       "email": {
         "question": "Czy mogę użyć szablonu dokumentu jako e-maila?",
-        "answer": "Tak. Ten sam szablon może służyć do utworzenia PDF-a lub sformatowanej wiadomości e-mail. Po uzupełnieniu zmiennych skopiuj temat i treść wiadomości, a następnie wklej je do swojego klienta pocztowego. Szablon może mieć również opcjonalny temat e-maila ze zmiennymi."
+        "answer": "Tak. Na liście Dokumentów wybierz „Przygotuj e-mail”, wskaż dowolny szablon i uzupełnij jego zmienne. Możesz podać opcjonalny temat, a następnie skopiować sformatowaną wiadomość do Gmaila, Outlooka lub innego klienta. Bezpośrednia wysyłka wymaga dobrowolnej konfiguracji własnego konta e-mail w Ustawieniach."
       }
     }
   }

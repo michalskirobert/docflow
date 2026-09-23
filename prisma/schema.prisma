@@ -21,6 +21,22 @@ model User {
   lastName           String
   verificationTokens EmailVerificationToken[]
   memberships        Membership[]
+  emailSettings      UserEmailSettings?
+}
+
+model UserEmailSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  host              String
+  port              Int      @default(587)
+  secure            Boolean  @default(false)
+  username          String
+  passwordEncrypted String
+  fromEmail         String
+  fromName          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EmailVerificationToken {

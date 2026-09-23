@@ -1,6 +1,6 @@
 "use client";
 
-import { FilePlus2 } from "lucide-react";
+import { FilePlus2, MailPlus } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -21,9 +21,14 @@ export default function DocumentList() {
       onQueryChange={setQ}
       onSortChange={setSort}
       action={
-        <Link className="btn" href="/documents/new">
-          <FilePlus2 size={18} /> {t("newDocument")}
-        </Link>
+        <div className="document-create-actions">
+          <Link className="btn secondary" href="/documents/email">
+            <MailPlus size={18} /> {t("prepareEmail")}
+          </Link>
+          <Link className="btn" href="/documents/new">
+            <FilePlus2 size={18} /> {t("newDocument")}
+          </Link>
+        </div>
       }
     />
   );

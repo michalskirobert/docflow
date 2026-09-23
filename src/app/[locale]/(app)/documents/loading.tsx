@@ -19,6 +19,7 @@ export default function DocumentsLoading() {
           <span className="skeleton-line wide" />
           <span className="skeleton-line short" />
           <span className="skeleton-line short" />
+          <span className="skeleton-line short" />
         </div>
         <ListSkeleton rows={5} />
       </section>

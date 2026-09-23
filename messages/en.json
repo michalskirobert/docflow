@@ -243,7 +243,29 @@
     "emailCopied": "Email body copied.",
     "emailSubjectCopied": "Email subject copied.",
     "emailCopyError": "Could not copy the email.",
-    "emailRenderError": "Could not prepare the email content."
+    "emailRenderError": "Could not prepare the email content.",
+    "prepareEmail": "Prepare email",
+    "prepareEmailTitle": "Prepare email",
+    "prepareEmailDescription": "Choose a template, complete its fields and prepare a formatted message for your email client.",
+    "emailSubject": "Message subject",
+    "emailSubjectPlaceholder": "E.g. Order confirmation 123/2026",
+    "emailSubjectOptional": "Optional. If left empty, the template name will be used.",
+    "preparingEmail": "Preparing…",
+    "sendEmail": "Send email",
+    "sendEmailSetupRequired": "Configure email sending in Settings first.",
+    "sendEmailSetupHint": "Direct sending will be available after you voluntarily configure your own email account in Settings. Copying a message requires no configuration.",
+    "recipientEmail": "Recipient email",
+    "recipientEmailPlaceholder": "recipient@example.com",
+    "recipientEmailHelp": "Required only when sending directly from DocFlow.",
+    "recipientEmailRequired": "Enter a valid recipient email address.",
+    "sendingEmail": "Sending…",
+    "emailSent": "Email sent.",
+    "emailSendError": "Could not send the email. Check your email account configuration.",
+    "emailSubjectSetupPlaceholder": "Available after configuring email sending",
+    "emailSubjectSetupHelp": "The subject is used only when sending directly from DocFlow. Configure your email account in Settings to enable it.",
+    "emailSetupNoticeTitle": "Want to send directly from DocFlow?",
+    "emailSetupNoticeDescription": "Optionally configure your own SMTP account in Settings. Without it, you can still copy the prepared content and paste it into your email client.",
+    "openEmailSettings": "Open email settings"
   },
   "settings": {
     "title": "Settings",
@@ -331,7 +353,32 @@
     "themeLight": "Light",
     "themeLightHelp": "Always use the light appearance.",
     "themeDark": "Dark",
-    "themeDarkHelp": "Always use the dark appearance."
+    "themeDarkHelp": "Always use the dark appearance.",
+    "emailSending": "Email sending",
+    "emailSendingHelp": "Optionally connect your own SMTP account to send prepared messages directly from DocFlow.",
+    "smtpHost": "SMTP server",
+    "smtpPort": "SMTP port",
+    "smtpUsername": "SMTP username",
+    "smtpPassword": "Password / app password",
+    "smtpPasswordKeep": "Leave blank to keep the current password",
+    "senderEmail": "Sender email",
+    "senderName": "Sender name",
+    "smtpSecure": "Use direct TLS/SSL (usually port 465)",
+    "emailSendingResponsibility": "Configuration is optional. DocFlow uses these credentials only to send messages from your account. You are responsible for the configuration and use of sending. The password is stored encrypted.",
+    "saveEmailSettings": "Save configuration",
+    "emailSettingsSaved": "Email configuration saved.",
+    "emailSettingsSaveError": "Could not save the email configuration.",
+    "emailSettingsInvalid": "Complete the required SMTP details correctly.",
+    "emailPasswordRequired": "Enter an SMTP password when configuring email for the first time.",
+    "emailSettingsDisconnect": "Remove configuration",
+    "emailSettingsDisconnectTitle": "Remove email configuration?",
+    "emailSettingsDisconnectMessage": "Saved SMTP credentials will be permanently removed from DocFlow.",
+    "emailSettingsDisconnected": "Email configuration removed.",
+    "emailSetupGuideTitle": "How to configure sending",
+    "emailSetupGuideServer": "Enter the SMTP server and port provided by your email provider.",
+    "emailSetupGuideCredentials": "Enter your SMTP username and password. Some providers, such as Gmail, require an app password instead of your normal account password.",
+    "emailSetupGuideSender": "Enter the sender address and optional sender name that will be used for outgoing messages.",
+    "emailSetupGuideProvider": "You can find the SMTP settings in your email provider documentation. DocFlow does not change your email account settings."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -560,7 +607,7 @@
       },
       "email": {
         "question": "Can I use a document template as an email?",
-        "answer": "Yes. The same template can be used to create a PDF or a formatted email. After completing the variables, copy the subject and message body and paste them into your email client. A template can also define an optional email subject with variables."
+        "answer": "Yes. From Documents choose “Prepare email”, select any template and complete its variables. You can enter an optional subject and copy the formatted message into Gmail, Outlook or another email client. Direct sending requires voluntarily configuring your own email account in Settings."
       }
     }
   }
