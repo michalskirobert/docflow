@@ -281,19 +281,23 @@ export default function SettingsPanel() {
                       >
                         {payment.status}
                       </span>
-                      {payment.status === "CANCELED" && payment.provider === "PAYU" && (
-                        <button
-                          type="button"
-                          className="btn secondary compact"
-                          disabled={start.isPending}
-                          onClick={async () => {
-                            const result = await start.mutateAsync({ paymentMethod: "PAYU" });
-                            if (result.redirectUri) window.location.assign(result.redirectUri);
-                          }}
-                        >
-                          {t("payAgain")}
-                        </button>
-                      )}
+                      {payment.status === "CANCELED" &&
+                        payment.provider === "PAYU" && (
+                          <button
+                            type="button"
+                            className="btn secondary compact"
+                            disabled={start.isPending}
+                            onClick={async () => {
+                              const result = await start.mutateAsync({
+                                paymentMethod: "PAYU",
+                              });
+                              if (result.redirectUri)
+                                window.location.assign(result.redirectUri);
+                            }}
+                          >
+                            {t("payAgain")}
+                          </button>
+                        )}
                     </div>
                   </div>
                 ))

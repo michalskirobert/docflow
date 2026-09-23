@@ -395,7 +395,10 @@ export default function DocumentGenerator({
                 <button
                   className="btn email-send-button"
                   type="button"
-                  disabled={sendEmailMutation.isPending || !emailSettings.data?.configured}
+                  disabled={
+                    sendEmailMutation.isPending ||
+                    !emailSettings.data?.configured
+                  }
                   onClick={() => void sendPreparedEmail()}
                 >
                   {sendEmailMutation.isPending ? (
@@ -403,7 +406,9 @@ export default function DocumentGenerator({
                   ) : (
                     <Send size={17} />
                   )}
-                  {sendEmailMutation.isPending ? t("sendingEmail") : t("sendEmail")}
+                  {sendEmailMutation.isPending
+                    ? t("sendingEmail")
+                    : t("sendEmail")}
                 </button>
                 {!emailSettings.data?.configured && (
                   <HelpTooltip
@@ -627,7 +632,6 @@ export default function DocumentGenerator({
                 </div>
               </div>
             )}
-
           </>
         )}
       </section>

@@ -763,7 +763,6 @@
   }
 }
 
-
 .email-header-actions {
   display: flex;
   align-items: center;
@@ -784,13 +783,16 @@
 }
 
 @media (max-width: 640px) {
-  .document-generator-shell .document-sticky-actions:has(.email-header-actions) {
+  .document-generator-shell
+    .document-sticky-actions:has(.email-header-actions) {
     display: grid;
     grid-template-columns: 1fr;
     align-items: stretch;
   }
 
-  .document-generator-shell .document-sticky-actions:has(.email-header-actions) > .btn.secondary {
+  .document-generator-shell
+    .document-sticky-actions:has(.email-header-actions)
+    > .btn.secondary {
     width: fit-content;
     min-width: 0;
     justify-self: start;
