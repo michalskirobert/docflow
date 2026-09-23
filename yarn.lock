@@ -3813,6 +3813,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"heic2any@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "heic2any@npm:0.0.4"
+  checksum: 10c0/36a22e1df08de088322ac018d8e5de24911f93d6c2d8b3bd2ea9baeeb8630c031bc1eb9eaa10d4c6c3b4780ed3410e7eb0283ffd3dfb441e370bec8634003c43
+  languageName: node
+  linkType: hard
+
 "hermes-estree@npm:0.25.1":
   version: 0.25.1
   resolution: "hermes-estree@npm:0.25.1"
@@ -6234,10 +6241,3 @@ __metadata:
   checksum: 10c0/32eb6c5e98becbe045675b2141c3611451c16ba567f9779231d79af41c4d651ca1c22f154aef7e6c6e77b929f23e43f1154ca05b82e119e922353725d6776af5
   languageName: node
   linkType: hard
-
-"heic2any@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "heic2any@npm:0.0.4"
-  languageName: node
-  linkType: hard
-

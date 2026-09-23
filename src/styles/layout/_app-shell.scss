@@ -1314,3 +1314,82 @@ body {
   background: color-mix(in srgb, #6366f1 16%, var(--surface-muted));
   color: #c7d2fe;
 }
+
+/* Immediate route feedback. The previous page must never look frozen while
+   App Router waits for an RSC payload, data or a route chunk. */
+.main {
+  position: relative;
+}
+
+.route-transition {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  min-height: 100%;
+  padding: inherit;
+  background: var(--background);
+  cursor: progress;
+}
+
+.route-transition-progress {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 72%;
+  height: 3px;
+  background: var(--primary);
+  transform-origin: left;
+  animation: route-progress 0.9s ease-in-out infinite alternate;
+}
+
+.route-transition-skeleton,
+.app-route-skeleton {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+}
+
+.route-transition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.route-card {
+  display: block;
+  min-height: 150px;
+}
+
+.route-title {
+  display: block;
+  width: min(360px, 58%);
+  height: 34px;
+}
+
+.route-subtitle {
+  display: block;
+  width: min(560px, 82%);
+}
+
+@keyframes route-progress {
+  from {
+    transform: scaleX(0.22);
+    opacity: 0.7;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 760px) {
+  .route-transition-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .route-card {
+    min-height: 112px;
+  }
+}
