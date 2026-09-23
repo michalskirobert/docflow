@@ -235,7 +235,15 @@
     "unsavedChangesLeave": "Leave",
     "unsavedChangesStay": "Stay",
     "clearValue": "Clear value",
-    "processingImage": "Processing and optimizing image…"
+    "processingImage": "Processing and optimizing image…",
+    "emailExportTitle": "Email",
+    "emailExportDescription": "Use the same template as a formatted email. Paste the content into Gmail, Outlook, or another email client.",
+    "copyEmail": "Copy email body",
+    "copyEmailSubject": "Copy subject",
+    "emailCopied": "Email body copied.",
+    "emailSubjectCopied": "Email subject copied.",
+    "emailCopyError": "Could not copy the email.",
+    "emailRenderError": "Could not prepare the email content."
   },
   "settings": {
     "title": "Settings",
@@ -489,7 +497,10 @@
     "templateDetails": "Template details",
     "editTemplateDetails": "Edit name and description",
     "done": "Done",
-    "processingImage": "Processing and optimizing image…"
+    "processingImage": "Processing and optimizing image…",
+    "emailSubject": "Email subject",
+    "emailSubjectPlaceholder": "e.g. Order confirmation {{OrderNumber}}",
+    "emailSubjectHelp": "Optional subject used when exporting the template as an email. Variables are supported. If empty, the template name is used."
   },
   "help": {
     "title": "Help",
@@ -546,6 +557,10 @@
       "account": {
         "question": "How do I change account details or my password?",
         "answer": "Account data can be edited in Account, while preferences and account security are available from your profile sections."
+      },
+      "email": {
+        "question": "Can I use a document template as an email?",
+        "answer": "Yes. The same template can be used to create a PDF or a formatted email. After completing the variables, copy the subject and message body and paste them into your email client. A template can also define an optional email subject with variables."
       }
     }
   }

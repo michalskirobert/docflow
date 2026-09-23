@@ -117,15 +117,19 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
+  const [emailSubject, setEmailSubject] = useState(
+    template?.emailSubject ?? "",
+  );
   const [editingName, setEditingName] = useState(false);
   const [mobileMetadataSheet, setMobileMetadataSheet] = useState(false);
   const metadataSnapshot = useRef({
     name: template?.name ?? "",
     description: template?.description ?? "",
+    emailSubject: template?.emailSubject ?? "",
   });
 
   const openMetadataEditor = () => {
-    metadataSnapshot.current = { name, description };
+    metadataSnapshot.current = { name, description, emailSubject };
     setEditingName(true);
     requestAnimationFrame(() => nameRef.current?.focus());
   };
@@ -133,6 +137,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const cancelMetadataEditor = () => {
     setName(metadataSnapshot.current.name);
     setDescription(metadataSnapshot.current.description);
+    setEmailSubject(metadataSnapshot.current.emailSubject);
     setEditingName(false);
   };
 
@@ -1020,6 +1025,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     const payload = {
       name: name.trim(),
       description: description.trim(),
+      emailSubject: emailSubject.trim(),
 
       content: editor.current?.innerHTML ?? "",
 
@@ -1155,6 +1161,19 @@ export function TemplateEditor({ template, onClose }: Props) {
                       />
                     </label>
 
+                    <label className="field">
+                      <span>{t("emailSubject")}</span>
+                      <InputControl
+                        maxLength={250}
+                        value={emailSubject}
+                        onChange={(event) =>
+                          setEmailSubject(event.target.value)
+                        }
+                        placeholder={t("emailSubjectPlaceholder")}
+                      />
+                      <small>{t("emailSubjectHelp")}</small>
+                    </label>
+
                     <div className="editor-header-meta-actions">
                       <button
                         type="button"
@@ -1223,6 +1242,17 @@ export function TemplateEditor({ template, onClose }: Props) {
                       onChange={(event) => setDescription(event.target.value)}
                       placeholder={t("description")}
                     />
+                  </label>
+
+                  <label className="field">
+                    <span>{t("emailSubject")}</span>
+                    <InputControl
+                      maxLength={250}
+                      value={emailSubject}
+                      onChange={(event) => setEmailSubject(event.target.value)}
+                      placeholder={t("emailSubjectPlaceholder")}
+                    />
+                    <small>{t("emailSubjectHelp")}</small>
                   </label>
 
                   <div className="editor-header-meta-actions">

@@ -21,6 +21,15 @@ export const useGenerateDocumentService = () =>
     Document,
     { templateId: string; name: string; data: Record<string, string> }
   >("/documents", [["documents"]]);
+export type RenderedEmail = {
+  subject: string;
+  html: string;
+  text: string;
+};
+export const useRenderEmailService = (templateId: string) =>
+  usePost<RenderedEmail, { data: Record<string, string> }>(
+    `/templates/${templateId}/email`,
+  );
 export const useUpdateDocumentService = (id: string) =>
   usePut<Document, { name: string; data: Record<string, string> }>(
     `/documents/${id}`,

@@ -7,6 +7,7 @@ import { sanitizeTemplateHtml } from "@/server/documents/sanitize-template";
 const schema = z.object({
   name: z.string().min(2).max(250),
   description: z.string().max(400).optional(),
+  emailSubject: z.string().max(250).optional(),
   content: z.string().min(1),
   headerContent: z.string().optional(),
   footerContent: z.string().optional(),

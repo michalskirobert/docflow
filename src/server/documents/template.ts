@@ -102,3 +102,12 @@ export function renderTemplate(
     return escapeHtml(value ?? `{{${key}}}`);
   });
 }
+
+export function renderTextTemplate(
+  content: string,
+  data: Record<string, string | number>,
+) {
+  return content.replace(/{{\s*([\w.]+)\s*}}/g, (_, key) =>
+    String(data[key] ?? `{{${key}}}`),
+  );
+}

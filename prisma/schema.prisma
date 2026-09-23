@@ -137,6 +137,7 @@ model Template {
   organizationId String
   name           String
   description    String?
+  emailSubject   String?
   content        String
   variablesJson  String       @default("[]")
   isExample      Boolean      @default(false)

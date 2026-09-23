@@ -235,7 +235,15 @@
     "unsavedChangesLeave": "Keluar",
     "unsavedChangesStay": "Tetap di sini",
     "clearValue": "Hapus nilai",
-    "processingImage": "Memproses dan mengoptimalkan gambar…"
+    "processingImage": "Memproses dan mengoptimalkan gambar…",
+    "emailExportTitle": "Email",
+    "emailExportDescription": "Gunakan template yang sama sebagai email berformat. Tempelkan isinya ke Gmail, Outlook, atau aplikasi email lainnya.",
+    "copyEmail": "Salin isi email",
+    "copyEmailSubject": "Salin subjek",
+    "emailCopied": "Isi email berhasil disalin.",
+    "emailSubjectCopied": "Subjek email berhasil disalin.",
+    "emailCopyError": "Email tidak dapat disalin.",
+    "emailRenderError": "Isi email tidak dapat disiapkan."
   },
   "settings": {
     "title": "Pengaturan",
@@ -489,7 +497,10 @@
     "templateDetails": "Detail template",
     "editTemplateDetails": "Edit nama dan deskripsi",
     "done": "Selesai",
-    "processingImage": "Memproses dan mengoptimalkan gambar…"
+    "processingImage": "Memproses dan mengoptimalkan gambar…",
+    "emailSubject": "Subjek email",
+    "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan {{NomorPesanan}}",
+    "emailSubjectHelp": "Subjek opsional saat template digunakan sebagai email. Variabel dapat digunakan. Jika kosong, nama template akan digunakan."
   },
   "help": {
     "title": "Bantuan",
@@ -546,6 +557,10 @@
       "account": {
         "question": "Bagaimana mengubah data akun atau kata sandi?",
         "answer": "Data akun dapat diedit di bagian Akun, sedangkan preferensi dan keamanan tersedia melalui bagian profil."
+      },
+      "email": {
+        "question": "Bisakah template dokumen digunakan sebagai email?",
+        "answer": "Ya. Template yang sama dapat digunakan untuk membuat PDF atau email berformat. Setelah variabel diisi, salin subjek dan isi pesan lalu tempelkan ke aplikasi email Anda. Template juga dapat memiliki subjek email opsional dengan variabel."
       }
     }
   }

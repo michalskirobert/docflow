@@ -4,6 +4,7 @@ import type { Template, TemplateVariable } from "./types";
 export type TemplateInput = {
   name: string;
   description?: string;
+  emailSubject?: string;
   content: string;
   headerContent?: string;
   footerContent?: string;

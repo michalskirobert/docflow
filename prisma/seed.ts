@@ -70,6 +70,7 @@ async function main() {
 
       const data = {
         description: template.description,
+        emailSubject: "emailSubject" in template ? template.emailSubject : null,
         content: template.content,
         variablesJson: JSON.stringify(template.variables),
         isExample: true,

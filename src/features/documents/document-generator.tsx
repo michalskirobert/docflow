@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InputControl } from "@/components/shared/form";
-import { ArrowLeft, LoaderCircle, Save, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Clipboard,
+  Copy,
+  LoaderCircle,
+  Mail,
+  Save,
+  Sparkles,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -17,6 +25,7 @@ import {
   useDocumentService,
   useDocumentTemplatesService,
   useGenerateDocumentService,
+  useRenderEmailService,
   useUpdateDocumentService,
 } from "./service";
 
@@ -79,6 +88,7 @@ export default function DocumentGenerator({
   const [initialized, setInitialized] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const emailMutation = useRenderEmailService(templateId);
 
   const documentNameRef = useRef<HTMLInputElement>(null);
 
@@ -132,6 +142,77 @@ export default function DocumentGenerator({
 
   useUnsavedChanges(dirty && !isRedirecting, confirmLeave);
 
+  const validateValues = () => {
+    const nextErrors = Object.fromEntries(
+      variables
+        .map((variable) => [
+          variable.name,
+          validateVariable(variable, values[variable.name] ?? ""),
+        ])
+        .filter(([, error]) => error),
+    );
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length) {
+      const first = variables.find((variable) => nextErrors[variable.name]);
+      requestAnimationFrame(() => {
+        const element = first
+          ? document.getElementById(
+              `document-variable-${first.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`,
+            )
+          : null;
+        element?.scrollIntoView({ behavior: "smooth", block: "center" });
+        element?.focus();
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const renderEmail = async () => {
+    if (!selected || !validateValues()) return null;
+    try {
+      return await emailMutation.mutateAsync({ data: values });
+    } catch {
+      notify(t("emailRenderError"), "error");
+      return null;
+    }
+  };
+
+  const copyEmail = async () => {
+    const email = await renderEmail();
+    if (!email) return;
+
+    try {
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/html": new Blob([email.html], { type: "text/html" }),
+            "text/plain": new Blob([email.text], { type: "text/plain" }),
+          }),
+        ]);
+      } else {
+        await navigator.clipboard.writeText(email.text);
+      }
+      notify(t("emailCopied"), "success");
+    } catch {
+      notify(t("emailCopyError"), "error");
+    }
+  };
+
+  const copyEmailSubject = async () => {
+    const email = await renderEmail();
+    if (!email) return;
+    try {
+      await navigator.clipboard.writeText(email.subject);
+      notify(t("emailSubjectCopied"), "success");
+    } catch {
+      notify(t("emailCopyError"), "error");
+    }
+  };
+
   const save = () => {
     if (!selected) return;
 
@@ -154,37 +235,7 @@ export default function DocumentGenerator({
       return;
     }
 
-    const nextErrors = Object.fromEntries(
-      variables
-        .map((variable) => [
-          variable.name,
-          validateVariable(variable, values[variable.name] ?? ""),
-        ])
-        .filter(([, error]) => error),
-    );
-
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length) {
-      const first = variables.find((variable) => nextErrors[variable.name]);
-
-      requestAnimationFrame(() => {
-        const element = first
-          ? document.getElementById(
-              `document-variable-${first.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`,
-            )
-          : null;
-
-        element?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-
-        element?.focus();
-      });
-
-      return;
-    }
+    if (!validateValues()) return;
 
     if (isEditing && documentQuery.data) {
       updateMutation.mutate(
@@ -264,7 +315,10 @@ export default function DocumentGenerator({
   }
 
   const pending =
-    generateMutation.isPending || updateMutation.isPending || isRedirecting;
+    generateMutation.isPending ||
+    updateMutation.isPending ||
+    emailMutation.isPending ||
+    isRedirecting;
 
   return (
     <div className="document-generator-shell pending-form" aria-busy={pending}>
@@ -413,6 +467,38 @@ export default function DocumentGenerator({
             }}
           />
         ))}
+
+        {selected && (
+          <div className="card email-export-card">
+            <div className="section-heading">
+              <Mail size={20} />
+              <div>
+                <h3>{t("emailExportTitle")}</h3>
+                <p>{t("emailExportDescription")}</p>
+              </div>
+            </div>
+            <div className="form-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={pending}
+                onClick={() => void copyEmailSubject()}
+              >
+                <Copy size={17} />
+                {t("copyEmailSubject")}
+              </button>
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={pending}
+                onClick={() => void copyEmail()}
+              >
+                <Clipboard size={17} />
+                {t("copyEmail")}
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

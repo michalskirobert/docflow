@@ -235,7 +235,15 @@
     "unsavedChangesLeave": "Opuść",
     "unsavedChangesStay": "Zostań",
     "clearValue": "Wyczyść wartość",
-    "processingImage": "Przetwarzanie i optymalizacja obrazu…"
+    "processingImage": "Przetwarzanie i optymalizacja obrazu…",
+    "emailExportTitle": "E-mail",
+    "emailExportDescription": "Użyj tego samego szablonu jako sformatowanej wiadomości e-mail. Treść możesz wkleić do Gmaila, Outlooka lub innego klienta pocztowego.",
+    "copyEmail": "Kopiuj treść e-maila",
+    "copyEmailSubject": "Kopiuj temat",
+    "emailCopied": "Treść e-maila została skopiowana.",
+    "emailSubjectCopied": "Temat e-maila został skopiowany.",
+    "emailCopyError": "Nie udało się skopiować e-maila.",
+    "emailRenderError": "Nie udało się przygotować treści e-maila."
   },
   "settings": {
     "title": "Ustawienia",
@@ -489,7 +497,10 @@
     "templateDetails": "Szczegóły szablonu",
     "editTemplateDetails": "Edytuj nazwę i opis",
     "done": "Gotowe",
-    "processingImage": "Przetwarzanie i optymalizacja obrazu…"
+    "processingImage": "Przetwarzanie i optymalizacja obrazu…",
+    "emailSubject": "Temat e-maila",
+    "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia {{NumerZamowienia}}",
+    "emailSubjectHelp": "Opcjonalny temat używany przy eksporcie szablonu do e-maila. Możesz używać zmiennych. Gdy pole jest puste, użyta zostanie nazwa szablonu."
   },
   "help": {
     "title": "Pomoc",
@@ -546,6 +557,10 @@
       "account": {
         "question": "Jak zmienić dane konta lub hasło?",
         "answer": "Dane konta możesz edytować w sekcji Konto, a ustawienia i bezpieczeństwo konta są dostępne w odpowiednich sekcjach profilu."
+      },
+      "email": {
+        "question": "Czy mogę użyć szablonu dokumentu jako e-maila?",
+        "answer": "Tak. Ten sam szablon może służyć do utworzenia PDF-a lub sformatowanej wiadomości e-mail. Po uzupełnieniu zmiennych skopiuj temat i treść wiadomości, a następnie wklej je do swojego klienta pocztowego. Szablon może mieć również opcjonalny temat e-maila ze zmiennymi."
       }
     }
   }

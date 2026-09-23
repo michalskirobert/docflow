@@ -35,6 +35,7 @@ export type Template = {
   id: string;
   name: string;
   description: string | null;
+  emailSubject?: string | null;
   content: string;
   variablesJson: string;
   isExample: boolean;

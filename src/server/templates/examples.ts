@@ -319,6 +319,137 @@ export const EXAMPLE_TEMPLATES = [
       { name: "Kontakt", label: "Telefon / e-mail", type: "text" },
     ],
   },
+  {
+    name: "E-mail biznesowy",
+    description:
+      "Uniwersalny szablon profesjonalnej wiadomości e-mail z odbiorcą, treścią i podpisem.",
+    emailSubject: "{{Temat}}",
+    content: `<p>Dzień dobry {{Odbiorca}},</p><p>{{Wiadomosc}}</p><p>Pozdrawiam,<br><strong>{{Nadawca}}</strong><br>{{Firma}}<br>{{Kontakt}}</p>`,
+    variables: [
+      {
+        name: "Temat",
+        label: "Temat wiadomości",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Odbiorca",
+        label: "Imię / nazwa odbiorcy",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Wiadomosc",
+        label: "Treść wiadomości",
+        type: "text",
+        required: true,
+      },
+      { name: "Nadawca", label: "Nadawca", type: "text", required: true },
+      { name: "Firma", label: "Firma", type: "text" },
+      { name: "Kontakt", label: "Telefon / e-mail", type: "text" },
+    ],
+  },
+  {
+    name: "Przypomnienie o płatności",
+    description:
+      "Gotowy e-mail z uprzejmym przypomnieniem o terminie płatności faktury.",
+    emailSubject: "Przypomnienie o płatności – {{NumerFaktury}}",
+    content: `<p>Dzień dobry {{Odbiorca}},</p><p>uprzejmie przypominamy o płatności za fakturę <strong>{{NumerFaktury}}</strong> na kwotę <strong>{{Kwota}} PLN</strong>, której termin płatności przypada na {{TerminPlatnosci}}.</p><p>Jeżeli płatność została już zrealizowana, prosimy zignorować tę wiadomość.</p><p>Pozdrawiam,<br><strong>{{Nadawca}}</strong><br>{{Firma}}</p>`,
+    variables: [
+      {
+        name: "Odbiorca",
+        label: "Imię / nazwa odbiorcy",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "NumerFaktury",
+        label: "Numer faktury",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Kwota",
+        label: "Kwota",
+        type: "number",
+        decimalPlaces: 2,
+        decimalSeparator: ",",
+        thousandsSeparator: "space",
+        required: true,
+      },
+      {
+        name: "TerminPlatnosci",
+        label: "Termin płatności",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      { name: "Nadawca", label: "Nadawca", type: "text", required: true },
+      { name: "Firma", label: "Firma", type: "text" },
+    ],
+  },
+  {
+    name: "Podsumowanie spotkania",
+    description:
+      "E-mail follow-up po spotkaniu z podsumowaniem ustaleń i kolejnymi krokami.",
+    emailSubject: "Podsumowanie spotkania – {{TematSpotkania}}",
+    content: `<p>Dzień dobry {{Odbiorca}},</p><p>dziękuję za spotkanie dotyczące <strong>{{TematSpotkania}}</strong>.</p><p><strong>Najważniejsze ustalenia:</strong><br>{{Ustalenia}}</p><p><strong>Kolejne kroki:</strong><br>{{KolejneKroki}}</p><p>W razie pytań pozostaję do dyspozycji.</p><p>Pozdrawiam,<br><strong>{{Nadawca}}</strong></p>`,
+    variables: [
+      { name: "Odbiorca", label: "Odbiorca", type: "text", required: true },
+      {
+        name: "TematSpotkania",
+        label: "Temat spotkania",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Ustalenia",
+        label: "Najważniejsze ustalenia",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "KolejneKroki",
+        label: "Kolejne kroki",
+        type: "text",
+        required: true,
+      },
+      { name: "Nadawca", label: "Nadawca", type: "text", required: true },
+    ],
+  },
+  {
+    name: "Potwierdzenie zamówienia",
+    description:
+      "E-mail potwierdzający przyjęcie zamówienia z numerem, wartością i przewidywanym terminem realizacji.",
+    emailSubject: "Potwierdzenie zamówienia {{NumerZamowienia}}",
+    content: `<p>Dzień dobry {{Odbiorca}},</p><p>potwierdzamy przyjęcie zamówienia <strong>{{NumerZamowienia}}</strong>.</p><p>Wartość zamówienia: <strong>{{Kwota}} PLN</strong><br>Przewidywany termin realizacji: {{TerminRealizacji}}</p><p>Dziękujemy za zamówienie.</p><p>Pozdrawiam,<br><strong>{{Nadawca}}</strong><br>{{Firma}}</p>`,
+    variables: [
+      { name: "Odbiorca", label: "Odbiorca", type: "text", required: true },
+      {
+        name: "NumerZamowienia",
+        label: "Numer zamówienia",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Kwota",
+        label: "Wartość zamówienia",
+        type: "number",
+        decimalPlaces: 2,
+        decimalSeparator: ",",
+        thousandsSeparator: "space",
+        required: true,
+      },
+      {
+        name: "TerminRealizacji",
+        label: "Termin realizacji",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+      },
+      { name: "Nadawca", label: "Nadawca", type: "text", required: true },
+      { name: "Firma", label: "Firma", type: "text" },
+    ],
+  },
 ] as const;
 
 export function exampleTemplateCreateData(
@@ -328,6 +459,8 @@ export function exampleTemplateCreateData(
     organizationId,
     name: template.name,
     description: template.description,
+    emailSubject:
+      "emailSubject" in template ? template.emailSubject : undefined,
     content: template.content,
     variablesJson: JSON.stringify(template.variables),
     isExample: true,

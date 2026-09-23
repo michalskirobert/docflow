@@ -32,7 +32,11 @@ export function NavigationFeedback() {
       if (!(target instanceof Element)) return;
 
       const anchor = target.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) {
+      if (
+        !anchor ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      ) {
         return;
       }
 
