@@ -5,7 +5,6 @@ import { getSession } from "@/server/auth/session";
 
 import { Footer } from "./footer";
 import { Sidebar } from "./sidebar";
-import { NavigationFeedback } from "./navigation-feedback";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const user = await getSession();
@@ -19,10 +18,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <div className="shell">
         <Sidebar />
         <div className="content-column">
-          <main className="main">
-            <NavigationFeedback />
-            {children}
-          </main>
+          <main className="main">{children}</main>
           <Footer />
         </div>
       </div>
