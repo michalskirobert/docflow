@@ -74,6 +74,7 @@ export function EditorToolbar({
       </button>
       <span />
       <SelectControl
+        className="editor-select editor-select-block"
         onPointerDown={rememberSelection}
         onChange={(e) => cmd("formatBlock", e.target.value)}
         value={state.block}
@@ -88,6 +89,7 @@ export function EditorToolbar({
         <option value="blockquote">{t("quote")}</option>
       </SelectControl>
       <SelectControl
+        className="editor-select editor-select-size"
         value={state.fontSize}
         onPointerDown={rememberSelection}
         onChange={(e) => setPx(e.target.value)}
@@ -101,6 +103,7 @@ export function EditorToolbar({
         ))}
       </SelectControl>
       <SelectControl
+        className="editor-select editor-select-line-height"
         value={state.lineHeight}
         onPointerDown={rememberSelection}
         onChange={(e) => setLineHeight(e.target.value)}

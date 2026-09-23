@@ -291,7 +291,7 @@ body {
   width: 17px;
   height: 17px;
 }
-.editor-toolbar span {
+.editor-toolbar > span {
   width: 1px;
   height: 22px;
   background: var(--border);

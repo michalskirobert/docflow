@@ -142,3 +142,49 @@
     grid-template-columns: 1fr 1fr 42px;
   }
 }
+
+/* Route loader mirrors the FAQ and support form instead of generic cards. */
+.help-route-skeleton .section-heading-skeleton-copy .skeleton-line {
+  display: block;
+  margin: 0;
+}
+.faq-skeleton-item .faq-question {
+  cursor: default;
+}
+.faq-question-skeleton {
+  width: min(360px, 76%);
+  height: 16px;
+  margin: 0;
+}
+.skeleton-chevron {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 5px;
+  background: var(--skeleton-base);
+}
+.faq-answer-skeleton {
+  display: grid;
+  gap: 9px;
+}
+.faq-answer-skeleton .skeleton-line {
+  margin: 0;
+}
+.support-form-skeleton {
+  gap: 16px;
+}
+.skeleton-textarea {
+  height: 174px;
+}
+.support-form-skeleton .captcha-row .skeleton-control {
+  height: 42px;
+}
+.support-hint-skeleton {
+  width: min(310px, 78%);
+  height: 14px;
+  margin: 0;
+}
+.support-submit-skeleton {
+  width: 112px;
+  height: 42px;
+}

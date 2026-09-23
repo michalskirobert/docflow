@@ -344,15 +344,48 @@
 .template-list-actions > .shared-select {
   min-width: 180px;
 }
-.editor-toolbar .shared-select {
+.editor-toolbar .editor-select {
   flex: 0 0 auto;
-  width: auto;
-  min-width: 96px;
+  min-width: 0;
 }
-.editor-toolbar .shared-select-trigger {
+.editor-toolbar .editor-select-block {
+  width: 108px;
+}
+.editor-toolbar .editor-select-size {
+  width: 92px;
+}
+.editor-toolbar .editor-select-line-height {
+  width: 118px;
+}
+.editor-toolbar .editor-select .shared-select-trigger {
+  width: 100%;
+  min-width: 0;
   min-height: 34px;
-  padding: 6px 9px;
+  height: 34px;
+  gap: 7px;
+  padding: 0 9px;
   border-radius: 7px;
+  white-space: nowrap;
+}
+.editor-toolbar .editor-select .shared-select-trigger > span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.editor-toolbar .editor-select .shared-select-options {
+  right: auto;
+  left: 0;
+  width: max-content;
+  min-width: 100%;
+}
+.editor-toolbar .editor-select .shared-select-options button {
+  width: 100%;
+  height: auto;
+  min-height: 34px;
+  padding: 8px 10px;
+  white-space: nowrap;
 }
 
 /* Shared checkbox/radio primitive. Offer/payment cards intentionally keep their card-level layout. */
