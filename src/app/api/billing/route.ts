@@ -12,6 +12,16 @@ const paymentSchema = z.object({
 export async function GET() {
   try {
     const s = await requireSession();
+    const stalePayUThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await prisma.payment.updateMany({
+      where: {
+        organizationId: s.organizationId,
+        provider: "PAYU",
+        status: "PENDING",
+        createdAt: { lt: stalePayUThreshold },
+      },
+      data: { status: "CANCELED" },
+    });
     const [subscription, payments, billingProfile, salesDocuments] =
       await Promise.all([
         prisma.subscription.findUnique({
@@ -111,6 +121,16 @@ export async function POST(request: Request) {
   try {
     const s = await requireSession();
     const body = paymentSchema.parse(await request.json());
+    const stalePayUThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    await prisma.payment.updateMany({
+      where: {
+        organizationId: s.organizationId,
+        provider: "PAYU",
+        status: "PENDING",
+        createdAt: { lt: stalePayUThreshold },
+      },
+      data: { status: "CANCELED" },
+    });
     const existing = await prisma.payment.findFirst({
       where: {
         organizationId: s.organizationId,

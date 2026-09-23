@@ -275,11 +275,26 @@ export default function SettingsPanel() {
                         {payment.provider}
                       </small>
                     </div>
-                    <span
-                      className={`badge ${payment.status === "COMPLETED" ? "success" : "warning"}`}
-                    >
-                      {payment.status}
-                    </span>
+                    <div className="payment-row-actions">
+                      <span
+                        className={`badge ${payment.status === "COMPLETED" ? "success" : payment.status === "CANCELED" ? "muted" : "warning"}`}
+                      >
+                        {payment.status}
+                      </span>
+                      {payment.status === "CANCELED" && payment.provider === "PAYU" && (
+                        <button
+                          type="button"
+                          className="btn secondary compact"
+                          disabled={start.isPending}
+                          onClick={async () => {
+                            const result = await start.mutateAsync({ paymentMethod: "PAYU" });
+                            if (result.redirectUri) window.location.assign(result.redirectUri);
+                          }}
+                        >
+                          {t("payAgain")}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (

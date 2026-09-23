@@ -509,3 +509,28 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* 2.3.1: appearance selector responds to the width of its own card. */
+.settings-card:has(.theme-options) {
+  container-type: inline-size;
+}
+
+@container (max-width: 560px) {
+  .theme-options {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-option {
+    min-height: 72px;
+    padding: 12px 14px;
+  }
+
+  .theme-option > svg {
+    flex: 0 0 auto;
+  }
+
+  .theme-option strong,
+  .theme-option small {
+    overflow-wrap: anywhere;
+  }
+}

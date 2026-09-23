@@ -121,15 +121,17 @@
     "remaining": "Pozostało: {count}",
     "unlimited": "Bez limitu",
     "quickStart": "SZYBKI START",
-    "quickTitle": "Od szablonu do PDF w kilku krokach",
-    "quickDescription": "Zaprojektuj szablon A4, dodaj zmienne, a następnie generuj gotowe dokumenty PDF.",
+    "quickTitle": "Utwórz dokument lub przygotuj e-mail",
+    "quickDescription": "Użyj gotowego szablonu, uzupełnij jego zmienne, a następnie wygeneruj PDF lub przygotuj sformatowany e-mail.",
     "license": "Licencja",
     "annualLicense": "Licencja roczna",
     "freeLicense": "Darmowa licencja",
     "validUntil": "Ważna do {date}",
     "paymentVerification": "Płatność podczas weryfikacji",
     "pendingTitle": "Licencja roczna oczekuje na potwierdzenie płatności",
-    "pendingDescription": "Do czasu potwierdzenia płatności możesz korzystać z darmowej licencji i limitu 10 dokumentów miesięcznie."
+    "pendingDescription": "Do czasu potwierdzenia płatności możesz korzystać z darmowej licencji i limitu 10 dokumentów miesięcznie.",
+    "newDocument": "Nowy dokument",
+    "prepareEmail": "Przygotuj e-mail"
   },
   "templates": {
     "title": "Szablony",
@@ -238,7 +240,7 @@
     "processingImage": "Przetwarzanie i optymalizacja obrazu…",
     "emailExportTitle": "E-mail",
     "emailExportDescription": "Użyj tego samego szablonu jako sformatowanej wiadomości e-mail. Treść możesz wkleić do Gmaila, Outlooka lub innego klienta pocztowego.",
-    "copyEmail": "Kopiuj treść e-maila",
+    "copyEmail": "Kopiuj e-mail",
     "copyEmailSubject": "Kopiuj temat",
     "emailCopied": "Treść e-maila została skopiowana.",
     "emailSubjectCopied": "Temat e-maila został skopiowany.",
@@ -378,7 +380,8 @@
     "emailSetupGuideServer": "Wpisz serwer SMTP i port podany przez dostawcę Twojej poczty.",
     "emailSetupGuideCredentials": "Podaj login oraz hasło SMTP. Niektórzy dostawcy, np. Gmail, wymagają hasła aplikacji zamiast zwykłego hasła do konta.",
     "emailSetupGuideSender": "Podaj adres i opcjonalną nazwę nadawcy, które będą używane przy wysyłce.",
-    "emailSetupGuideProvider": "Ustawienia SMTP znajdziesz w dokumentacji swojego dostawcy poczty. DocFlow nie zmienia ustawień Twojego konta pocztowego."
+    "emailSetupGuideProvider": "Ustawienia SMTP znajdziesz w dokumentacji swojego dostawcy poczty. DocFlow nie zmienia ustawień Twojego konta pocztowego.",
+    "payAgain": "Zapłać ponownie"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -547,7 +550,13 @@
     "processingImage": "Przetwarzanie i optymalizacja obrazu…",
     "emailSubject": "Temat e-maila",
     "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia {{NumerZamowienia}}",
-    "emailSubjectHelp": "Opcjonalny temat używany przy eksporcie szablonu do e-maila. Możesz używać zmiennych. Gdy pole jest puste, użyta zostanie nazwa szablonu."
+    "emailSubjectHelp": "Opcjonalny temat używany przy eksporcie szablonu do e-maila. Możesz używać zmiennych. Gdy pole jest puste, użyta zostanie nazwa szablonu.",
+    "variablePlaceholder": "Placeholder",
+    "variablePlaceholderHelp": "Opcjonalna podpowiedź wyświetlana w kontrolce przed wpisaniem wartości. Dla obrazu zastępuje komunikat dodawania pliku.",
+    "variablePlaceholderExample": "Np. Wpisz nazwę klienta",
+    "variableTooltip": "Tooltip / tekst pomocy",
+    "variableTooltipHelp": "Opcjonalna pomoc kontekstowa wyświetlana przy etykiecie pola. Działa przez hover, fokus i dotknięcie.",
+    "variableTooltipExample": "Np. Użyj nazwy widocznej na fakturze"
   },
   "help": {
     "title": "Pomoc",

@@ -121,15 +121,17 @@
     "remaining": "Remaining: {count}",
     "unlimited": "Unlimited",
     "quickStart": "QUICK START",
-    "quickTitle": "From template to PDF in a few steps",
-    "quickDescription": "Design an A4 template, add variables, then generate finished PDF documents.",
+    "quickTitle": "Create a document or prepare an email",
+    "quickDescription": "Use a reusable template, complete its variables, then generate a PDF or prepare a formatted email.",
     "license": "License",
     "annualLicense": "Annual license",
     "freeLicense": "Free license",
     "validUntil": "Valid until {date}",
     "paymentVerification": "Payment under verification",
     "pendingTitle": "Annual license is awaiting payment confirmation",
-    "pendingDescription": "Until payment is confirmed, you can use the Free license with a 10-document monthly limit."
+    "pendingDescription": "Until payment is confirmed, you can use the Free license with a 10-document monthly limit.",
+    "newDocument": "New document",
+    "prepareEmail": "Prepare email"
   },
   "templates": {
     "title": "Templates",
@@ -238,7 +240,7 @@
     "processingImage": "Processing and optimizing image…",
     "emailExportTitle": "Email",
     "emailExportDescription": "Use the same template as a formatted email. Paste the content into Gmail, Outlook, or another email client.",
-    "copyEmail": "Copy email body",
+    "copyEmail": "Copy email",
     "copyEmailSubject": "Copy subject",
     "emailCopied": "Email body copied.",
     "emailSubjectCopied": "Email subject copied.",
@@ -378,7 +380,8 @@
     "emailSetupGuideServer": "Enter the SMTP server and port provided by your email provider.",
     "emailSetupGuideCredentials": "Enter your SMTP username and password. Some providers, such as Gmail, require an app password instead of your normal account password.",
     "emailSetupGuideSender": "Enter the sender address and optional sender name that will be used for outgoing messages.",
-    "emailSetupGuideProvider": "You can find the SMTP settings in your email provider documentation. DocFlow does not change your email account settings."
+    "emailSetupGuideProvider": "You can find the SMTP settings in your email provider documentation. DocFlow does not change your email account settings.",
+    "payAgain": "Pay again"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -547,7 +550,13 @@
     "processingImage": "Processing and optimizing image…",
     "emailSubject": "Email subject",
     "emailSubjectPlaceholder": "e.g. Order confirmation {{OrderNumber}}",
-    "emailSubjectHelp": "Optional subject used when exporting the template as an email. Variables are supported. If empty, the template name is used."
+    "emailSubjectHelp": "Optional subject used when exporting the template as an email. Variables are supported. If empty, the template name is used.",
+    "variablePlaceholder": "Placeholder",
+    "variablePlaceholderHelp": "Optional hint shown inside the control before the user enters a value. For image fields it replaces the upload prompt.",
+    "variablePlaceholderExample": "e.g. Enter customer name",
+    "variableTooltip": "Tooltip / help text",
+    "variableTooltipHelp": "Optional contextual help displayed next to the field label. It is accessible by hover, focus and tap.",
+    "variableTooltipExample": "e.g. Use the name shown on the invoice"
   },
   "help": {
     "title": "Help",

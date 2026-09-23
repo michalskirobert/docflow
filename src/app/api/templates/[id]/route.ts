@@ -17,6 +17,8 @@ const schema = z.object({
       z.object({
         name: z.string(),
         label: z.string().optional(),
+        placeholder: z.string().max(180).optional(),
+        tooltip: z.string().max(300).optional(),
         type: z.enum([
           "text",
           "number",

@@ -13,10 +13,7 @@ export default function HelpLoading() {
           <SectionHeaderSkeleton icon />
           <div className="faq-list">
             {Array.from({ length: 7 }).map((_, index) => (
-              <div
-                className={`faq-item faq-skeleton-item${index === 0 ? " open" : ""}`}
-                key={index}
-              >
+              <div className={`faq-item faq-skeleton-item${index === 0 ? " open" : ""}`} key={index}>
                 <div className="faq-question">
                   <span className="skeleton-line faq-question-skeleton" />
                   <span className="skeleton-chevron" />

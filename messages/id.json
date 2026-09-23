@@ -121,15 +121,17 @@
     "remaining": "Tersisa: {count}",
     "unlimited": "Tanpa batas",
     "quickStart": "MULAI CEPAT",
-    "quickTitle": "Dari template ke PDF dalam beberapa langkah",
-    "quickDescription": "Rancang template A4, tambahkan variabel, lalu buat dokumen PDF siap pakai.",
+    "quickTitle": "Buat dokumen atau siapkan email",
+    "quickDescription": "Gunakan template yang dapat digunakan kembali, lengkapi variabelnya, lalu buat PDF atau siapkan email terformat.",
     "license": "Lisensi",
     "annualLicense": "Lisensi tahunan",
     "freeLicense": "Lisensi gratis",
     "validUntil": "Berlaku hingga {date}",
     "paymentVerification": "Pembayaran sedang diverifikasi",
     "pendingTitle": "Lisensi tahunan menunggu konfirmasi pembayaran",
-    "pendingDescription": "Sampai pembayaran dikonfirmasi, Anda dapat menggunakan lisensi Gratis dengan batas 10 dokumen per bulan."
+    "pendingDescription": "Sampai pembayaran dikonfirmasi, Anda dapat menggunakan lisensi Gratis dengan batas 10 dokumen per bulan.",
+    "newDocument": "Dokumen baru",
+    "prepareEmail": "Siapkan email"
   },
   "templates": {
     "title": "Templat",
@@ -238,7 +240,7 @@
     "processingImage": "Memproses dan mengoptimalkan gambar…",
     "emailExportTitle": "Email",
     "emailExportDescription": "Gunakan template yang sama sebagai email berformat. Tempelkan isinya ke Gmail, Outlook, atau aplikasi email lainnya.",
-    "copyEmail": "Salin isi email",
+    "copyEmail": "Salin email",
     "copyEmailSubject": "Salin subjek",
     "emailCopied": "Isi email berhasil disalin.",
     "emailSubjectCopied": "Subjek email berhasil disalin.",
@@ -378,7 +380,8 @@
     "emailSetupGuideServer": "Masukkan server SMTP dan port yang diberikan oleh penyedia email Anda.",
     "emailSetupGuideCredentials": "Masukkan nama pengguna dan kata sandi SMTP. Beberapa penyedia, seperti Gmail, memerlukan kata sandi aplikasi, bukan kata sandi akun biasa.",
     "emailSetupGuideSender": "Masukkan alamat pengirim dan nama pengirim opsional yang akan digunakan untuk pesan keluar.",
-    "emailSetupGuideProvider": "Pengaturan SMTP tersedia di dokumentasi penyedia email Anda. DocFlow tidak mengubah pengaturan akun email Anda."
+    "emailSetupGuideProvider": "Pengaturan SMTP tersedia di dokumentasi penyedia email Anda. DocFlow tidak mengubah pengaturan akun email Anda.",
+    "payAgain": "Bayar lagi"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -547,7 +550,13 @@
     "processingImage": "Memproses dan mengoptimalkan gambar…",
     "emailSubject": "Subjek email",
     "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan {{NomorPesanan}}",
-    "emailSubjectHelp": "Subjek opsional saat template digunakan sebagai email. Variabel dapat digunakan. Jika kosong, nama template akan digunakan."
+    "emailSubjectHelp": "Subjek opsional saat template digunakan sebagai email. Variabel dapat digunakan. Jika kosong, nama template akan digunakan.",
+    "variablePlaceholder": "Placeholder",
+    "variablePlaceholderHelp": "Petunjuk opsional yang ditampilkan di dalam kontrol sebelum pengguna memasukkan nilai. Untuk bidang gambar, ini menggantikan petunjuk unggah.",
+    "variablePlaceholderExample": "Contoh: Masukkan nama pelanggan",
+    "variableTooltip": "Tooltip / teks bantuan",
+    "variableTooltipHelp": "Bantuan kontekstual opsional yang ditampilkan di samping label bidang. Dapat diakses melalui hover, fokus, dan ketukan.",
+    "variableTooltipExample": "Contoh: Gunakan nama yang tertera pada faktur"
   },
   "help": {
     "title": "Bantuan",

@@ -353,19 +353,13 @@ export default function DocumentGenerator({
     );
   }
 
-  const pending =
-    generateMutation.isPending ||
-    updateMutation.isPending ||
-    emailMutation.isPending ||
-    sendEmailMutation.isPending ||
-    isRedirecting;
+  const documentPending =
+    generateMutation.isPending || updateMutation.isPending || isRedirecting;
+  const pending = isEmailMode ? false : documentPending;
 
   return (
     <div className="document-generator-shell pending-form" aria-busy={pending}>
-      <PendingOverlay
-        active={pending}
-        label={isEmailMode ? t("preparingEmail") : t("saving")}
-      />
+      <PendingOverlay active={documentPending} label={t("saving")} />
       <div className="form-actions document-sticky-actions">
         <button
           className="btn secondary"
@@ -383,28 +377,41 @@ export default function DocumentGenerator({
 
         {selected &&
           (isEmailMode ? (
-            <div className="email-send-action">
+            <div className="email-header-actions">
               <button
-                className="btn email-send-button"
+                className="btn secondary"
                 type="button"
-                disabled={pending || !emailSettings.data?.configured}
-                onClick={() => void sendPreparedEmail()}
+                disabled={emailMutation.isPending}
+                onClick={() => void copyEmail()}
               >
-                {sendEmailMutation.isPending ? (
+                {emailMutation.isPending ? (
                   <LoaderCircle className="spinner" size={17} />
                 ) : (
-                  <Send size={17} />
+                  <Clipboard size={17} />
                 )}
-                {sendEmailMutation.isPending
-                  ? t("sendingEmail")
-                  : t("sendEmail")}
+                {emailMutation.isPending ? t("preparingEmail") : t("copyEmail")}
               </button>
-              {!emailSettings.data?.configured && (
-                <HelpTooltip
-                  text={t("sendEmailSetupRequired")}
-                  label={t("sendEmailSetupRequired")}
-                />
-              )}
+              <div className="email-send-action">
+                <button
+                  className="btn email-send-button"
+                  type="button"
+                  disabled={sendEmailMutation.isPending || !emailSettings.data?.configured}
+                  onClick={() => void sendPreparedEmail()}
+                >
+                  {sendEmailMutation.isPending ? (
+                    <LoaderCircle className="spinner" size={17} />
+                  ) : (
+                    <Send size={17} />
+                  )}
+                  {sendEmailMutation.isPending ? t("sendingEmail") : t("sendEmail")}
+                </button>
+                {!emailSettings.data?.configured && (
+                  <HelpTooltip
+                    text={t("sendEmailSetupRequired")}
+                    label={t("sendEmailSetupRequired")}
+                  />
+                )}
+              </div>
             </div>
           ) : (
             <button
@@ -620,17 +627,7 @@ export default function DocumentGenerator({
                 </div>
               </div>
             )}
-            <div className="email-composer-actions">
-              <button
-                className="btn secondary"
-                type="button"
-                disabled={pending}
-                onClick={() => void copyEmail()}
-              >
-                <Clipboard size={17} />
-                {t("copyEmail")}
-              </button>
-            </div>
+
           </>
         )}
       </section>

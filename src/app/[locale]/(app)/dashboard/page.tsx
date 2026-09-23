@@ -6,6 +6,8 @@ import {
   Layers,
   ShieldCheck,
   Sparkles,
+  Mail,
+  FilePlus2,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -52,6 +54,8 @@ async function DashboardContent() {
   start.setDate(1);
   start.setHours(0, 0, 0, 0);
 
+  const pendingVisibleSince = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
   const [templates, documents, usedThisMonth, pendingPayment, subscription] =
     await Promise.all([
       prisma.template.count({
@@ -71,6 +75,7 @@ async function DashboardContent() {
           organizationId: session.organizationId,
           status: "PENDING",
           plan: "YEARLY",
+          createdAt: { gte: pendingVisibleSince },
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -159,10 +164,24 @@ async function DashboardContent() {
           <p className="muted">{t("pendingDescription")}</p>
         </div>
       )}
-      <div className="card quick-start">
+      <div className="card quick-start quick-start-interactive">
         <span className="eyebrow">{t("quickStart")}</span>
         <h2>{t("quickTitle")}</h2>
         <p className="muted">{t("quickDescription")}</p>
+        <div className="quick-start-actions">
+          <Link href="/documents/new" className="btn">
+            <FilePlus2 size={17} />
+            {t("newDocument")}
+          </Link>
+          <Link href="/documents/email" className="btn secondary">
+            <Mail size={17} />
+            {t("prepareEmail")}
+          </Link>
+          <Link href="/templates" className="btn secondary">
+            <Sparkles size={17} />
+            {t("createTemplate")}
+          </Link>
+        </div>
       </div>
     </>
   );

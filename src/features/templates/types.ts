@@ -3,6 +3,8 @@ export type VariableType =
 export type TemplateVariable = {
   name: string;
   label?: string;
+  placeholder?: string;
+  tooltip?: string;
   type: VariableType;
   required?: boolean;
   requiredMessage?: string;

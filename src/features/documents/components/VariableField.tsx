@@ -4,6 +4,7 @@ import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import { LoaderCircle, Trash2, Upload, X } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 import type { TemplateVariable } from "@/features/templates/types";
 import { parseFormattedNumber } from "@/features/documents/helpers";
 import {
@@ -411,6 +412,7 @@ function VariableSelect({
   disabled,
   invalid,
   onChange,
+  placeholder,
 }: {
   id: string;
   value: string;
@@ -418,6 +420,7 @@ function VariableSelect({
   disabled?: boolean;
   invalid?: boolean;
   onChange: (value: string) => void;
+  placeholder?: string;
   clearLabel: string;
 }) {
   return (
@@ -428,7 +431,7 @@ function VariableSelect({
       aria-invalid={invalid || undefined}
       onChange={(event) => onChange(event.target.value)}
     >
-      <option value="">—</option>
+      <option value="">{placeholder?.trim() || "—"}</option>
       {options.map((option) => (
         <option key={option} value={option}>
           {option}
@@ -495,6 +498,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     <span className="field-label variable-field-label">
       <span>{label}</span>
       <code className="variable-field-token">{`{{${variable.name}}}`}</code>
+      {variable.tooltip && <HelpTooltip text={variable.tooltip} />}
 
       {variable.required && (
         <span className="required" aria-hidden="true">
@@ -517,6 +521,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           id={id}
           value={value}
           options={variable.options ?? []}
+          placeholder={variable.placeholder}
           disabled={variable.locked}
           invalid={Boolean(error)}
           onChange={onChange}
@@ -550,6 +555,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
         <label className="field-label variable-field-label" htmlFor={id}>
           <span>{label}</span>
           <code className="variable-field-token">{`{{${variable.name}}}`}</code>
+          {variable.tooltip && <HelpTooltip text={variable.tooltip} />}
           {variable.required && (
             <span className="required" aria-hidden="true">
               {" "}
@@ -565,7 +571,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             value={formattedValue}
             mask={formatToMask(format)}
             definitions={{ "9": /[0-9]/ }}
-            placeholder={format}
+            placeholder={variable.placeholder?.trim() || format}
             aria-invalid={Boolean(error)}
             disabled={variable.locked}
             onAccept={(nextValue) => {
@@ -666,7 +672,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
             <>
               <Upload />
 
-              <strong>{t("dropImage")}</strong>
+              <strong>{variable.placeholder?.trim() || t("dropImage")}</strong>
 
               <small>{t("imageTypes")}</small>
             </>
@@ -732,6 +738,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           inputMode="decimal"
           disabled={variable.locked}
           value={value}
+          placeholder={variable.placeholder}
           aria-invalid={Boolean(error)}
           onChange={(e) => {
             const nextValue = e.target.value;
@@ -766,7 +773,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
           definitions={{
             "9": /[0-9]/,
           }}
-          placeholder={variable.mask}
+          placeholder={variable.placeholder?.trim() || variable.mask}
           aria-invalid={Boolean(error)}
           disabled={variable.locked}
           onAccept={(nextValue) => onChange(String(nextValue))}
@@ -775,6 +782,7 @@ export function VariableField({ variable, value, error, onChange }: Props) {
         <InputControl
           id={id}
           value={value}
+          placeholder={variable.placeholder}
           aria-invalid={Boolean(error)}
           disabled={variable.locked}
           onChange={(e) => onChange(e.target.value)}

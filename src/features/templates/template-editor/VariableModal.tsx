@@ -45,6 +45,8 @@ export function VariableModal({
     [initial?.name, label],
   );
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
+  const [placeholder, setPlaceholder] = useState(initial?.placeholder ?? "");
+  const [tooltip, setTooltip] = useState(initial?.tooltip ?? "");
   const [hasDefault, setHasDefault] = useState(
     initial?.defaultValue !== undefined ||
       initial?.defaultValueMode === "current",
@@ -112,6 +114,8 @@ export function VariableModal({
     onInsert({
       name: generatedName,
       label: label.trim(),
+      placeholder: placeholder.trim() || undefined,
+      tooltip: tooltip.trim() || undefined,
       type,
       defaultValue: nextDefault,
       defaultValueMode:
@@ -292,6 +296,30 @@ export function VariableModal({
                   <option value="image">{t("typeImage")}</option>
                   <option value="select">{t("typeSelect")}</option>
                 </SelectControl>
+              </label>
+              <label className="field">
+                <span className="field-label-with-help">
+                  {t("variablePlaceholder")}
+                  <HelpTooltip text={t("variablePlaceholderHelp")} />
+                </span>
+                <InputControl
+                  value={placeholder}
+                  maxLength={180}
+                  placeholder={t("variablePlaceholderExample")}
+                  onChange={(e) => setPlaceholder(e.target.value)}
+                />
+              </label>
+              <label className="field">
+                <span className="field-label-with-help">
+                  {t("variableTooltip")}
+                  <HelpTooltip text={t("variableTooltipHelp")} />
+                </span>
+                <InputControl
+                  value={tooltip}
+                  maxLength={300}
+                  placeholder={t("variableTooltipExample")}
+                  onChange={(e) => setTooltip(e.target.value)}
+                />
               </label>
               {type !== "image" && (
                 <label className="field">
