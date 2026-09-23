@@ -463,8 +463,10 @@ body {
   top: 16px;
 }
 .auth-language .language-field {
+  width: 170px;
+  min-width: 170px;
+  max-width: 170px;
   margin: 0;
-  max-width: 150px;
 }
 .auth-language .language-field {
   font-size: 0;
@@ -480,6 +482,13 @@ body {
 .auth-language .shared-select-trigger {
   min-height: 36px;
   padding: 7px 9px;
+}
+.auth-language .shared-select-trigger > span,
+.auth-language .shared-select-options button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .status-card {
   text-align: center;
@@ -751,8 +760,9 @@ body {
     margin: 0 0 18px;
   }
   .auth-language .language-field {
-    width: auto;
+    width: 170px;
     min-width: 170px;
+    max-width: 170px;
     margin: 0;
   }
   .auth-language .field-label {
