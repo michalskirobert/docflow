@@ -37,7 +37,7 @@ export default function SettingsPanel() {
   const remove = useDeleteAccount();
   const start = useStartLicensePayment();
   const change = useChangePaymentMethod();
-  const { confirm } = useFeedback();
+  const { confirm, notify } = useFeedback();
   const [method, setMethod] = useState<"PAYU" | "BANK_TRANSFER">("PAYU");
   const currentPlan = billing.data?.subscription?.plan ?? "FREE";
   const [selectedPlan, setSelectedPlan] = useState<"FREE" | "YEARLY">("FREE");
@@ -288,11 +288,17 @@ export default function SettingsPanel() {
                             className="btn secondary compact"
                             disabled={start.isPending}
                             onClick={async () => {
-                              const result = await start.mutateAsync({
-                                paymentMethod: "PAYU",
-                              });
-                              if (result.redirectUri)
-                                window.location.assign(result.redirectUri);
+                              try {
+                                const result = await start.mutateAsync({
+                                  paymentMethod: "PAYU",
+                                  paymentId: payment.id,
+                                });
+                                if (result.redirectUri) {
+                                  window.location.assign(result.redirectUri);
+                                }
+                              } catch {
+                                notify(t("paymentStartError"), "error");
+                              }
                             }}
                           >
                             {t("payAgain")}

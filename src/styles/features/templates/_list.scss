@@ -289,3 +289,26 @@
     max-height: min(54dvh, 360px);
   }
 }
+
+/* 2.3.1: metadata cards are intentionally preview-free and keep actions aligned. */
+.template-grid {
+  align-items: stretch;
+}
+.template-card {
+  display: flex;
+  min-height: 260px;
+}
+.template-card .template-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.template-card .variable-list {
+  margin-bottom: 16px;
+}
+.template-card .card-actions {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}

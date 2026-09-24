@@ -7,6 +7,7 @@ import {
   FileText,
   LoaderCircle,
   Printer,
+  MailPlus,
   Search,
   Trash2,
   X,
@@ -189,14 +190,7 @@ export function DocumentHistory({
       )}
 
       {previewDocument && (
-        <div
-          className="document-preview-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !previewDownloadLoading)
-              setPreviewDocument(null);
-          }}
-        >
+        <div className="document-preview-backdrop" role="presentation">
           <section
             className="document-preview-modal"
             role="dialog"
@@ -350,6 +344,15 @@ function DocumentRow({
         >
           <Edit3 />
           {t("edit")}
+        </Link>
+
+        <Link
+          href={`/documents/email?documentId=${d.id}`}
+          aria-disabled={actionsDisabled}
+          onClick={(event) => actionsDisabled && event.preventDefault()}
+        >
+          <MailPlus />
+          {t("email")}
         </Link>
 
         <DownloadPdfButton

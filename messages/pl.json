@@ -272,7 +272,12 @@
     "emailPreviewTitle": "Podgląd emaila",
     "emailPreviewDescription": "Sprawdź przygotowaną wiadomość przed skopiowaniem lub wysłaniem.",
     "closeEmailPreview": "Zamknij podgląd",
-    "print": "Drukuj"
+    "print": "Drukuj",
+    "email": "E-mail",
+    "previewError": "Nie udało się przygotować podglądu.",
+    "preparingPreview": "Przygotowywanie podglądu…",
+    "emailFromDocument": "Używasz wygenerowanego dokumentu",
+    "emailFromDocumentDescription": "E-mail użyje zapisanej treści dokumentu „{name}”, dzięki czemu odpowiada wygenerowanej wersji dokumentu."
   },
   "settings": {
     "title": "Ustawienia",
@@ -386,7 +391,8 @@
     "emailSetupGuideCredentials": "Podaj login oraz hasło SMTP. Niektórzy dostawcy, np. Gmail, wymagają hasła aplikacji zamiast zwykłego hasła do konta.",
     "emailSetupGuideSender": "Podaj adres i opcjonalną nazwę nadawcy, które będą używane przy wysyłce.",
     "emailSetupGuideProvider": "Ustawienia SMTP znajdziesz w dokumentacji swojego dostawcy poczty. DocFlow nie zmienia ustawień Twojego konta pocztowego.",
-    "payAgain": "Zapłać ponownie"
+    "payAgain": "Zapłać ponownie",
+    "paymentStartError": "Nie udało się rozpocząć płatności. Spróbuj ponownie."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -624,5 +630,17 @@
         "answer": "Tak. Na liście Dokumentów wybierz „Przygotuj e-mail”, wskaż dowolny szablon i uzupełnij jego zmienne. Możesz podać opcjonalny temat, a następnie skopiować sformatowaną wiadomość do Gmaila, Outlooka lub innego klienta. Bezpośrednia wysyłka wymaga dobrowolnej konfiguracji własnego konta e-mail w Ustawieniach."
       }
     }
+  },
+  "paymentReturn": {
+    "checkingTitle": "Sprawdzamy płatność",
+    "checkingDescription": "Sprawdzamy status płatności w DocFlow. Zwykle trwa to tylko chwilę.",
+    "completedTitle": "Płatność zakończona",
+    "completedDescription": "Płatność została potwierdzona, a status licencji zaktualizowany.",
+    "pendingTitle": "Płatność jest weryfikowana",
+    "pendingDescription": "PayU przekierował Cię do DocFlow, ale końcowe potwierdzenie jeszcze nie dotarło. Możesz bezpiecznie korzystać z aplikacji i sprawdzić status w Moim koncie.",
+    "failedTitle": "Płatność nie została zakończona",
+    "failedDescription": "Płatność została anulowana lub zakończyła się błędem. Możesz rozpocząć ją ponownie w Moim koncie.",
+    "account": "Przejdź do Mojego konta",
+    "dashboard": "Przejdź do pulpitu"
   }
 }

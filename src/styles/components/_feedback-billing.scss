@@ -204,3 +204,39 @@
     animation: none !important;
   }
 }
+
+.payment-return-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--background);
+  color: var(--text);
+}
+.payment-return-card {
+  width: min(520px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 36px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 12%);
+}
+.payment-return-card h1,
+.payment-return-card p {
+  margin: 0;
+}
+.payment-return-card p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.payment-return-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}

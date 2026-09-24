@@ -272,7 +272,12 @@
     "emailPreviewTitle": "Email preview",
     "emailPreviewDescription": "Preview the prepared message before copying or sending it.",
     "closeEmailPreview": "Close preview",
-    "print": "Print"
+    "print": "Print",
+    "email": "Email",
+    "previewError": "Could not prepare the preview.",
+    "preparingPreview": "Preparing preview…",
+    "emailFromDocument": "Using generated document",
+    "emailFromDocumentDescription": "The email will use the saved content of “{name}”, so it matches the generated document snapshot."
   },
   "settings": {
     "title": "Settings",
@@ -386,7 +391,8 @@
     "emailSetupGuideCredentials": "Enter your SMTP username and password. Some providers, such as Gmail, require an app password instead of your normal account password.",
     "emailSetupGuideSender": "Enter the sender address and optional sender name that will be used for outgoing messages.",
     "emailSetupGuideProvider": "You can find the SMTP settings in your email provider documentation. DocFlow does not change your email account settings.",
-    "payAgain": "Pay again"
+    "payAgain": "Pay again",
+    "paymentStartError": "Could not start the payment. Please try again."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -624,5 +630,17 @@
         "answer": "Yes. From Documents choose “Prepare email”, select any template and complete its variables. You can enter an optional subject and copy the formatted message into Gmail, Outlook or another email client. Direct sending requires voluntarily configuring your own email account in Settings."
       }
     }
+  },
+  "paymentReturn": {
+    "checkingTitle": "Checking payment",
+    "checkingDescription": "We are checking the payment status with DocFlow. This usually takes only a moment.",
+    "completedTitle": "Payment completed",
+    "completedDescription": "The payment has been confirmed and your license status has been updated.",
+    "pendingTitle": "Payment is being verified",
+    "pendingDescription": "PayU has returned you to DocFlow, but the final confirmation has not arrived yet. You can safely continue using the application and check the status in My account.",
+    "failedTitle": "Payment not completed",
+    "failedDescription": "The payment was cancelled or failed. You can start it again from My account.",
+    "account": "Go to My account",
+    "dashboard": "Go to dashboard"
   }
 }

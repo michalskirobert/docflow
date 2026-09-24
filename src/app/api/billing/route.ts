@@ -12,7 +12,7 @@ const paymentSchema = z.object({
 export async function GET() {
   try {
     const s = await requireSession();
-    const stalePayUThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const stalePayUThreshold = new Date(Date.now() - 72 * 60 * 60 * 1000);
     await prisma.payment.updateMany({
       where: {
         organizationId: s.organizationId,
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
   try {
     const s = await requireSession();
     const body = paymentSchema.parse(await request.json());
-    const stalePayUThreshold = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const stalePayUThreshold = new Date(Date.now() - 72 * 60 * 60 * 1000);
     await prisma.payment.updateMany({
       where: {
         organizationId: s.organizationId,
@@ -131,6 +131,39 @@ export async function POST(request: Request) {
       },
       data: { status: "CANCELED" },
     });
+    if (body.paymentId) {
+      const previous = await prisma.payment.findFirst({
+        where: {
+          id: body.paymentId,
+          organizationId: s.organizationId,
+          status: "CANCELED",
+          plan: "YEARLY",
+        },
+      });
+      if (!previous) {
+        return NextResponse.json(
+          { message: "Payment cannot be retried" },
+          { status: 409 },
+        );
+      }
+      const retryPayment = await prisma.payment.create({
+        data: {
+          organizationId: s.organizationId,
+          plan: "YEARLY",
+          provider: body.paymentMethod,
+          extOrderId: randomUUID(),
+          netAmount: previous.netAmount,
+          vatAmount: previous.vatAmount,
+          grossAmount: previous.grossAmount,
+          vatRate: previous.vatRate,
+        },
+      });
+      return NextResponse.json(
+        await configurePayment(request, retryPayment.id, body.paymentMethod),
+        { status: 201 },
+      );
+    }
+
     const existing = await prisma.payment.findFirst({
       where: {
         organizationId: s.organizationId,

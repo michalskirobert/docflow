@@ -272,7 +272,12 @@
     "emailPreviewTitle": "Pratinjau email",
     "emailPreviewDescription": "Periksa pesan yang telah disiapkan sebelum menyalin atau mengirimnya.",
     "closeEmailPreview": "Tutup pratinjau",
-    "print": "Cetak"
+    "print": "Cetak",
+    "email": "Email",
+    "previewError": "Tidak dapat menyiapkan pratinjau.",
+    "preparingPreview": "Menyiapkan pratinjau…",
+    "emailFromDocument": "Menggunakan dokumen yang sudah dibuat",
+    "emailFromDocumentDescription": "Email akan menggunakan konten tersimpan dari “{name}”, sehingga sesuai dengan versi dokumen yang dibuat."
   },
   "settings": {
     "title": "Pengaturan",
@@ -386,7 +391,8 @@
     "emailSetupGuideCredentials": "Masukkan nama pengguna dan kata sandi SMTP. Beberapa penyedia, seperti Gmail, memerlukan kata sandi aplikasi, bukan kata sandi akun biasa.",
     "emailSetupGuideSender": "Masukkan alamat pengirim dan nama pengirim opsional yang akan digunakan untuk pesan keluar.",
     "emailSetupGuideProvider": "Pengaturan SMTP tersedia di dokumentasi penyedia email Anda. DocFlow tidak mengubah pengaturan akun email Anda.",
-    "payAgain": "Bayar lagi"
+    "payAgain": "Bayar lagi",
+    "paymentStartError": "Pembayaran tidak dapat dimulai. Silakan coba lagi."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -624,5 +630,17 @@
         "answer": "Ya. Dari Dokumen pilih “Siapkan email”, pilih templat apa pun dan lengkapi variabelnya. Anda dapat memasukkan subjek opsional lalu menyalin pesan berformat ke Gmail, Outlook, atau klien email lain. Pengiriman langsung memerlukan konfigurasi sukarela akun email Anda sendiri di Pengaturan."
       }
     }
+  },
+  "paymentReturn": {
+    "checkingTitle": "Memeriksa pembayaran",
+    "checkingDescription": "Kami sedang memeriksa status pembayaran di DocFlow. Biasanya hanya membutuhkan beberapa saat.",
+    "completedTitle": "Pembayaran selesai",
+    "completedDescription": "Pembayaran telah dikonfirmasi dan status lisensi telah diperbarui.",
+    "pendingTitle": "Pembayaran sedang diverifikasi",
+    "pendingDescription": "PayU telah mengembalikan Anda ke DocFlow, tetapi konfirmasi akhir belum diterima. Anda dapat tetap menggunakan aplikasi dan memeriksa status di Akun saya.",
+    "failedTitle": "Pembayaran belum selesai",
+    "failedDescription": "Pembayaran dibatalkan atau gagal. Anda dapat memulainya kembali dari Akun saya.",
+    "account": "Buka Akun saya",
+    "dashboard": "Buka dasbor"
   }
 }

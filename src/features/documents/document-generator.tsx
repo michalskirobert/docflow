@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Clipboard,
   Eye,
+  FileText,
   LoaderCircle,
   Mail,
   Send,
@@ -27,8 +28,11 @@ import { validateVariable } from "./helpers";
 import {
   useDocumentService,
   useDocumentTemplatesService,
+  useDocumentTemplateService,
   useGenerateDocumentService,
   useRenderEmailService,
+  useRenderDocumentEmailService,
+  useRenderDocumentPreviewService,
   useEmailSettingsStatusService,
   useSendPreparedEmailService,
   useUpdateDocumentService,
@@ -73,15 +77,17 @@ const getInitialTemplateValues = (variablesJson: string) => {
 export default function DocumentGenerator({
   documentId,
   mode = "document",
+  sourceDocumentId,
 }: {
   documentId?: string;
   mode?: "document" | "email";
+  sourceDocumentId?: string;
 }) {
   const t = useTranslations("documents");
   const router = useRouter();
   const { notify, confirm } = useFeedback();
 
-  const templates = useDocumentTemplatesService();
+  const templates = useDocumentTemplatesService(!sourceDocumentId);
   const documentQuery = useDocumentService(documentId ?? "");
   const generateMutation = useGenerateDocumentService();
   const updateMutation = useUpdateDocumentService(documentId ?? "");
@@ -99,10 +105,21 @@ export default function DocumentGenerator({
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [dirty, setDirty] = useState(false);
   const emailMutation = useRenderEmailService(templateId);
+  const documentEmailMutation = useRenderDocumentEmailService(
+    sourceDocumentId ?? "",
+  );
+  const sourceDocumentQuery = useDocumentService(sourceDocumentId ?? "");
+  const sourceTemplateQuery = useDocumentTemplateService(
+    sourceDocumentQuery.data?.templateId ?? "",
+  );
+  const documentPreviewMutation = useRenderDocumentPreviewService(templateId);
   const emailSettings = useEmailSettingsStatusService();
   const sendEmailMutation = useSendPreparedEmailService();
   const [recipientEmail, setRecipientEmail] = useState("");
   const [emailPreview, setEmailPreview] = useState<RenderedEmail | null>(null);
+  const [documentPreviewHtml, setDocumentPreviewHtml] = useState<string | null>(
+    null,
+  );
   const [emailAction, setEmailAction] = useState<"preview" | "copy" | null>(
     null,
   );
@@ -110,10 +127,13 @@ export default function DocumentGenerator({
   const documentNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!emailPreview) return;
+    if (!emailPreview && !documentPreviewHtml) return;
     const previousOverflow = document.body.style.overflow;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setEmailPreview(null);
+      if (event.key === "Escape") {
+        setEmailPreview(null);
+        setDocumentPreviewHtml(null);
+      }
     };
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", closeOnEscape);
@@ -121,7 +141,37 @@ export default function DocumentGenerator({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [emailPreview]);
+  }, [emailPreview, documentPreviewHtml]);
+
+  useEffect(() => {
+    if (
+      !isEmailMode ||
+      !sourceDocumentId ||
+      initialized ||
+      !sourceDocumentQuery.data
+    )
+      return;
+    const source = sourceDocumentQuery.data;
+    setTemplateId(source.templateId ?? "");
+    try {
+      const payload = JSON.parse(source.payloadJson ?? "{}") as Record<
+        string,
+        unknown
+      >;
+      setValues(
+        Object.fromEntries(
+          Object.entries(payload).map(([key, value]) => [
+            key,
+            value == null ? "" : String(value),
+          ]),
+        ),
+      );
+    } catch {
+      setValues({});
+    }
+    setInitialized(true);
+    setDirty(false);
+  }, [initialized, isEmailMode, sourceDocumentId, sourceDocumentQuery.data]);
 
   useEffect(() => {
     if (!isEditing || initialized || !documentQuery.data) return;
@@ -150,9 +200,9 @@ export default function DocumentGenerator({
     setDirty(false);
   }, [documentQuery.data, initialized, isEditing]);
 
-  const selected = templates.data?.find(
-    (template) => template.id === templateId,
-  );
+  const selected = sourceDocumentId
+    ? sourceTemplateQuery.data
+    : templates.data?.find((template) => template.id === templateId);
 
   const variables = useMemo(
     () => (selected ? parseTemplateVariables(selected.variablesJson) : []),
@@ -220,6 +270,12 @@ export default function DocumentGenerator({
   const renderEmail = async () => {
     if (!selected || !validateValues()) return null;
     try {
+      if (sourceDocumentId) {
+        return await documentEmailMutation.mutateAsync({
+          subject: emailSubject.trim(),
+          data: values,
+        });
+      }
       return await emailMutation.mutateAsync({
         data: values,
         subject: emailSubject.trim(),
@@ -288,6 +344,19 @@ export default function DocumentGenerator({
       notify(t("emailSent"), "success");
     } catch {
       notify(t("emailSendError"), "error");
+    }
+  };
+
+  const previewDocument = async () => {
+    if (!selected || documentPreviewMutation.isPending || !validateValues())
+      return;
+    try {
+      const preview = await documentPreviewMutation.mutateAsync({
+        data: values,
+      });
+      setDocumentPreviewHtml(preview.html);
+    } catch {
+      notify(t("previewError"), "error");
     }
   };
 
@@ -367,11 +436,11 @@ export default function DocumentGenerator({
             onClick={() => router.push("/documents")}
           >
             <ArrowLeft />
-            {t("back")}
+            {t("backToDocuments")}
           </button>
           <button className="btn" type="button" disabled>
             <Save />
-            {t("save")}
+            {t("saveDocument")}
           </button>
         </div>
         <section className="card document-form-card document-data-loading">
@@ -477,26 +546,42 @@ export default function DocumentGenerator({
               </div>
             </div>
           ) : (
-            <button
-              className="btn"
-              type="button"
-              disabled={pending}
-              onClick={save}
-            >
-              {pending ? (
-                <LoaderCircle className="spinner" size={17} />
-              ) : isEditing ? (
-                <Save size={17} />
-              ) : (
-                <Sparkles size={17} />
-              )}
-
-              {pending
-                ? t("saving")
-                : isEditing
-                  ? t("saveDocument")
-                  : t("generate")}
-            </button>
+            <div className="document-primary-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={pending || documentPreviewMutation.isPending}
+                onClick={() => void previewDocument()}
+              >
+                {documentPreviewMutation.isPending ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : (
+                  <Eye size={17} />
+                )}
+                {documentPreviewMutation.isPending
+                  ? t("preparingPreview")
+                  : t("preview")}
+              </button>
+              <button
+                className="btn"
+                type="button"
+                disabled={pending}
+                onClick={save}
+              >
+                {pending ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : isEditing ? (
+                  <Save size={17} />
+                ) : (
+                  <Sparkles size={17} />
+                )}
+                {pending
+                  ? t("saving")
+                  : isEditing
+                    ? t("saveDocument")
+                    : t("generate")}
+              </button>
+            </div>
           ))}
       </div>
 
@@ -521,7 +606,7 @@ export default function DocumentGenerator({
           </div>
         </div>
 
-        {!isEditing && (
+        {!isEditing && !sourceDocumentId && (
           <TemplatePicker
             templates={templates.data ?? []}
             loading={templates.isLoading}
@@ -651,6 +736,30 @@ export default function DocumentGenerator({
           </div>
         )}
 
+        {sourceDocumentId &&
+          (sourceDocumentQuery.isLoading ||
+            sourceTemplateQuery.isLoading ||
+            !initialized) && (
+            <div className="email-source-loading" aria-busy="true">
+              <div className="skeleton-line wide" />
+              <ListSkeleton rows={5} />
+            </div>
+          )}
+
+        {sourceDocumentId && sourceDocumentQuery.data && selected && (
+          <div className="email-source-document" role="note">
+            <FileText size={18} />
+            <div>
+              <strong>{t("emailFromDocument")}</strong>
+              <p>
+                {t("emailFromDocumentDescription", {
+                  name: sourceDocumentQuery.data.name,
+                })}
+              </p>
+            </div>
+          </div>
+        )}
+
         {variables.map((variable) => (
           <VariableField
             key={variable.name}
@@ -694,14 +803,44 @@ export default function DocumentGenerator({
         )}
       </section>
 
+      {documentPreviewHtml && (
+        <div className="document-draft-preview-backdrop" role="presentation">
+          <section
+            className="document-draft-preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="document-draft-preview-title"
+          >
+            <header className="document-preview-header">
+              <div>
+                <span>{t("preview")}</span>
+                <h2 id="document-draft-preview-title">
+                  {documentName || selected?.name}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="btn secondary compact"
+                aria-label={t("close")}
+                onClick={() => setDocumentPreviewHtml(null)}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <div className="document-draft-preview-frame-wrap">
+              <iframe
+                className="document-draft-preview-frame"
+                title={t("preview")}
+                srcDoc={documentPreviewHtml}
+                sandbox=""
+              />
+            </div>
+          </section>
+        </div>
+      )}
+
       {emailPreview && (
-        <div
-          className="email-preview-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setEmailPreview(null);
-          }}
-        >
+        <div className="email-preview-backdrop" role="presentation">
           <section
             className="email-preview-modal"
             role="dialog"

@@ -150,13 +150,6 @@ function TemplateCard({
   };
   return (
     <article className="template-card">
-      <div
-        className="template-preview-frame template-preview-summary"
-        aria-hidden="true"
-      >
-        <FilePlus2 />
-        <span>{template.name}</span>
-      </div>
       <div className="template-body">
         <div className="row between">
           <h3>{template.name}</h3>

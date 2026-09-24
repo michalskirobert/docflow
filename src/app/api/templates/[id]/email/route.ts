@@ -63,7 +63,7 @@ function emailSection(content: string, kind: "header" | "body" | "footer") {
 }
 
 function buildEmailHtml(header: string, body: string, footer: string) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#f3f4f6;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#f3f4f6"><tr><td align="center" style="padding:24px 12px"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">${emailSection(header, "header")}${emailSection(body, "body")}${emailSection(footer, "footer")}</table></td></tr></table></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#ffffff;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#ffffff"><tr><td align="center" style="padding:0"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#ffffff;border:0;overflow:hidden">${emailSection(header, "header")}${emailSection(body, "body")}${emailSection(footer, "footer")}</table></td></tr></table></body></html>`;
 }
 
 export async function POST(

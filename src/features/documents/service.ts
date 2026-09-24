@@ -1,7 +1,7 @@
 "use client";
 import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
 import type { Document, DocumentSummary } from "./types";
-import type { TemplateSummary } from "@/features/templates/types";
+import type { Template, TemplateSummary } from "@/features/templates/types";
 
 export const useDocumentsService = (q = "", sort = "newest") => {
   const params = new URLSearchParams();
@@ -14,8 +14,14 @@ export const useDocumentsService = (q = "", sort = "newest") => {
 };
 export const useDocumentService = (id: string) =>
   useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id));
-export const useDocumentTemplatesService = () =>
-  useGet<TemplateSummary[]>(["templates", "picker"], "/templates?view=picker");
+export const useDocumentTemplatesService = (enabled = true) =>
+  useGet<TemplateSummary[]>(
+    ["templates", "picker"],
+    "/templates?view=picker",
+    enabled,
+  );
+export const useDocumentTemplateService = (id: string) =>
+  useGet<Template>(["templates", id], `/templates/${id}`, Boolean(id));
 export const useGenerateDocumentService = () =>
   usePost<
     Document,
@@ -29,6 +35,15 @@ export type RenderedEmail = {
 export const useRenderEmailService = (templateId: string) =>
   usePost<RenderedEmail, { data: Record<string, string>; subject?: string }>(
     `/templates/${templateId}/email`,
+  );
+export const useRenderDocumentEmailService = (documentId: string) =>
+  usePost<RenderedEmail, { subject?: string; data?: Record<string, string> }>(
+    `/documents/${documentId}/email`,
+  );
+export type RenderedDocumentPreview = { html: string };
+export const useRenderDocumentPreviewService = (templateId: string) =>
+  usePost<RenderedDocumentPreview, { data: Record<string, string> }>(
+    `/templates/${templateId}/preview`,
   );
 export const useUpdateDocumentService = (id: string) =>
   usePut<Document, { name: string; data: Record<string, string> }>(

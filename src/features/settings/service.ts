@@ -38,10 +38,10 @@ export const useBillingOverview = () =>
   useGet<BillingOverview>(["billing"], "/billing");
 export const useDeleteAccount = () => useDelete<void>("/account");
 export const useStartLicensePayment = () =>
-  usePost<PaymentResult, { paymentMethod: "PAYU" | "BANK_TRANSFER" }>(
-    "/billing",
-    [["billing"]],
-  );
+  usePost<
+    PaymentResult,
+    { paymentMethod: "PAYU" | "BANK_TRANSFER"; paymentId?: string }
+  >("/billing", [["billing"]]);
 export const useChangePaymentMethod = () =>
   usePatch<
     PaymentResult,
