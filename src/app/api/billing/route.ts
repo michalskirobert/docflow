@@ -5,6 +5,26 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { getPlan } from "@/server/billing/plans";
 import { createPayUOrder } from "@/server/payu/client";
+
+async function keepOnlyLatestPendingPayment(organizationId: string) {
+  const latest = await prisma.payment.findFirst({
+    where: { organizationId, status: "PENDING", plan: "YEARLY" },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+  if (!latest) return null;
+  await prisma.payment.updateMany({
+    where: {
+      organizationId,
+      status: "PENDING",
+      plan: "YEARLY",
+      id: { not: latest.id },
+    },
+    data: { status: "CANCELED" },
+  });
+  return latest.id;
+}
+
 const paymentSchema = z.object({
   paymentMethod: z.enum(["PAYU", "BANK_TRANSFER"]),
   paymentId: z.string().optional(),
@@ -22,6 +42,7 @@ export async function GET() {
       },
       data: { status: "CANCELED" },
     });
+    await keepOnlyLatestPendingPayment(s.organizationId);
     const [subscription, payments, billingProfile, salesDocuments] =
       await Promise.all([
         prisma.subscription.findUnique({
@@ -81,8 +102,16 @@ async function configurePayment(
     .get("x-forwarded-for")
     ?.split(",")[0]
     ?.trim();
+  // A PayU extOrderId is single-use. A pending payment may previously have
+  // been configured as PayU or bank transfer, so always create a fresh id
+  // before starting/restarting the PayU flow.
+  const extOrderId = randomUUID();
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { extOrderId, providerOrderId: null },
+  });
   const order = await createPayUOrder({
-    extOrderId: payment.extOrderId,
+    extOrderId,
     customerIp: forwarded || "127.0.0.1",
     description: "DocFlow YEARLY",
     totalAmount: payment.grossAmount,
@@ -131,7 +160,21 @@ export async function POST(request: Request) {
       },
       data: { status: "CANCELED" },
     });
+    await keepOnlyLatestPendingPayment(s.organizationId);
     if (body.paymentId) {
+      const activePending = await prisma.payment.findFirst({
+        where: {
+          organizationId: s.organizationId,
+          status: "PENDING",
+          plan: "YEARLY",
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      if (activePending) {
+        return NextResponse.json(
+          await configurePayment(request, activePending.id, body.paymentMethod),
+        );
+      }
       const previous = await prisma.payment.findFirst({
         where: {
           id: body.paymentId,

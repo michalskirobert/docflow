@@ -10,6 +10,7 @@ import {
   Link2,
   List,
   ListOrdered,
+  MoveHorizontal,
   Redo2,
   Table2,
   Underline,
@@ -25,6 +26,7 @@ export type ToolbarState = {
   justifyCenter: boolean;
   justifyRight: boolean;
   justifyFull: boolean;
+  justifyBetween: boolean;
   unorderedList: boolean;
   orderedList: boolean;
   block: string;
@@ -189,6 +191,15 @@ export function EditorToolbar({
         title={t("justify")}
       >
         <AlignJustify />
+      </button>
+      <button
+        className={b(state.justifyBetween)}
+        aria-pressed={state.justifyBetween}
+        onMouseDown={rememberSelection}
+        onClick={() => cmd("justifyBetween")}
+        title={t("alignBetween")}
+      >
+        <MoveHorizontal />
       </button>
       <span />
       <button

@@ -52,18 +52,18 @@ function makeEmailSafe(html: string) {
 
 function emailSection(content: string, kind: "header" | "body" | "footer") {
   if (!content.trim()) return "";
-  const padding = kind === "body" ? "24px" : "16px 24px";
+  const padding = kind === "body" ? "28px 32px" : "22px 32px";
   const border =
     kind === "header"
       ? "border-bottom:1px solid #e5e7eb;"
       : kind === "footer"
         ? "border-top:1px solid #e5e7eb;"
         : "";
-  return `<tr><td style="${padding};${border}color:#111827;background:#ffffff;overflow-wrap:anywhere">${makeEmailSafe(content)}</td></tr>`;
+  return `<tr><td style="padding:${padding};${border}color:#111827;background:#ffffff;overflow-wrap:anywhere">${makeEmailSafe(content)}</td></tr>`;
 }
 
 function buildEmailHtml(header: string, body: string, footer: string) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#ffffff;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#ffffff"><tr><td align="center" style="padding:0"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#ffffff;border:0;overflow:hidden">${emailSection(header, "header")}${emailSection(body, "body")}${emailSection(footer, "footer")}</table></td></tr></table></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:24px 12px;background:#f3f4f6;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#f3f4f6"><tr><td align="center" style="padding:0"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">${emailSection(header, "header")}${emailSection(body, "body")}${emailSection(footer, "footer")}</table></td></tr></table></body></html>`;
 }
 
 export async function POST(

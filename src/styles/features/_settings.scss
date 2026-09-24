@@ -534,3 +534,56 @@
     overflow-wrap: anywhere;
   }
 }
+
+.skeleton-plan-grid .skeleton-settings-option {
+  min-height: 190px;
+  border-radius: 14px;
+}
+.account-save-skeleton {
+  width: 100%;
+}
+@media (max-width: 760px) {
+  .skeleton-plan-grid .skeleton-settings-option {
+    min-height: 130px;
+  }
+}
+
+/* 2.3.1 hotfix: route skeletons mirror the real account cards. */
+.account-route-skeleton .settings-column {
+  align-self: start;
+}
+.account-password-card-skeleton {
+  min-height: 430px;
+}
+.account-danger-skeleton {
+  min-height: 166px;
+}
+.danger-action-skeleton {
+  width: 190px;
+  height: 48px;
+}
+.status-badge {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.invoice-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.invoice-row-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .invoice-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .invoice-row .btn {
+    width: 100%;
+  }
+}

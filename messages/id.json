@@ -277,7 +277,8 @@
     "previewError": "Tidak dapat menyiapkan pratinjau.",
     "preparingPreview": "Menyiapkan pratinjau…",
     "emailFromDocument": "Menggunakan dokumen yang sudah dibuat",
-    "emailFromDocumentDescription": "Email akan menggunakan konten tersimpan dari “{name}”, sehingga sesuai dengan versi dokumen yang dibuat."
+    "emailFromDocumentDescription": "Email akan menggunakan konten tersimpan dari “{name}”, sehingga sesuai dengan versi dokumen yang dibuat.",
+    "copied": "Tersalin"
   },
   "settings": {
     "title": "Pengaturan",
@@ -333,6 +334,7 @@
     "invoicesTransactionsHelp": "Transaksi organisasi yang dibayar dan tertunda.",
     "noTransactions": "Belum ada transaksi.",
     "invoice": "Faktur",
+    "downloadInvoice": "Unduh PDF",
     "dangerZone": "Zona berbahaya",
     "dangerZoneHelp": "Tindakan akun permanen.",
     "deleteAccount": "Hapus akun",
@@ -421,6 +423,7 @@
     "alignCenter": "Tengah",
     "alignRight": "Rata kanan",
     "justify": "Rata kiri-kanan",
+    "alignBetween": "Jarak antar elemen",
     "bulletList": "Daftar poin",
     "numberedList": "Daftar bernomor",
     "table": "Tabel",
@@ -429,7 +432,7 @@
     "variable": "Variabel",
     "selectedImage": "Gambar dipilih",
     "width": "Lebar",
-    "inline": "Sebaris",
+    "inline": "Sebaris (di antara teks)",
     "leftWrap": "Kiri + teks mengalir",
     "center": "Tengah",
     "rightWrap": "Kanan + teks mengalir",
@@ -505,6 +508,7 @@
     "createSuccess": "Templat berhasil dibuat.",
     "updateSuccess": "Templat berhasil disimpan.",
     "saveError": "Templat tidak dapat disimpan.",
+    "edit": "Edit",
     "editVariable": "Edit variabel",
     "typeDateTime": "Tanggal & waktu",
     "typeTime": "Waktu",

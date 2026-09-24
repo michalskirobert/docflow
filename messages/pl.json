@@ -277,7 +277,8 @@
     "previewError": "Nie udało się przygotować podglądu.",
     "preparingPreview": "Przygotowywanie podglądu…",
     "emailFromDocument": "Używasz wygenerowanego dokumentu",
-    "emailFromDocumentDescription": "E-mail użyje zapisanej treści dokumentu „{name}”, dzięki czemu odpowiada wygenerowanej wersji dokumentu."
+    "emailFromDocumentDescription": "E-mail użyje zapisanej treści dokumentu „{name}”, dzięki czemu odpowiada wygenerowanej wersji dokumentu.",
+    "copied": "Skopiowano"
   },
   "settings": {
     "title": "Ustawienia",
@@ -333,6 +334,7 @@
     "invoicesTransactionsHelp": "Opłacone i oczekujące transakcje organizacji.",
     "noTransactions": "Brak transakcji.",
     "invoice": "Faktura",
+    "downloadInvoice": "Pobierz PDF",
     "dangerZone": "Strefa niebezpieczna",
     "dangerZoneHelp": "Nieodwracalne operacje na koncie.",
     "deleteAccount": "Usuń konto",
@@ -421,6 +423,7 @@
     "alignCenter": "Wyśrodkuj",
     "alignRight": "Do prawej",
     "justify": "Wyjustuj",
+    "alignBetween": "Rozsuń na boki",
     "bulletList": "Lista punktowana",
     "numberedList": "Lista numerowana",
     "table": "Tabela",
@@ -429,7 +432,7 @@
     "variable": "Zmienna",
     "selectedImage": "Zaznaczony obraz",
     "width": "Szerokość",
-    "inline": "W tekście",
+    "inline": "W linii (między tekstem)",
     "leftWrap": "Lewo + opływanie",
     "center": "Środek",
     "rightWrap": "Prawo + opływanie",
@@ -505,6 +508,7 @@
     "createSuccess": "Szablon został utworzony.",
     "updateSuccess": "Szablon został zapisany.",
     "saveError": "Nie udało się zapisać szablonu.",
+    "edit": "Edytuj",
     "editVariable": "Edytuj zmienną",
     "typeDateTime": "Data i czas",
     "typeTime": "Czas",

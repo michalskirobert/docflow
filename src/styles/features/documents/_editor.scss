@@ -1261,3 +1261,199 @@
   margin: 4px 0 0;
   color: var(--muted);
 }
+
+.copy-success-icon {
+  color: #22c55e;
+}
+
+.email-form-skeleton {
+  display: grid;
+  gap: 18px;
+}
+.email-source-note-skeleton {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+.email-source-note-skeleton > div {
+  display: grid;
+  gap: 8px;
+}
+.email-form-skeleton .form-field-skeleton {
+  display: grid;
+  gap: 8px;
+}
+
+/* 2.3.1 hotfix: document loading keeps the same geometry as the resolved form. */
+.document-edit-form-skeleton .document-field-skeleton {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+.document-edit-form-skeleton .skeleton-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--skeleton-base);
+}
+.document-edit-actions-skeleton {
+  display: flex;
+  gap: 10px;
+}
+.document-edit-actions-skeleton .skeleton-action {
+  width: 112px;
+  height: 44px;
+}
+@media (max-width: 640px) {
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions)) {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    > .btn,
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    .document-primary-actions {
+    width: 100%;
+  }
+  .document-primary-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .document-primary-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .document-edit-actions-skeleton {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .document-edit-actions-skeleton .skeleton-action {
+    width: 100%;
+  }
+}
+.email-form-skeleton .document-field-skeleton {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+.email-form-skeleton .skeleton-input {
+  display: block;
+  width: 100%;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--skeleton-base);
+}
+@media (max-width: 640px) {
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    > .btn.secondary {
+    width: fit-content;
+    min-width: 0;
+    justify-self: start;
+  }
+}
+
+/* 2.3.1 mobile document actions: keep the create/edit toolbar compact and aligned. */
+@media (max-width: 640px) {
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions)) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    align-items: stretch;
+    padding: 10px;
+  }
+
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    > .btn.secondary {
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    justify-self: stretch;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    .document-primary-actions {
+    display: contents;
+  }
+
+  .document-generator-shell
+    .document-sticky-actions:not(:has(.email-header-actions))
+    .document-primary-actions
+    .btn {
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
+  .document-edit-actions-skeleton {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .document-edit-actions-skeleton .skeleton-action {
+    width: 100%;
+    height: 48px;
+  }
+}
+
+/* 2.3.1 email route loading: reserve the exact action rail before data resolves. */
+.email-header-actions-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.email-header-actions-skeleton .skeleton-action {
+  width: 150px;
+}
+.email-actions-loading .email-back-action-skeleton {
+  width: 112px;
+}
+
+@media (max-width: 640px) {
+  .email-actions-loading {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .email-actions-loading .email-back-action-skeleton {
+    width: 112px;
+    height: 48px;
+  }
+
+  .email-header-actions-skeleton {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .email-header-actions-skeleton .skeleton-action {
+    width: 100%;
+    height: 48px;
+  }
+
+  .email-header-actions-skeleton .email-send-action-skeleton {
+    grid-row: 1;
+  }
+}

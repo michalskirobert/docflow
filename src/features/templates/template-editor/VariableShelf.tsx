@@ -303,6 +303,7 @@ export function VariableShelf({
               <button
                 type="button"
                 aria-label={t("removeVariable")}
+                title={t("removeVariable")}
                 onClick={() => removeVariable(variable.name)}
               >
                 <X />

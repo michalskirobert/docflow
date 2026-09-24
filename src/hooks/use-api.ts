@@ -6,7 +6,12 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 import { api } from "@/lib/axios";
-export function useGet<T>(key: QueryKey, url: string, enabled = true) {
+export function useGet<T>(
+  key: QueryKey,
+  url: string,
+  enabled = true,
+  options?: { refetchOnMount?: boolean | "always" },
+) {
   return useQuery({
     queryKey: key,
     queryFn: async () => (await api.get<T>(url)).data,
@@ -14,6 +19,7 @@ export function useGet<T>(key: QueryKey, url: string, enabled = true) {
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
+    refetchOnMount: options?.refetchOnMount,
   });
 }
 function useWrite<TData, TBody>(

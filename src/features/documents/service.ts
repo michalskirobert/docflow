@@ -13,7 +13,9 @@ export const useDocumentsService = (q = "", sort = "newest") => {
   );
 };
 export const useDocumentService = (id: string) =>
-  useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id));
+  useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id), {
+    refetchOnMount: "always",
+  });
 export const useDocumentTemplatesService = (enabled = true) =>
   useGet<TemplateSummary[]>(
     ["templates", "picker"],
@@ -21,7 +23,9 @@ export const useDocumentTemplatesService = (enabled = true) =>
     enabled,
   );
 export const useDocumentTemplateService = (id: string) =>
-  useGet<Template>(["templates", id], `/templates/${id}`, Boolean(id));
+  useGet<Template>(["templates", id], `/templates/${id}`, Boolean(id), {
+    refetchOnMount: "always",
+  });
 export const useGenerateDocumentService = () =>
   usePost<
     Document,
@@ -40,7 +44,7 @@ export const useRenderDocumentEmailService = (documentId: string) =>
   usePost<RenderedEmail, { subject?: string; data?: Record<string, string> }>(
     `/documents/${documentId}/email`,
   );
-export type RenderedDocumentPreview = { html: string };
+export type RenderedDocumentPreview = { pdfDataUrl: string };
 export const useRenderDocumentPreviewService = (templateId: string) =>
   usePost<RenderedDocumentPreview, { data: Record<string, string> }>(
     `/templates/${templateId}/preview`,

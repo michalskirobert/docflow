@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard, FileText, ShieldAlert, Trash2 } from "lucide-react";
+import {
+  CreditCard,
+  Download,
+  FileText,
+  LoaderCircle,
+  ShieldAlert,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { SelectControl } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { AccountSettings } from "./AccountSettings";
+import { PasswordSettings } from "./PasswordSettings";
 import {
   useAccountDetails,
   useBillingOverview,
@@ -69,21 +78,26 @@ export default function SettingsPanel() {
     [];
 
   const runPayment = async () => {
-    const current = pending[0];
-    const result = current
-      ? await change.mutateAsync({
-          paymentId: current.id,
-          paymentMethod: method,
-        })
-      : await start.mutateAsync({ paymentMethod: method });
+    try {
+      const current = pending[0];
+      const result = current
+        ? await change.mutateAsync({
+            paymentId: current.id,
+            paymentMethod: method,
+          })
+        : await start.mutateAsync({ paymentMethod: method });
 
-    if (result.redirectUri) window.location.assign(result.redirectUri);
+      if (result.redirectUri) window.location.assign(result.redirectUri);
+    } catch {
+      notify(t("paymentStartError"), "error");
+    }
   };
 
   return (
     <div className="settings-grid">
       <div className="settings-column">
         <AccountSettings />
+        <PasswordSettings />
       </div>
 
       <div className="settings-column">
@@ -124,9 +138,9 @@ export default function SettingsPanel() {
                     </small>
                   )}
                 </div>
-                <span className="status-active">
-                  {billing.data?.subscription?.status ?? "ACTIVE"}
-                </span>
+                <StatusBadge
+                  status={billing.data?.subscription?.status ?? "ACTIVE"}
+                />
               </div>
 
               {billing.data?.subscription?.currentPeriodEndsAt &&
@@ -150,7 +164,7 @@ export default function SettingsPanel() {
                       {payment.transferReference || t("onlinePayment")}
                     </small>
                   </div>
-                  <span className="badge warning">{t("pending")}</span>
+                  <StatusBadge status="PENDING" label={t("pending")} />
                 </div>
               ))}
 
@@ -211,6 +225,7 @@ export default function SettingsPanel() {
                     {t("paymentMethod")}
                     <SelectControl
                       value={method}
+                      disabled={start.isPending || change.isPending}
                       onChange={(event) =>
                         setMethod(
                           event.target.value as "PAYU" | "BANK_TRANSFER",
@@ -226,6 +241,9 @@ export default function SettingsPanel() {
                     disabled={start.isPending || change.isPending}
                     onClick={runPayment}
                   >
+                    {(start.isPending || change.isPending) && (
+                      <LoaderCircle className="spinner" size={17} />
+                    )}
                     {pending.length
                       ? t("continuePayment")
                       : currentPlan === "FREE"
@@ -276,11 +294,7 @@ export default function SettingsPanel() {
                       </small>
                     </div>
                     <div className="payment-row-actions">
-                      <span
-                        className={`badge ${payment.status === "COMPLETED" ? "success" : payment.status === "CANCELED" ? "muted" : "warning"}`}
-                      >
-                        {payment.status}
-                      </span>
+                      <StatusBadge status={payment.status} />
                       {payment.status === "CANCELED" &&
                         payment.provider === "PAYU" && (
                           <button

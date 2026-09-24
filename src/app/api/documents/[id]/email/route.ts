@@ -35,9 +35,9 @@ const safe = (html: string) =>
 const section = (html: string, kind: "header" | "body" | "footer") =>
   !html.trim()
     ? ""
-    : `<tr><td style="${kind === "body" ? "24px" : "16px 24px"};${kind === "header" ? "border-bottom:1px solid #e5e7eb;" : kind === "footer" ? "border-top:1px solid #e5e7eb;" : ""}color:#111827;background:#fff;overflow-wrap:anywhere">${safe(html)}</td></tr>`;
+    : `<tr><td style="padding:${kind === "body" ? "28px 32px" : "22px 32px"};${kind === "header" ? "border-bottom:1px solid #e5e7eb;" : kind === "footer" ? "border-top:1px solid #e5e7eb;" : ""}color:#111827;background:#fff;overflow-wrap:anywhere">${safe(html)}</td></tr>`;
 const build = (h: string, b: string, f: string) =>
-  `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#fff;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#fff"><tr><td align="center" style="padding:0"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#fff">${section(h, "header")}${section(b, "body")}${section(f, "footer")}</table></td></tr></table></body></html>`;
+  `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:24px 12px;background:#f3f4f6;color:#111827;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border-collapse:collapse;background:#f3f4f6"><tr><td align="center" style="padding:0"><table role="presentation" width="680" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:680px;border-collapse:separate;background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden">${section(h, "header")}${section(b, "body")}${section(f, "footer")}</table></td></tr></table></body></html>`;
 
 export async function POST(
   req: Request,

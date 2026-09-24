@@ -156,9 +156,8 @@ export function variableHtml(v: TemplateVariable) {
     ]
       .filter(Boolean)
       .join(";");
-    return styles
-      ? `<span data-variable-name="${escapeHtmlAttribute(v.name)}" style="${styles}">{{${v.name}}}</span>`
-      : `{{${v.name}}}`;
+    const name = escapeHtmlAttribute(v.name);
+    return `<span data-variable-name="${name}" data-variable-type="value" contenteditable="false"${styles ? ` style="${styles}"` : ""}>{{${name}}}</span>`;
   }
 
   const name = escapeHtmlAttribute(v.name);

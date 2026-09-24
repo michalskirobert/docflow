@@ -277,7 +277,8 @@
     "previewError": "Could not prepare the preview.",
     "preparingPreview": "Preparing preview…",
     "emailFromDocument": "Using generated document",
-    "emailFromDocumentDescription": "The email will use the saved content of “{name}”, so it matches the generated document snapshot."
+    "emailFromDocumentDescription": "The email will use the saved content of “{name}”, so it matches the generated document snapshot.",
+    "copied": "Copied"
   },
   "settings": {
     "title": "Settings",
@@ -333,6 +334,7 @@
     "invoicesTransactionsHelp": "Paid and pending transactions for your organization.",
     "noTransactions": "No transactions yet.",
     "invoice": "Invoice",
+    "downloadInvoice": "Download PDF",
     "dangerZone": "Danger zone",
     "dangerZoneHelp": "Permanent account actions.",
     "deleteAccount": "Delete account",
@@ -421,6 +423,7 @@
     "alignCenter": "Center",
     "alignRight": "Align right",
     "justify": "Justify",
+    "alignBetween": "Space between",
     "bulletList": "Bullet list",
     "numberedList": "Numbered list",
     "table": "Table",
@@ -429,7 +432,7 @@
     "variable": "Variable",
     "selectedImage": "Selected image",
     "width": "Width",
-    "inline": "Inline",
+    "inline": "Inline (between text)",
     "leftWrap": "Left + wrap",
     "center": "Center",
     "rightWrap": "Right + wrap",
@@ -505,6 +508,7 @@
     "createSuccess": "Template created successfully.",
     "updateSuccess": "Template saved successfully.",
     "saveError": "Could not save the template.",
+    "edit": "Edit",
     "editVariable": "Edit variable",
     "typeDateTime": "Date & time",
     "typeTime": "Time",

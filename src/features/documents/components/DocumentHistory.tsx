@@ -3,17 +3,14 @@
 import {
   Edit3,
   Eye,
-  Download,
   FileText,
   LoaderCircle,
-  Printer,
   MailPlus,
   Search,
   Trash2,
-  X,
 } from "lucide-react";
 import { InputControl, SelectControl } from "@/components/shared/form";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
@@ -21,6 +18,7 @@ import { useFeedback } from "@/components/ui/feedback-provider";
 import { useDeleteDocumentService } from "../service";
 import type { DocumentSummary } from "../types";
 import { DownloadPdfButton } from "./DownloadPdfButton";
+import { DocumentPdfPreviewModal } from "./DocumentPdfPreviewModal";
 
 export function DocumentHistory({
   documents,
@@ -48,7 +46,6 @@ export function DocumentHistory({
   const [previewPdfLoading, setPreviewPdfLoading] = useState(false);
   const [previewPdfError, setPreviewPdfError] = useState(false);
   const [previewDownloadLoading, setPreviewDownloadLoading] = useState(false);
-  const previewFrameRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!previewDocument) {
@@ -91,21 +88,6 @@ export function DocumentHistory({
     };
   }, [previewDocument]);
 
-  useEffect(() => {
-    if (!previewDocument) return;
-    const previousOverflow = document.body.style.overflow;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !previewDownloadLoading)
-        setPreviewDocument(null);
-    };
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [previewDocument, previewDownloadLoading]);
-
   const downloadPreview = async () => {
     if (!previewDocument || previewDownloadLoading) return;
     setPreviewDownloadLoading(true);
@@ -126,10 +108,6 @@ export function DocumentHistory({
     } finally {
       setPreviewDownloadLoading(false);
     }
-  };
-
-  const printPreview = () => {
-    previewFrameRef.current?.contentWindow?.print();
   };
 
   return (
@@ -190,84 +168,19 @@ export function DocumentHistory({
       )}
 
       {previewDocument && (
-        <div className="document-preview-backdrop" role="presentation">
-          <section
-            className="document-preview-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="document-preview-title"
-          >
-            <header className="document-preview-header">
-              <div>
-                <span>{t("preview")}</span>
-                <h2 id="document-preview-title">{previewDocument.name}</h2>
-              </div>
-              <button
-                className="btn secondary compact"
-                type="button"
-                aria-label={t("close")}
-                disabled={previewDownloadLoading}
-                onClick={() => setPreviewDocument(null)}
-              >
-                <X size={18} />
-              </button>
-            </header>
-            <div className="document-preview-frame-wrap">
-              {previewPdfLoading && (
-                <div
-                  className="pdf-generation-loader"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <LoaderCircle className="spin" size={34} />
-                  <strong>Generating PDF…</strong>
-                  <span>This can take a moment for documents with images.</span>
-                </div>
-              )}
-              {previewPdfError && (
-                <div className="pdf-generation-loader" role="alert">
-                  <strong>Could not generate PDF preview.</strong>
-                </div>
-              )}
-              {previewPdfUrl && (
-                <iframe
-                  ref={previewFrameRef}
-                  className="document-preview-frame"
-                  src={`${previewPdfUrl}#view=FitH`}
-                  title={`${t("preview")}: ${previewDocument.name}`}
-                />
-              )}
-            </div>
-            <footer className="document-preview-actions">
-              <button
-                className="btn secondary"
-                type="button"
-                disabled={
-                  previewDownloadLoading || previewPdfLoading || !previewPdfUrl
-                }
-                onClick={printPreview}
-              >
-                <Printer size={17} />
-                {t("print")}
-              </button>
-              <button
-                className="btn"
-                type="button"
-                disabled={
-                  previewDownloadLoading || previewPdfLoading || !previewPdfUrl
-                }
-                onClick={downloadPreview}
-              >
-                {previewDownloadLoading ? (
-                  <LoaderCircle className="spinner" size={17} />
-                ) : (
-                  <Download size={17} />
-                )}
-                {t("downloadPdf")}
-              </button>
-            </footer>
-          </section>
-        </div>
+        <DocumentPdfPreviewModal
+          title={previewDocument.name}
+          previewLabel={t("preview")}
+          closeLabel={t("close")}
+          printLabel={t("print")}
+          downloadLabel={t("downloadPdf")}
+          pdfUrl={previewPdfUrl}
+          loading={previewPdfLoading}
+          error={previewPdfError}
+          downloading={previewDownloadLoading}
+          onClose={() => setPreviewDocument(null)}
+          onDownload={downloadPreview}
+        />
       )}
     </section>
   );

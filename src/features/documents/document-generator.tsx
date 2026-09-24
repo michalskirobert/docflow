@@ -6,23 +6,24 @@ import { HelpTooltip } from "@/components/ui/help-tooltip";
 import {
   ArrowLeft,
   Clipboard,
+  Check,
   Eye,
   FileText,
   LoaderCircle,
   Mail,
   Send,
-  X,
   Save,
   Sparkles,
+  X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
-import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { parseTemplateVariables } from "@/features/templates/types";
 import { TemplatePicker } from "./components/TemplatePicker";
+import { DocumentPdfPreviewModal } from "./components/DocumentPdfPreviewModal";
 import { VariableField } from "./components/VariableField";
 import { validateVariable } from "./helpers";
 import {
@@ -123,17 +124,23 @@ export default function DocumentGenerator({
   const [emailAction, setEmailAction] = useState<"preview" | "copy" | null>(
     null,
   );
+  const [emailCopied, setEmailCopied] = useState(false);
+  const copyFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const documentNameRef = useRef<HTMLInputElement>(null);
 
+  useEffect(
+    () => () => {
+      if (copyFeedbackTimer.current) clearTimeout(copyFeedbackTimer.current);
+    },
+    [],
+  );
+
   useEffect(() => {
-    if (!emailPreview && !documentPreviewHtml) return;
+    if (!emailPreview) return;
     const previousOverflow = document.body.style.overflow;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setEmailPreview(null);
-        setDocumentPreviewHtml(null);
-      }
+      if (event.key === "Escape") setEmailPreview(null);
     };
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", closeOnEscape);
@@ -141,7 +148,7 @@ export default function DocumentGenerator({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [emailPreview, documentPreviewHtml]);
+  }, [emailPreview]);
 
   useEffect(() => {
     if (
@@ -317,6 +324,9 @@ export default function DocumentGenerator({
       } else {
         await navigator.clipboard.writeText(email.text);
       }
+      setEmailCopied(true);
+      if (copyFeedbackTimer.current) clearTimeout(copyFeedbackTimer.current);
+      copyFeedbackTimer.current = setTimeout(() => setEmailCopied(false), 1800);
       notify(t("emailCopied"), "success");
     } catch {
       notify(t("emailCopyError"), "error");
@@ -347,6 +357,16 @@ export default function DocumentGenerator({
     }
   };
 
+  const downloadDocumentPreview = () => {
+    if (!documentPreviewHtml) return;
+    const anchor = document.createElement("a");
+    anchor.href = documentPreviewHtml;
+    anchor.download = `${(documentName || selected?.name || "document").replace(/[\\/:*?"<>|]+/g, "-")}.pdf`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  };
+
   const previewDocument = async () => {
     if (!selected || documentPreviewMutation.isPending || !validateValues())
       return;
@@ -354,7 +374,7 @@ export default function DocumentGenerator({
       const preview = await documentPreviewMutation.mutateAsync({
         data: values,
       });
-      setDocumentPreviewHtml(preview.html);
+      setDocumentPreviewHtml(preview.pdfDataUrl);
     } catch {
       notify(t("previewError"), "error");
     }
@@ -426,7 +446,82 @@ export default function DocumentGenerator({
     );
   };
 
-  if (isEditing && (documentQuery.isLoading || !initialized)) {
+  if (
+    isEmailMode &&
+    sourceDocumentId &&
+    (sourceDocumentQuery.isFetching ||
+      sourceTemplateQuery.isFetching ||
+      (!initialized &&
+        !sourceDocumentQuery.isError &&
+        !sourceTemplateQuery.isError))
+  ) {
+    return (
+      <div
+        className="document-generator-shell pending-form email-generator-loading"
+        aria-busy="true"
+      >
+        <div className="form-actions document-sticky-actions">
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => router.push("/documents")}
+          >
+            <ArrowLeft size={17} />
+            {t("backToDocuments")}
+          </button>
+          <div className="email-header-actions">
+            <button className="btn secondary" type="button" disabled>
+              <Eye size={17} />
+              {t("previewEmail")}
+            </button>
+            <button className="btn secondary" type="button" disabled>
+              <Clipboard size={17} />
+              {t("copyEmail")}
+            </button>
+            <button className="btn email-send-button" type="button" disabled>
+              <Send size={17} />
+              {t("sendEmail")}
+            </button>
+          </div>
+        </div>
+        <section className="card document-form-card email-form-skeleton">
+          <div className="document-loading-heading">
+            <span className="skeleton-icon" />
+            <div>
+              <span className="skeleton-line wide" />
+              <span className="skeleton-line" />
+            </div>
+          </div>
+          <div className="document-field-skeleton">
+            <span className="skeleton-line short" />
+            <span className="skeleton-input" />
+          </div>
+          <div className="document-field-skeleton">
+            <span className="skeleton-line short" />
+            <span className="skeleton-input" />
+          </div>
+          <div className="email-source-note-skeleton">
+            <span className="skeleton-icon" />
+            <div>
+              <span className="skeleton-line wide" />
+              <span className="skeleton-line" />
+            </div>
+          </div>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div className="document-field-skeleton" key={index}>
+              <span className="skeleton-line short" />
+              <span className="skeleton-input" />
+            </div>
+          ))}
+        </section>
+      </div>
+    );
+  }
+
+  if (
+    isEditing &&
+    (documentQuery.isFetching || (!initialized && !documentQuery.isError))
+  ) {
     return (
       <div className="document-generator-shell pending-form" aria-busy="true">
         <div className="form-actions document-sticky-actions">
@@ -438,12 +533,18 @@ export default function DocumentGenerator({
             <ArrowLeft />
             {t("backToDocuments")}
           </button>
-          <button className="btn" type="button" disabled>
-            <Save />
-            {t("saveDocument")}
-          </button>
+          <div className="document-primary-actions">
+            <button className="btn secondary" type="button" disabled>
+              <Eye size={17} />
+              {t("preview")}
+            </button>
+            <button className="btn" type="button" disabled>
+              <Save />
+              {t("saveDocument")}
+            </button>
+          </div>
         </div>
-        <section className="card document-form-card document-data-loading">
+        <section className="card document-form-card document-data-loading document-edit-form-skeleton">
           <div className="document-loading-heading">
             <span className="skeleton-icon" />
             <div>
@@ -451,7 +552,16 @@ export default function DocumentGenerator({
               <span className="skeleton-line" />
             </div>
           </div>
-          <ListSkeleton rows={6} />
+          <div className="document-field-skeleton">
+            <span className="skeleton-line short" />
+            <span className="skeleton-input" />
+          </div>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div className="document-field-skeleton" key={index}>
+              <span className="skeleton-line short" />
+              <span className="skeleton-input" />
+            </div>
+          ))}
         </section>
       </div>
     );
@@ -487,102 +597,118 @@ export default function DocumentGenerator({
           {t("backToDocuments")}
         </button>
 
-        {selected &&
-          (isEmailMode ? (
-            <div className="email-header-actions">
+        {isEmailMode ? (
+          <div className="email-header-actions">
+            <button
+              className="btn secondary"
+              type="button"
+              disabled={!selected || emailAction !== null}
+              onClick={() => void previewEmail()}
+            >
+              {emailAction === "preview" ? (
+                <LoaderCircle className="spinner" size={17} />
+              ) : (
+                <Eye size={17} />
+              )}
+              {emailAction === "preview"
+                ? t("preparingEmail")
+                : t("previewEmail")}
+            </button>
+            <button
+              className="btn secondary"
+              type="button"
+              disabled={!selected || emailAction !== null}
+              onClick={() => void copyEmail()}
+            >
+              {emailAction === "copy" ? (
+                <LoaderCircle className="spinner" size={17} />
+              ) : emailCopied ? (
+                <Check className="copy-success-icon" size={17} />
+              ) : (
+                <Clipboard size={17} />
+              )}
+              {emailAction === "copy"
+                ? t("preparingEmail")
+                : emailCopied
+                  ? t("copied")
+                  : t("copyEmail")}
+            </button>
+            <div className="email-send-action">
               <button
-                className="btn secondary"
+                className="btn email-send-button"
                 type="button"
-                disabled={emailAction === "preview"}
-                onClick={() => void previewEmail()}
+                disabled={
+                  !selected ||
+                  sendEmailMutation.isPending ||
+                  !emailSettings.data?.configured ||
+                  !recipientEmail.trim().includes("@")
+                }
+                onClick={() => void sendPreparedEmail()}
               >
-                {emailAction === "preview" ? (
+                {sendEmailMutation.isPending ? (
                   <LoaderCircle className="spinner" size={17} />
                 ) : (
-                  <Eye size={17} />
+                  <Send size={17} />
                 )}
-                {emailAction === "preview"
-                  ? t("preparingEmail")
-                  : t("previewEmail")}
+                {sendEmailMutation.isPending
+                  ? t("sendingEmail")
+                  : t("sendEmail")}
               </button>
-              <button
-                className="btn secondary"
-                type="button"
-                disabled={emailAction === "copy"}
-                onClick={() => void copyEmail()}
-              >
-                {emailAction === "copy" ? (
-                  <LoaderCircle className="spinner" size={17} />
-                ) : (
-                  <Clipboard size={17} />
-                )}
-                {emailAction === "copy" ? t("preparingEmail") : t("copyEmail")}
-              </button>
-              <div className="email-send-action">
-                <button
-                  className="btn email-send-button"
-                  type="button"
-                  disabled={
-                    sendEmailMutation.isPending ||
+              {(!emailSettings.data?.configured ||
+                !recipientEmail.trim().includes("@")) && (
+                <HelpTooltip
+                  text={
                     !emailSettings.data?.configured
+                      ? t("sendEmailSetupRequired")
+                      : t("recipientEmailRequired")
                   }
-                  onClick={() => void sendPreparedEmail()}
-                >
-                  {sendEmailMutation.isPending ? (
-                    <LoaderCircle className="spinner" size={17} />
-                  ) : (
-                    <Send size={17} />
-                  )}
-                  {sendEmailMutation.isPending
-                    ? t("sendingEmail")
-                    : t("sendEmail")}
-                </button>
-                {!emailSettings.data?.configured && (
-                  <HelpTooltip
-                    text={t("sendEmailSetupRequired")}
-                    label={t("sendEmailSetupRequired")}
-                  />
-                )}
-              </div>
+                  label={
+                    !emailSettings.data?.configured
+                      ? t("sendEmailSetupRequired")
+                      : t("recipientEmailRequired")
+                  }
+                />
+              )}
             </div>
-          ) : (
-            <div className="document-primary-actions">
-              <button
-                className="btn secondary"
-                type="button"
-                disabled={pending || documentPreviewMutation.isPending}
-                onClick={() => void previewDocument()}
-              >
-                {documentPreviewMutation.isPending ? (
-                  <LoaderCircle className="spinner" size={17} />
-                ) : (
-                  <Eye size={17} />
-                )}
-                {documentPreviewMutation.isPending
-                  ? t("preparingPreview")
-                  : t("preview")}
-              </button>
-              <button
-                className="btn"
-                type="button"
-                disabled={pending}
-                onClick={save}
-              >
-                {pending ? (
-                  <LoaderCircle className="spinner" size={17} />
-                ) : isEditing ? (
-                  <Save size={17} />
-                ) : (
-                  <Sparkles size={17} />
-                )}
-                {pending
-                  ? t("saving")
-                  : isEditing
-                    ? t("saveDocument")
-                    : t("generate")}
-              </button>
-            </div>
-          ))}
+          </div>
+        ) : (
+          <div className="document-primary-actions">
+            <button
+              className="btn secondary"
+              type="button"
+              disabled={pending || documentPreviewMutation.isPending}
+              onClick={() => void previewDocument()}
+            >
+              {documentPreviewMutation.isPending ? (
+                <LoaderCircle className="spinner" size={17} />
+              ) : (
+                <Eye size={17} />
+              )}
+              {documentPreviewMutation.isPending
+                ? t("preparingPreview")
+                : t("preview")}
+            </button>
+            <button
+              className="btn"
+              type="button"
+              disabled={pending}
+              onClick={save}
+            >
+              {pending ? (
+                <LoaderCircle className="spinner" size={17} />
+              ) : isEditing ? (
+                <Save size={17} />
+              ) : (
+                <Sparkles size={17} />
+              )}
+              {pending
+                ? t("saving")
+                : isEditing
+                  ? t("saveDocument")
+                  : t("generate")}
+            </button>
+          </div>
+        )}
       </div>
 
       <section className="card document-form-card">
@@ -740,9 +866,23 @@ export default function DocumentGenerator({
           (sourceDocumentQuery.isLoading ||
             sourceTemplateQuery.isLoading ||
             !initialized) && (
-            <div className="email-source-loading" aria-busy="true">
-              <div className="skeleton-line wide" />
-              <ListSkeleton rows={5} />
+            <div
+              className="email-source-loading email-form-skeleton"
+              aria-busy="true"
+            >
+              <div className="email-source-note-skeleton">
+                <span className="skeleton-icon" />
+                <div>
+                  <span className="skeleton-line wide" />
+                  <span className="skeleton-line" />
+                </div>
+              </div>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div className="form-field-skeleton" key={index}>
+                  <span className="skeleton-line skeleton-label" />
+                  <span className="skeleton-control" />
+                </div>
+              ))}
             </div>
           )}
 
@@ -804,39 +944,16 @@ export default function DocumentGenerator({
       </section>
 
       {documentPreviewHtml && (
-        <div className="document-draft-preview-backdrop" role="presentation">
-          <section
-            className="document-draft-preview-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="document-draft-preview-title"
-          >
-            <header className="document-preview-header">
-              <div>
-                <span>{t("preview")}</span>
-                <h2 id="document-draft-preview-title">
-                  {documentName || selected?.name}
-                </h2>
-              </div>
-              <button
-                type="button"
-                className="btn secondary compact"
-                aria-label={t("close")}
-                onClick={() => setDocumentPreviewHtml(null)}
-              >
-                <X size={18} />
-              </button>
-            </header>
-            <div className="document-draft-preview-frame-wrap">
-              <iframe
-                className="document-draft-preview-frame"
-                title={t("preview")}
-                srcDoc={documentPreviewHtml}
-                sandbox=""
-              />
-            </div>
-          </section>
-        </div>
+        <DocumentPdfPreviewModal
+          title={documentName || selected?.name || ""}
+          previewLabel={t("preview")}
+          closeLabel={t("close")}
+          printLabel={t("print")}
+          downloadLabel={t("downloadPdf")}
+          pdfUrl={documentPreviewHtml}
+          onClose={() => setDocumentPreviewHtml(null)}
+          onDownload={downloadDocumentPreview}
+        />
       )}
 
       {emailPreview && (
@@ -878,16 +995,31 @@ export default function DocumentGenerator({
               <button
                 className="btn secondary"
                 type="button"
+                disabled={emailAction !== null}
                 onClick={() => void copyEmail()}
               >
-                <Clipboard size={17} />
-                {t("copyEmail")}
+                {emailAction === "copy" ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : emailCopied ? (
+                  <Check className="copy-success-icon" size={17} />
+                ) : (
+                  <Clipboard size={17} />
+                )}
+                {emailAction === "copy"
+                  ? t("preparingEmail")
+                  : emailCopied
+                    ? t("copied")
+                    : t("copyEmail")}
               </button>
-              {emailSettings.data?.configured && (
+              <div className="email-send-action">
                 <button
                   className="btn email-send-button"
                   type="button"
-                  disabled={sendEmailMutation.isPending}
+                  disabled={
+                    sendEmailMutation.isPending ||
+                    !emailSettings.data?.configured ||
+                    !recipientEmail.trim().includes("@")
+                  }
                   onClick={() => void sendPreparedEmail()}
                 >
                   {sendEmailMutation.isPending ? (
@@ -899,7 +1031,22 @@ export default function DocumentGenerator({
                     ? t("sendingEmail")
                     : t("sendEmail")}
                 </button>
-              )}
+                {(!emailSettings.data?.configured ||
+                  !recipientEmail.trim().includes("@")) && (
+                  <HelpTooltip
+                    text={
+                      !emailSettings.data?.configured
+                        ? t("sendEmailSetupRequired")
+                        : t("recipientEmailRequired")
+                    }
+                    label={
+                      !emailSettings.data?.configured
+                        ? t("sendEmailSetupRequired")
+                        : t("recipientEmailRequired")
+                    }
+                  />
+                )}
+              </div>
             </footer>
           </section>
         </div>

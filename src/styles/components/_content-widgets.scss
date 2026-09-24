@@ -296,3 +296,54 @@
     justify-content: flex-start;
   }
 }
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  cursor: default;
+  user-select: none;
+}
+.status-badge.success {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+.status-badge.warning {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}
+.status-badge.danger {
+  color: #991b1b;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+.status-badge.neutral {
+  color: var(--muted);
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+:root[data-theme="dark"] .status-badge.success {
+  color: #86efac;
+  background: rgb(22 101 52 / 28%);
+  border-color: rgb(74 222 128 / 42%);
+}
+:root[data-theme="dark"] .status-badge.warning {
+  color: #fcd34d;
+  background: rgb(146 64 14 / 30%);
+  border-color: rgb(245 158 11 / 45%);
+}
+:root[data-theme="dark"] .status-badge.danger {
+  color: #fca5a5;
+  background: rgb(153 27 27 / 28%);
+  border-color: rgb(248 113 113 / 42%);
+}

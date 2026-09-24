@@ -63,8 +63,8 @@
   padding: 0 12px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--surface-muted);
+  color: var(--muted, #64748b);
 }
 @media (max-width: 480px) {
   .default-value-heading {
@@ -105,8 +105,8 @@
 }
 .variable-select-trigger:disabled {
   cursor: not-allowed;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--surface-muted);
+  color: var(--muted, #64748b);
 }
 .variable-select-trigger > svg {
   flex: 0 0 auto;

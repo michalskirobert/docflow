@@ -149,6 +149,10 @@ export function TemplateEditor({ template, onClose }: Props) {
     return () => media.removeEventListener("change", sync);
   }, []);
 
+  const [selectedVariableElement, setSelectedVariableElement] =
+    useState<HTMLElement | null>(null);
+  const [selectedVariableBox, setSelectedVariableBox] =
+    useState<DOMRect | null>(null);
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
@@ -167,6 +171,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     justifyCenter: false,
     justifyRight: false,
     justifyFull: false,
+    justifyBetween: false,
     unorderedList: false,
     orderedList: false,
     block: "p",
@@ -371,6 +376,20 @@ export function TemplateEditor({ template, onClose }: Props) {
         justifyCenter: document.queryCommandState("justifyCenter"),
         justifyRight: document.queryCommandState("justifyRight"),
         justifyFull: document.queryCommandState("justifyFull"),
+        justifyBetween: (() => {
+          const selection = window.getSelection();
+          const anchor = selection?.anchorNode;
+          const element =
+            anchor instanceof Element ? anchor : anchor?.parentElement;
+          const block = element?.closest<HTMLElement>(
+            "p, div, h1, h2, h3, h4, h5, blockquote",
+          );
+          return Boolean(
+            block &&
+            block.style.display === "flex" &&
+            block.style.justifyContent === "space-between",
+          );
+        })(),
         unorderedList: document.queryCommandState("insertUnorderedList"),
         orderedList: document.queryCommandState("insertOrderedList"),
         block: (() => {
@@ -449,11 +468,127 @@ export function TemplateEditor({ template, onClose }: Props) {
   const cmd = (command: string, value?: string) => {
     restoreSelection();
 
-    document.execCommand(command, false, value);
+    if (command === "justifyBetween") {
+      const selection = window.getSelection();
+      const anchor = selection?.anchorNode;
+      const element =
+        anchor instanceof Element ? anchor : anchor?.parentElement;
+      const region = activeEditor.current ?? editor.current;
+      const block = element?.closest<HTMLElement>(
+        "p, div, h1, h2, h3, h4, h5, blockquote",
+      );
+
+      if (block && region?.contains(block)) {
+        const enabled = block.dataset.layout === "between";
+        if (enabled) {
+          block.style.display = "";
+          block.style.justifyContent = "";
+          block.style.alignItems = "";
+          block.style.width = "";
+          delete block.dataset.layout;
+        } else {
+          block.style.display = "flex";
+          block.style.justifyContent = "space-between";
+          block.style.alignItems = "center";
+          block.style.width = "100%";
+          block.dataset.layout = "between";
+        }
+        setDirty(true);
+      }
+    } else {
+      document.execCommand(command, false, value);
+    }
 
     rememberSelection();
     syncToolbarState();
   };
+
+  const decorateVariableTokens = useCallback(() => {
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      (region) => {
+        region
+          ?.querySelectorAll<HTMLElement>('[data-variable-type="value"]')
+          .forEach((token) => {
+            if (token.querySelector("[data-variable-actions]")) return;
+            const actions = document.createElement("span");
+            actions.dataset.variableActions = "true";
+            actions.className = "inline-variable-actions";
+            actions.contentEditable = "false";
+            actions.innerHTML = `<button type="button" data-variable-action="edit" aria-label="Edit">✎</button><button type="button" data-variable-action="remove" aria-label="Remove">×</button>`;
+            token.appendChild(actions);
+          });
+      },
+    );
+  }, []);
+
+  useEffect(() => {
+    decorateVariableTokens();
+    const observer = new MutationObserver(() => decorateVariableTokens());
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      (region) => {
+        if (region)
+          observer.observe(region, { childList: true, subtree: true });
+      },
+    );
+    return () => observer.disconnect();
+  }, [decorateVariableTokens, variables, headerEnabled, footerEnabled]);
+
+  const handleVariableAction = (target: HTMLElement) => {
+    const action = target.closest<HTMLButtonElement>("[data-variable-action]");
+    if (!action) return false;
+    const token = action.closest<HTMLElement>("[data-variable-name]");
+    const variable = variables.find(
+      (item) => item.name === token?.dataset.variableName,
+    );
+    if (!token || !variable) return true;
+    if (action.dataset.variableAction === "edit") {
+      setEditingVariable(variable);
+      setVariableOpen(true);
+    } else {
+      token.remove();
+      setDirty(true);
+    }
+    return true;
+  };
+
+  const selectVariableElement = (target: HTMLElement) => {
+    const element = target.closest<HTMLElement>("[data-variable-name]");
+    if (!element || element.tagName === "IMG") {
+      setSelectedVariableElement(null);
+      setSelectedVariableBox(null);
+      return false;
+    }
+    setSelectedVariableElement(element);
+    setSelectedVariableBox(element.getBoundingClientRect());
+    setSelectedImage(null);
+    setResizeBox(null);
+    return true;
+  };
+
+  useEffect(() => {
+    if (!selectedVariableElement) {
+      setSelectedVariableBox(null);
+      return;
+    }
+
+    const sync = () => {
+      if (!selectedVariableElement.isConnected) {
+        setSelectedVariableElement(null);
+        setSelectedVariableBox(null);
+        return;
+      }
+      setSelectedVariableBox(selectedVariableElement.getBoundingClientRect());
+    };
+
+    sync();
+    window.addEventListener("resize", sync);
+    window.addEventListener("scroll", sync, true);
+
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("scroll", sync, true);
+    };
+  }, [selectedVariableElement, zoom]);
 
   const insertVariable = (variable: TemplateVariable) => {
     restoreSelection();
@@ -498,22 +633,14 @@ export function TemplateEditor({ template, onClose }: Props) {
             .forEach((img) => {
               img.dataset.variableName = variable.name;
               img.dataset.variableType = "image";
-              img.dataset.imageFit = variable.imageFit ?? "contain";
+              // The variable definition provides defaults for newly inserted images.
+              // Existing placements keep their own size/fit/alignment.
+              img.dataset.imageFit =
+                img.dataset.imageFit ?? variable.imageFit ?? "contain";
 
               img.alt = "";
               img.title = `{{${variable.name}}}`;
-
               img.src = createImageVariablePlaceholder(variable.name);
-
-              img.setAttribute(
-                "style",
-                imageStyle(
-                  variable.imageWidth ?? 180,
-                  variable.imageAlign ?? "center",
-                  variable.imageHeight,
-                  variable.imageFit ?? "contain",
-                ),
-              );
             });
 
           /*
@@ -1017,6 +1144,15 @@ export function TemplateEditor({ template, onClose }: Props) {
     };
   };
 
+  const serializeRegion = (region: HTMLElement | null) => {
+    if (!region) return "";
+    const clone = region.cloneNode(true) as HTMLElement;
+    clone
+      .querySelectorAll("[data-variable-actions]")
+      .forEach((node) => node.remove());
+    return clone.innerHTML;
+  };
+
   const save = async () => {
     [editor.current, headerEditor.current, footerEditor.current].forEach(
       normalizeEditorVariableImages,
@@ -1027,15 +1163,11 @@ export function TemplateEditor({ template, onClose }: Props) {
       description: description.trim(),
       emailSubject: emailSubject.trim(),
 
-      content: editor.current?.innerHTML ?? "",
+      content: serializeRegion(editor.current),
 
-      headerContent: headerEnabled
-        ? (headerEditor.current?.innerHTML ?? "")
-        : "",
+      headerContent: headerEnabled ? serializeRegion(headerEditor.current) : "",
 
-      footerContent: footerEnabled
-        ? (footerEditor.current?.innerHTML ?? "")
-        : "",
+      footerContent: footerEnabled ? serializeRegion(footerEditor.current) : "",
 
       pageNumbers,
       variables,
@@ -1301,99 +1433,139 @@ export function TemplateEditor({ template, onClose }: Props) {
           </div>
         </header>
 
-        <EditorToolbar
-          t={t}
-          cmd={cmd}
-          setPx={setPx}
-          setLineHeight={setLineHeight}
-          insertTable={() =>
-            cmd(
-              "insertHTML",
-              "<table><tbody><tr><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td></tr></tbody></table><p><br></p>",
-            )
-          }
-          rememberSelection={rememberSelection}
-          openImage={() => setImageOpen(true)}
-          openLink={() => setLinkOpen(true)}
-          openVariable={() => {
-            setEditingVariable(undefined);
-            setVariableOpen(true);
-          }}
-          state={toolbarState}
-        />
-
-        {selectedImage && (
-          <ImageContextBar
+        <div className="editor-sticky-controls">
+          <EditorToolbar
             t={t}
-            width={imageWidth}
-            height={imageHeight}
-            fit={imageFit}
-            align={imageAlign}
-            onChange={updateSelectedImage}
-            onMoveBefore={() => moveImage(-1)}
-            onMoveAfter={() => moveImage(1)}
-            onRemove={() => {
-              removePlacedImage(selectedImage);
-
-              setSelectedImage(null);
-              setResizeBox(null);
+            cmd={cmd}
+            setPx={setPx}
+            setLineHeight={setLineHeight}
+            insertTable={() =>
+              cmd(
+                "insertHTML",
+                "<table><tbody><tr><td>Cell</td><td>Cell</td></tr><tr><td>Cell</td><td>Cell</td></tr></tbody></table><p><br></p>",
+              )
+            }
+            rememberSelection={rememberSelection}
+            openImage={() => setImageOpen(true)}
+            openLink={() => setLinkOpen(true)}
+            openVariable={() => {
+              setEditingVariable(undefined);
+              setVariableOpen(true);
             }}
+            state={toolbarState}
           />
-        )}
 
-        <VariableShelf
-          t={t}
-          variables={variables}
-          rememberSelection={rememberSelection}
-          insertVariable={insertVariable}
-          editVariable={(variable) => {
-            setEditingVariable(variable);
-            setVariableOpen(true);
-          }}
-          removeVariable={(variableName) =>
-            setVariables((current) =>
-              current.filter((variable) => variable.name !== variableName),
-            )
-          }
-          dropVariableAtPoint={dropVariableAtPoint}
-          reorderVariable={(from, to) =>
-            setVariables((current) => {
-              if (
-                from < 0 ||
-                to < 0 ||
-                from >= current.length ||
-                to > current.length
-              ) {
-                return current;
-              }
+          {selectedImage && (
+            <ImageContextBar
+              t={t}
+              width={imageWidth}
+              height={imageHeight}
+              fit={imageFit}
+              align={imageAlign}
+              onChange={updateSelectedImage}
+              onMoveBefore={() => moveImage(-1)}
+              onMoveAfter={() => moveImage(1)}
+              onRemove={() => {
+                removePlacedImage(selectedImage);
 
-              const next = [...current];
-              const [moved] = next.splice(from, 1);
+                setSelectedImage(null);
+                setResizeBox(null);
+              }}
+            />
+          )}
 
-              const insertAt = from < to ? to - 1 : to;
+          {selectedVariableElement &&
+            (() => {
+              const variableName = selectedVariableElement.dataset.variableName;
+              const variable = variables.find(
+                (item) => item.name === variableName,
+              );
+              if (!variable) return null;
+              return (
+                <div className="image-context-bar variable-context-bar">
+                  <strong>{`{{${variable.name}}}`}</strong>
+                  <div className="image-context-actions">
+                    <button
+                      type="button"
+                      className="btn secondary compact"
+                      onClick={() => {
+                        setEditingVariable(variable);
+                        setVariableOpen(true);
+                      }}
+                    >
+                      <Pencil size={16} /> {t("editVariable")}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn secondary compact danger"
+                      onClick={() => {
+                        selectedVariableElement.remove();
+                        setSelectedVariableElement(null);
+                        setSelectedVariableBox(null);
+                        setDirty(true);
+                      }}
+                    >
+                      <Trash2 size={16} /> {t("removeVariable")}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
 
-              if (insertAt === from) {
-                return current;
-              }
+          <VariableShelf
+            t={t}
+            variables={variables}
+            rememberSelection={rememberSelection}
+            insertVariable={insertVariable}
+            editVariable={(variable) => {
+              setEditingVariable(variable);
+              setVariableOpen(true);
+            }}
+            removeVariable={(variableName) =>
+              setVariables((current) =>
+                current.filter((variable) => variable.name !== variableName),
+              )
+            }
+            dropVariableAtPoint={dropVariableAtPoint}
+            reorderVariable={(from, to) =>
+              setVariables((current) => {
+                if (
+                  from < 0 ||
+                  to < 0 ||
+                  from >= current.length ||
+                  to > current.length
+                ) {
+                  return current;
+                }
 
-              next.splice(insertAt, 0, moved);
+                const next = [...current];
+                const [moved] = next.splice(from, 1);
 
-              return next;
-            })
-          }
-        />
+                const insertAt = from < to ? to - 1 : to;
 
-        <DocumentOptions
-          t={t}
-          header={headerEnabled}
-          footer={footerEnabled}
-          pageNumbers={pageNumbers}
-          setHeader={setHeaderEnabled}
-          setFooter={setFooterEnabled}
-          setPageNumbers={setPageNumbers}
-        />
+                if (insertAt === from) {
+                  return current;
+                }
 
-        <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+                next.splice(insertAt, 0, moved);
+
+                return next;
+              })
+            }
+          />
+
+          <DocumentOptions
+            t={t}
+            header={headerEnabled}
+            footer={footerEnabled}
+            pageNumbers={pageNumbers}
+            setHeader={setHeaderEnabled}
+            setFooter={setFooterEnabled}
+            setPageNumbers={setPageNumbers}
+          />
+
+          <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+        </div>
 
         <div className="paper-stage">
           <div
@@ -1435,6 +1607,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
+                    if (handleVariableAction(target)) return;
+                    if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {
                       selectImage(target as HTMLImageElement);
@@ -1469,6 +1643,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                 onMouseUp={rememberSelection}
                 onClick={(event) => {
                   const target = event.target as HTMLElement;
+                  if (handleVariableAction(target)) return;
+                  if (selectVariableElement(target)) return;
 
                   if (target.tagName === "IMG") {
                     selectImage(target as HTMLImageElement);
@@ -1508,6 +1684,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
+                    if (handleVariableAction(target)) return;
+                    if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {
                       selectImage(target as HTMLImageElement);
@@ -1522,6 +1700,57 @@ export function TemplateEditor({ template, onClose }: Props) {
               {pageNumbers && <div className="page-number-preview">1 / 1</div>}
             </div>
           </div>
+
+          {selectedVariableElement &&
+            selectedVariableBox &&
+            (() => {
+              const variableName = selectedVariableElement.dataset.variableName;
+              const variable = variables.find(
+                (item) => item.name === variableName,
+              );
+              if (!variable) return null;
+
+              return (
+                <>
+                  <button
+                    type="button"
+                    className="selected-variable-edit"
+                    aria-label={t("editVariable")}
+                    title={t("editVariable")}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      setEditingVariable(variable);
+                      setVariableOpen(true);
+                    }}
+                    style={{
+                      left: Math.max(8, selectedVariableBox.right - 68),
+                      top: Math.max(8, selectedVariableBox.top - 34),
+                    }}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="selected-variable-delete"
+                    aria-label={t("removeVariable")}
+                    title={t("removeVariable")}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      selectedVariableElement.remove();
+                      setSelectedVariableElement(null);
+                      setSelectedVariableBox(null);
+                      setDirty(true);
+                    }}
+                    style={{
+                      left: Math.max(42, selectedVariableBox.right - 34),
+                      top: Math.max(8, selectedVariableBox.top - 34),
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </>
+              );
+            })()}
 
           {selectedImage && resizeBox && (
             <>
@@ -1558,6 +1787,32 @@ export function TemplateEditor({ template, onClose }: Props) {
                   top: resizeBox.bottom - 10,
                 }}
               />
+
+              {selectedImage.dataset.variableType === "image" &&
+                selectedImage.dataset.variableName && (
+                  <button
+                    type="button"
+                    className="selected-image-edit"
+                    aria-label={t("edit")}
+                    title={t("edit")}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      const variable = variables.find(
+                        (item) =>
+                          item.name === selectedImage.dataset.variableName,
+                      );
+                      if (!variable) return;
+                      setEditingVariable(variable);
+                      setVariableOpen(true);
+                    }}
+                    style={{
+                      left: resizeBox.right - 52,
+                      top: resizeBox.top - 16,
+                    }}
+                  >
+                    <Pencil size={15} />
+                  </button>
+                )}
 
               <button
                 type="button"

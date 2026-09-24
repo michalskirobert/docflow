@@ -5,7 +5,7 @@ import {
   SelectControl,
 } from "@/components/shared/form";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IMaskInput } from "react-imask";
 import { DateTimePicker } from "@/components/shared/form";
 import {
@@ -17,13 +17,18 @@ import {
 import { Bold, Italic, Plus, Trash2, Underline, Variable } from "lucide-react";
 import type { TemplateVariable, VariableType } from "../types";
 
-const makeTag = (value: string) =>
-  value
+const makeTag = (value: string) => {
+  const base = value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-zA-Z0-9]+(.)/g, (_, c: string) => c.toUpperCase())
     .replace(/[^a-zA-Z0-9]/g, "")
     .replace(/^[0-9]+/, "");
+
+  if (!base) return "";
+  if (base.length >= 3) return base;
+  return `${base}Var`.slice(0, Math.max(3, base.length + 3));
+};
 const num0 = (v: string) => Math.max(0, Number(v) || 0);
 
 export function VariableModal({
@@ -64,6 +69,18 @@ export function VariableModal({
   const [dateFormat, setDateFormat] = useState(
     initial?.dateFormat ?? "DD.MM.YYYY",
   );
+  useEffect(() => {
+    const allowed =
+      type === "date"
+        ? ["DD.MM.YYYY", "YYYY-MM-DD", "DD/MM/YYYY"]
+        : type === "datetime"
+          ? ["DD.MM.YYYY HH:mm", "YYYY-MM-DD HH:mm", "DD/MM/YYYY HH:mm"]
+          : type === "time"
+            ? ["HH:mm", "HH:mm:ss"]
+            : [];
+    if (allowed.length && !allowed.includes(dateFormat))
+      setDateFormat(allowed[0]);
+  }, [type, dateFormat]);
   const [options, setOptions] = useState(
     initial?.options?.length ? initial.options : [""],
   );
@@ -274,6 +291,7 @@ export function VariableModal({
                 {t("variableType")}
                 <SelectControl
                   value={type}
+                  disabled={Boolean(initial)}
                   onChange={(e) => {
                     const n = e.target.value as VariableType;
                     setType(n);
@@ -459,26 +477,38 @@ export function VariableModal({
                   value={dateFormat}
                   onChange={(e) => setDateFormat(e.target.value)}
                 >
-                  {type === "date" && (
-                    <>
-                      <option>DD.MM.YYYY</option>
-                      <option>YYYY-MM-DD</option>
-                      <option>DD/MM/YYYY</option>
-                    </>
-                  )}
-                  {type === "datetime" && (
-                    <>
-                      <option>DD.MM.YYYY HH:mm</option>
-                      <option>YYYY-MM-DD HH:mm</option>
-                      <option>DD/MM/YYYY HH:mm</option>
-                    </>
-                  )}
-                  {type === "time" && (
-                    <>
-                      <option>HH:mm</option>
-                      <option>HH:mm:ss</option>
-                    </>
-                  )}
+                  {type === "date"
+                    ? [
+                        <option key="dmy-dot" value="DD.MM.YYYY">
+                          DD.MM.YYYY
+                        </option>,
+                        <option key="ymd" value="YYYY-MM-DD">
+                          YYYY-MM-DD
+                        </option>,
+                        <option key="dmy-slash" value="DD/MM/YYYY">
+                          DD/MM/YYYY
+                        </option>,
+                      ]
+                    : type === "datetime"
+                      ? [
+                          <option key="dmy-dot-time" value="DD.MM.YYYY HH:mm">
+                            DD.MM.YYYY HH:mm
+                          </option>,
+                          <option key="ymd-time" value="YYYY-MM-DD HH:mm">
+                            YYYY-MM-DD HH:mm
+                          </option>,
+                          <option key="dmy-slash-time" value="DD/MM/YYYY HH:mm">
+                            DD/MM/YYYY HH:mm
+                          </option>,
+                        ]
+                      : [
+                          <option key="hm" value="HH:mm">
+                            HH:mm
+                          </option>,
+                          <option key="hms" value="HH:mm:ss">
+                            HH:mm:ss
+                          </option>,
+                        ]}
                 </SelectControl>
               </label>
             )}

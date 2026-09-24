@@ -435,6 +435,7 @@
 .variable-chip {
   margin: 0 2px;
 }
+.selected-image-edit,
 .selected-image-delete {
   position: fixed;
   z-index: 35;
@@ -448,6 +449,9 @@
   color: #fff;
   box-shadow: 0 3px 12px rgb(15 23 42 / 25%);
   cursor: pointer;
+}
+.selected-image-edit {
+  background: #4f46e5;
 }
 .option-builder-fixed {
   max-height: 240px;
@@ -545,4 +549,82 @@
 .image-source.is-processing.dragging {
   border-color: #cbd5e1;
   background: #f8fafc;
+}
+
+/* Keep editor dropdowns above the contextual image/variable bars. */
+.editor-toolbar:has(.shared-select.is-open) {
+  z-index: 60;
+}
+
+.selected-variable-edit,
+.selected-variable-delete {
+  position: fixed;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  box-shadow: 0 3px 12px rgb(15 23 42 / 25%);
+  cursor: pointer;
+}
+
+.selected-variable-edit {
+  background: #4f46e5;
+}
+
+.selected-variable-delete {
+  background: #dc2626;
+}
+
+.editor-sticky-controls {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: var(--surface, #fff);
+  box-shadow: 0 1px 0 var(--border);
+}
+.editor-sticky-controls .editor-toolbar {
+  position: relative;
+  top: auto;
+  z-index: 3;
+}
+.editor-sticky-controls .variable-shelf,
+.editor-sticky-controls .document-regions {
+  position: relative;
+  z-index: 2;
+}
+.inline-variable-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.inline-variable-actions button {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #c7d2fe;
+  border-radius: 5px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.inline-variable-actions button[data-variable-action="remove"] {
+  color: #dc2626;
+}
+.a4-paper [data-layout="between"],
+.page-header-editor [data-layout="between"],
+.page-footer-editor [data-layout="between"] {
+  display: flex !important;
+  width: 100% !important;
+  justify-content: space-between !important;
+  align-items: center;
 }

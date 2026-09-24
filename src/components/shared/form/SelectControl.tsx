@@ -52,23 +52,33 @@ export const SelectControl = forwardRef<
 
   const options: Option[] = [];
 
-  Children.forEach(children, (child) => {
-    if (!isValidElement(child)) return;
+  const collectOptions = (nodes: ReactNode) => {
+    Children.forEach(nodes, (child) => {
+      if (!isValidElement(child)) return;
 
-    if (child.type === "option") {
-      const option = child as ReactElement<{
-        value?: string | number;
-        disabled?: boolean;
-        children?: ReactNode;
-      }>;
+      if (child.type === "option") {
+        const option = child as ReactElement<{
+          value?: string | number;
+          disabled?: boolean;
+          children?: ReactNode;
+        }>;
 
-      options.push({
-        value: String(option.props.value ?? ""),
-        label: Children.toArray(option.props.children).join(""),
-        disabled: option.props.disabled,
-      });
-    }
-  });
+        options.push({
+          value: String(option.props.value ?? ""),
+          label: Children.toArray(option.props.children).join(""),
+          disabled: option.props.disabled,
+        });
+        return;
+      }
+
+      const nested = child as ReactElement<{ children?: ReactNode }>;
+      if (nested.props.children !== undefined) {
+        collectOptions(nested.props.children);
+      }
+    });
+  };
+
+  collectOptions(children);
 
   const currentValue = String(value ?? uncontrolledValue ?? "");
 
