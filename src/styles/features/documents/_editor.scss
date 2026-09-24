@@ -817,3 +817,332 @@
     justify-content: center;
   }
 }
+
+.email-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(2 6 23 / 72%);
+  backdrop-filter: blur(4px);
+}
+
+.email-preview-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 100%);
+  max-height: min(900px, calc(100dvh - 40px));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+
+.email-preview-header,
+.email-preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.email-preview-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.email-preview-header h2,
+.email-preview-header p {
+  margin: 0;
+}
+
+.email-preview-header p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.email-preview-subject {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.email-preview-frame-wrap {
+  min-height: 0;
+  flex: 1;
+  padding: 14px;
+  overflow: auto;
+  background: #e5e7eb;
+}
+
+.email-preview-frame {
+  display: block;
+  width: 100%;
+  min-height: 560px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.email-preview-actions {
+  justify-content: flex-end;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .email-preview-backdrop {
+    padding: 0;
+  }
+
+  .email-preview-modal {
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .email-preview-frame-wrap {
+    padding: 8px;
+  }
+
+  .email-preview-frame {
+    min-height: 100%;
+  }
+
+  .email-preview-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .email-preview-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 2.3.1 interaction polish: sticky actions always stay above form controls. */
+.document-generator-shell .document-sticky-actions {
+  z-index: 70;
+  isolation: isolate;
+}
+
+.document-generator-shell .document-form-card .template-combobox {
+  z-index: 1;
+}
+
+@media (max-width: 760px) {
+  .document-generator-shell .template-combobox-menu {
+    position: fixed;
+    z-index: 180;
+    top: auto;
+    right: 12px;
+    bottom: 88px;
+    left: 12px;
+    max-height: min(62dvh, 520px);
+  }
+}
+
+/* Modal motion is shared visually by email/document previews. */
+.email-preview-backdrop {
+  animation: modal-backdrop-in 160ms ease-out both;
+}
+
+.email-preview-modal {
+  transform-origin: 50% 45%;
+  animation: modal-surface-in 190ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Document preview stays in context and uses the same generated PDF as download. */
+.document-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(2 6 23 / 72%);
+  backdrop-filter: blur(4px);
+  animation: modal-backdrop-in 160ms ease-out both;
+}
+
+.document-preview-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  height: min(900px, calc(100dvh - 40px));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+  transform-origin: 50% 45%;
+  animation: modal-surface-in 190ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.document-preview-header,
+.document-preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.document-preview-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.document-preview-header h2,
+.document-preview-header span {
+  margin: 0;
+}
+
+.document-preview-header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.document-preview-frame-wrap {
+  min-height: 0;
+  flex: 1;
+  padding: 12px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.document-preview-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.document-preview-actions {
+  justify-content: flex-end;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .document-preview-backdrop {
+    padding: 0;
+  }
+  .document-preview-modal {
+    width: 100%;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+  .document-preview-frame-wrap {
+    padding: 6px;
+  }
+  .document-preview-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .document-preview-backdrop,
+  .document-preview-modal {
+    animation: none !important;
+  }
+}
+
+/* Email preview represents a common desktop email viewport (680px), not an A4 page.
+   On small screens the canvas is scaled down as a whole so layout relationships stay visible. */
+.email-preview-frame-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.email-preview-frame {
+  flex: 0 0 680px;
+  width: 680px;
+  max-width: none;
+  min-height: 720px;
+}
+@media (max-width: 640px) {
+  .email-preview-frame-wrap {
+    display: block;
+    overflow: hidden;
+    padding: 8px;
+  }
+  .email-preview-frame {
+    width: 680px;
+    min-height: 1080px;
+    transform: scale(0.5);
+    transform-origin: top left;
+  }
+}
+@media (max-width: 420px) {
+  .email-preview-frame {
+    transform: scale(0.47);
+  }
+}
+@media (max-width: 380px) {
+  .email-preview-frame {
+    transform: scale(0.42);
+  }
+}
+.template-preview-summary {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--muted);
+  background: var(--surface-muted);
+}
+.template-preview-summary svg {
+  width: 30px;
+  height: 30px;
+}
+.template-preview-summary span {
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pdf-generation-loader {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  color: #334155;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+.pdf-generation-loader span {
+  max-width: 320px;
+  color: #64748b;
+  font-size: 13px;
+}
+.pdf-generation-loader .spin {
+  animation: pdf-loader-spin 0.8s linear infinite;
+}
+@keyframes pdf-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pdf-generation-loader .spin {
+    animation: none;
+  }
+}

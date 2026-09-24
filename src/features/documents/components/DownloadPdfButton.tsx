@@ -1,8 +1,8 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { Download, LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/shared/button";
+import { useFeedback } from "@/components/ui/feedback-provider";
 
 export function DownloadPdfButton({
   documentId,
@@ -10,21 +10,19 @@ export function DownloadPdfButton({
   label,
   errorLabel,
   disabled = false,
-  onPendingChange,
 }: {
   documentId: string;
   fileName: string;
   label: string;
   errorLabel: string;
   disabled?: boolean;
-  onPendingChange?: (pending: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const { notify } = useFeedback();
 
   const download = async () => {
     if (loading || disabled) return;
     setLoading(true);
-    onPendingChange?.(true);
     try {
       const response = await fetch(`/api/documents/${documentId}/pdf`);
       if (!response.ok) throw new Error("PDF download failed");
@@ -38,23 +36,20 @@ export function DownloadPdfButton({
       anchor.remove();
       URL.revokeObjectURL(url);
     } catch {
-      window.alert(errorLabel);
+      notify(errorLabel, "error");
     } finally {
       setLoading(false);
-      onPendingChange?.(false);
     }
   };
 
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      loading={loading}
-      disabled={disabled}
-      onClick={download}
-    >
-      {!loading && <Download size={18} />}
+    <button type="button" disabled={disabled || loading} onClick={download}>
+      {loading ? (
+        <LoaderCircle className="spinner" size={18} />
+      ) : (
+        <Download size={18} />
+      )}
       {label}
-    </Button>
+    </button>
   );
 }

@@ -165,3 +165,42 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Global modal entrance motion. */
+.dialog-backdrop {
+  animation: modal-backdrop-in 160ms ease-out both;
+}
+
+.dialog-backdrop > .dialog {
+  transform-origin: 50% 45%;
+  animation: modal-surface-in 190ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-backdrop,
+  .dialog-backdrop > .dialog,
+  .email-preview-backdrop,
+  .email-preview-modal {
+    animation: none !important;
+  }
+}

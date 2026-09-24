@@ -1,20 +1,5 @@
 /* 2.1.1 mobile combobox + modal viewport hotfix */
 @media (max-width: 760px) {
-  .template-combobox {
-    z-index: 45;
-  }
-  .template-combobox-menu {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(100% + 6px);
-    bottom: auto;
-    max-height: min(52dvh, 420px);
-    overflow: hidden;
-  }
-  .template-combobox-options {
-    max-height: min(38dvh, 300px);
-  }
   .dialog-backdrop {
     place-items: center;
     padding: 8px;

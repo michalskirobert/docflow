@@ -3,19 +3,22 @@
 import {
   Edit3,
   Eye,
+  Download,
   FileText,
   LoaderCircle,
+  Printer,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { InputControl, SelectControl } from "@/components/shared/form";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useDeleteDocumentService } from "../service";
-import type { Document } from "../types";
+import type { DocumentSummary } from "../types";
 import { DownloadPdfButton } from "./DownloadPdfButton";
 
 export function DocumentHistory({
@@ -27,7 +30,7 @@ export function DocumentHistory({
   onQueryChange,
   onSortChange,
 }: {
-  documents: Document[];
+  documents: DocumentSummary[];
   loading?: boolean;
   action?: ReactNode;
   q: string;
@@ -36,7 +39,97 @@ export function DocumentHistory({
   onSortChange: (value: string) => void;
 }) {
   const t = useTranslations("documents");
+  const { notify } = useFeedback();
   const [actionPending, setActionPending] = useState(false);
+  const [previewDocument, setPreviewDocument] =
+    useState<DocumentSummary | null>(null);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewPdfLoading, setPreviewPdfLoading] = useState(false);
+  const [previewPdfError, setPreviewPdfError] = useState(false);
+  const [previewDownloadLoading, setPreviewDownloadLoading] = useState(false);
+  const previewFrameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!previewDocument) {
+      setPreviewPdfUrl(null);
+      setPreviewPdfLoading(false);
+      setPreviewPdfError(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let objectUrl: string | null = null;
+    setPreviewPdfLoading(true);
+    setPreviewPdfError(false);
+    setPreviewPdfUrl(null);
+
+    fetch(`/api/documents/${previewDocument.id}/pdf?inline=1`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("PDF_GENERATION_FAILED");
+        return response.blob();
+      })
+      .then((blob) => {
+        if (controller.signal.aborted) return;
+        objectUrl = URL.createObjectURL(blob);
+        setPreviewPdfUrl(objectUrl);
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+        setPreviewPdfError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setPreviewPdfLoading(false);
+      });
+
+    return () => {
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [previewDocument]);
+
+  useEffect(() => {
+    if (!previewDocument) return;
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !previewDownloadLoading)
+        setPreviewDocument(null);
+    };
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [previewDocument, previewDownloadLoading]);
+
+  const downloadPreview = async () => {
+    if (!previewDocument || previewDownloadLoading) return;
+    setPreviewDownloadLoading(true);
+    try {
+      const response = await fetch(`/api/documents/${previewDocument.id}/pdf`);
+      if (!response.ok) throw new Error("PDF_DOWNLOAD_FAILED");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${previewDocument.name.replace(/[\\/:*?"<>|]+/g, "-")}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      notify(t("downloadError"), "error");
+    } finally {
+      setPreviewDownloadLoading(false);
+    }
+  };
+
+  const printPreview = () => {
+    previewFrameRef.current?.contentWindow?.print();
+  };
 
   return (
     <section className="document-history">
@@ -85,12 +178,101 @@ export function DocumentHistory({
             document={document}
             actionsDisabled={actionPending}
             onActionPendingChange={setActionPending}
+            onPreview={setPreviewDocument}
           />
         ))
       ) : (
         <div className="empty-state compact">
           <FileText />
           <p>{t("noDocuments")}</p>
+        </div>
+      )}
+
+      {previewDocument && (
+        <div
+          className="document-preview-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !previewDownloadLoading)
+              setPreviewDocument(null);
+          }}
+        >
+          <section
+            className="document-preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="document-preview-title"
+          >
+            <header className="document-preview-header">
+              <div>
+                <span>{t("preview")}</span>
+                <h2 id="document-preview-title">{previewDocument.name}</h2>
+              </div>
+              <button
+                className="btn secondary compact"
+                type="button"
+                aria-label={t("close")}
+                disabled={previewDownloadLoading}
+                onClick={() => setPreviewDocument(null)}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <div className="document-preview-frame-wrap">
+              {previewPdfLoading && (
+                <div
+                  className="pdf-generation-loader"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <LoaderCircle className="spin" size={34} />
+                  <strong>Generating PDF…</strong>
+                  <span>This can take a moment for documents with images.</span>
+                </div>
+              )}
+              {previewPdfError && (
+                <div className="pdf-generation-loader" role="alert">
+                  <strong>Could not generate PDF preview.</strong>
+                </div>
+              )}
+              {previewPdfUrl && (
+                <iframe
+                  ref={previewFrameRef}
+                  className="document-preview-frame"
+                  src={`${previewPdfUrl}#view=FitH`}
+                  title={`${t("preview")}: ${previewDocument.name}`}
+                />
+              )}
+            </div>
+            <footer className="document-preview-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={
+                  previewDownloadLoading || previewPdfLoading || !previewPdfUrl
+                }
+                onClick={printPreview}
+              >
+                <Printer size={17} />
+                {t("print")}
+              </button>
+              <button
+                className="btn"
+                type="button"
+                disabled={
+                  previewDownloadLoading || previewPdfLoading || !previewPdfUrl
+                }
+                onClick={downloadPreview}
+              >
+                {previewDownloadLoading ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : (
+                  <Download size={17} />
+                )}
+                {t("downloadPdf")}
+              </button>
+            </footer>
+          </section>
         </div>
       )}
     </section>
@@ -101,10 +283,12 @@ function DocumentRow({
   document: d,
   actionsDisabled,
   onActionPendingChange,
+  onPreview,
 }: {
-  document: Document;
+  document: DocumentSummary;
   actionsDisabled: boolean;
   onActionPendingChange: (pending: boolean) => void;
+  onPreview: (document: DocumentSummary) => void;
 }) {
   const t = useTranslations("documents");
   const remove = useDeleteDocumentService(d.id);
@@ -150,16 +334,14 @@ function DocumentRow({
       </div>
 
       <div className="document-actions">
-        <Link
-          href={`/documents/${d.id}/preview`}
-          aria-disabled={actionsDisabled}
-          onClick={(event) => actionsDisabled && event.preventDefault()}
-          target="_blank"
-          rel="noreferrer"
+        <button
+          type="button"
+          disabled={actionsDisabled}
+          onClick={() => onPreview(d)}
         >
           <Eye />
           {t("preview")}
-        </Link>
+        </button>
 
         <Link
           href={`/documents/${d.id}/edit`}
@@ -176,7 +358,6 @@ function DocumentRow({
           label={t("pdf")}
           errorLabel={t("downloadError")}
           disabled={actionsDisabled}
-          onPendingChange={onActionPendingChange}
         />
 
         <button

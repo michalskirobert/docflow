@@ -381,7 +381,28 @@ a:focus-visible {
     var(--skeleton-highlight) 45%,
     var(--skeleton-base) 65%
   ) !important;
-  background-size: 200% 100% !important;
+  background-size: 220% 100% !important;
+  animation: docflow-skeleton-shimmer 1.45s ease-in-out infinite !important;
+}
+
+@keyframes docflow-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line,
+  .skeleton-action,
+  .skeleton-icon,
+  .skeleton-field,
+  .settings-skeleton-input,
+  .settings-skeleton-button {
+    animation: none !important;
+  }
 }
 
 /* Common legacy white surfaces */
@@ -882,4 +903,127 @@ select {
 .skeleton-row .skeleton-line + .skeleton-line,
 .skeleton-card .skeleton-line + .skeleton-line {
   margin-top: 10px;
+}
+
+/* 2.3.1 unified animated skeleton primitives. */
+.skeleton-control,
+.skeleton-label,
+.skeleton-pill,
+.skeleton-chevron,
+.skeleton-template-trigger,
+.skeleton-textarea,
+.skeleton-settings-option,
+.skeleton-toggle,
+.skeleton-warning,
+.support-hint-skeleton,
+.support-submit-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-highlight) 45%,
+    var(--skeleton-base) 65%
+  ) !important;
+  background-size: 220% 100% !important;
+  animation: docflow-skeleton-shimmer 1.45s ease-in-out infinite !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-control,
+  .skeleton-label,
+  .skeleton-pill,
+  .skeleton-chevron,
+  .skeleton-template-trigger,
+  .skeleton-textarea,
+  .skeleton-settings-option,
+  .skeleton-toggle,
+  .skeleton-warning,
+  .support-hint-skeleton,
+  .support-submit-skeleton {
+    animation: none !important;
+  }
+}
+
+/* 2.3.1 global skeleton motion. The moving highlight is a pseudo-element so
+   feature-level background rules cannot accidentally turn skeletons static. */
+.skeleton-line,
+.skeleton-action,
+.skeleton-icon,
+.skeleton-field,
+.skeleton-control,
+.skeleton-label,
+.skeleton-pill,
+.skeleton-chevron,
+.skeleton-template-trigger,
+.skeleton-textarea,
+.skeleton-settings-option,
+.skeleton-toggle,
+.skeleton-warning,
+.settings-skeleton-input,
+.settings-skeleton-button,
+.support-hint-skeleton,
+.support-submit-skeleton {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--skeleton-base) !important;
+}
+
+.skeleton-line::after,
+.skeleton-action::after,
+.skeleton-icon::after,
+.skeleton-field::after,
+.skeleton-control::after,
+.skeleton-label::after,
+.skeleton-pill::after,
+.skeleton-chevron::after,
+.skeleton-template-trigger::after,
+.skeleton-textarea::after,
+.skeleton-settings-option::after,
+.skeleton-toggle::after,
+.skeleton-warning::after,
+.settings-skeleton-input::after,
+.settings-skeleton-button::after,
+.support-hint-skeleton::after,
+.support-submit-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    100deg,
+    transparent 18%,
+    var(--skeleton-highlight) 48%,
+    transparent 78%
+  );
+  transform: translateX(-115%);
+  animation: docflow-skeleton-sweep 1.25s ease-in-out infinite;
+}
+
+@keyframes docflow-skeleton-sweep {
+  to {
+    transform: translateX(115%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line::after,
+  .skeleton-action::after,
+  .skeleton-icon::after,
+  .skeleton-field::after,
+  .skeleton-control::after,
+  .skeleton-label::after,
+  .skeleton-pill::after,
+  .skeleton-chevron::after,
+  .skeleton-template-trigger::after,
+  .skeleton-textarea::after,
+  .skeleton-settings-option::after,
+  .skeleton-toggle::after,
+  .skeleton-warning::after,
+  .settings-skeleton-input::after,
+  .settings-skeleton-button::after,
+  .support-hint-skeleton::after,
+  .support-submit-skeleton::after {
+    animation: none;
+    display: none;
+  }
 }

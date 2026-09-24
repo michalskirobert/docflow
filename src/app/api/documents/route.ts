@@ -43,7 +43,13 @@ export async function GET(req: Request) {
               }
             : {}),
         },
-        include: { template: { select: { name: true } } },
+        select: {
+          id: true,
+          name: true,
+          templateId: true,
+          createdAt: true,
+          template: { select: { name: true } },
+        },
         orderBy,
       }),
     );

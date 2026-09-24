@@ -77,6 +77,7 @@ export async function GET(req: Request) {
           : sort === "nameDesc"
             ? { name: "desc" as const }
             : { createdAt: "desc" as const };
+    const picker = searchParams.get("view") === "picker";
     return NextResponse.json(
       await prisma.template.findMany({
         where: {
@@ -92,6 +93,23 @@ export async function GET(req: Request) {
               }
             : {}),
         },
+        select: picker
+          ? {
+              id: true,
+              name: true,
+              description: true,
+              emailSubject: true,
+              variablesJson: true,
+              createdAt: true,
+            }
+          : {
+              id: true,
+              name: true,
+              description: true,
+              variablesJson: true,
+              isExample: true,
+              createdAt: true,
+            },
         orderBy,
       }),
     );

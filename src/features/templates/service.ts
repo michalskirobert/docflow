@@ -1,6 +1,6 @@
 "use client";
 import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
-import type { Template, TemplateVariable } from "./types";
+import type { Template, TemplateSummary, TemplateVariable } from "./types";
 export type TemplateInput = {
   name: string;
   description?: string;
@@ -15,7 +15,7 @@ export const useTemplatesService = (q = "", sort = "newest") => {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
   params.set("sort", sort);
-  return useGet<Template[]>(
+  return useGet<TemplateSummary[]>(
     ["templates", q, sort],
     `/templates?${params.toString()}`,
   );

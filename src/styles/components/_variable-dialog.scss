@@ -28,33 +28,19 @@
   outline: none;
 }
 .help-tooltip-content {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  z-index: 200;
-  width: max-content;
-  max-width: min(280px, 80vw);
-  padding: 8px 10px;
+  position: fixed;
+  z-index: 1000;
+  padding: 9px 11px;
   border: 1px solid var(--border);
   border-radius: 9px;
   background: #111827;
-  color: white;
+  color: #fff;
   font-size: 12px;
   line-height: 1.4;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 18%);
-  opacity: 0;
-  visibility: hidden;
-  transform: translate(-50%, 4px);
-  transition: 0.15s ease;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 22%);
   pointer-events: none;
 }
-.help-tooltip:hover .help-tooltip-content,
-.help-tooltip:focus-within .help-tooltip-content,
-.help-tooltip-content.is-open {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, 0);
-}
+
 .variable-section {
   margin: 14px 0;
   border: 1px solid var(--border);
@@ -88,23 +74,6 @@
   background: rgb(248 250 252 / 92%);
   backdrop-filter: blur(10px);
 }
-@media (max-width: 760px) {
-  .help-tooltip-content {
-    position: fixed;
-    left: 16px;
-    right: 16px;
-    bottom: 24px;
-    width: auto;
-    max-width: none;
-    transform: translateY(4px);
-  }
-  .help-tooltip:hover .help-tooltip-content,
-  .help-tooltip:focus-within .help-tooltip-content,
-  .help-tooltip-content.is-open {
-    transform: none;
-  }
-}
-
 /* 2.1.0 variable modal + unified list toolbar */
 .variable-dialog {
   width: min(760px, calc(100vw - 28px));

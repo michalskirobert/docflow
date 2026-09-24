@@ -33,14 +33,18 @@ export type TemplateVariable = {
   imageAlign?: "inline" | "left" | "center" | "right";
   imageFit?: "contain" | "cover" | "fill";
 };
-export type Template = {
+export type TemplateSummary = {
   id: string;
   name: string;
   description: string | null;
-  emailSubject?: string | null;
-  content: string;
   variablesJson: string;
-  isExample: boolean;
+  isExample?: boolean;
+  emailSubject?: string | null;
+  createdAt: string;
+};
+
+export type Template = TemplateSummary & {
+  content: string;
   headerContent?: string | null;
   footerContent?: string | null;
   pageNumbers?: boolean;

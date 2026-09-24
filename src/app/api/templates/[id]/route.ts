@@ -61,6 +61,24 @@ const schema = z.object({
     )
     .optional(),
 });
+export async function GET(
+  _: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const s = await requireSession();
+    const { id } = await params;
+    const template = await prisma.template.findFirst({
+      where: { id, organizationId: s.organizationId },
+    });
+    if (!template)
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    return NextResponse.json(template);
+  } catch {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+}
+
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> },

@@ -1,13 +1,13 @@
 "use client";
 import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
-import type { Document } from "./types";
-import type { Template } from "@/features/templates/types";
+import type { Document, DocumentSummary } from "./types";
+import type { TemplateSummary } from "@/features/templates/types";
 
 export const useDocumentsService = (q = "", sort = "newest") => {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
   params.set("sort", sort);
-  return useGet<Document[]>(
+  return useGet<DocumentSummary[]>(
     ["documents", q, sort],
     `/documents?${params.toString()}`,
   );
@@ -15,7 +15,7 @@ export const useDocumentsService = (q = "", sort = "newest") => {
 export const useDocumentService = (id: string) =>
   useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id));
 export const useDocumentTemplatesService = () =>
-  useGet<Template[]>(["templates"], "/templates");
+  useGet<TemplateSummary[]>(["templates", "picker"], "/templates?view=picker");
 export const useGenerateDocumentService = () =>
   usePost<
     Document,

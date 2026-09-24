@@ -120,6 +120,57 @@ export async function GET(
       },
     );
 
+    // Raster images are deliberately normalized immediately before PDF creation.
+    // This also protects older documents created before client-side image optimization.
+    await page.evaluate(async () => {
+      const images = Array.from(document.images);
+      await Promise.all(
+        images.map(async (image) => {
+          if (!image.src || image.src.startsWith("data:image/svg+xml")) return;
+
+          if (!image.complete) {
+            await new Promise<void>((resolve) => {
+              image.addEventListener("load", () => resolve(), { once: true });
+              image.addEventListener("error", () => resolve(), { once: true });
+            });
+          }
+
+          if (!image.naturalWidth || !image.naturalHeight) return;
+
+          const scale = Math.min(
+            1,
+            1280 / image.naturalWidth,
+            800 / image.naturalHeight,
+          );
+          const width = Math.max(1, Math.round(image.naturalWidth * scale));
+          const height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext("2d");
+          if (!context) return;
+
+          context.fillStyle = "#ffffff";
+          context.fillRect(0, 0, width, height);
+          context.drawImage(image, 0, 0, width, height);
+
+          const targetBytes = 160 * 1024;
+          let quality = 0.68;
+          let dataUrl = canvas.toDataURL("image/jpeg", quality);
+          const approximateBytes = (value: string) =>
+            Math.ceil((value.length - value.indexOf(",") - 1) * 0.75);
+
+          while (approximateBytes(dataUrl) > targetBytes && quality > 0.38) {
+            quality = Math.max(0.38, quality - 0.06);
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+          }
+
+          image.src = dataUrl;
+          await image.decode().catch(() => undefined);
+        }),
+      );
+    });
+
     const showHeaderFooter = Boolean(
       doc.renderedHeader || doc.renderedFooter || doc.pageNumbers,
     );

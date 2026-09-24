@@ -267,7 +267,12 @@
     "emailSubjectSetupHelp": "Subjek hanya digunakan saat mengirim langsung dari DocFlow. Konfigurasikan akun email di Pengaturan untuk mengaktifkannya.",
     "emailSetupNoticeTitle": "Ingin mengirim langsung dari DocFlow?",
     "emailSetupNoticeDescription": "Konfigurasikan akun SMTP Anda sendiri secara opsional di Pengaturan. Tanpa konfigurasi, Anda tetap dapat menyalin konten dan menempelkannya ke klien email.",
-    "openEmailSettings": "Buka pengaturan email"
+    "openEmailSettings": "Buka pengaturan email",
+    "previewEmail": "Pratinjau email",
+    "emailPreviewTitle": "Pratinjau email",
+    "emailPreviewDescription": "Periksa pesan yang telah disiapkan sebelum menyalin atau mengirimnya.",
+    "closeEmailPreview": "Tutup pratinjau",
+    "print": "Cetak"
   },
   "settings": {
     "title": "Pengaturan",

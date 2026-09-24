@@ -267,7 +267,12 @@
     "emailSubjectSetupHelp": "The subject is used only when sending directly from DocFlow. Configure your email account in Settings to enable it.",
     "emailSetupNoticeTitle": "Want to send directly from DocFlow?",
     "emailSetupNoticeDescription": "Optionally configure your own SMTP account in Settings. Without it, you can still copy the prepared content and paste it into your email client.",
-    "openEmailSettings": "Open email settings"
+    "openEmailSettings": "Open email settings",
+    "previewEmail": "Preview email",
+    "emailPreviewTitle": "Email preview",
+    "emailPreviewDescription": "Preview the prepared message before copying or sending it.",
+    "closeEmailPreview": "Close preview",
+    "print": "Print"
   },
   "settings": {
     "title": "Settings",

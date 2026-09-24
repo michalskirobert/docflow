@@ -17,7 +17,8 @@ import {
   useDeleteTemplateService,
   useTemplatesService,
 } from "./service";
-import type { Template } from "./types";
+import type { Template, TemplateSummary } from "./types";
+import { api } from "@/lib/axios";
 import { parseTemplateVariables } from "./types";
 import { TemplateEditor } from "./template-editor";
 export default function TemplateList() {
@@ -63,15 +64,32 @@ export default function TemplateList() {
               template={item}
               actionsDisabled={cardActionPending}
               onActionPendingChange={setCardActionPending}
-              onEdit={() => setEditing(item)}
+              onEdit={async () => {
+                setCardActionPending(true);
+                try {
+                  const full = (
+                    await api.get<Template>(`/templates/${item.id}`)
+                  ).data;
+                  setEditing(full);
+                } finally {
+                  setCardActionPending(false);
+                }
+              }}
               onDuplicate={async () => {
                 setCardActionPending(true);
                 try {
+                  const full = (
+                    await api.get<Template>(`/templates/${item.id}`)
+                  ).data;
                   await create.mutateAsync({
-                    name: `${item.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
-                    description: item.description ?? "",
-                    content: item.content,
-                    variables: parseTemplateVariables(item.variablesJson),
+                    name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                    description: full.description ?? "",
+                    emailSubject: full.emailSubject ?? "",
+                    content: full.content,
+                    headerContent: full.headerContent ?? "",
+                    footerContent: full.footerContent ?? "",
+                    pageNumbers: full.pageNumbers,
+                    variables: parseTemplateVariables(full.variablesJson),
                   });
                 } finally {
                   setCardActionPending(false);
@@ -103,8 +121,8 @@ function TemplateCard({
   actionsDisabled,
   onActionPendingChange,
 }: {
-  template: Template;
-  onEdit: () => void;
+  template: TemplateSummary;
+  onEdit: () => Promise<void>;
   onDuplicate: () => Promise<void>;
   actionsDisabled: boolean;
   onActionPendingChange: (pending: boolean) => void;
@@ -132,11 +150,12 @@ function TemplateCard({
   };
   return (
     <article className="template-card">
-      <div className="template-preview-frame">
-        <div
-          className="template-preview"
-          dangerouslySetInnerHTML={{ __html: template.content }}
-        />
+      <div
+        className="template-preview-frame template-preview-summary"
+        aria-hidden="true"
+      >
+        <FilePlus2 />
+        <span>{template.name}</span>
       </div>
       <div className="template-body">
         <div className="row between">
@@ -154,7 +173,7 @@ function TemplateCard({
         <div className="card-actions">
           <button
             className="template-action-edit"
-            onClick={onEdit}
+            onClick={() => void onEdit()}
             disabled={actionsDisabled}
           >
             <Edit3 /> {t("edit")}

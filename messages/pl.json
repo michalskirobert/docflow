@@ -267,7 +267,12 @@
     "emailSubjectSetupHelp": "Temat jest używany tylko przy bezpośredniej wysyłce z DocFlow. Skonfiguruj konto pocztowe w Ustawieniach, aby go włączyć.",
     "emailSetupNoticeTitle": "Chcesz wysyłać bezpośrednio z DocFlow?",
     "emailSetupNoticeDescription": "Skonfiguruj dobrowolnie własne konto SMTP w Ustawieniach. Bez konfiguracji nadal możesz skopiować gotową treść i wkleić ją do swojego klienta pocztowego.",
-    "openEmailSettings": "Przejdź do ustawień poczty"
+    "openEmailSettings": "Przejdź do ustawień poczty",
+    "previewEmail": "Podgląd emaila",
+    "emailPreviewTitle": "Podgląd emaila",
+    "emailPreviewDescription": "Sprawdź przygotowaną wiadomość przed skopiowaniem lub wysłaniem.",
+    "closeEmailPreview": "Zamknij podgląd",
+    "print": "Drukuj"
   },
   "settings": {
     "title": "Ustawienia",

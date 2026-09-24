@@ -75,7 +75,7 @@
   padding: 8px 10px;
   border: 0;
   border-radius: 9px;
-  background: #f8fafc;
+  background: var(--surface-muted);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -182,7 +182,8 @@
   padding: 14px 16px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   box-shadow: 0 5px 18px rgb(15 23 42 / 3%);
 }
 
@@ -358,4 +359,10 @@
     transform: none !important;
     zoom: 1 !important;
   }
+}
+
+.document-history .document-actions > button:not(.danger-link) {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
 }

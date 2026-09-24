@@ -6,9 +6,11 @@ import { HelpTooltip } from "@/components/ui/help-tooltip";
 import {
   ArrowLeft,
   Clipboard,
+  Eye,
   LoaderCircle,
   Mail,
   Send,
+  X,
   Save,
   Sparkles,
 } from "lucide-react";
@@ -31,6 +33,7 @@ import {
   useSendPreparedEmailService,
   useUpdateDocumentService,
 } from "./service";
+import type { RenderedEmail } from "./service";
 
 const padDatePart = (value: number) => String(value).padStart(2, "0");
 const currentVariableValue = (type: string, now = new Date()) => {
@@ -99,8 +102,26 @@ export default function DocumentGenerator({
   const emailSettings = useEmailSettingsStatusService();
   const sendEmailMutation = useSendPreparedEmailService();
   const [recipientEmail, setRecipientEmail] = useState("");
+  const [emailPreview, setEmailPreview] = useState<RenderedEmail | null>(null);
+  const [emailAction, setEmailAction] = useState<"preview" | "copy" | null>(
+    null,
+  );
 
   const documentNameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!emailPreview) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setEmailPreview(null);
+    };
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [emailPreview]);
 
   useEffect(() => {
     if (!isEditing || initialized || !documentQuery.data) return;
@@ -209,9 +230,25 @@ export default function DocumentGenerator({
     }
   };
 
+  const previewEmail = async () => {
+    if (emailAction) return;
+    setEmailAction("preview");
+    try {
+      const email = await renderEmail();
+      if (email) setEmailPreview(email);
+    } finally {
+      setEmailAction(null);
+    }
+  };
+
   const copyEmail = async () => {
+    if (emailAction) return;
+    setEmailAction("copy");
     const email = await renderEmail();
-    if (!email) return;
+    if (!email) {
+      setEmailAction(null);
+      return;
+    }
 
     try {
       if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
@@ -227,6 +264,8 @@ export default function DocumentGenerator({
       notify(t("emailCopied"), "success");
     } catch {
       notify(t("emailCopyError"), "error");
+    } finally {
+      setEmailAction(null);
     }
   };
 
@@ -320,18 +359,22 @@ export default function DocumentGenerator({
 
   if (isEditing && (documentQuery.isLoading || !initialized)) {
     return (
-      <div
-        className="document-generator-shell document-generator-loading"
-        aria-busy="true"
-      >
-        <div
-          className="document-sticky-actions document-actions-skeleton"
-          aria-hidden="true"
-        >
-          <span className="skeleton-action" />
-          <span className="skeleton-action" />
+      <div className="document-generator-shell pending-form" aria-busy="true">
+        <div className="form-actions document-sticky-actions">
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => router.push("/documents")}
+          >
+            <ArrowLeft />
+            {t("back")}
+          </button>
+          <button className="btn" type="button" disabled>
+            <Save />
+            {t("save")}
+          </button>
         </div>
-        <section className="card document-form-card">
+        <section className="card document-form-card document-data-loading">
           <div className="document-loading-heading">
             <span className="skeleton-icon" />
             <div>
@@ -381,15 +424,30 @@ export default function DocumentGenerator({
               <button
                 className="btn secondary"
                 type="button"
-                disabled={emailMutation.isPending}
+                disabled={emailAction === "preview"}
+                onClick={() => void previewEmail()}
+              >
+                {emailAction === "preview" ? (
+                  <LoaderCircle className="spinner" size={17} />
+                ) : (
+                  <Eye size={17} />
+                )}
+                {emailAction === "preview"
+                  ? t("preparingEmail")
+                  : t("previewEmail")}
+              </button>
+              <button
+                className="btn secondary"
+                type="button"
+                disabled={emailAction === "copy"}
                 onClick={() => void copyEmail()}
               >
-                {emailMutation.isPending ? (
+                {emailAction === "copy" ? (
                   <LoaderCircle className="spinner" size={17} />
                 ) : (
                   <Clipboard size={17} />
                 )}
-                {emailMutation.isPending ? t("preparingEmail") : t("copyEmail")}
+                {emailAction === "copy" ? t("preparingEmail") : t("copyEmail")}
               </button>
               <div className="email-send-action">
                 <button
@@ -635,6 +693,78 @@ export default function DocumentGenerator({
           </>
         )}
       </section>
+
+      {emailPreview && (
+        <div
+          className="email-preview-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setEmailPreview(null);
+          }}
+        >
+          <section
+            className="email-preview-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="email-preview-title"
+          >
+            <header className="email-preview-header">
+              <div>
+                <h2 id="email-preview-title">{t("emailPreviewTitle")}</h2>
+                <p>{t("emailPreviewDescription")}</p>
+              </div>
+              <button
+                type="button"
+                className="btn secondary compact"
+                aria-label={t("closeEmailPreview")}
+                onClick={() => setEmailPreview(null)}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            {emailPreview.subject && (
+              <div className="email-preview-subject">
+                <strong>{t("emailSubject")}:</strong> {emailPreview.subject}
+              </div>
+            )}
+            <div className="email-preview-frame-wrap">
+              <iframe
+                className="email-preview-frame"
+                title={t("emailPreviewTitle")}
+                srcDoc={emailPreview.html}
+                sandbox=""
+              />
+            </div>
+            <footer className="email-preview-actions">
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={() => void copyEmail()}
+              >
+                <Clipboard size={17} />
+                {t("copyEmail")}
+              </button>
+              {emailSettings.data?.configured && (
+                <button
+                  className="btn email-send-button"
+                  type="button"
+                  disabled={sendEmailMutation.isPending}
+                  onClick={() => void sendPreparedEmail()}
+                >
+                  {sendEmailMutation.isPending ? (
+                    <LoaderCircle className="spinner" size={17} />
+                  ) : (
+                    <Send size={17} />
+                  )}
+                  {sendEmailMutation.isPending
+                    ? t("sendingEmail")
+                    : t("sendEmail")}
+                </button>
+              )}
+            </footer>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

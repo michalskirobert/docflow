@@ -5,10 +5,10 @@ import { InputControl } from "@/components/shared/form";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
-import type { Template } from "@/features/templates/types";
+import type { TemplateSummary } from "@/features/templates/types";
 
 type Props = {
-  templates: Template[];
+  templates: TemplateSummary[];
   loading?: boolean;
   value: string;
   disabled?: boolean;
