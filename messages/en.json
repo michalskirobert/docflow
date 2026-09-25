@@ -132,7 +132,11 @@
     "pendingTitle": "Annual license is awaiting payment confirmation",
     "pendingDescription": "Until payment is confirmed, you can use the Free license with a 10-document monthly limit.",
     "newDocument": "New document",
-    "prepareEmail": "Prepare email"
+    "prepareEmail": "Prepare email",
+    "newFeature": "NEW IN DOCFLOW",
+    "calculatedVariablesTitle": "Calculated variables",
+    "calculatedVariablesDescription": "Calculate values automatically from numbers and other document fields. Type a formula manually or use the helpers.",
+    "calculatedVariablesTutorial": "View tutorial"
   },
   "templates": {
     "title": "Templates",
@@ -576,7 +580,17 @@
     "variablePlaceholderExample": "e.g. Enter customer name",
     "variableTooltip": "Tooltip / help text",
     "variableTooltipHelp": "Optional contextual help displayed next to the field label. It is accessible by hover, focus and tap.",
-    "variableTooltipExample": "e.g. Use the name shown on the invoice"
+    "variableTooltipExample": "e.g. Use the name shown on the invoice",
+    "typeFormula": "Calculated number",
+    "formulaExpression": "Formula",
+    "formulaExpressionHelp": "Type the expression manually or use the helpers. Reference numeric variables as '{{tag}}'. Supported operators: +, -, *, /, %, ( ).",
+    "formulaExpressionExample": "e.g. '{{quantity}}' * '{{unitPrice}}'",
+    "formulaAvailableVariables": "Available variables:",
+    "formulaInsertVariable": "Insert variable…",
+    "formulaValid": "Formula is valid.",
+    "addToWorkspace": "Add to workspace",
+    "addToWorkspaceHelp": "When disabled, the variable is created but is not automatically inserted into the document.",
+    "formulaInsertOperator": "Insert operator…"
   },
   "help": {
     "title": "Help",
@@ -637,8 +651,15 @@
       "email": {
         "question": "Can I use a document template as an email?",
         "answer": "Yes. From Documents choose “Prepare email”, select any template and complete its variables. You can enter an optional subject and copy the formatted message into Gmail, Outlook or another email client. Direct sending requires voluntarily configuring your own email account in Settings."
+      },
+      "calculations": {
+        "question": "How do calculated numeric variables work?",
+        "answer": "Calculated numbers use formulas made from numbers and numeric variables. Open the calculated variables tutorial for examples, supported operators and an interactive playground."
       }
-    }
+    },
+    "calculationsTitle": "Calculated numeric variables",
+    "calculationsDescription": "Learn how to build formulas from numbers and numeric variables, validate them and preview the result.",
+    "calculationsTutorial": "Open calculation tutorial"
   },
   "paymentReturn": {
     "checkingTitle": "Checking payment",
@@ -651,5 +672,25 @@
     "failedDescription": "The payment was cancelled or failed. You can start it again from My account.",
     "login": "Go to sign in",
     "checkAgain": "Check again"
+  },
+  "calculationHelp": {
+    "breadcrumb": "Help",
+    "eyebrow": "DOCFLOW 2.4",
+    "title": "Calculated numeric variables",
+    "description": "Create numeric values from constants, NUMBER variables and other calculations.",
+    "step1": "Start with normal math",
+    "step2": "Mix numbers and variables",
+    "step3": "Combine variables",
+    "syntaxTitle": "Supported syntax",
+    "syntax": "Use +, -, *, /, %, parentheses and decimal numbers. Only NUMBER and calculated numeric variables can be inserted into a formula.",
+    "validationTitle": "Validation",
+    "validation": "DocFlow checks missing variables, non-numeric variables, unsupported operators, invalid syntax and circular calculation dependencies before the formula is used.",
+    "tryTitle": "Try it yourself",
+    "tryDescription": "Enter a formula with numbers and see the result immediately.",
+    "formula": "Formula",
+    "result": "Result",
+    "invalid": "The formula cannot be calculated.",
+    "quantity": "Quantity",
+    "price": "Price"
   }
 }

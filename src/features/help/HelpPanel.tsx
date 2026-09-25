@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
+import { Link } from "@/i18n/navigation";
 import { SelectField } from "@/components/shared/form";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -24,6 +25,7 @@ import { supportSchema, type SupportFormValues } from "./schema";
 const faqKeys = [
   "templates",
   "variables",
+  "calculations",
   "documents",
   "email",
   "pdf",
@@ -138,6 +140,17 @@ export function HelpPanel() {
             );
           })}
         </div>
+      </section>
+
+      <section className="card help-card calculation-help-card">
+        <div className="section-heading">
+          <Lightbulb />
+          <div>
+            <h2>{t("calculationsTitle")}</h2>
+            <p>{t("calculationsDescription")}</p>
+          </div>
+        </div>
+        <Link href="/help/calculations" className="btn secondary">{t("calculationsTutorial")}</Link>
       </section>
 
       <section className="card help-card support-card">

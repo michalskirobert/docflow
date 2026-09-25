@@ -213,3 +213,26 @@
   background: transparent;
   cursor: pointer;
 }
+
+.formula-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: 0.55rem;
+}
+.formula-toolbar select { min-height: 36px; max-width: 280px; }
+.formula-operator { min-width: 36px; min-height: 36px; padding: 0.35rem 0.55rem; }
+.formula-valid { color: var(--success, #15803d); }
+.formula-workspace-option { display: grid; gap: 0.25rem; padding: 0.8rem 0; }
+
+.formula-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.formula-toolbar select { min-width: 190px; max-width: 280px; }
+.formula-decimal-places { max-width: 280px; }
+
+.disabled-action-reason { display:inline-flex; }
+.disabled-action-reason > .btn { width:100%; }

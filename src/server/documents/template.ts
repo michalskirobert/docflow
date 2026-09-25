@@ -1,4 +1,6 @@
 import type { TemplateVariable } from "@/features/templates/types";
+import { resolveCalculatedValues } from "./calculations";
+import { formatTemplateNumber } from "@/features/templates/number-format";
 
 export function extractVariables(content: string) {
   const tokenNames = [...content.matchAll(/{{\s*([\w.]+)\s*}}/g)].map(
@@ -62,14 +64,18 @@ export function renderTemplate(
   variables: TemplateVariable[] = [],
 ) {
   const defs = new Map(variables.map((variable) => [variable.name, variable]));
-  const withImages = replaceImagePlaceholders(content, data).replace(
+  const resolvedData = resolveCalculatedValues(variables, data);
+  const withImages = replaceImagePlaceholders(content, resolvedData).replace(
     /<span\b[^>]*data-variable-label=["'][^"']+["'][^>]*>[\s\S]*?<\/span>/gi,
     "",
   );
   return withImages.replace(/{{\s*([\w.]+)\s*}}/g, (_, key) => {
     const def = defs.get(key),
-      value = data[key];
+      value = resolvedData[key];
     if (def?.type === "image") return "";
+    if (def?.type === "formula" && typeof value === "number") {
+      return escapeHtml(formatTemplateNumber(value, def));
+    }
     if (def && ["date", "datetime", "time"].includes(def.type) && value) {
       const raw = String(value);
       if (def.type === "time") {

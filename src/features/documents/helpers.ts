@@ -28,6 +28,7 @@ export function parseFormattedNumber(value: string, v: TemplateVariable) {
 }
 
 export function validateVariable(v: TemplateVariable, value: string) {
+  if (v.type === "formula") return "";
   if (v.required && !value.trim())
     return v.requiredMessage || "This field is required.";
   if (!value) return "";

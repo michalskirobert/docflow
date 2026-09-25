@@ -5,7 +5,7 @@ import {
   SelectControl,
 } from "@/components/shared/form";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IMaskInput } from "react-imask";
 import { DateTimePicker } from "@/components/shared/form";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/features/documents/components/VariableField";
 import { Bold, Italic, Plus, Trash2, Underline, Variable } from "lucide-react";
 import type { TemplateVariable, VariableType } from "../types";
+import { validateFormula } from "../calculations";
 
 const makeTag = (value: string) => {
   const base = value
@@ -29,7 +30,11 @@ const makeTag = (value: string) => {
   if (base.length >= 3) return base;
   return `${base}Var`.slice(0, Math.max(3, base.length + 3));
 };
-const num0 = (v: string) => Math.max(0, Number(v) || 0);
+const optionalNumber = (value: string) => {
+  if (value.trim() === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
 
 export function VariableModal({
   onClose,
@@ -39,7 +44,7 @@ export function VariableModal({
   existingVariables,
 }: {
   onClose: () => void;
-  onInsert: (v: TemplateVariable) => void;
+  onInsert: (v: TemplateVariable, insertIntoWorkspace: boolean) => void;
   t: (key: string) => string;
   initial?: TemplateVariable;
   existingVariables: TemplateVariable[];
@@ -51,6 +56,9 @@ export function VariableModal({
   );
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
   const [placeholder, setPlaceholder] = useState(initial?.placeholder ?? "");
+  const [formula, setFormula] = useState(initial?.formula ?? "");
+  const [insertIntoWorkspace, setInsertIntoWorkspace] = useState(true);
+  const formulaRef = useRef<HTMLInputElement>(null);
   const [tooltip, setTooltip] = useState(initial?.tooltip ?? "");
   const [hasDefault, setHasDefault] = useState(
     initial?.defaultValue !== undefined ||
@@ -94,12 +102,12 @@ export function VariableModal({
   const [imageFit, setImageFit] = useState<"contain" | "cover" | "fill">(
     initial?.imageFit ?? "contain",
   );
-  const [minLength, setMinLength] = useState(initial?.minLength ?? 0);
-  const [maxLength, setMaxLength] = useState(initial?.maxLength ?? 0);
-  const [minNumber, setMinNumber] = useState(initial?.minNumber ?? 0);
-  const [maxNumber, setMaxNumber] = useState(initial?.maxNumber ?? 0);
+  const [minLength, setMinLength] = useState(initial?.minLength?.toString() ?? "");
+  const [maxLength, setMaxLength] = useState(initial?.maxLength?.toString() ?? "");
+  const [minNumber, setMinNumber] = useState(initial?.minNumber?.toString() ?? "");
+  const [maxNumber, setMaxNumber] = useState(initial?.maxNumber?.toString() ?? "");
   const [decimalPlaces, setDecimalPlaces] = useState(
-    initial?.decimalPlaces ?? 0,
+    initial?.decimalPlaces?.toString() ?? "",
   );
   const [decimalSeparator, setDecimalSeparator] = useState<"." | ",">(
     initial?.decimalSeparator ?? ",",
@@ -124,8 +132,18 @@ export function VariableModal({
     );
   const toggle = (value: boolean, setter: (v: boolean) => void) => () =>
     setter(!value);
+  const formulaError = type === "formula" ? validateFormula(formula, existingVariables, initial?.name ?? generatedName) : null;
+  const numericVariables = existingVariables.filter((v) => v.name !== initial?.name && (v.type === "number" || v.type === "formula"));
+  const insertFormulaPart = (part: string) => {
+    const input = formulaRef.current;
+    const start = input?.selectionStart ?? formula.length;
+    const end = input?.selectionEnd ?? start;
+    const next = `${formula.slice(0, start)}${part}${formula.slice(end)}`;
+    setFormula(next);
+    requestAnimationFrame(() => { input?.focus(); input?.setSelectionRange(start + part.length, start + part.length); });
+  };
   const submit = () => {
-    if (!label.trim() || !generatedName || duplicate) return;
+    if (!label.trim() || !generatedName || duplicate || formulaError) return;
     const nextDefault =
       hasDefault && defaultValueMode === "fixed" ? defaultValue : undefined;
     onInsert({
@@ -134,22 +152,23 @@ export function VariableModal({
       placeholder: placeholder.trim() || undefined,
       tooltip: tooltip.trim() || undefined,
       type,
+      formula: type === "formula" ? formula.trim() || undefined : undefined,
       defaultValue: nextDefault,
       defaultValueMode:
         hasDefault && ["date", "datetime", "time"].includes(type)
           ? defaultValueMode
           : undefined,
-      locked,
+      locked: type === "formula" ? true : locked,
       required,
       requiredMessage: required ? requiredMessage : undefined,
       mask: type === "text" && mask ? mask : undefined,
-      minLength: type === "text" ? minLength : undefined,
-      maxLength: type === "text" ? maxLength : undefined,
-      minNumber: type === "number" ? minNumber : undefined,
-      maxNumber: type === "number" ? maxNumber : undefined,
-      decimalPlaces: type === "number" ? decimalPlaces : undefined,
-      decimalSeparator: type === "number" ? decimalSeparator : undefined,
-      thousandsSeparator: type === "number" ? thousandsSeparator : undefined,
+      minLength: type === "text" ? optionalNumber(minLength) : undefined,
+      maxLength: type === "text" ? optionalNumber(maxLength) : undefined,
+      minNumber: type === "number" ? optionalNumber(minNumber) : undefined,
+      maxNumber: type === "number" ? optionalNumber(maxNumber) : undefined,
+      decimalPlaces: ["number", "formula"].includes(type) ? optionalNumber(decimalPlaces) : undefined,
+      decimalSeparator: ["number", "formula"].includes(type) ? decimalSeparator : undefined,
+      thousandsSeparator: ["number", "formula"].includes(type) ? thousandsSeparator : undefined,
       minDate:
         ["date", "datetime"].includes(type) && minDate ? minDate : undefined,
       maxDate:
@@ -167,7 +186,7 @@ export function VariableModal({
       italic: type !== "image" ? italic : undefined,
       underline: type !== "image" ? underline : undefined,
       color: type !== "image" ? color : undefined,
-    });
+    }, initial ? false : insertIntoWorkspace);
   };
   const defaultControl =
     type === "select" ? (
@@ -313,6 +332,7 @@ export function VariableModal({
                   <option value="time">{t("typeTime")}</option>
                   <option value="image">{t("typeImage")}</option>
                   <option value="select">{t("typeSelect")}</option>
+                  <option value="formula">{t("typeFormula")}</option>
                 </SelectControl>
               </label>
               <label className="field">
@@ -339,7 +359,7 @@ export function VariableModal({
                   onChange={(e) => setTooltip(e.target.value)}
                 />
               </label>
-              {type !== "image" && (
+              {type !== "image" && type !== "formula" && (
                 <label className="field">
                   {t("defaultValueOption")}
                   <SelectControl
@@ -356,7 +376,7 @@ export function VariableModal({
                 </label>
               )}
             </div>
-            {hasDefault && type !== "image" && (
+            {hasDefault && type !== "image" && type !== "formula" && (
               <div className="field">
                 <span className="default-value-heading">
                   <span>{t("defaultValue")}</span>
@@ -395,16 +415,56 @@ export function VariableModal({
             <div className="check-row">
               <ChoiceField
                 type="checkbox"
-                checked={locked}
+                checked={type === "formula" ? true : locked}
+                disabled={type === "formula"}
                 onChange={(e) => setLocked(e.target.checked)}
                 label={t("lockedField")}
               />
               <HelpTooltip text={t("lockedFieldHelp")} />
             </div>
+            {!initial && (
+              <div className="formula-workspace-option">
+                <ChoiceField type="checkbox" checked={insertIntoWorkspace} onChange={(e) => setInsertIntoWorkspace(e.target.checked)} label={t("addToWorkspace")} />
+                <small>{t("addToWorkspaceHelp")}</small>
+              </div>
+            )}
           </section>
 
           <section className="variable-form-section">
             <h4>{t("fieldSettings")}</h4>
+            {type === "formula" && (
+              <div className={`field ${formulaError ? "field-error" : ""}`}>
+                <span className="field-label-with-help">
+                  {t("formulaExpression")}
+                  <HelpTooltip text={t("formulaExpressionHelp")} />
+                </span>
+                <InputControl
+                  ref={formulaRef}
+                  value={formula}
+                  maxLength={500}
+                  placeholder={t("formulaExpressionExample")}
+                  onChange={(e) => setFormula(e.target.value)}
+                />
+                <div className="formula-toolbar">
+                  <select aria-label={t("formulaAvailableVariables")} defaultValue="" onChange={(e) => { if (e.target.value) insertFormulaPart(`{{${e.target.value}}}`); e.target.value = ""; }}>
+                    <option value="">{t("formulaInsertVariable")}</option>
+                    {numericVariables.map((v) => <option key={v.name} value={v.name}>{v.label || v.name}</option>)}
+                  </select>
+                  <select aria-label={t("formulaInsertOperator")} defaultValue="" onChange={(e) => { if (e.target.value) insertFormulaPart(e.target.value); e.target.value = ""; }}>
+                    <option value="">{t("formulaInsertOperator")}</option>
+                    <option value=" + ">+</option>
+                    <option value=" - ">−</option>
+                    <option value=" * ">×</option>
+                    <option value=" / ">÷</option>
+                    <option value=" % ">%</option>
+                    <option value="(">(</option>
+                    <option value=")">)</option>
+                  </select>
+                </div>
+                {formula && <small className={formulaError ? "field-error" : "formula-valid"}>{formulaError || t("formulaValid")}</small>}
+              </div>
+            )}
+
             {type === "text" && (
               <label className="field">
                 <span className="field-label-with-help">
@@ -418,7 +478,7 @@ export function VariableModal({
                 />
               </label>
             )}
-            {type === "number" && (
+            {["number", "formula"].includes(type) && (
               <div className="form-grid two">
                 <label className="field">
                   {t("decimalPlaces")}
@@ -428,9 +488,7 @@ export function VariableModal({
                     max="12"
                     inputMode="numeric"
                     value={decimalPlaces}
-                    onChange={(e) =>
-                      setDecimalPlaces(Math.min(12, num0(e.target.value)))
-                    }
+                    onChange={(e) => setDecimalPlaces(e.target.value)}
                   />
                 </label>
                 <label className="field">
@@ -604,7 +662,7 @@ export function VariableModal({
             )}
           </section>
 
-          <details className="variable-section">
+          {type !== "formula" && <details className="variable-section">
             <summary>{t("validationSettings")}</summary>
             <div className="variable-section-body">
               <div className="check-row">
@@ -632,7 +690,7 @@ export function VariableModal({
                       type="number"
                       min="0"
                       value={minLength}
-                      onChange={(e) => setMinLength(num0(e.target.value))}
+                      onChange={(e) => setMinLength(e.target.value)}
                     />
                   </label>
                   <label className="field">
@@ -641,7 +699,7 @@ export function VariableModal({
                       type="number"
                       min="0"
                       value={maxLength}
-                      onChange={(e) => setMaxLength(num0(e.target.value))}
+                      onChange={(e) => setMaxLength(e.target.value)}
                     />
                   </label>
                 </div>
@@ -654,7 +712,7 @@ export function VariableModal({
                       type="number"
                       min="0"
                       value={minNumber}
-                      onChange={(e) => setMinNumber(num0(e.target.value))}
+                      onChange={(e) => setMinNumber(e.target.value)}
                     />
                   </label>
                   <label className="field">
@@ -663,7 +721,7 @@ export function VariableModal({
                       type="number"
                       min="0"
                       value={maxNumber}
-                      onChange={(e) => setMaxNumber(num0(e.target.value))}
+                      onChange={(e) => setMaxNumber(e.target.value)}
                     />
                   </label>
                 </div>
@@ -689,7 +747,7 @@ export function VariableModal({
                 </div>
               )}
             </div>
-          </details>
+          </details>}
           {type !== "image" && (
             <details className="variable-section">
               <summary>{t("variableStyle")}</summary>
@@ -754,13 +812,18 @@ export function VariableModal({
           <button className="btn secondary" onClick={onClose}>
             {t("cancel")}
           </button>
-          <button
-            className="btn"
-            onClick={submit}
-            disabled={!generatedName || !label.trim() || duplicate}
+          <span
+            className="disabled-action-reason"
+            title={!label.trim() ? t("variableNameRequired") : !generatedName ? t("variableNameRequired") : duplicate ? t("variableNameRequired") : formulaError || undefined}
           >
-            {initial ? t("saveVariableChanges") : t("insertVariable")}
-          </button>
+            <button
+              className="btn"
+              onClick={submit}
+              disabled={!generatedName || !label.trim() || duplicate || !!formulaError}
+            >
+              {initial ? t("saveVariableChanges") : t("insertVariable")}
+            </button>
+          </span>
         </div>
       </div>
     </div>

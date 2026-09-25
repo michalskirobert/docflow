@@ -132,7 +132,11 @@
     "pendingTitle": "Lisensi tahunan menunggu konfirmasi pembayaran",
     "pendingDescription": "Sampai pembayaran dikonfirmasi, Anda dapat menggunakan lisensi Gratis dengan batas 10 dokumen per bulan.",
     "newDocument": "Dokumen baru",
-    "prepareEmail": "Siapkan email"
+    "prepareEmail": "Siapkan email",
+    "newFeature": "BARU DI DOCFLOW",
+    "calculatedVariablesTitle": "Variabel perhitungan",
+    "calculatedVariablesDescription": "Hitung nilai secara otomatis dari angka dan bidang dokumen lainnya. Ketik rumus atau gunakan bantuan.",
+    "calculatedVariablesTutorial": "Lihat panduan"
   },
   "templates": {
     "title": "Templat",
@@ -576,7 +580,17 @@
     "variablePlaceholderExample": "Contoh: Masukkan nama pelanggan",
     "variableTooltip": "Tooltip / teks bantuan",
     "variableTooltipHelp": "Bantuan kontekstual opsional yang ditampilkan di samping label bidang. Dapat diakses melalui hover, fokus, dan ketukan.",
-    "variableTooltipExample": "Contoh: Gunakan nama yang tertera pada faktur"
+    "variableTooltipExample": "Contoh: Gunakan nama yang tertera pada faktur",
+    "typeFormula": "Angka terhitung",
+    "formulaExpression": "Rumus",
+    "formulaExpressionHelp": "Ketik rumus secara manual atau gunakan bantuan. Gunakan '{{tag}}' untuk variabel angka. Operator: +, -, *, /, %, ( ).",
+    "formulaExpressionExample": "contoh: '{{quantity}}' * '{{unitPrice}}'",
+    "formulaAvailableVariables": "Variabel yang tersedia:",
+    "formulaInsertVariable": "Sisipkan variabel…",
+    "formulaValid": "Rumus valid.",
+    "addToWorkspace": "Tambahkan ke area kerja",
+    "addToWorkspaceHelp": "Jika dinonaktifkan, variabel dibuat tetapi tidak otomatis disisipkan ke dokumen.",
+    "formulaInsertOperator": "Sisipkan operator…"
   },
   "help": {
     "title": "Bantuan",
@@ -637,8 +651,15 @@
       "email": {
         "question": "Bisakah template dokumen digunakan sebagai email?",
         "answer": "Ya. Dari Dokumen pilih “Siapkan email”, pilih templat apa pun dan lengkapi variabelnya. Anda dapat memasukkan subjek opsional lalu menyalin pesan berformat ke Gmail, Outlook, atau klien email lain. Pengiriman langsung memerlukan konfigurasi sukarela akun email Anda sendiri di Pengaturan."
+      },
+      "calculations": {
+        "question": "Bagaimana variabel angka terhitung bekerja?",
+        "answer": "Angka terhitung menggunakan rumus yang terdiri dari angka dan variabel numerik. Buka panduan untuk melihat contoh, operator yang didukung, dan playground interaktif."
       }
-    }
+    },
+    "calculationsTitle": "Variabel angka terhitung",
+    "calculationsDescription": "Pelajari cara membuat rumus dari angka dan variabel numerik, memvalidasinya, dan melihat hasilnya.",
+    "calculationsTutorial": "Buka panduan perhitungan"
   },
   "paymentReturn": {
     "checkingTitle": "Memeriksa pembayaran",
@@ -651,5 +672,25 @@
     "failedDescription": "Pembayaran dibatalkan atau gagal. Anda dapat memulainya kembali dari Akun saya.",
     "login": "Buka halaman masuk",
     "checkAgain": "Periksa lagi"
+  },
+  "calculationHelp": {
+    "breadcrumb": "Bantuan",
+    "eyebrow": "DOCFLOW 2.4",
+    "title": "Variabel angka terhitung",
+    "description": "Buat nilai numerik dari konstanta, variabel NUMBER, dan perhitungan lainnya.",
+    "step1": "Mulai dengan matematika biasa",
+    "step2": "Gabungkan angka dan variabel",
+    "step3": "Gabungkan variabel",
+    "syntaxTitle": "Sintaks yang didukung",
+    "syntax": "Gunakan +, -, *, /, %, tanda kurung, dan angka desimal. Hanya variabel NUMBER dan angka terhitung yang dapat digunakan.",
+    "validationTitle": "Validasi",
+    "validation": "DocFlow memeriksa variabel yang hilang atau bukan angka, operator yang tidak didukung, sintaks yang salah, dan dependensi perhitungan melingkar.",
+    "tryTitle": "Coba sendiri",
+    "tryDescription": "Masukkan rumus angka dan lihat hasilnya secara langsung.",
+    "formula": "Rumus",
+    "result": "Hasil",
+    "invalid": "Rumus ini tidak dapat dihitung.",
+    "quantity": "Jumlah",
+    "price": "Harga"
   }
 }

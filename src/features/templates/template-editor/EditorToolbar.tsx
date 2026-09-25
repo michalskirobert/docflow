@@ -220,7 +220,7 @@ export function EditorToolbar({
       >
         <ListOrdered />
       </button>
-      <button onClick={insertTable} title={t("table")}>
+      <button onMouseDown={rememberSelection} onClick={insertTable} title={t("table")}>
         <Table2 />
       </button>
       <button

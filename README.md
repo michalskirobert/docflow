@@ -52,6 +52,33 @@ The project stores billing profiles, payments and sales-document records, but do
 
 ---
 
+## v2.4.0
+
+Prototype calculation syntax uses DocFlow variable tokens such as `{{quantity}} * {{unitPrice}}`. Users may type expressions directly or use the optional variable/operator toolbar. Formula references are limited to NUMBER and calculated variables. New variables can also be created without immediately inserting them into the document workspace. Math.js is used as the calculation parser/evaluator behind DocFlow's restricted validation layer.
+
+DocFlow 2.4.0 starts the commercial-product iteration focused on calculated document variables and final production readiness.
+
+### Calculated variables
+
+- Added the `formula` variable type for values calculated from other document variables.
+- Formula expressions support `+`, `-`, `*`, `/`, `%`, parentheses and the `SUM`, `MIN`, `MAX`, `ROUND` and `ABS` functions.
+- Calculated variables are resolved by a shared server-side calculation engine before template rendering, so preview, generated HTML, PDF and e-mail rendering use the same result.
+- Formula variables can depend on other formula variables; circular dependencies and invalid expressions are rejected instead of using JavaScript `eval`.
+- Calculated variables are output-only during document generation and do not create editable form fields.
+- Template create/update APIs persist and validate formula definitions.
+- The template variable editor exposes formula configuration in PL/EN/ID.
+
+Further 2.4.0 work will expand calculation UX, live previews, plan-limit enforcement and final production-readiness checks.
+
+### 2.4.0 editor/calculation stabilization
+
+- Calculation inputs now use raw numeric values internally and formatting only at presentation time, so localized values such as `25.000,00` remain calculable.
+- Calculated numbers share decimal and thousands-separator formatting with numeric variables across document preview/PDF rendering.
+- Formula validation uses the standard invalid-field visual state.
+- Renaming a variable updates workspace tokens and formula references in the same template.
+- Table/image context controls float above the workspace to avoid layout jumps.
+- Successful document save suppresses the unsaved-changes guard while redirecting.
+
 ## Historical notes and migrations
 
 ### README-v1.3.md

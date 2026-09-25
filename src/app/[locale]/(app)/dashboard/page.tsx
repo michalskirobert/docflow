@@ -8,6 +8,7 @@ import {
   Sparkles,
   Mail,
   FilePlus2,
+  Calculator,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -164,6 +165,18 @@ async function DashboardContent() {
           <p className="muted">{t("pendingDescription")}</p>
         </div>
       )}
+      <div className="card quick-start calculated-variables-news">
+        <span className="eyebrow">{t("newFeature")}</span>
+        <h2>{t("calculatedVariablesTitle")}</h2>
+        <p className="muted">{t("calculatedVariablesDescription")}</p>
+        <code>{"{{quantity}} * {{unitPrice}}"}</code>
+        <div className="quick-start-actions">
+          <Link href="/help/calculations" className="btn secondary">
+            <Calculator size={17} />
+            {t("calculatedVariablesTutorial")}
+          </Link>
+        </div>
+      </div>
       <div className="card quick-start quick-start-interactive">
         <span className="eyebrow">{t("quickStart")}</span>
         <h2>{t("quickTitle")}</h2>

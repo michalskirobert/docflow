@@ -629,3 +629,26 @@
     overscroll-behavior: contain;
   }
 }
+
+
+/* Table editing controls: row/column operations plus direct horizontal cell resizing. */
+.table-context-bar { display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface-raised); }
+.table-context-bar button { min-height:32px; padding:5px 9px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); cursor:pointer; }
+.table-context-bar button:hover { background:var(--hover); }
+.table-context-bar button.danger { color:var(--danger, #dc2626); }
+.a4-paper td, .a4-paper th, .page-header-editor td, .page-header-editor th, .page-footer-editor td, .page-footer-editor th { min-width:40px; resize:horizontal; overflow:auto; }
+
+/* Context controls float over the workspace instead of changing the document layout. */
+.editor-sticky-controls > .table-context-bar,
+.editor-sticky-controls > .image-context-bar {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  z-index: 120;
+  width: max-content;
+  max-width: min(94vw, 980px);
+  transform: translateX(-50%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgb(15 23 42 / 18%);
+}

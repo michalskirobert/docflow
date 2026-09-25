@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { validateFormula } from "@/features/templates/calculations";
+import type { TemplateVariable } from "@/features/templates/types";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { extractVariables } from "@/server/documents/template";
@@ -31,7 +33,9 @@ const schema = z.object({
           "time",
           "image",
           "select",
+          "formula",
         ]),
+        formula: z.string().max(500).optional(),
         required: z.boolean().optional(),
         requiredMessage: z.string().optional(),
         mask: z.string().optional(),
@@ -104,6 +108,11 @@ export async function PUT(
       name,
       type: "text" as const,
     }));
+  for (const variable of variableDefinitions) {
+    if (variable.type !== "formula") continue;
+    const error = validateFormula(variable.formula ?? "", variableDefinitions as TemplateVariable[], variable.name);
+    if (error) return NextResponse.json({ message: error }, { status: 400 });
+  }
   const { variables: _variables, ...templateData } = p;
   if (isDefaultTemplateId(id)) {
     return NextResponse.json(

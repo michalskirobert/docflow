@@ -699,6 +699,16 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     );
   }
 
+  if (variableType === "formula") {
+    return (
+      <label className="field field-locked" htmlFor={id}>
+        <Label />
+        <InputControl id={id} type="text" disabled value={value} readOnly />
+        {error && <small className="form-error">{error}</small>}
+      </label>
+    );
+  }
+
   if (variableType === "number") {
     const decimalPlaces = Math.max(0, variable.decimalPlaces ?? 0);
 

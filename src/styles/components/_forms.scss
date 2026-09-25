@@ -467,3 +467,20 @@
   padding: 10px;
   color: var(--muted);
 }
+
+
+/* Disabled shared choices must look disabled, not merely ignore clicks. */
+.choice-field:has(> input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.choice-field > input:disabled + .choice-indicator {
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--surface-muted) 78%, var(--border));
+  box-shadow: none;
+}
+.choice-field > input:disabled:checked + .choice-indicator {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--primary) 45%, var(--surface-muted));
+}
+.choice-field:has(> input:disabled):hover .choice-indicator { border-color: var(--border); }

@@ -22,6 +22,8 @@ import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { parseTemplateVariables } from "@/features/templates/types";
+import { resolveCalculatedValues } from "@/features/templates/calculations";
+import { formatTemplateNumber } from "@/features/templates/number-format";
 import { TemplatePicker } from "./components/TemplatePicker";
 import { DocumentPdfPreviewModal } from "./components/DocumentPdfPreviewModal";
 import { VariableField } from "./components/VariableField";
@@ -900,11 +902,24 @@ export default function DocumentGenerator({
           </div>
         )}
 
-        {variables.map((variable) => (
+        {variables.map((variable) => {
+          let displayValue = values[variable.name] ?? "";
+          if (variable.type === "formula") {
+            try {
+              const resolved = resolveCalculatedValues(variables, values);
+              const result = resolved[variable.name];
+              displayValue = typeof result === "number"
+                ? formatTemplateNumber(result, variable)
+                : String(result ?? "");
+            } catch {
+              displayValue = "—";
+            }
+          }
+          return (
           <VariableField
             key={variable.name}
             variable={variable}
-            value={values[variable.name] ?? ""}
+            value={displayValue}
             error={errors[variable.name]}
             onChange={(value) => {
               if (value !== (values[variable.name] ?? "")) setDirty(true);
@@ -919,7 +934,8 @@ export default function DocumentGenerator({
               }));
             }}
           />
-        ))}
+          );
+        })}
 
         {selected && isEmailMode && (
           <>

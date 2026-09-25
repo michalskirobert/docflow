@@ -132,7 +132,11 @@
     "pendingTitle": "Licencja roczna oczekuje na potwierdzenie płatności",
     "pendingDescription": "Do czasu potwierdzenia płatności możesz korzystać z darmowej licencji i limitu 10 dokumentów miesięcznie.",
     "newDocument": "Nowy dokument",
-    "prepareEmail": "Przygotuj e-mail"
+    "prepareEmail": "Przygotuj e-mail",
+    "newFeature": "NOWOŚĆ W DOCFLOW",
+    "calculatedVariablesTitle": "Zmienne obliczeniowe",
+    "calculatedVariablesDescription": "Twórz wartości automatycznie z liczb i innych pól dokumentu. Formułę możesz wpisać ręcznie albo zbudować z podpowiedzi.",
+    "calculatedVariablesTutorial": "Zobacz samouczek"
   },
   "templates": {
     "title": "Szablony",
@@ -576,7 +580,17 @@
     "variablePlaceholderExample": "Np. Wpisz nazwę klienta",
     "variableTooltip": "Tooltip / tekst pomocy",
     "variableTooltipHelp": "Opcjonalna pomoc kontekstowa wyświetlana przy etykiecie pola. Działa przez hover, fokus i dotknięcie.",
-    "variableTooltipExample": "Np. Użyj nazwy widocznej na fakturze"
+    "variableTooltipExample": "Np. Użyj nazwy widocznej na fakturze",
+    "typeFormula": "Numeryczna obliczeniowa",
+    "formulaExpression": "Formuła",
+    "formulaExpressionHelp": "Wpisz działanie ręcznie lub użyj podpowiedzi. Zmienne liczbowe zapisuj jako '{{tag}}'. Obsługiwane operatory: +, -, *, /, %, ( ).",
+    "formulaExpressionExample": "np. '{{quantity}}' * '{{unitPrice}}'",
+    "formulaAvailableVariables": "Dostępne zmienne:",
+    "formulaInsertVariable": "Wstaw zmienną…",
+    "formulaValid": "Formuła jest poprawna.",
+    "addToWorkspace": "Dodaj do obszaru roboczego",
+    "addToWorkspaceHelp": "Po wyłączeniu zmienna zostanie utworzona, ale nie będzie automatycznie wstawiona do dokumentu.",
+    "formulaInsertOperator": "Wstaw operator…"
   },
   "help": {
     "title": "Pomoc",
@@ -637,8 +651,15 @@
       "email": {
         "question": "Czy mogę użyć szablonu dokumentu jako e-maila?",
         "answer": "Tak. Na liście Dokumentów wybierz „Przygotuj e-mail”, wskaż dowolny szablon i uzupełnij jego zmienne. Możesz podać opcjonalny temat, a następnie skopiować sformatowaną wiadomość do Gmaila, Outlooka lub innego klienta. Bezpośrednia wysyłka wymaga dobrowolnej konfiguracji własnego konta e-mail w Ustawieniach."
+      },
+      "calculations": {
+        "question": "Jak działają zmienne numeryczne obliczeniowe?",
+        "answer": "Zmienne numeryczne obliczeniowe korzystają z formuł złożonych z liczb i innych zmiennych numerycznych. Otwórz samouczek, aby zobaczyć przykłady, obsługiwane operatory i interaktywny playground."
       }
-    }
+    },
+    "calculationsTitle": "Zmienne numeryczne obliczeniowe",
+    "calculationsDescription": "Dowiedz się, jak budować formuły z liczb i zmiennych numerycznych, walidować je i sprawdzać wynik.",
+    "calculationsTutorial": "Otwórz samouczek obliczeń"
   },
   "paymentReturn": {
     "checkingTitle": "Sprawdzamy płatność",
@@ -651,5 +672,25 @@
     "failedDescription": "Płatność została anulowana lub zakończyła się błędem. Możesz rozpocząć ją ponownie w Moim koncie.",
     "login": "Przejdź do logowania",
     "checkAgain": "Sprawdź ponownie"
+  },
+  "calculationHelp": {
+    "breadcrumb": "Pomoc",
+    "eyebrow": "DOCFLOW 2.4",
+    "title": "Zmienne numeryczne obliczeniowe",
+    "description": "Twórz wartości liczbowe ze stałych, zmiennych NUMBER i innych obliczeń.",
+    "step1": "Zacznij od zwykłego działania",
+    "step2": "Połącz liczby i zmienne",
+    "step3": "Łącz zmienne",
+    "syntaxTitle": "Obsługiwana składnia",
+    "syntax": "Używaj +, -, *, /, %, nawiasów i liczb dziesiętnych. W formule można używać tylko zmiennych NUMBER i numerycznych obliczeniowych.",
+    "validationTitle": "Walidacja",
+    "validation": "DocFlow sprawdza brakujące i nienumeryczne zmienne, nieobsługiwane operatory, błędną składnię oraz cykliczne zależności przed użyciem formuły.",
+    "tryTitle": "Wypróbuj sam",
+    "tryDescription": "Wpisz działanie na liczbach i od razu zobacz wynik.",
+    "formula": "Formuła",
+    "result": "Wynik",
+    "invalid": "Nie można obliczyć tej formuły.",
+    "quantity": "Ilość",
+    "price": "Cena"
   }
 }

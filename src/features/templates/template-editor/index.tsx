@@ -155,6 +155,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [selectedVariableBox, setSelectedVariableBox] =
     useState<DOMRect | null>(null);
   const draggedVariableElement = useRef<HTMLElement | null>(null);
+  const [selectedTableCell, setSelectedTableCell] = useState<HTMLTableCellElement | null>(null);
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
@@ -470,7 +471,23 @@ export function TemplateEditor({ template, onClose }: Props) {
   const cmd = (command: string, value?: string) => {
     restoreSelection();
 
-    if (command === "justifyBetween") {
+    const region = activeEditor.current ?? editor.current;
+    const selectedToken =
+      selectedVariableElement && region?.contains(selectedVariableElement)
+        ? selectedVariableElement
+        : null;
+
+    if (selectedToken && ["bold", "italic", "underline", "foreColor"].includes(command)) {
+      if (command === "bold")
+        selectedToken.style.fontWeight = selectedToken.style.fontWeight === "700" ? "" : "700";
+      if (command === "italic")
+        selectedToken.style.fontStyle = selectedToken.style.fontStyle === "italic" ? "" : "italic";
+      if (command === "underline")
+        selectedToken.style.textDecoration = selectedToken.style.textDecoration.includes("underline") ? "" : "underline";
+      if (command === "foreColor" && value) selectedToken.style.color = value;
+      setDirty(true);
+      setSelectedVariableBox(selectedToken.getBoundingClientRect());
+    } else if (command === "justifyBetween") {
       const selection = window.getSelection();
       const anchor = selection?.anchorNode;
       const element =
@@ -617,6 +634,45 @@ export function TemplateEditor({ template, onClose }: Props) {
     };
   }, [selectedVariableElement, zoom]);
 
+  const selectTableCell = (target: HTMLElement) => {
+    const cell = target.closest<HTMLTableCellElement>("td,th");
+    const region = activeEditor.current ?? editor.current;
+    if (cell && region?.contains(cell)) {
+      setSelectedTableCell(cell);
+      return true;
+    }
+    setSelectedTableCell(null);
+    return false;
+  };
+
+  const mutateTable = (action: "rowBefore" | "rowAfter" | "rowDelete" | "colBefore" | "colAfter" | "colDelete" | "tableDelete") => {
+    const cell = selectedTableCell;
+    const row = cell?.parentElement as HTMLTableRowElement | null;
+    const table = cell?.closest("table");
+    if (!cell || !row || !table) return;
+    const columnIndex = Array.from(row.cells).indexOf(cell);
+    if (action === "tableDelete") { table.remove(); setSelectedTableCell(null); setDirty(true); return; }
+    if (action === "rowBefore" || action === "rowAfter") {
+      const newRow = row.cloneNode(false) as HTMLTableRowElement;
+      for (let i = 0; i < row.cells.length; i += 1) { const td = document.createElement("td"); td.innerHTML = "<br>"; newRow.appendChild(td); }
+      row.parentElement?.insertBefore(newRow, action === "rowBefore" ? row : row.nextSibling);
+    } else if (action === "rowDelete") {
+      const parent = row.parentElement; row.remove(); if (!parent?.querySelector("tr")) table.remove(); setSelectedTableCell(null);
+    } else if (action === "colBefore" || action === "colAfter") {
+      Array.from(table.rows).forEach((tableRow) => {
+        const td = document.createElement("td"); td.innerHTML = "<br>";
+        const reference = tableRow.cells[columnIndex + (action === "colAfter" ? 1 : 0)] ?? null;
+        tableRow.insertBefore(td, reference);
+      });
+    } else if (action === "colDelete") {
+      Array.from(table.rows).forEach((tableRow) => tableRow.cells[columnIndex]?.remove());
+      if (!table.rows[0]?.cells.length) table.remove();
+      setSelectedTableCell(null);
+    }
+    setDirty(true);
+    rememberSelection();
+  };
+
   const insertVariable = (variable: TemplateVariable) => {
     restoreSelection();
 
@@ -635,16 +691,31 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
-  const saveVariableDefinition = (variable: TemplateVariable) => {
+  const saveVariableDefinition = (variable: TemplateVariable, insertIntoWorkspace = true) => {
     setDirty(true);
     if (!editingVariable) {
-      insertVariable(variable);
+      if (insertIntoWorkspace) insertVariable(variable);
+      else {
+        setVariables((current) => upsertVariable(current, variable));
+        setVariableOpen(false);
+        rememberSelection();
+      }
       return;
     }
 
     const oldName = editingVariable.name;
 
-    setVariables((current) => upsertVariable(current, variable, oldName));
+    setVariables((current) =>
+      upsertVariable(
+        current.map((item) =>
+          oldName !== variable.name && item.formula
+            ? { ...item, formula: item.formula.split(`{{${oldName}}}`).join(`{{${variable.name}}}`) }
+            : item,
+        ),
+        variable,
+        oldName,
+      ),
+    );
 
     [editor.current, headerEditor.current, footerEditor.current].forEach(
       (region) => {
@@ -1538,6 +1609,18 @@ export function TemplateEditor({ template, onClose }: Props) {
             state={toolbarState}
           />
 
+          {selectedTableCell && (
+            <div className="table-context-bar" role="toolbar" aria-label="Table actions">
+              <button type="button" onClick={() => mutateTable("rowBefore")}>+ Row ↑</button>
+              <button type="button" onClick={() => mutateTable("rowAfter")}>+ Row ↓</button>
+              <button type="button" onClick={() => mutateTable("rowDelete")}>− Row</button>
+              <button type="button" onClick={() => mutateTable("colBefore")}>+ Col ←</button>
+              <button type="button" onClick={() => mutateTable("colAfter")}>+ Col →</button>
+              <button type="button" onClick={() => mutateTable("colDelete")}>− Col</button>
+              <button type="button" className="danger" onClick={() => mutateTable("tableDelete")}>Delete table</button>
+            </div>
+          )}
+
           {selectedImage && (
             <ImageContextBar
               t={t}
@@ -1652,6 +1735,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
+                    selectTableCell(target);
                     if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {
@@ -1687,6 +1771,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                 onMouseUp={rememberSelection}
                 onClick={(event) => {
                   const target = event.target as HTMLElement;
+                  selectTableCell(target);
                   if (selectVariableElement(target)) return;
 
                   if (target.tagName === "IMG") {
@@ -1727,6 +1812,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
+                    selectTableCell(target);
                     if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {

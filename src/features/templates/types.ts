@@ -1,11 +1,12 @@
 export type VariableType =
-  "text" | "number" | "date" | "datetime" | "time" | "image" | "select";
+  "text" | "number" | "date" | "datetime" | "time" | "image" | "select" | "formula";
 export type TemplateVariable = {
   name: string;
   label?: string;
   placeholder?: string;
   tooltip?: string;
   type: VariableType;
+  formula?: string;
   required?: boolean;
   requiredMessage?: string;
   mask?: string;
