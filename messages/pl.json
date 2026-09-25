@@ -400,6 +400,7 @@
     "editTemplate": "EDYCJA SZABLONU",
     "newTemplate": "NOWY SZABLON",
     "templateName": "Nazwa szablonu",
+    "defaultTemplateName": "Szablon",
     "close": "Zamknij",
     "save": "Zapisz",
     "saving": "Zapisywanie…",

@@ -400,6 +400,7 @@
     "editTemplate": "EDIT TEMPLATE",
     "newTemplate": "TEMPLATE BARU",
     "templateName": "Nama template",
+    "defaultTemplateName": "Templat",
     "close": "Tutup",
     "save": "Simpan",
     "saving": "Menyimpan…",

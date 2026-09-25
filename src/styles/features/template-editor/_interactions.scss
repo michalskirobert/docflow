@@ -556,27 +556,63 @@
   z-index: 60;
 }
 
-.selected-variable-edit,
-.selected-variable-delete {
+.selected-variable-actions {
   position: fixed;
-  z-index: 70;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  height: 30px;
+  padding: 3px 4px;
+  border: 1px solid rgb(71 85 105 / 72%);
+  border-radius: 7px;
+  background: rgb(15 23 42 / 94%);
+  box-shadow: 0 5px 14px rgb(15 23 42 / 22%);
+  backdrop-filter: blur(6px);
+}
+
+.selected-variable-edit,
+.selected-variable-delete,
+.selected-variable-drag {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 21px;
+  height: 22px;
+  padding: 0;
   border: 0;
-  border-radius: 999px;
-  color: #fff;
-  box-shadow: 0 3px 12px rgb(15 23 42 / 25%);
+  border-radius: 4px;
+  background: transparent;
+  color: #cbd5e1;
   cursor: pointer;
+  transition:
+    color 120ms ease,
+    background 120ms ease;
 }
 
-.selected-variable-edit {
-  background: #4f46e5;
+.selected-variable-edit:hover,
+.selected-variable-edit:focus-visible {
+  background: rgb(99 102 241 / 22%);
+  color: #a5b4fc;
 }
 
-.selected-variable-delete {
-  background: #dc2626;
+.selected-variable-delete:hover,
+.selected-variable-delete:focus-visible {
+  background: rgb(220 38 38 / 20%);
+  color: #fca5a5;
+}
+
+.selected-variable-drag {
+  cursor: grab;
+}
+
+.selected-variable-drag:active {
+  cursor: grabbing;
+}
+
+.selected-variable-drag:hover,
+.selected-variable-drag:focus-visible {
+  background: rgb(99 102 241 / 22%);
+  color: #a5b4fc;
 }
 
 .editor-sticky-controls {
@@ -596,30 +632,6 @@
   position: relative;
   z-index: 2;
 }
-.inline-variable-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 5px;
-  vertical-align: middle;
-}
-.inline-variable-actions button {
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid #c7d2fe;
-  border-radius: 5px;
-  background: #eef2ff;
-  color: #4338ca;
-  font-size: 13px;
-  line-height: 1;
-  cursor: pointer;
-}
-.inline-variable-actions button[data-variable-action="remove"] {
-  color: #dc2626;
-}
 .a4-paper [data-layout="between"],
 .page-header-editor [data-layout="between"],
 .page-footer-editor [data-layout="between"] {
@@ -627,4 +639,23 @@
   width: 100% !important;
   justify-content: space-between !important;
   align-items: center;
+}
+
+/* Keep the complete editor command surface available while the A4 workspace scrolls. */
+.editor-header {
+  z-index: 100 !important;
+  min-height: 68px;
+}
+.editor-sticky-controls {
+  top: 68px !important;
+  z-index: 90 !important;
+}
+
+@media (max-width: 760px) {
+  .editor-header {
+    min-height: 64px;
+  }
+  .editor-sticky-controls {
+    top: 64px !important;
+  }
 }

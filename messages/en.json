@@ -400,6 +400,7 @@
     "editTemplate": "EDIT TEMPLATE",
     "newTemplate": "NEW TEMPLATE",
     "templateName": "Template name",
+    "defaultTemplateName": "Template",
     "close": "Close",
     "save": "Save",
     "saving": "Saving…",

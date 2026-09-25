@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Check,
   LoaderCircle,
+  GripVertical,
   Pencil,
   Save,
   Trash2,
@@ -115,7 +116,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const activeEditor = useRef<HTMLDivElement | null>(null);
   const draggedImage = useRef<HTMLImageElement | null>(null);
 
-  const [name, setName] = useState(template?.name ?? "");
+  const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
   const [emailSubject, setEmailSubject] = useState(
     template?.emailSubject ?? "",
@@ -123,7 +124,7 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [editingName, setEditingName] = useState(false);
   const [mobileMetadataSheet, setMobileMetadataSheet] = useState(false);
   const metadataSnapshot = useRef({
-    name: template?.name ?? "",
+    name: template?.name ?? t("defaultTemplateName"),
     description: template?.description ?? "",
     emailSubject: template?.emailSubject ?? "",
   });
@@ -153,6 +154,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     useState<HTMLElement | null>(null);
   const [selectedVariableBox, setSelectedVariableBox] =
     useState<DOMRect | null>(null);
+  const draggedVariableElement = useRef<HTMLElement | null>(null);
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
@@ -503,61 +505,86 @@ export function TemplateEditor({ template, onClose }: Props) {
     syncToolbarState();
   };
 
-  const decorateVariableTokens = useCallback(() => {
+  const normalizePlainVariableTokens = useCallback(() => {
+    const knownVariables = new Map(
+      variables.map((variable) => [variable.name, variable]),
+    );
+
     [editor.current, headerEditor.current, footerEditor.current].forEach(
       (region) => {
-        region
-          ?.querySelectorAll<HTMLElement>('[data-variable-type="value"]')
-          .forEach((token) => {
-            if (token.querySelector("[data-variable-actions]")) return;
-            const actions = document.createElement("span");
-            actions.dataset.variableActions = "true";
-            actions.className = "inline-variable-actions";
-            actions.contentEditable = "false";
-            actions.innerHTML = `<button type="button" data-variable-action="edit" aria-label="Edit">✎</button><button type="button" data-variable-action="remove" aria-label="Remove">×</button>`;
-            token.appendChild(actions);
-          });
+        if (!region) return;
+
+        const walker = document.createTreeWalker(region, NodeFilter.SHOW_TEXT);
+        const textNodes: Text[] = [];
+        let current = walker.nextNode();
+
+        while (current) {
+          const parent = current.parentElement;
+          if (
+            parent &&
+            !parent.closest("[data-variable-name]") &&
+            /\{\{[^{}]+\}\}/.test(current.textContent ?? "")
+          ) {
+            textNodes.push(current as Text);
+          }
+          current = walker.nextNode();
+        }
+
+        textNodes.forEach((textNode) => {
+          const text = textNode.textContent ?? "";
+          const pattern = /\{\{([^{}]+)\}\}/g;
+          let match: RegExpExecArray | null;
+          let cursor = 0;
+          const fragment = document.createDocumentFragment();
+          let changed = false;
+
+          while ((match = pattern.exec(text))) {
+            const variableName = match[1];
+            const variable = knownVariables.get(variableName);
+            if (!variable || variable.type === "image") continue;
+
+            changed = true;
+            fragment.append(
+              document.createTextNode(text.slice(cursor, match.index)),
+            );
+            const token = document.createElement("span");
+            token.dataset.variableName = variableName;
+            token.dataset.variableType = "value";
+            token.contentEditable = "false";
+            token.textContent = match[0];
+            fragment.append(token);
+            cursor = match.index + match[0].length;
+          }
+
+          if (changed) {
+            fragment.append(document.createTextNode(text.slice(cursor)));
+            textNode.replaceWith(fragment);
+          }
+        });
       },
     );
-  }, []);
+  }, [variables]);
 
   useEffect(() => {
-    decorateVariableTokens();
-    const observer = new MutationObserver(() => decorateVariableTokens());
-    [editor.current, headerEditor.current, footerEditor.current].forEach(
-      (region) => {
-        if (region)
-          observer.observe(region, { childList: true, subtree: true });
-      },
-    );
-    return () => observer.disconnect();
-  }, [decorateVariableTokens, variables, headerEnabled, footerEnabled]);
-
-  const handleVariableAction = (target: HTMLElement) => {
-    const action = target.closest<HTMLButtonElement>("[data-variable-action]");
-    if (!action) return false;
-    const token = action.closest<HTMLElement>("[data-variable-name]");
-    const variable = variables.find(
-      (item) => item.name === token?.dataset.variableName,
-    );
-    if (!token || !variable) return true;
-    if (action.dataset.variableAction === "edit") {
-      setEditingVariable(variable);
-      setVariableOpen(true);
-    } else {
-      token.remove();
-      setDirty(true);
-    }
-    return true;
-  };
+    normalizePlainVariableTokens();
+  }, [normalizePlainVariableTokens, headerEnabled, footerEnabled, template]);
 
   const selectVariableElement = (target: HTMLElement) => {
     const element = target.closest<HTMLElement>("[data-variable-name]");
-    if (!element || element.tagName === "IMG") {
+    const variableName = element?.dataset.variableName;
+    const expectedToken = variableName ? `{{${variableName}}}` : null;
+
+    if (
+      !element ||
+      element.tagName === "IMG" ||
+      !expectedToken ||
+      element.textContent?.trim() !== expectedToken
+    ) {
       setSelectedVariableElement(null);
       setSelectedVariableBox(null);
       return false;
     }
+
     setSelectedVariableElement(element);
     setSelectedVariableBox(element.getBoundingClientRect());
     setSelectedImage(null);
@@ -930,16 +957,13 @@ export function TemplateEditor({ template, onClose }: Props) {
   };
 
   const selectImage = (image: HTMLImageElement) => {
-    [editor.current, headerEditor.current, footerEditor.current].forEach(
-      (region) =>
-        region
-          ?.querySelectorAll("img[data-selected=true]")
-          .forEach((node) => node.removeAttribute("data-selected")),
-    );
+    if (selectedImage === image) {
+      setResizeBox(image.getBoundingClientRect());
+      return;
+    }
 
-    image.dataset.selected = "true";
-    image.draggable = true;
-
+    setSelectedVariableElement(null);
+    setSelectedVariableBox(null);
     setSelectedImage(image);
 
     setImageWidth(String(parseInt(image.style.width) || image.width || 240));
@@ -1046,11 +1070,29 @@ export function TemplateEditor({ template, onClose }: Props) {
     event: DragEvent<HTMLDivElement>,
     region: HTMLDivElement | null,
   ) => {
+    const range = rangeAtPoint(event.clientX, event.clientY);
+    const draggedVariable = draggedVariableElement.current;
+
+    if (draggedVariable && range && region?.contains(range.startContainer)) {
+      event.preventDefault();
+
+      if (draggedVariable.contains(range.startContainer)) {
+        draggedVariableElement.current = null;
+        return;
+      }
+
+      range.insertNode(draggedVariable);
+      draggedVariableElement.current = null;
+      setSelectedVariableElement(draggedVariable);
+      setSelectedVariableBox(draggedVariable.getBoundingClientRect());
+      setDirty(true);
+      rememberSelection();
+      return;
+    }
+
     const variableName = event.dataTransfer.getData("text/docflow-variable");
 
     const variable = variables.find((item) => item.name === variableName);
-
-    const range = rangeAtPoint(event.clientX, event.clientY);
 
     if (variable && range && region?.contains(range.startContainer)) {
       event.preventDefault();
@@ -1150,6 +1192,15 @@ export function TemplateEditor({ template, onClose }: Props) {
     clone
       .querySelectorAll("[data-variable-actions]")
       .forEach((node) => node.remove());
+    clone
+      .querySelectorAll<HTMLElement>("[data-variable-editor-wrapper]")
+      .forEach((wrapper) => {
+        const token = wrapper.querySelector<HTMLElement>(
+          ":scope > [data-variable-name]",
+        );
+        if (token) wrapper.replaceWith(token);
+        else wrapper.remove();
+      });
     return clone.innerHTML;
   };
 
@@ -1474,44 +1525,6 @@ export function TemplateEditor({ template, onClose }: Props) {
             />
           )}
 
-          {selectedVariableElement &&
-            (() => {
-              const variableName = selectedVariableElement.dataset.variableName;
-              const variable = variables.find(
-                (item) => item.name === variableName,
-              );
-              if (!variable) return null;
-              return (
-                <div className="image-context-bar variable-context-bar">
-                  <strong>{`{{${variable.name}}}`}</strong>
-                  <div className="image-context-actions">
-                    <button
-                      type="button"
-                      className="btn secondary compact"
-                      onClick={() => {
-                        setEditingVariable(variable);
-                        setVariableOpen(true);
-                      }}
-                    >
-                      <Pencil size={16} /> {t("editVariable")}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn secondary compact danger"
-                      onClick={() => {
-                        selectedVariableElement.remove();
-                        setSelectedVariableElement(null);
-                        setSelectedVariableBox(null);
-                        setDirty(true);
-                      }}
-                    >
-                      <Trash2 size={16} /> {t("removeVariable")}
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-
           <VariableShelf
             t={t}
             variables={variables}
@@ -1607,7 +1620,6 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
-                    if (handleVariableAction(target)) return;
                     if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {
@@ -1643,7 +1655,6 @@ export function TemplateEditor({ template, onClose }: Props) {
                 onMouseUp={rememberSelection}
                 onClick={(event) => {
                   const target = event.target as HTMLElement;
-                  if (handleVariableAction(target)) return;
                   if (selectVariableElement(target)) return;
 
                   if (target.tagName === "IMG") {
@@ -1684,7 +1695,6 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
-                    if (handleVariableAction(target)) return;
                     if (selectVariableElement(target)) return;
 
                     if (target.tagName === "IMG") {
@@ -1710,21 +1720,43 @@ export function TemplateEditor({ template, onClose }: Props) {
               );
               if (!variable) return null;
 
+              const actionsWidth = 74;
+              const actionsHeight = 30;
+              const gap = 6;
+              const viewportPadding = 8;
+              const canPlaceRight =
+                selectedVariableBox.right + gap + actionsWidth <=
+                window.innerWidth - viewportPadding;
+              const left = canPlaceRight
+                ? selectedVariableBox.right + gap
+                : Math.max(
+                    viewportPadding,
+                    selectedVariableBox.left - actionsWidth - gap,
+                  );
+              const top = Math.min(
+                window.innerHeight - actionsHeight - viewportPadding,
+                Math.max(
+                  viewportPadding,
+                  selectedVariableBox.top +
+                    selectedVariableBox.height / 2 -
+                    actionsHeight / 2,
+                ),
+              );
+
               return (
-                <>
+                <div
+                  className="selected-variable-actions"
+                  style={{ left, top }}
+                  onMouseDown={(event) => event.preventDefault()}
+                >
                   <button
                     type="button"
                     className="selected-variable-edit"
                     aria-label={t("editVariable")}
                     title={t("editVariable")}
-                    onMouseDown={(event) => event.preventDefault()}
                     onClick={() => {
                       setEditingVariable(variable);
                       setVariableOpen(true);
-                    }}
-                    style={{
-                      left: Math.max(8, selectedVariableBox.right - 68),
-                      top: Math.max(8, selectedVariableBox.top - 34),
                     }}
                   >
                     <Pencil size={14} />
@@ -1734,21 +1766,37 @@ export function TemplateEditor({ template, onClose }: Props) {
                     className="selected-variable-delete"
                     aria-label={t("removeVariable")}
                     title={t("removeVariable")}
-                    onMouseDown={(event) => event.preventDefault()}
                     onClick={() => {
                       selectedVariableElement.remove();
                       setSelectedVariableElement(null);
                       setSelectedVariableBox(null);
                       setDirty(true);
                     }}
-                    style={{
-                      left: Math.max(42, selectedVariableBox.right - 34),
-                      top: Math.max(8, selectedVariableBox.top - 34),
-                    }}
                   >
                     <Trash2 size={14} />
                   </button>
-                </>
+                  <button
+                    type="button"
+                    draggable
+                    className="selected-variable-drag"
+                    aria-label="Move variable"
+                    title="Move variable"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onDragStart={(event) => {
+                      draggedVariableElement.current = selectedVariableElement;
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData(
+                        "text/docflow-variable-instance",
+                        variable.name,
+                      );
+                    }}
+                    onDragEnd={() => {
+                      draggedVariableElement.current = null;
+                    }}
+                  >
+                    <GripVertical size={14} />
+                  </button>
+                </div>
               );
             })()}
 
