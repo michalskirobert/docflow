@@ -33,5 +33,14 @@ export async function sendEmail(input: EmailInput) {
     to: input.to,
     subject: input.subject,
     html: input.html,
+    attachments: input.html.includes("cid:docflow-brand-mark")
+      ? [
+          {
+            filename: "docflow-mark.png",
+            path: `${process.cwd()}/public/brand/docflow-email-mark.png`,
+            cid: "docflow-brand-mark",
+          },
+        ]
+      : undefined,
   });
 }

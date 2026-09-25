@@ -16,7 +16,9 @@ import LanguageSwitcher from "@/features/language/language-switcher";
 
 type VerificationResult = {
   paymentRequired: boolean;
+  paymentId: string | null;
   paymentMethod: "PAYU" | "BANK_TRANSFER" | null;
+  paymentStarted: boolean;
   transferReference: string | null;
 };
 
@@ -24,6 +26,8 @@ function VerifyEmailContent() {
   const params = useSearchParams();
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState(false);
 
   useEffect(() => {
     const token = params.get("token");
@@ -41,6 +45,25 @@ function VerifyEmailContent() {
       })
       .catch(() => setState("error"));
   }, [params]);
+
+  const continueToPayment = async () => {
+    const token = params.get("token");
+    if (!token || !result?.paymentId) return;
+
+    setPaymentLoading(true);
+    setPaymentError(false);
+
+    try {
+      const { data } = await api.post<{ redirectUri: string }>(
+        "/auth/verification-payment",
+        { token, paymentId: result.paymentId },
+      );
+      window.location.assign(data.redirectUri);
+    } catch {
+      setPaymentError(true);
+      setPaymentLoading(false);
+    }
+  };
 
   const Icon =
     state === "loading"
@@ -84,10 +107,31 @@ function VerifyEmailContent() {
 
         {state === "ok" && result?.paymentRequired && (
           <div className="auth-status-actions">
-            <Link className="btn full" href="/login?next=/settings">
-              <CreditCard size={17} />
-              Continue to payment
-            </Link>
+            {result.paymentMethod === "PAYU" && !result.paymentStarted ? (
+              <button
+                className="btn full"
+                type="button"
+                disabled={paymentLoading}
+                onClick={continueToPayment}
+              >
+                {paymentLoading ? (
+                  <LoaderCircle className="spin" size={17} />
+                ) : (
+                  <CreditCard size={17} />
+                )}
+                {paymentLoading ? "Opening PayU…" : "Continue to payment"}
+              </button>
+            ) : (
+              <Link className="btn full" href="/login">
+                <CreditCard size={17} />
+                Continue
+              </Link>
+            )}
+            {paymentError && (
+              <p className="field-error-message" role="alert">
+                Payment could not be started. Please try again.
+              </p>
+            )}
             <Link className="btn secondary full" href="/login">
               <LogIn size={17} />
               Sign in instead

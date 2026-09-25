@@ -34,6 +34,7 @@ export async function POST(request: Request) {
         select: {
           id: true,
           provider: true,
+          providerOrderId: true,
           transferReference: true,
         },
       })
@@ -42,7 +43,9 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     paymentRequired: Boolean(pendingPayment),
+    paymentId: pendingPayment?.id ?? null,
     paymentMethod: pendingPayment?.provider ?? null,
+    paymentStarted: Boolean(pendingPayment?.providerOrderId),
     transferReference: pendingPayment?.transferReference ?? null,
   });
 }
