@@ -1,48 +1,70 @@
 "use client";
 
 import { CheckCircle2, Clock3, LoaderCircle, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/axios";
-import type { BillingOverview } from "@/features/settings/service";
 
 type State = "checking" | "completed" | "pending" | "failed";
+type PaymentStatusResponse = {
+  status: "PENDING" | "COMPLETED" | "CANCELED" | "FAILED";
+};
 
 export default function PaymentReturnPage() {
   const t = useTranslations("paymentReturn");
   const [state, setState] = useState<State>("checking");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = useCallback(() => {
+    setState("checking");
+    setRefreshKey((value) => value + 1);
+  }, []);
 
   useEffect(() => {
+    const payment = new URLSearchParams(window.location.search).get("payment");
+    if (!payment) {
+      setState("failed");
+      return;
+    }
+
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
+
     const check = async () => {
       try {
-        const { data } = await api.get<BillingOverview>("/billing", {
-          params: { paymentReturn: "1" },
+        const { data } = await api.get<PaymentStatusResponse>("/payu/status", {
+          params: { payment },
         });
         if (cancelled) return;
-        const payment = data.payments.find(
-          (item: BillingOverview["payments"][number]) =>
-            item.provider === "PAYU",
-        );
-        if (payment?.status === "COMPLETED") return setState("completed");
-        if (payment?.status === "CANCELED" || payment?.status === "FAILED")
-          return setState("failed");
+
+        if (data.status === "COMPLETED") {
+          setState("completed");
+          return;
+        }
+        if (data.status === "CANCELED" || data.status === "FAILED") {
+          setState("failed");
+          return;
+        }
+
         attempts += 1;
-        if (attempts >= 8) return setState("pending");
+        if (attempts >= 8) {
+          setState("pending");
+          return;
+        }
         timer = setTimeout(check, 1500);
       } catch {
-        if (!cancelled) setState("pending");
+        if (!cancelled) setState("failed");
       }
     };
+
     void check();
     return () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [refreshKey]);
 
   const Icon =
     state === "checking"
@@ -52,6 +74,7 @@ export default function PaymentReturnPage() {
         : state === "pending"
           ? Clock3
           : XCircle;
+
   return (
     <main className="payment-return-page">
       <section className="payment-return-card" aria-live="polite">
@@ -61,13 +84,16 @@ export default function PaymentReturnPage() {
         />
         <h1>{t(`${state}Title`)}</h1>
         <p>{t(`${state}Description`)}</p>
+
         {state !== "checking" && (
           <div className="payment-return-actions">
-            <Link className="btn" href="/account">
-              {t("account")}
-            </Link>
-            <Link className="btn secondary" href="/dashboard">
-              {t("dashboard")}
+            {state === "pending" && (
+              <button className="btn secondary" type="button" onClick={refresh}>
+                {t("checkAgain")}
+              </button>
+            )}
+            <Link className="btn" href="/login">
+              {t("login")}
             </Link>
           </div>
         )}

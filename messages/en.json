@@ -649,7 +649,7 @@
     "pendingDescription": "PayU has returned you to DocFlow, but the final confirmation has not arrived yet. You can safely continue using the application and check the status in My account.",
     "failedTitle": "Payment not completed",
     "failedDescription": "The payment was cancelled or failed. You can start it again from My account.",
-    "account": "Go to My account",
-    "dashboard": "Go to dashboard"
+    "login": "Go to sign in",
+    "checkAgain": "Check again"
   }
 }

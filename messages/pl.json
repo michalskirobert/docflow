@@ -649,7 +649,7 @@
     "pendingDescription": "PayU przekierował Cię do DocFlow, ale końcowe potwierdzenie jeszcze nie dotarło. Możesz bezpiecznie korzystać z aplikacji i sprawdzić status w Moim koncie.",
     "failedTitle": "Płatność nie została zakończona",
     "failedDescription": "Płatność została anulowana lub zakończyła się błędem. Możesz rozpocząć ją ponownie w Moim koncie.",
-    "account": "Przejdź do Mojego konta",
-    "dashboard": "Przejdź do pulpitu"
+    "login": "Przejdź do logowania",
+    "checkAgain": "Sprawdź ponownie"
   }
 }

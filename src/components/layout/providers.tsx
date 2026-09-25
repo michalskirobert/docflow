@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { FeedbackProvider } from "@/components/ui/feedback-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
+
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -18,6 +21,8 @@ export function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider>
         <FeedbackProvider>{children}</FeedbackProvider>
       </ThemeProvider>
+      <SpeedInsights />
+      <Analytics />
     </QueryClientProvider>
   );
 }

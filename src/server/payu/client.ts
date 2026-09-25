@@ -48,7 +48,7 @@ export async function createPayUOrder(input: {
     },
     body: JSON.stringify({
       notifyUrl: `${appUrl}/api/payu/notify`,
-      continueUrl: `${appUrl}/${input.locale}/payment/return`,
+      continueUrl: `${appUrl}/${input.locale}/payment/return?payment=${encodeURIComponent(input.extOrderId)}`,
       customerIp: input.customerIp,
       merchantPosId: posId,
       description: input.description,

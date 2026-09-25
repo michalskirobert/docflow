@@ -649,7 +649,7 @@
     "pendingDescription": "PayU telah mengembalikan Anda ke DocFlow, tetapi konfirmasi akhir belum diterima. Anda dapat tetap menggunakan aplikasi dan memeriksa status di Akun saya.",
     "failedTitle": "Pembayaran belum selesai",
     "failedDescription": "Pembayaran dibatalkan atau gagal. Anda dapat memulainya kembali dari Akun saya.",
-    "account": "Buka Akun saya",
-    "dashboard": "Buka dasbor"
+    "login": "Buka halaman masuk",
+    "checkAgain": "Periksa lagi"
   }
 }
