@@ -274,6 +274,15 @@ export default function RegisterForm() {
 
         await refreshCaptcha();
 
+        if (code === "EMAIL_DELIVERY_FAILED") {
+          setError("root", {
+            type: "server",
+            message: "emailDeliveryFailed",
+          });
+          setFocus("email");
+          return;
+        }
+
         if (code === "EMAIL_EXISTS") {
           setError("email", {
             type: "server",

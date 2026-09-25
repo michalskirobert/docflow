@@ -50,16 +50,76 @@ export async function POST(request: Request) {
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
-      select: { id: true },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        locale: true,
+        emailVerifiedAt: true,
+        memberships: {
+          take: 1,
+          select: {
+            organization: {
+              select: {
+                payments: {
+                  orderBy: { createdAt: "desc" },
+                  take: 1,
+                  select: {
+                    plan: true,
+                    provider: true,
+                    transferReference: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (existingUser) {
+      if (existingUser.emailVerifiedAt) {
+        return NextResponse.json(
+          {
+            code: "EMAIL_EXISTS",
+            message: "Account with this email already exists",
+          },
+          { status: 409 },
+        );
+      }
+
+      try {
+        await sendVerificationEmail(existingUser);
+      } catch (error) {
+        console.error(
+          "[POST /api/auth/register] verification email retry",
+          error,
+        );
+
+        return NextResponse.json(
+          {
+            code: "EMAIL_DELIVERY_FAILED",
+            message: "Verification email could not be sent",
+          },
+          { status: 503 },
+        );
+      }
+
+      const payment =
+        existingUser.memberships[0]?.organization.payments[0] ?? null;
+
       return NextResponse.json(
         {
-          code: "EMAIL_EXISTS",
-          message: "Account with this email already exists",
+          email,
+          verificationRequired: true,
+          paymentRequired: Boolean(payment && payment.plan !== "FREE"),
+          ...(payment?.provider === "BANK_TRANSFER" && {
+            paymentPending: true,
+            paymentMethod: "BANK_TRANSFER",
+            transferReference: payment.transferReference,
+          }),
         },
-        { status: 409 },
+        { status: 200 },
       );
     }
 
@@ -169,6 +229,14 @@ export async function POST(request: Request) {
       await sendVerificationEmail(result.user);
     } catch (error) {
       console.error("[POST /api/auth/register] verification email", error);
+
+      return NextResponse.json(
+        {
+          code: "EMAIL_DELIVERY_FAILED",
+          message: "Verification email could not be sent",
+        },
+        { status: 503 },
+      );
     }
 
     if (result.paymentMethod === "BANK_TRANSFER") {

@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+import { DOCFLOW_EMAIL_MARK_BASE64 } from "./brand-mark";
+
 type EmailInput = { to: string; subject: string; html: string };
 
 export async function sendEmail(input: EmailInput) {
@@ -37,7 +39,8 @@ export async function sendEmail(input: EmailInput) {
       ? [
           {
             filename: "docflow-mark.png",
-            path: `${process.cwd()}/public/brand/docflow-email-mark.png`,
+            content: Buffer.from(DOCFLOW_EMAIL_MARK_BASE64, "base64"),
+            contentType: "image/png",
             cid: "docflow-brand-mark",
           },
         ]

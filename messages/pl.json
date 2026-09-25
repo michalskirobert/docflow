@@ -102,7 +102,8 @@
     "freeWhilePaymentPending": "Do czasu potwierdzenia płatności konto korzysta z darmowej licencji z limitem 10 dokumentów miesięcznie.",
     "alreadyAccount": "Masz już konto?",
     "workspaceName": "Nazwa obszaru roboczego",
-    "country": "Kraj"
+    "country": "Kraj",
+    "emailDeliveryFailed": "Nie udało się wysłać wiadomości weryfikacyjnej. Spróbuj ponownie."
   },
   "dashboard": {
     "title": "Panel",

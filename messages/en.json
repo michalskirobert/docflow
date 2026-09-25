@@ -102,7 +102,8 @@
     "freeWhilePaymentPending": "Until payment is confirmed, your account uses the Free license with a 10-document monthly limit.",
     "alreadyAccount": "Already have an account?",
     "workspaceName": "Workspace name",
-    "country": "Country"
+    "country": "Country",
+    "emailDeliveryFailed": "The verification email could not be sent. Please try again."
   },
   "dashboard": {
     "title": "Dashboard",
