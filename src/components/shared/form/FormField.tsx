@@ -39,7 +39,7 @@ export function FormField({
         <InputControl
           {...inputProps}
           type={isPassword && passwordVisible ? "text" : inputProps.type}
-          className={`${inputProps.className ?? ""}${isPassword ? " has-password-toggle" : ""}`.trim()}
+          className={isPassword ? "has-password-toggle" : undefined}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
         />
