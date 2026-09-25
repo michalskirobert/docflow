@@ -11,10 +11,11 @@ import {
   XCircle,
 } from "lucide-react";
 import { api } from "@/lib/axios";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import LanguageSwitcher from "@/features/language/language-switcher";
 
 type VerificationResult = {
+  authenticated: boolean;
   paymentRequired: boolean;
   paymentId: string | null;
   paymentMethod: "PAYU" | "BANK_TRANSFER" | null;
@@ -24,6 +25,7 @@ type VerificationResult = {
 
 function VerifyEmailContent() {
   const params = useSearchParams();
+  const router = useRouter();
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -40,11 +42,16 @@ function VerifyEmailContent() {
     api
       .post<VerificationResult>("/auth/verify-email", { token })
       .then(({ data }) => {
+        if (data.authenticated) {
+          router.replace("/account");
+          return;
+        }
+
         setResult(data);
         setState("ok");
       })
       .catch(() => setState("error"));
-  }, [params]);
+  }, [params, router]);
 
   const continueToPayment = async () => {
     const token = params.get("token");

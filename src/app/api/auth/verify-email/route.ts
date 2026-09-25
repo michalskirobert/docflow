@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { consumeVerificationToken } from "@/server/email/verification";
+import { getSession } from "@/server/auth/session";
 
 export async function POST(request: Request) {
   const { token } = (await request.json()) as { token?: string };
@@ -23,6 +24,14 @@ export async function POST(request: Request) {
     select: { organizationId: true },
   });
 
+  const session = await getSession();
+  const authenticated = Boolean(
+    session &&
+    session.id === user.id &&
+    membership &&
+    session.organizationId === membership.organizationId,
+  );
+
   const pendingPayment = membership
     ? await prisma.payment.findFirst({
         where: {
@@ -42,6 +51,7 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
+    authenticated,
     paymentRequired: Boolean(pendingPayment),
     paymentId: pendingPayment?.id ?? null,
     paymentMethod: pendingPayment?.provider ?? null,
