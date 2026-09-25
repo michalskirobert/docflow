@@ -105,32 +105,19 @@ export async function POST(request: Request) {
       await tx.billingProfile.create({
         data: {
           organizationId: organization.id,
-
           customerType: data.customerType,
-
           billingEmail: data.billingEmail.toLowerCase(),
-
           firstName: data.customerType === "INDIVIDUAL" ? data.firstName : null,
-
           lastName: data.customerType === "INDIVIDUAL" ? data.lastName : null,
-
           companyName:
             data.customerType === "BUSINESS" ? data.companyName : null,
-
           taxId: data.customerType === "BUSINESS" ? data.taxId : null,
-
           vatId: data.customerType === "BUSINESS" ? data.vatId : null,
-
           countryCode: data.countryCode.toUpperCase(),
-
           street: data.street,
-
           buildingNumber: data.buildingNumber,
-
           apartmentNumber: data.apartmentNumber || null,
-
           postalCode: data.postalCode,
-
           city: data.city,
         },
       });
@@ -138,62 +125,64 @@ export async function POST(request: Request) {
       await tx.subscription.create({
         data: {
           organizationId: organization.id,
-
           plan: "FREE",
-
           status: "ACTIVE",
-
           monthlyDocumentLimit: 10,
         },
       });
 
+      let paymentMethod: string | undefined;
+      let transferReference: string | null = null;
+
+      if (data.plan !== "FREE") {
+        const extOrderId = randomUUID();
+        transferReference =
+          data.paymentMethod === "BANK_TRANSFER"
+            ? `DF-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`
+            : null;
+
+        await tx.payment.create({
+          data: {
+            organizationId: organization.id,
+            plan: data.plan,
+            provider: data.paymentMethod,
+            extOrderId,
+            transferReference,
+            netAmount: plan.net,
+            vatAmount: plan.vat,
+            grossAmount: plan.gross,
+            vatRate: plan.vatRate,
+          },
+        });
+
+        paymentMethod = data.paymentMethod;
+      }
+
       return {
         user,
-        organization,
+        paymentMethod,
+        transferReference,
       };
     });
 
-    await sendVerificationEmail(result.user);
+    try {
+      await sendVerificationEmail(result.user);
+    } catch (error) {
+      console.error("[POST /api/auth/register] verification email", error);
+    }
 
-    if (data.plan !== "FREE") {
-      const extOrderId = randomUUID();
-      const transferReference =
-        data.paymentMethod === "BANK_TRANSFER"
-          ? `DF-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`
-          : null;
-
-      const payment = await prisma.payment.create({
-        data: {
-          organizationId: result.organization.id,
-
-          plan: data.plan,
-          provider: data.paymentMethod,
-          extOrderId,
-          transferReference,
-
-          netAmount: plan.net,
-          vatAmount: plan.vat,
-          grossAmount: plan.gross,
-          vatRate: plan.vatRate,
+    if (result.paymentMethod === "BANK_TRANSFER") {
+      return NextResponse.json(
+        {
+          email,
+          verificationRequired: true,
+          paymentRequired: true,
+          paymentPending: true,
+          paymentMethod: "BANK_TRANSFER",
+          transferReference: result.transferReference,
         },
-      });
-
-      if (data.paymentMethod === "BANK_TRANSFER") {
-        return NextResponse.json(
-          {
-            email,
-            verificationRequired: true,
-            paymentRequired: true,
-            paymentPending: true,
-            paymentMethod: "BANK_TRANSFER",
-            transferReference,
-          },
-          { status: 201 },
-        );
-      }
-
-      // Payment remains PENDING until the user verifies the email address
-      // and explicitly chooses to continue to payment.
+        { status: 201 },
+      );
     }
 
     return NextResponse.json(

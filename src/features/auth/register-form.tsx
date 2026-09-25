@@ -59,6 +59,7 @@ export default function RegisterForm() {
     setError,
     setValue,
     resetField,
+    setFocus,
     control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
@@ -213,103 +214,110 @@ export default function RegisterForm() {
     });
   }
 
-  const submit = handleSubmit(async (values) => {
-    try {
-      /*
-       * The question displayed to the user comes directly
-       * from captcha.data.
-       *
-       * Therefore we also submit the token directly from
-       * captcha.data instead of trusting the hidden RHF value.
-       *
-       * This prevents:
-       *
-       * question A + token B
-       */
-      const currentCaptchaToken = captcha.data?.token;
-
-      if (!currentCaptchaToken) {
-        setError("captchaAnswer", {
-          type: "server",
-          message: "captchaUnavailable",
-        });
-
-        await refreshCaptcha();
-
-        return;
-      }
-
-      const result = await mutation.mutateAsync({
-        ...values,
-
+  const submit = handleSubmit(
+    async (values) => {
+      try {
         /*
-         * Explicitly overwrite the hidden form value
-         * with the token belonging to the currently
-         * rendered challenge.
-         */
-        captchaToken: currentCaptchaToken,
-
-        captchaAnswer: values.captchaAnswer.trim(),
-      });
-
-      setIsRedirecting(true);
-      notify(t("registrationCreated"), "success");
-
-      router.push(
-        `/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`,
-      );
-    } catch (error) {
-      const response = axios.isAxiosError<
-        ApiError & {
-          code?: string;
-        }
-      >(error)
-        ? error.response
-        : undefined;
-
-      const code = response?.data?.code;
-
-      if (code === "EMAIL_EXISTS") {
-        setError("email", {
-          type: "server",
-          message: "emailExists",
-        });
-
-        return;
-      }
-
-      if (code === "INVALID_CAPTCHA") {
-        /*
-         * Refresh FIRST.
+         * The question displayed to the user comes directly
+         * from captcha.data.
          *
-         * refreshCaptcha() resets captchaAnswer,
-         * therefore setError() must happen afterwards.
+         * Therefore we also submit the token directly from
+         * captcha.data instead of trusting the hidden RHF value.
+         *
+         * This prevents:
+         *
+         * question A + token B
          */
+        const currentCaptchaToken = captcha.data?.token;
+
+        if (!currentCaptchaToken) {
+          setError("captchaAnswer", {
+            type: "server",
+            message: "captchaUnavailable",
+          });
+
+          await refreshCaptcha();
+          setFocus("captchaAnswer");
+
+          return;
+        }
+
+        const result = await mutation.mutateAsync({
+          ...values,
+
+          /*
+           * Explicitly overwrite the hidden form value
+           * with the token belonging to the currently
+           * rendered challenge.
+           */
+          captchaToken: currentCaptchaToken,
+
+          captchaAnswer: values.captchaAnswer.trim(),
+        });
+
+        setIsRedirecting(true);
+        notify(t("registrationCreated"), "success");
+
+        router.push(
+          `/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`,
+        );
+      } catch (error) {
+        const response = axios.isAxiosError<
+          ApiError & {
+            code?: string;
+          }
+        >(error)
+          ? error.response
+          : undefined;
+
+        const code = response?.data?.code;
+
         await refreshCaptcha();
 
-        setError("captchaAnswer", {
+        if (code === "EMAIL_EXISTS") {
+          setError("email", {
+            type: "server",
+            message: "emailExists",
+          });
+          setFocus("email");
+          return;
+        }
+
+        if (code === "INVALID_CAPTCHA") {
+          setError("captchaAnswer", {
+            type: "server",
+            message: "invalidCaptcha",
+          });
+          setFocus("captchaAnswer");
+          return;
+        }
+
+        if (code === "PLAN_UNAVAILABLE") {
+          setError("plan", {
+            type: "server",
+            message: "planUnavailable",
+          });
+          setFocus("plan");
+          return;
+        }
+
+        setError("root", {
           type: "server",
-          message: "invalidCaptcha",
+          message: "registrationFailed",
         });
-
-        return;
       }
+    },
+    async (validationErrors) => {
+      await refreshCaptcha();
 
-      if (code === "PLAN_UNAVAILABLE") {
-        setError("plan", {
-          type: "server",
-          message: "planUnavailable",
-        });
+      const firstInvalidField = Object.keys(validationErrors)[0] as
+        keyof RegisterFormValues | undefined;
 
-        return;
+      if (firstInvalidField) {
+        setFocus(firstInvalidField);
       }
-
-      setError("root", {
-        type: "server",
-        message: "registrationFailed",
-      });
-    }
-  });
+    },
+  );
 
   const pending = mutation.isPending || isRedirecting;
 
