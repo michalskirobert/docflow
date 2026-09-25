@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { Providers } from "@/components/layout/providers";
 import { routing } from "@/i18n/navigation";
@@ -56,6 +57,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
