@@ -395,7 +395,9 @@
     "emailSetupGuideSender": "Masukkan alamat pengirim dan nama pengirim opsional yang akan digunakan untuk pesan keluar.",
     "emailSetupGuideProvider": "Pengaturan SMTP tersedia di dokumentasi penyedia email Anda. DocFlow tidak mengubah pengaturan akun email Anda.",
     "payAgain": "Bayar lagi",
-    "paymentStartError": "Pembayaran tidak dapat dimulai. Silakan coba lagi."
+    "paymentStartError": "Pembayaran tidak dapat dimulai. Silakan coba lagi.",
+    "paymentMethodChanged": "Metode pembayaran telah diubah.",
+    "payNow": "Bayar sekarang"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -566,7 +568,7 @@
     "done": "Selesai",
     "processingImage": "Memproses dan mengoptimalkan gambar…",
     "emailSubject": "Subjek email",
-    "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan {{NomorPesanan}}",
+    "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan '{{NomorPesanan}}'",
     "emailSubjectHelp": "Subjek opsional saat template digunakan sebagai email. Variabel dapat digunakan. Jika kosong, nama template akan digunakan.",
     "variablePlaceholder": "Placeholder",
     "variablePlaceholderHelp": "Petunjuk opsional yang ditampilkan di dalam kontrol sebelum pengguna memasukkan nilai. Untuk bidang gambar, ini menggantikan petunjuk unggah.",

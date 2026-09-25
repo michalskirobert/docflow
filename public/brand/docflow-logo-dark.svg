@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 72" fill="none">
-  <g transform="translate(2 4)">
-    <path d="M14 3h25l12 12v36a4 4 0 0 1-4 4H14a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5Z" stroke="#f8fafc" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M39 3v12h12L39 3Z" fill="#fbbf24"/>
-    <path d="M20 26h20M20 35h20M20 44h13" stroke="#f8fafc" stroke-width="4" stroke-linecap="round"/>
-  </g>
-  <text x="72" y="48" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="-2" fill="#f8fafc">Doc</text>
-  <text x="150" y="48" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" letter-spacing="-2" fill="#fbbf24">Flow</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" fill="none">
+<path d="M14 8h31l13 13v43a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V14a6 6 0 0 1 6-6Z" fill="#111827" stroke="#f8fafc" stroke-width="5" stroke-linejoin="round"/>
+<path d="M45 8v13h13" fill="#f59e0b" stroke="#f59e0b" stroke-width="5" stroke-linejoin="round"/>
+<text x="33" y="51" text-anchor="middle" fill="#f8fafc" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="800">DF</text>
+<text x="76" y="43" fill="#f8fafc" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="800">Doc</text>
+<text x="135" y="43" fill="#f59e0b" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="800">Flow</text>
+<text x="77" y="63" fill="#64748b" font-family="Arial,Helvetica,sans-serif" font-size="12">by NurByte</text>
 </svg>

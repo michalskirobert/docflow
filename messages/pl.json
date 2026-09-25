@@ -395,7 +395,9 @@
     "emailSetupGuideSender": "Podaj adres i opcjonalną nazwę nadawcy, które będą używane przy wysyłce.",
     "emailSetupGuideProvider": "Ustawienia SMTP znajdziesz w dokumentacji swojego dostawcy poczty. DocFlow nie zmienia ustawień Twojego konta pocztowego.",
     "payAgain": "Zapłać ponownie",
-    "paymentStartError": "Nie udało się rozpocząć płatności. Spróbuj ponownie."
+    "paymentStartError": "Nie udało się rozpocząć płatności. Spróbuj ponownie.",
+    "paymentMethodChanged": "Metoda płatności została zmieniona.",
+    "payNow": "Zapłać teraz"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -566,7 +568,7 @@
     "done": "Gotowe",
     "processingImage": "Przetwarzanie i optymalizacja obrazu…",
     "emailSubject": "Temat e-maila",
-    "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia {{NumerZamowienia}}",
+    "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia '{{NumerZamowienia}}'",
     "emailSubjectHelp": "Opcjonalny temat używany przy eksporcie szablonu do e-maila. Możesz używać zmiennych. Gdy pole jest puste, użyta zostanie nazwa szablonu.",
     "variablePlaceholder": "Placeholder",
     "variablePlaceholderHelp": "Opcjonalna podpowiedź wyświetlana w kontrolce przed wpisaniem wartości. Dla obrazu zastępuje komunikat dodawania pliku.",

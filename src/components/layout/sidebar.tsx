@@ -131,7 +131,7 @@ export function Sidebar() {
         className="mobile-product-meta"
         aria-label={`DocFlow by NurByte, version ${version}`}
       >
-        <DocFlowLogo className="mobile-docflow-logo" showByline />
+        <DocFlowLogo compact className="mobile-docflow-logo" />
         <span className="mobile-version">v{version}</span>
       </div>
     </aside>

@@ -1,4 +1,5 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
+import { useState, type InputHTMLAttributes, type ReactNode } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import type { FieldError } from "react-hook-form";
 import { InputControl } from "./InputControl";
 
@@ -18,6 +19,8 @@ export function FormField({
   ...inputProps
 }: Props) {
   const errorMessage = typeof error === "string" ? error : error?.message;
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const isPassword = inputProps.type === "password";
   const errorId = `${inputProps.name ?? inputProps.id ?? "field"}-error`;
   return (
     <label
@@ -35,9 +38,22 @@ export function FormField({
       <div className="field-control">
         <InputControl
           {...inputProps}
+          type={isPassword && passwordVisible ? "text" : inputProps.type}
+          className={`${inputProps.className ?? ""}${isPassword ? " has-password-toggle" : ""}`.trim()}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
         />
+        {isPassword && (
+          <button
+            type="button"
+            className="password-visibility-toggle"
+            aria-label={passwordVisible ? "Hide password" : "Show password"}
+            title={passwordVisible ? "Hide password" : "Show password"}
+            onClick={() => setPasswordVisible((visible) => !visible)}
+          >
+            {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
         {suffix}
       </div>
       {error && (

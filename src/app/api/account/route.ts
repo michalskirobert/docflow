@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { accountSchema } from "@/features/settings/schema";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
+import { destroySession } from "@/server/auth/session";
 import { sendVerificationEmail } from "@/server/email/verification";
 
 export async function GET() {
@@ -103,6 +104,7 @@ export async function PATCH(request: Request) {
       await tx.billingProfile.update({
         where: { organizationId: s.organizationId },
         data: {
+          customerType: data.customerType,
           billingEmail: data.billingEmail.toLowerCase(),
           companyName: data.companyName || null,
           taxId: data.taxId || null,
@@ -149,6 +151,7 @@ export async function DELETE() {
         await tx.organization.delete({ where: { id: s.organizationId } });
       await tx.user.delete({ where: { id: s.id } });
     });
+    await destroySession();
     return new NextResponse(null, { status: 204 });
   } catch (e) {
     console.error("[DELETE account]", e);

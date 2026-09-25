@@ -85,32 +85,12 @@ export default function SettingsPanel() {
     periodEndsAt !== null &&
     periodEndsAt - Date.now() <= 7 * 86400000;
   const paymentBusy = start.isPending || change.isPending;
-  const canContinuePayment = Boolean(currentPending);
-  const canChangePaymentMethod =
-    Boolean(currentPending) || currentPlan === "FREE" || isRenewalWindow;
 
-  const continuePayment = async () => {
-    if (!currentPending) return;
+  const payNow = async () => {
+    if (currentPending) return;
+    if (currentPlan === "YEARLY" && !isRenewalWindow) return;
     try {
-      const result = await change.mutateAsync({
-        paymentId: currentPending.id,
-        paymentMethod: currentPending.provider as "PAYU" | "BANK_TRANSFER",
-      });
-      if (result.redirectUri) window.location.assign(result.redirectUri);
-    } catch {
-      notify(t("paymentStartError"), "error");
-    }
-  };
-
-  const changePaymentMethod = async () => {
-    if (!canChangePaymentMethod) return;
-    try {
-      const result = currentPending
-        ? await change.mutateAsync({
-            paymentId: currentPending.id,
-            paymentMethod: method,
-          })
-        : await start.mutateAsync({ paymentMethod: method });
+      const result = await start.mutateAsync({ paymentMethod: method });
       if (result.redirectUri) window.location.assign(result.redirectUri);
     } catch {
       notify(t("paymentStartError"), "error");
@@ -249,7 +229,7 @@ export default function SettingsPanel() {
                     {t("paymentMethod")}
                     <SelectControl
                       value={method}
-                      disabled={paymentBusy || !canChangePaymentMethod}
+                      disabled={paymentBusy || Boolean(currentPending)}
                       onChange={(event) =>
                         setMethod(
                           event.target.value as "PAYU" | "BANK_TRANSFER",
@@ -260,30 +240,23 @@ export default function SettingsPanel() {
                       <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
                     </SelectControl>
                   </label>
-                  <div className="settings-payment-actions">
-                    <button
-                      className="btn secondary"
-                      disabled={paymentBusy || !canContinuePayment}
-                      onClick={continuePayment}
-                    >
-                      {change.isPending && (
-                        <LoaderCircle className="spinner" size={17} />
-                      )}
-                      {t("continuePayment")}
-                    </button>
-                    <button
-                      className="btn secondary"
-                      disabled={paymentBusy || !canChangePaymentMethod}
-                      onClick={changePaymentMethod}
-                    >
-                      {paymentBusy && (
-                        <LoaderCircle className="spinner" size={17} />
-                      )}
-                      {currentPlan === "FREE" && !currentPending
-                        ? t("upgradePlan")
-                        : t("changePaymentMethod")}
-                    </button>
-                  </div>
+                  {!currentPending && (
+                    <div className="settings-payment-actions">
+                      <button
+                        className="btn"
+                        disabled={
+                          paymentBusy ||
+                          (currentPlan === "YEARLY" && !isRenewalWindow)
+                        }
+                        onClick={payNow}
+                      >
+                        {start.isPending && (
+                          <LoaderCircle className="spinner" size={17} />
+                        )}
+                        {t("payNow")}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
 

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import {
+  getDefaultTemplate,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 import { requireSession } from "@/server/auth/require-session";
 import {
   renderTemplate,
@@ -74,9 +78,11 @@ export async function POST(
     const session = await requireSession();
     const { id } = await params;
     const parsed = schema.parse(await req.json());
-    const template = await prisma.template.findFirst({
-      where: { id, organizationId: session.organizationId },
-    });
+    const template = isDefaultTemplateId(id)
+      ? getDefaultTemplate(id)
+      : await prisma.template.findFirst({
+          where: { id, organizationId: session.organizationId },
+        });
 
     if (!template) {
       return NextResponse.json(

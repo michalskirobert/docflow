@@ -532,8 +532,9 @@ body {
   margin: 20px 0;
   padding: 12px;
   border-radius: 11px;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
   font-size: 13px;
 }
 .status-card .btn {
@@ -1430,9 +1431,9 @@ body {
   }
 
   .mobile-product-meta .docflow-logo-mark {
-    width: 11px;
-    height: 11px;
-    flex-basis: 11px;
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
   }
 
   .mobile-product-meta .docflow-logo-copy {

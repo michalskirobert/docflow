@@ -2,15 +2,28 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2, LoaderCircle, ShieldCheck, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  CreditCard,
+  LoaderCircle,
+  LogIn,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 import { api } from "@/lib/axios";
 import { Link } from "@/i18n/navigation";
 import LanguageSwitcher from "@/features/language/language-switcher";
 
+type VerificationResult = {
+  paymentRequired: boolean;
+  paymentMethod: "PAYU" | "BANK_TRANSFER" | null;
+  transferReference: string | null;
+};
+
 function VerifyEmailContent() {
   const params = useSearchParams();
-
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
+  const [result, setResult] = useState<VerificationResult | null>(null);
 
   useEffect(() => {
     const token = params.get("token");
@@ -21,8 +34,11 @@ function VerifyEmailContent() {
     }
 
     api
-      .post("/auth/verify-email", { token })
-      .then(() => setState("ok"))
+      .post<VerificationResult>("/auth/verify-email", { token })
+      .then(({ data }) => {
+        setResult(data);
+        setState("ok");
+      })
       .catch(() => setState("error"));
   }, [params]);
 
@@ -58,15 +74,36 @@ function VerifyEmailContent() {
 
         <p>
           {state === "ok"
-            ? "Your account is ready. Sign in to start creating documents."
+            ? result?.paymentRequired
+              ? "Your account is verified. Your annual plan payment is waiting for you."
+              : "Your account is ready. Sign in to start creating documents."
             : state === "error"
               ? "This verification link is invalid or has expired. Request a new link from the sign-in flow."
               : "This will only take a moment."}
         </p>
 
-        {state !== "loading" && (
+        {state === "ok" && result?.paymentRequired && (
+          <div className="auth-status-actions">
+            <Link className="btn full" href="/login?next=/settings">
+              <CreditCard size={17} />
+              Continue to payment
+            </Link>
+            <Link className="btn secondary full" href="/login">
+              <LogIn size={17} />
+              Sign in instead
+            </Link>
+          </div>
+        )}
+
+        {state === "ok" && !result?.paymentRequired && (
           <Link className="btn full" href="/login">
             Continue to sign in
+          </Link>
+        )}
+
+        {state === "error" && (
+          <Link className="btn full" href="/login">
+            Back to sign in
           </Link>
         )}
       </section>
@@ -81,13 +118,10 @@ function VerifyEmailFallback() {
         <div className="status-icon loading">
           <LoaderCircle />
         </div>
-
         <span className="eyebrow">
           <ShieldCheck size={14} /> ACCOUNT SECURITY
         </span>
-
         <h1>Verifying your email…</h1>
-
         <p>This will only take a moment.</p>
       </section>
     </main>

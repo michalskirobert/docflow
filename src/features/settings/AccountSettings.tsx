@@ -3,9 +3,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/shared/button";
-import { FormField, SelectField } from "@/components/shared/form";
+import {
+  FormField,
+  SearchableSelectField,
+  SelectField,
+} from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { accountSchema, type AccountFormValues } from "./schema";
 import { useAccountDetails, useUpdateAccount } from "./service";
@@ -34,6 +38,8 @@ export function AccountSettings() {
     formState: { errors },
   } = useForm<AccountFormValues>({ resolver: zodResolver(accountSchema) });
   const countryCode = useWatch({ control, name: "countryCode" }) || "PL";
+  const customerType =
+    useWatch({ control, name: "customerType" }) || "INDIVIDUAL";
   const countryOptions = getCountryOptions(locale);
   useEffect(() => {
     if (account.data) reset(account.data);
@@ -108,12 +114,7 @@ export function AccountSettings() {
             {...register("organizationName")}
             error={msg(errors.organizationName)}
           />
-          <SelectField
-            label={t("customerType")}
-            value={account.data?.customerType ?? "INDIVIDUAL"}
-            disabled
-            onChange={() => {}}
-          >
+          <SelectField label={t("customerType")} {...register("customerType")}>
             <option value="INDIVIDUAL">{t("individual")}</option>
             <option value="BUSINESS">{t("business")}</option>
           </SelectField>
@@ -124,7 +125,7 @@ export function AccountSettings() {
             {...register("billingEmail")}
             error={msg(errors.billingEmail)}
           />
-          {account.data?.customerType === "BUSINESS" && (
+          {customerType === "BUSINESS" && (
             <>
               <FormField
                 label={t("companyName")}
@@ -143,21 +144,26 @@ export function AccountSettings() {
               />
             </>
           )}
-          <SelectField
-            label={t("country")}
-            requiredMark
-            {...register("countryCode", {
-              onChange: () =>
-                setValue("postalCode", "", { shouldValidate: true }),
-            })}
-            error={msg(errors.countryCode)}
-          >
-            {countryOptions.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.label}
-              </option>
-            ))}
-          </SelectField>
+          <Controller
+            name="countryCode"
+            control={control}
+            render={({ field }) => (
+              <SearchableSelectField
+                label={t("country")}
+                requiredMark
+                value={field.value || "PL"}
+                options={countryOptions.map((country) => ({
+                  value: country.code,
+                  label: country.label,
+                }))}
+                onChange={(value) => {
+                  field.onChange(value);
+                  setValue("postalCode", "", { shouldValidate: true });
+                }}
+                error={msg(errors.countryCode)}
+              />
+            )}
+          />
           <FormField
             label={t("street")}
             requiredMark

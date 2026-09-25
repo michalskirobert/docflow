@@ -397,3 +397,73 @@
 .choice-field:hover .choice-indicator {
   border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
 }
+
+.password-visibility-toggle {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 7px;
+}
+.password-visibility-toggle:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.field-control {
+  position: relative;
+}
+.field-control input.has-password-toggle {
+  padding-right: 42px !important;
+}
+.searchable-select {
+  position: relative;
+}
+.searchable-select > input {
+  width: 100%;
+}
+.searchable-select-menu {
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow: auto;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-raised);
+  box-shadow: 0 14px 36px rgb(15 23 42 / 18%);
+}
+.searchable-select-menu button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.searchable-select-menu button:hover,
+.searchable-select-menu button[aria-selected="true"] {
+  background: var(--hover);
+}
+.searchable-select-menu small {
+  color: var(--muted);
+}
+.searchable-select-empty {
+  display: block;
+  padding: 10px;
+  color: var(--muted);
+}

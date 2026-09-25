@@ -5,13 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
 import {
   ChoiceField,
   InputControl,
-  SelectField,
+  SearchableSelectField,
 } from "@/components/shared/form";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { LoaderCircle } from "lucide-react";
@@ -255,12 +255,6 @@ export default function RegisterForm() {
       setIsRedirecting(true);
       notify(t("registrationCreated"), "success");
 
-      if (result.redirectUri) {
-        window.location.assign(result.redirectUri);
-
-        return;
-      }
-
       router.push(
         `/registration-success?email=${encodeURIComponent(result.email)}${result.paymentMethod === "BANK_TRANSFER" ? `&payment=bank&reference=${encodeURIComponent(result.transferReference ?? "")}` : ""}`,
       );
@@ -451,21 +445,26 @@ export default function RegisterForm() {
         />
 
         <div className="form-grid">
-          <SelectField
-            label={t("country")}
-            requiredMark
-            {...register("countryCode", {
-              onChange: () =>
-                setValue("postalCode", "", { shouldValidate: true }),
-            })}
-            error={fieldError(errors.countryCode)}
-          >
-            {countryOptions.map((country) => (
-              <option key={country.code} value={country.code}>
-                {country.label}
-              </option>
-            ))}
-          </SelectField>
+          <Controller
+            name="countryCode"
+            control={control}
+            render={({ field }) => (
+              <SearchableSelectField
+                label={t("country")}
+                requiredMark
+                value={field.value || "PL"}
+                options={countryOptions.map((country) => ({
+                  value: country.code,
+                  label: country.label,
+                }))}
+                onChange={(value) => {
+                  field.onChange(value);
+                  setValue("postalCode", "", { shouldValidate: true });
+                }}
+                error={fieldError(errors.countryCode)}
+              />
+            )}
+          />
 
           <FormField
             label={t("city")}

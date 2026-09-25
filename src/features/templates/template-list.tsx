@@ -181,7 +181,11 @@ function TemplateCard({
           <button
             className="danger-link"
             onClick={del}
-            disabled={actionsDisabled || remove.isPending}
+            disabled={
+              actionsDisabled ||
+              remove.isPending ||
+              template.id.startsWith("default:")
+            }
             aria-busy={remove.isPending}
           >
             {remove.isPending ? (

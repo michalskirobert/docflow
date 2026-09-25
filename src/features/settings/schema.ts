@@ -6,6 +6,7 @@ export const accountSchema = z
     firstName: required(2).max(60),
     lastName: required(2).max(80),
     organizationName: required(2).max(120),
+    customerType: z.enum(["INDIVIDUAL", "BUSINESS"]),
     email: z.string().trim().min(1, "required").email("invalidEmail"),
     billingEmail: z.string().trim().min(1, "required").email("invalidEmail"),
     companyName: z.string().trim().max(120),

@@ -4,6 +4,7 @@ import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
@@ -17,6 +18,12 @@ import { useLogin } from "./service";
 export default function LoginForm() {
   const t = useTranslations("auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedNext = searchParams.get("next");
+  const nextPath =
+    requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
+      ? requestedNext
+      : "/dashboard";
   const locale = useLocale() as AppLocale;
   const mutation = useLogin();
   const { notify } = useFeedback();
@@ -36,7 +43,7 @@ export default function LoginForm() {
       const user = await mutation.mutateAsync(values);
       setIsRedirecting(true);
       notify(t("loginSuccess"), "success");
-      router.replace("/dashboard", { locale: user.locale ?? locale });
+      router.replace(nextPath, { locale: user.locale ?? locale });
       router.refresh();
     } catch (error) {
       const code = axios.isAxiosError<ApiError & { code?: string }>(error)

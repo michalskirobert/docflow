@@ -192,7 +192,8 @@ export async function POST(request: Request) {
       });
       if (activePending) {
         return NextResponse.json(
-          await configurePayment(request, activePending.id, body.paymentMethod),
+          { message: "A payment is already pending" },
+          { status: 409 },
         );
       }
       const previous = await prisma.payment.findFirst({
@@ -237,7 +238,8 @@ export async function POST(request: Request) {
     });
     if (existing)
       return NextResponse.json(
-        await configurePayment(request, existing.id, body.paymentMethod),
+        { message: "A payment is already pending" },
+        { status: 409 },
       );
     const plan = getPlan("YEARLY");
     if (!plan.available)

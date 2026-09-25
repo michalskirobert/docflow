@@ -5,6 +5,10 @@ import { requireSession } from "@/server/auth/require-session";
 import { renderTemplate } from "@/server/documents/template";
 import { renderDocument } from "@/server/documents/renderer";
 import { createDocumentPdf } from "@/server/documents/pdf";
+import {
+  getDefaultTemplate,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 
 export const runtime = "nodejs";
 
@@ -20,9 +24,11 @@ export async function POST(
     const session = await requireSession();
     const { id } = await params;
     const { data } = schema.parse(await req.json());
-    const template = await prisma.template.findFirst({
-      where: { id, organizationId: session.organizationId },
-    });
+    const template = isDefaultTemplateId(id)
+      ? getDefaultTemplate(id)
+      : await prisma.template.findFirst({
+          where: { id, organizationId: session.organizationId },
+        });
     if (!template)
       return NextResponse.json(
         { message: "Template not found" },

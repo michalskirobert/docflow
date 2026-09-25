@@ -450,6 +450,172 @@ export const EXAMPLE_TEMPLATES = [
       { name: "Firma", label: "Firma", type: "text" },
     ],
   },
+
+  {
+    name: "[EN] Service Agreement",
+    description:
+      "English service agreement with parties, scope, dates, fee and signatures.",
+    content: `<h1 style="text-align:center">SERVICE AGREEMENT</h1><p>This agreement is made on {{AgreementDate}} between <strong>{{Client}}</strong> and <strong>{{Provider}}</strong>.</p><h2>1. Services</h2><p>{{Scope}}</p><h2>2. Term</h2><p>The services will be provided from {{StartDate}} to {{EndDate}}.</p><h2>3. Fee</h2><p>The agreed fee is <strong>{{Amount}} {{Currency}}</strong>.</p><table style="width:100%;margin-top:48px"><tbody><tr><td style="width:50%;text-align:center">_________________________<br>Client</td><td style="width:50%;text-align:center">_________________________<br>Provider</td></tr></tbody></table>`,
+    variables: [
+      {
+        name: "AgreementDate",
+        label: "Agreement date",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      { name: "Client", label: "Client", type: "text", required: true },
+      { name: "Provider", label: "Provider", type: "text", required: true },
+      {
+        name: "Scope",
+        label: "Scope of services",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "StartDate",
+        label: "Start date",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      {
+        name: "EndDate",
+        label: "End date",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      {
+        name: "Amount",
+        label: "Amount",
+        type: "number",
+        decimalPlaces: 2,
+        required: true,
+      },
+      {
+        name: "Currency",
+        label: "Currency",
+        type: "select",
+        options: ["PLN", "EUR", "USD", "GBP"],
+        required: true,
+      },
+    ],
+  },
+  {
+    name: "[EN] Meeting Summary",
+    description:
+      "English follow-up email summarizing a meeting and next steps.",
+    emailSubject: "Meeting summary – {{MeetingTopic}}",
+    content: `<p>Hello {{Recipient}},</p><p>Thank you for the meeting regarding <strong>{{MeetingTopic}}</strong>.</p><p><strong>Key decisions:</strong><br>{{Decisions}}</p><p><strong>Next steps:</strong><br>{{NextSteps}}</p><p>Best regards,<br><strong>{{Sender}}</strong></p>`,
+    variables: [
+      { name: "Recipient", label: "Recipient", type: "text", required: true },
+      {
+        name: "MeetingTopic",
+        label: "Meeting topic",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Decisions",
+        label: "Key decisions",
+        type: "text",
+        required: true,
+      },
+      { name: "NextSteps", label: "Next steps", type: "text", required: true },
+      { name: "Sender", label: "Sender", type: "text", required: true },
+    ],
+  },
+  {
+    name: "[ID] Perjanjian Jasa",
+    description:
+      "Templat perjanjian jasa Indonesia dengan para pihak, ruang lingkup, jangka waktu, biaya, dan tanda tangan.",
+    content: `<h1 style="text-align:center">PERJANJIAN JASA</h1><p>Perjanjian ini dibuat pada tanggal {{TanggalPerjanjian}} antara <strong>{{PemberiKerja}}</strong> dan <strong>{{PenyediaJasa}}</strong>.</p><h2>1. Ruang Lingkup</h2><p>{{RuangLingkup}}</p><h2>2. Jangka Waktu</h2><p>Pekerjaan dilaksanakan dari {{TanggalMulai}} sampai {{TanggalSelesai}}.</p><h2>3. Biaya</h2><p>Nilai jasa yang disepakati adalah <strong>{{Nilai}} {{MataUang}}</strong>.</p><table style="width:100%;margin-top:48px"><tbody><tr><td style="width:50%;text-align:center">_________________________<br>Pemberi Kerja</td><td style="width:50%;text-align:center">_________________________<br>Penyedia Jasa</td></tr></tbody></table>`,
+    variables: [
+      {
+        name: "TanggalPerjanjian",
+        label: "Tanggal perjanjian",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      {
+        name: "PemberiKerja",
+        label: "Pemberi kerja",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "PenyediaJasa",
+        label: "Penyedia jasa",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "RuangLingkup",
+        label: "Ruang lingkup",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "TanggalMulai",
+        label: "Tanggal mulai",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      {
+        name: "TanggalSelesai",
+        label: "Tanggal selesai",
+        type: "date",
+        dateFormat: "DD.MM.YYYY",
+        required: true,
+      },
+      {
+        name: "Nilai",
+        label: "Nilai",
+        type: "number",
+        decimalPlaces: 2,
+        required: true,
+      },
+      {
+        name: "MataUang",
+        label: "Mata uang",
+        type: "select",
+        options: ["IDR", "USD", "SGD", "EUR"],
+        required: true,
+      },
+    ],
+  },
+  {
+    name: "[ID] Ringkasan Pertemuan",
+    description:
+      "Email tindak lanjut berbahasa Indonesia untuk rangkuman rapat dan langkah berikutnya.",
+    emailSubject: "Ringkasan pertemuan – {{TopikPertemuan}}",
+    content: `<p>Halo {{Penerima}},</p><p>Terima kasih atas pertemuan mengenai <strong>{{TopikPertemuan}}</strong>.</p><p><strong>Kesepakatan utama:</strong><br>{{Kesepakatan}}</p><p><strong>Langkah berikutnya:</strong><br>{{LangkahBerikutnya}}</p><p>Salam,<br><strong>{{Pengirim}}</strong></p>`,
+    variables: [
+      { name: "Penerima", label: "Penerima", type: "text", required: true },
+      {
+        name: "TopikPertemuan",
+        label: "Topik pertemuan",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "Kesepakatan",
+        label: "Kesepakatan utama",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "LangkahBerikutnya",
+        label: "Langkah berikutnya",
+        type: "text",
+        required: true,
+      },
+      { name: "Pengirim", label: "Pengirim", type: "text", required: true },
+    ],
+  },
 ] as const;
 
 export function exampleTemplateCreateData(

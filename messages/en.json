@@ -395,7 +395,9 @@
     "emailSetupGuideSender": "Enter the sender address and optional sender name that will be used for outgoing messages.",
     "emailSetupGuideProvider": "You can find the SMTP settings in your email provider documentation. DocFlow does not change your email account settings.",
     "payAgain": "Pay again",
-    "paymentStartError": "Could not start the payment. Please try again."
+    "paymentStartError": "Could not start the payment. Please try again.",
+    "paymentMethodChanged": "Payment method changed.",
+    "payNow": "Pay now"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -566,7 +568,7 @@
     "done": "Done",
     "processingImage": "Processing and optimizing image…",
     "emailSubject": "Email subject",
-    "emailSubjectPlaceholder": "e.g. Order confirmation {{OrderNumber}}",
+    "emailSubjectPlaceholder": "e.g. Order confirmation '{{OrderNumber}}'",
     "emailSubjectHelp": "Optional subject used when exporting the template as an email. Variables are supported. If empty, the template name is used.",
     "variablePlaceholder": "Placeholder",
     "variablePlaceholderHelp": "Optional hint shown inside the control before the user enters a value. For image fields it replaces the upload prompt.",

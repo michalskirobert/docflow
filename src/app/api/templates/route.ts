@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/server/auth/session";
 import { extractVariables } from "@/server/documents/template";
 import { sanitizeTemplateHtml } from "@/server/documents/sanitize-template";
+import { DEFAULT_TEMPLATES } from "@/server/templates/defaults";
 const schema = z.object({
   name: z.string().min(2).max(250),
   description: z.string().max(400).optional(),
@@ -78,41 +79,67 @@ export async function GET(req: Request) {
             ? { name: "desc" as const }
             : { createdAt: "desc" as const };
     const picker = searchParams.get("view") === "picker";
-    return NextResponse.json(
-      await prisma.template.findMany({
-        where: {
-          organizationId: s.organizationId,
-          ...(q
-            ? {
-                OR: [
-                  { name: { contains: q, mode: "insensitive" as const } },
-                  {
-                    description: { contains: q, mode: "insensitive" as const },
-                  },
-                ],
-              }
-            : {}),
-        },
-        select: picker
+    const savedTemplates = await prisma.template.findMany({
+      where: {
+        organizationId: s.organizationId,
+        ...(q
           ? {
-              id: true,
-              name: true,
-              description: true,
-              emailSubject: true,
-              variablesJson: true,
-              createdAt: true,
+              OR: [
+                { name: { contains: q, mode: "insensitive" as const } },
+                {
+                  description: { contains: q, mode: "insensitive" as const },
+                },
+              ],
             }
-          : {
-              id: true,
-              name: true,
-              description: true,
-              variablesJson: true,
-              isExample: true,
-              createdAt: true,
-            },
-        orderBy,
-      }),
+          : {}),
+      },
+      select: picker
+        ? {
+            id: true,
+            name: true,
+            description: true,
+            emailSubject: true,
+            variablesJson: true,
+            createdAt: true,
+          }
+        : {
+            id: true,
+            name: true,
+            description: true,
+            variablesJson: true,
+            isExample: true,
+            createdAt: true,
+          },
+      orderBy,
+    });
+    const savedNames = new Set(savedTemplates.map((template) => template.name));
+    const defaults = DEFAULT_TEMPLATES.filter(
+      (template) =>
+        !savedNames.has(template.name) &&
+        (!q ||
+          `${template.name} ${template.description}`
+            .toLocaleLowerCase()
+            .includes(q.toLocaleLowerCase())),
+    ).map((template) =>
+      picker
+        ? {
+            id: template.id,
+            name: template.name,
+            description: template.description,
+            emailSubject: template.emailSubject,
+            variablesJson: template.variablesJson,
+            createdAt: template.createdAt,
+          }
+        : {
+            id: template.id,
+            name: template.name,
+            description: template.description,
+            variablesJson: template.variablesJson,
+            isExample: true,
+            createdAt: template.createdAt,
+          },
     );
+    return NextResponse.json([...defaults, ...savedTemplates]);
   } catch {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }

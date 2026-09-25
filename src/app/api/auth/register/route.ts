@@ -8,8 +8,6 @@ import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/server/billing/plans";
 import { verifyCaptcha } from "@/server/captcha/challenge";
 import { sendVerificationEmail } from "@/server/email/verification";
-import { createPayUOrder } from "@/server/payu/client";
-import { exampleTemplateCreateData } from "@/server/templates/examples";
 
 export async function POST(request: Request) {
   try {
@@ -137,10 +135,6 @@ export async function POST(request: Request) {
         },
       });
 
-      await tx.template.createMany({
-        data: exampleTemplateCreateData(organization.id),
-      });
-
       await tx.subscription.create({
         data: {
           organizationId: organization.id,
@@ -160,8 +154,6 @@ export async function POST(request: Request) {
     });
 
     await sendVerificationEmail(result.user);
-
-    let redirectUri: string | undefined;
 
     if (data.plan !== "FREE") {
       const extOrderId = randomUUID();
@@ -200,54 +192,8 @@ export async function POST(request: Request) {
         );
       }
 
-      const forwarded = request.headers
-        .get("x-forwarded-for")
-        ?.split(",")[0]
-        ?.trim();
-
-      const customerIp = forwarded || "127.0.0.1";
-
-      try {
-        const order = await createPayUOrder({
-          extOrderId,
-          customerIp,
-          description: `DocFlow ${data.plan}`,
-
-          totalAmount: plan.gross,
-
-          email,
-
-          firstName: data.firstName,
-
-          lastName: data.lastName,
-
-          locale: data.locale,
-        });
-
-        redirectUri = order.redirectUri;
-
-        await prisma.payment.update({
-          where: {
-            id: payment.id,
-          },
-
-          data: {
-            providerOrderId: order.orderId,
-          },
-        });
-      } catch (error) {
-        await prisma.payment.update({
-          where: {
-            id: payment.id,
-          },
-
-          data: {
-            status: "FAILED",
-          },
-        });
-
-        throw error;
-      }
+      // Payment remains PENDING until the user verifies the email address
+      // and explicitly chooses to continue to payment.
     }
 
     return NextResponse.json(
@@ -255,7 +201,6 @@ export async function POST(request: Request) {
         email,
         verificationRequired: true,
         paymentRequired: data.plan !== "FREE",
-        redirectUri,
       },
       { status: 201 },
     );

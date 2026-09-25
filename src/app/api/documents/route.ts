@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { getSubscriptionAccess } from "@/server/subscription/access";
 import { renderTemplate } from "@/server/documents/template";
+import {
+  getDefaultTemplate,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 import { renderDocument } from "@/server/documents/renderer";
 const schema = z.object({
   templateId: z.string(),
@@ -67,9 +71,11 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     const p = schema.parse(await req.json());
-    const t = await prisma.template.findFirst({
-      where: { id: p.templateId, organizationId: s.organizationId },
-    });
+    const t = isDefaultTemplateId(p.templateId)
+      ? getDefaultTemplate(p.templateId)
+      : await prisma.template.findFirst({
+          where: { id: p.templateId, organizationId: s.organizationId },
+        });
     if (!t)
       return NextResponse.json(
         { message: "Template not found" },
@@ -91,7 +97,7 @@ export async function POST(req: Request) {
     const doc = await prisma.document.create({
       data: {
         organizationId: s.organizationId,
-        templateId: t.id,
+        templateId: isDefaultTemplateId(p.templateId) ? null : t.id,
         name: p.name,
         payloadJson: JSON.stringify(p.data),
         renderedContent: rendered,
