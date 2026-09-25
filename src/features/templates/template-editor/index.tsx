@@ -896,18 +896,50 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     restoreSelection();
 
+    const region = activeEditor.current ?? editor.current;
+    const selection = window.getSelection();
+    const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+    const selectedToken =
+      selectedVariableElement && region?.contains(selectedVariableElement)
+        ? selectedVariableElement
+        : null;
+
+    const tokensInSelection =
+      region && range
+        ? Array.from(
+            region.querySelectorAll<HTMLElement>(
+              '[data-variable-name][data-variable-type="value"]',
+            ),
+          ).filter((token) => {
+            try {
+              return range.intersectsNode(token);
+            } catch {
+              return false;
+            }
+          })
+        : [];
+
     document.execCommand("fontSize", false, "7");
 
-    (activeEditor.current ?? editor.current)
-      ?.querySelectorAll('font[size="7"]')
-      .forEach((element) => {
-        const html = element as HTMLElement;
+    region?.querySelectorAll('font[size="7"]').forEach((element) => {
+      const html = element as HTMLElement;
+      html.removeAttribute("size");
+      html.style.fontSize = `${px}px`;
+    });
 
-        html.removeAttribute("size");
-        html.style.fontSize = `${px}px`;
-      });
+    const variableTokens = new Set(tokensInSelection);
+    if (selectedToken) {
+      variableTokens.add(selectedToken);
+    }
 
-    (activeEditor.current ?? editor.current)?.focus();
+    variableTokens.forEach((token) => {
+      token.style.fontSize = `${px}px`;
+    });
+
+    region?.focus();
+    rememberSelection();
+    syncToolbarState();
+    setDirty(true);
   };
 
   const setLineHeight = (value: string) => {
