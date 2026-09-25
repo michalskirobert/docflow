@@ -29,7 +29,16 @@ export async function POST(request: Request) {
         providerOrderId: order.orderId ?? payment.providerOrderId,
       },
     });
-    if (status === "COMPLETED")
+    if (status === "COMPLETED") {
+      await tx.payment.updateMany({
+        where: {
+          organizationId: payment.organizationId,
+          plan: payment.plan,
+          status: "PENDING",
+          id: { not: payment.id },
+        },
+        data: { status: "CANCELED" },
+      });
       await tx.subscription.update({
         where: { organizationId: payment.organizationId },
         data: {
@@ -45,6 +54,7 @@ export async function POST(request: Request) {
               : null,
         },
       });
+    }
   });
   return NextResponse.json({ ok: true });
 }

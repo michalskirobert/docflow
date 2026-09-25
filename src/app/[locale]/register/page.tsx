@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { getSession } from "@/server/auth/session";
 import LanguageSwitcher from "@/features/language/language-switcher";
+import { DocFlowLogo } from "@/components/brand/docflow-logo";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 const RegisterForm = dynamic(() => import("@/features/auth/register-form"));
@@ -23,8 +24,7 @@ export default async function RegisterPage({
           </Link>
           <LanguageSwitcher />
         </div>
-        <div className="login-brand">DocFlow</div>
-        <p className="brand-by">by NurByte</p>
+        <DocFlowLogo className="login-brand-logo" showByline />
         <h1>{t("registerTitle")}</h1>
         <p className="muted">{t("registerDescription")}</p>
         <RegisterForm />

@@ -473,3 +473,60 @@ h3 {
 :root[data-theme="dark"] .settings-plan-card.selected {
   background: #18203d;
 }
+
+.docflow-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text, #111827);
+}
+
+.docflow-logo-mark {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  color: currentcolor;
+}
+
+.docflow-logo-copy {
+  display: grid;
+  gap: 1px;
+}
+
+.docflow-logo-wordmark {
+  display: flex;
+  align-items: baseline;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.docflow-logo-wordmark strong {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+.docflow-logo-byline {
+  color: var(--muted, #94a3b8);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.sidebar .docflow-logo {
+  color: #f8fafc;
+}
+
+.login-brand-logo {
+  margin-bottom: 18px;
+}
+
+.login-brand-logo .docflow-logo-mark {
+  width: 46px;
+  height: 46px;
+  flex-basis: 46px;
+}
+
+.login-brand-logo .docflow-logo-wordmark {
+  font-size: 30px;
+}

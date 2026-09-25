@@ -21,6 +21,15 @@ export async function POST(
     ends.setFullYear(ends.getFullYear() + 1);
     await prisma.$transaction([
       prisma.payment.update({ where: { id }, data: { status: "COMPLETED" } }),
+      prisma.payment.updateMany({
+        where: {
+          organizationId: payment.organizationId,
+          plan: payment.plan,
+          status: "PENDING",
+          id: { not: id },
+        },
+        data: { status: "CANCELED" },
+      }),
       prisma.subscription.update({
         where: { organizationId: payment.organizationId },
         data: {

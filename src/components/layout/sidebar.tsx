@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { DocFlowLogo } from "@/components/brand/docflow-logo";
 
 import { version } from "../../../package.json";
 
@@ -46,11 +47,7 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="brand-mark">D</div>
-        <div>
-          <div className="brand">DocFlow</div>
-          <div className="brand-by">by NurByte</div>
-        </div>
+        <DocFlowLogo showByline />
       </div>
 
       <nav>
@@ -134,7 +131,8 @@ export function Sidebar() {
         className="mobile-product-meta"
         aria-label={`DocFlow by NurByte, version ${version}`}
       >
-        <span>DocFlow · NurByte · v{version}</span>
+        <DocFlowLogo className="mobile-docflow-logo" showByline />
+        <span className="mobile-version">v{version}</span>
       </div>
     </aside>
   );

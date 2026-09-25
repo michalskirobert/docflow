@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { getSession } from "@/server/auth/session";
 import LanguageSwitcher from "@/features/language/language-switcher";
+import { DocFlowLogo } from "@/components/brand/docflow-logo";
 const LoginForm = dynamic(() => import("@/features/auth/login-form"));
 export default async function LoginPage({
   params,
@@ -18,8 +19,7 @@ export default async function LoginPage({
         <div className="auth-language">
           <LanguageSwitcher />
         </div>
-        <div className="login-brand">DocFlow</div>
-        <p className="brand-by">by NurByte</p>
+        <DocFlowLogo className="login-brand-logo" showByline />
         <h1>{t("title")}</h1>
         <p className="muted">{t("description")}</p>
         <LoginForm />

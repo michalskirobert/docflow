@@ -1415,3 +1415,41 @@ body {
     display: none;
   }
 }
+
+/* 2.3.2: keep DocFlow branding visible in the compact mobile navigation. */
+@media (max-width: 900px) {
+  .mobile-product-meta {
+    gap: 6px !important;
+    overflow: visible;
+  }
+
+  .mobile-product-meta .mobile-docflow-logo {
+    display: inline-flex;
+    gap: 4px;
+    color: #f8fafc;
+  }
+
+  .mobile-product-meta .docflow-logo-mark {
+    width: 11px;
+    height: 11px;
+    flex-basis: 11px;
+  }
+
+  .mobile-product-meta .docflow-logo-copy {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .mobile-product-meta .docflow-logo-wordmark {
+    font-size: 9px;
+    letter-spacing: -0.03em;
+  }
+
+  .mobile-product-meta .docflow-logo-byline,
+  .mobile-product-meta .mobile-version {
+    color: #94a3b8;
+    font-size: 7px;
+    line-height: 1;
+  }
+}

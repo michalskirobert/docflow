@@ -43,6 +43,26 @@ export async function GET() {
       data: { status: "CANCELED" },
     });
     await keepOnlyLatestPendingPayment(s.organizationId);
+    const currentSubscription = await prisma.subscription.findUnique({
+      where: { organizationId: s.organizationId },
+      select: { plan: true, status: true, currentPeriodEndsAt: true },
+    });
+    const renewalWindowStartsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    if (
+      currentSubscription?.plan === "YEARLY" &&
+      currentSubscription.status === "ACTIVE" &&
+      currentSubscription.currentPeriodEndsAt &&
+      currentSubscription.currentPeriodEndsAt.getTime() > renewalWindowStartsAt
+    ) {
+      await prisma.payment.updateMany({
+        where: {
+          organizationId: s.organizationId,
+          plan: "YEARLY",
+          status: "PENDING",
+        },
+        data: { status: "CANCELED" },
+      });
+    }
     const [subscription, payments, billingProfile, salesDocuments] =
       await Promise.all([
         prisma.subscription.findUnique({

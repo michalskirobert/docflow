@@ -76,17 +76,41 @@ export default function SettingsPanel() {
   const pending =
     billing.data?.payments.filter((payment) => payment.status === "PENDING") ??
     [];
+  const currentPending = pending[0];
+  const periodEndsAt = billing.data?.subscription?.currentPeriodEndsAt
+    ? new Date(billing.data.subscription.currentPeriodEndsAt).getTime()
+    : null;
+  const isRenewalWindow =
+    currentPlan === "YEARLY" &&
+    periodEndsAt !== null &&
+    periodEndsAt - Date.now() <= 7 * 86400000;
+  const paymentBusy = start.isPending || change.isPending;
+  const canContinuePayment = Boolean(currentPending);
+  const canChangePaymentMethod =
+    Boolean(currentPending) || currentPlan === "FREE" || isRenewalWindow;
 
-  const runPayment = async () => {
+  const continuePayment = async () => {
+    if (!currentPending) return;
     try {
-      const current = pending[0];
-      const result = current
+      const result = await change.mutateAsync({
+        paymentId: currentPending.id,
+        paymentMethod: currentPending.provider as "PAYU" | "BANK_TRANSFER",
+      });
+      if (result.redirectUri) window.location.assign(result.redirectUri);
+    } catch {
+      notify(t("paymentStartError"), "error");
+    }
+  };
+
+  const changePaymentMethod = async () => {
+    if (!canChangePaymentMethod) return;
+    try {
+      const result = currentPending
         ? await change.mutateAsync({
-            paymentId: current.id,
+            paymentId: currentPending.id,
             paymentMethod: method,
           })
         : await start.mutateAsync({ paymentMethod: method });
-
       if (result.redirectUri) window.location.assign(result.redirectUri);
     } catch {
       notify(t("paymentStartError"), "error");
@@ -225,7 +249,7 @@ export default function SettingsPanel() {
                     {t("paymentMethod")}
                     <SelectControl
                       value={method}
-                      disabled={start.isPending || change.isPending}
+                      disabled={paymentBusy || !canChangePaymentMethod}
                       onChange={(event) =>
                         setMethod(
                           event.target.value as "PAYU" | "BANK_TRANSFER",
@@ -236,20 +260,30 @@ export default function SettingsPanel() {
                       <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
                     </SelectControl>
                   </label>
-                  <button
-                    className="btn secondary"
-                    disabled={start.isPending || change.isPending}
-                    onClick={runPayment}
-                  >
-                    {(start.isPending || change.isPending) && (
-                      <LoaderCircle className="spinner" size={17} />
-                    )}
-                    {pending.length
-                      ? t("continuePayment")
-                      : currentPlan === "FREE"
+                  <div className="settings-payment-actions">
+                    <button
+                      className="btn secondary"
+                      disabled={paymentBusy || !canContinuePayment}
+                      onClick={continuePayment}
+                    >
+                      {change.isPending && (
+                        <LoaderCircle className="spinner" size={17} />
+                      )}
+                      {t("continuePayment")}
+                    </button>
+                    <button
+                      className="btn secondary"
+                      disabled={paymentBusy || !canChangePaymentMethod}
+                      onClick={changePaymentMethod}
+                    >
+                      {paymentBusy && (
+                        <LoaderCircle className="spinner" size={17} />
+                      )}
+                      {currentPlan === "FREE" && !currentPending
                         ? t("upgradePlan")
-                        : t("renewLicense")}
-                  </button>
+                        : t("changePaymentMethod")}
+                    </button>
+                  </div>
                 </>
               )}
 
