@@ -1763,3 +1763,47 @@ thead .data-table-actions-column {
   width: 6px;
   height: 6px;
 }
+
+/* v2.4 Data Table round 17 — top row action, explicit sticky actions column and contained DnD feedback. */
+.data-table-field-heading {
+  align-items: center;
+}
+.data-table-field-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.data-table-field-heading-actions .data-table-add-row {
+  margin: 0;
+}
+.data-table-actions-column {
+  border-left: 2px solid
+    color-mix(in srgb, var(--border) 72%, var(--text-muted)) !important;
+  box-shadow: -6px 0 12px color-mix(in srgb, var(--background) 18%, transparent);
+}
+.data-table-row-actions {
+  justify-content: flex-end;
+  gap: 5px;
+}
+.data-table-delete-row {
+  order: 1 !important;
+}
+.data-table-drag-handle {
+  order: 2 !important;
+  margin-left: 2px;
+}
+.document-data-table tbody tr.is-dragging > td {
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+}
+@media (max-width: 760px) {
+  .data-table-field-heading {
+    align-items: flex-start;
+  }
+  .data-table-field-heading-actions {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

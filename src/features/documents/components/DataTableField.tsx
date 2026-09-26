@@ -72,9 +72,24 @@ export function DataTableField({
           )}
           <code>{`{{${table.name}}}`}</code>
         </div>
-        <small>
-          {minRows > 0 ? `Minimum rows: ${minRows}` : "Add rows as needed."}
-        </small>
+        <div className="data-table-field-heading-actions">
+          <small>
+            {minRows > 0 ? `Minimum rows: ${minRows}` : "Add rows as needed."}
+          </small>
+          <button
+            type="button"
+            className="btn secondary compact data-table-add-row"
+            disabled={maxRows !== undefined && rows.length >= maxRows}
+            title={
+              maxRows !== undefined && rows.length >= maxRows
+                ? `Maximum rows: ${maxRows}`
+                : undefined
+            }
+            onClick={addRow}
+          >
+            <Plus size={16} /> Add row
+          </button>
+        </div>
       </div>
       <div className="data-table-scroll" tabIndex={0}>
         <table className="document-data-table">
@@ -216,14 +231,12 @@ export function DataTableField({
                           draggable
                           onDragStart={(event) => {
                             setDraggedRow(rowIndex);
-                            const rowElement =
-                              event.currentTarget.closest("tr");
-                            if (rowElement)
-                              event.dataTransfer.setDragImage(
-                                rowElement,
-                                24,
-                                24,
-                              );
+                            const dragImage = document.createElement("div");
+                            dragImage.style.cssText =
+                              "position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;opacity:0;pointer-events:none";
+                            document.body.appendChild(dragImage);
+                            event.dataTransfer.setDragImage(dragImage, 0, 0);
+                            window.setTimeout(() => dragImage.remove(), 0);
                             event.dataTransfer.effectAllowed = "move";
                           }}
                           onDragEnd={() => {
@@ -243,19 +256,6 @@ export function DataTableField({
         </table>
       </div>
       {error && <small className="form-error">{error}</small>}
-      <button
-        type="button"
-        className="btn secondary compact data-table-add-row"
-        disabled={maxRows !== undefined && rows.length >= maxRows}
-        title={
-          maxRows !== undefined && rows.length >= maxRows
-            ? `Maximum rows: ${maxRows}`
-            : undefined
-        }
-        onClick={addRow}
-      >
-        <Plus size={16} /> Add row
-      </button>
     </div>
   );
 }

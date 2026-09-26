@@ -2363,3 +2363,64 @@
   color: color-mix(in srgb, var(--primary) 70%, white) !important;
   opacity: 0.9;
 }
+
+/* Data-table atomic block actions: keep the floating panel dark, actions themselves ghost. */
+.table-context-bar button {
+  background: transparent !important;
+  transition:
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    color 0.5s ease,
+    filter 0.5s ease !important;
+}
+
+.table-context-bar button:hover:not(:disabled) {
+  background: var(--hover) !important;
+}
+
+.table-context-bar button.danger {
+  background: transparent !important;
+  color: var(--danger, #dc2626) !important;
+}
+
+.table-context-bar button.danger:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--danger, #dc2626) 12%,
+    transparent
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--danger, #dc2626) 48%,
+    var(--border)
+  ) !important;
+}
+
+/* v2.4 Data Table round 17 — document workspace mirrors printable layout.
+   Designer remains horizontally scrollable; the document/PDF representation never is. */
+.docflow-data-table {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible !important;
+}
+.docflow-data-table table {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed;
+}
+.docflow-data-table th,
+.docflow-data-table td {
+  min-width: 0 !important;
+  max-width: none;
+  overflow: visible !important;
+  resize: none !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.docflow-data-table span {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}

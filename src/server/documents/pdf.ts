@@ -32,7 +32,7 @@ export async function createDocumentPdf({
     await page.setContent(
       `<!doctype html><html><head><meta charset="utf-8"><style>
       @page{size:A4;margin:20mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#111;line-height:1.55}
-      img{max-width:100%}.docflow-rendered-data-table{max-width:100%;overflow:hidden}.docflow-rendered-data-table table,table{width:100%;border-collapse:collapse}td,th{border:1px solid #aeb5c2;padding:8px}
+      img{max-width:100%}.docflow-rendered-data-table{max-width:100%;overflow:hidden}.docflow-rendered-data-table table,table{width:100%;border-collapse:collapse}td,th{border:1px solid #aeb5c2;padding:8px;white-space:normal;word-break:normal;overflow-wrap:anywhere}
       p{margin:.45em 0}h1{margin:.65em 0 .35em;font-size:32px}h2{font-size:26px}h3{font-size:21px}h4{font-size:18px}h5{font-size:16px}a{color:#4f46e5}
     </style></head><body>${content}</body></html>`,
       { waitUntil: "load" },

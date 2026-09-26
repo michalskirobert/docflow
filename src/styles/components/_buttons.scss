@@ -1,1 +1,61 @@
 /* Shared Button uses the existing .btn visual system. */
+
+/* Global button affordance: every enabled button should visibly react to hover. */
+button {
+  transition:
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    color 0.5s ease,
+    box-shadow 0.5s ease,
+    filter 0.5s ease,
+    opacity 0.5s ease;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* v2.4 round 17: one interaction contract for clickable controls in light and dark themes. */
+:where(button, .btn, .icon-button, a.btn, [role="button"]):not(:disabled):not(
+    [aria-disabled="true"]
+  ) {
+  cursor: pointer;
+  transition:
+    background-color 0.5s ease,
+    border-color 0.5s ease,
+    color 0.5s ease,
+    box-shadow 0.5s ease,
+    filter 0.5s ease,
+    opacity 0.5s ease !important;
+}
+:where(button, .btn, .icon-button, a.btn, [role="button"]):not(:disabled):not(
+    [aria-disabled="true"]
+  ):hover {
+  filter: brightness(0.86) contrast(1.04);
+}
+:where(.btn.secondary, .btn.ghost, .icon-button):not(:disabled):not(
+    [aria-disabled="true"]
+  ):hover {
+  background-color: color-mix(
+    in srgb,
+    var(--text) 9%,
+    var(--surface)
+  ) !important;
+  border-color: color-mix(in srgb, var(--text) 24%, var(--border)) !important;
+}
+:where(button, .btn, .icon-button, a.btn, [role="button"]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 2px;
+}
+:where(button, .btn, .icon-button, a.btn, [role="button"]):disabled,
+:where(.btn, .icon-button, a.btn, [role="button"])[aria-disabled="true"] {
+  cursor: not-allowed;
+}

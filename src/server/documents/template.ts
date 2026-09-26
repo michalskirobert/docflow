@@ -78,7 +78,7 @@ function renderDataTableMarkup(
   const header = columns
     .map(
       (column) =>
-        `<th style="padding:8px 10px;border:1px solid #d1d5db;background:#f3f4f6;color:#111827;font-weight:600;text-align:left;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(column.label || (column.variableName ? defs.get(column.variableName)?.label : undefined) || column.variableName || "Column")}</th>`,
+        `<th style="padding:8px 10px;border:1px solid #d1d5db;background:#f3f4f6;color:#111827;font-weight:600;text-align:left;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:anywhere">${escapeHtml(column.label || (column.variableName ? defs.get(column.variableName)?.label : undefined) || column.variableName || "Column")}</th>`,
     )
     .join("");
   const body = rows
@@ -93,14 +93,14 @@ function renderDataTableMarkup(
       const cells = columns
         .map((column) => {
           if (!column.variableName)
-            return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(column.staticText ?? "")}</td>`;
+            return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:anywhere">${escapeHtml(column.staticText ?? "")}</td>`;
           const def = defs.get(column.variableName);
           const raw = resolved[column.variableName] ?? "";
           const value =
             def?.type === "formula" && typeof raw === "number"
               ? formatTemplateNumber(raw, def)
               : raw;
-          return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(value)}</td>`;
+          return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:anywhere">${escapeHtml(value)}</td>`;
         })
         .join("");
       return `<tr>${cells}</tr>`;

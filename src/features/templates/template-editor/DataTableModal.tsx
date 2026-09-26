@@ -217,10 +217,8 @@ export function DataTableModal({
 
     const onMove = (event: PointerEvent) => {
       const delta = event.clientX - startX;
-      if (isSingleColumn) {
-        const width = Math.round(
-          Math.min(canvasWidth, Math.max(MIN_COLUMN_WIDTH, leftStart + delta)),
-        );
+      if (isSingleColumn || index === columns.length - 1) {
+        const width = Math.round(Math.max(MIN_COLUMN_WIDTH, leftStart + delta));
         setColumns((current) =>
           current.map((column, currentIndex) =>
             currentIndex === index ? { ...column, width } : column,
@@ -228,7 +226,6 @@ export function DataTableModal({
         );
         return;
       }
-      if (index >= columns.length - 1) return;
       const leftWidth = Math.round(
         Math.min(
           pairTotal - MIN_COLUMN_WIDTH,
@@ -439,18 +436,15 @@ export function DataTableModal({
                                   <Trash2 size={15} />
                                 </button>
                               </div>
-                              {(columns.length === 1 ||
-                                index < columns.length - 1) && (
-                                <button
-                                  type="button"
-                                  className="data-table-column-resizer"
-                                  aria-label={`Resize column ${index + 1}`}
-                                  onPointerDown={(event) => {
-                                    event.preventDefault();
-                                    resizeColumn(column.id, event.clientX);
-                                  }}
-                                />
-                              )}
+                              <button
+                                type="button"
+                                className="data-table-column-resizer"
+                                aria-label={`Resize column ${index + 1}`}
+                                onPointerDown={(event) => {
+                                  event.preventDefault();
+                                  resizeColumn(column.id, event.clientX);
+                                }}
+                              />
                             </th>
                           );
                         })}
