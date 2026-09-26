@@ -481,6 +481,29 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
+  const expandCollapsedSelectionToCurrentBlock = () => {
+    const selection = window.getSelection();
+    const region = activeEditor.current ?? editor.current;
+
+    if (!selection?.rangeCount || !region) return;
+
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) return;
+
+    const anchor = range.startContainer;
+    const element = anchor instanceof Element ? anchor : anchor.parentElement;
+    const block = element?.closest<HTMLElement>(
+      "p,h1,h2,h3,h4,h5,blockquote,li,div",
+    );
+
+    if (!block || block === region || !region.contains(block)) return;
+
+    const blockRange = document.createRange();
+    blockRange.selectNodeContents(block);
+    selection.removeAllRanges();
+    selection.addRange(blockRange);
+  };
+
   const cmd = (command: string, value?: string) => {
     restoreSelection();
 
@@ -536,6 +559,9 @@ export function TemplateEditor({ template, onClose }: Props) {
         setDirty(true);
       }
     } else {
+      if (["bold", "italic", "underline", "foreColor"].includes(command)) {
+        expandCollapsedSelectionToCurrentBlock();
+      }
       document.execCommand(command, false, value);
     }
 
@@ -1032,15 +1058,21 @@ export function TemplateEditor({ template, onClose }: Props) {
         ? selectedVariableElement
         : null;
 
+    if (!selectedToken && range?.collapsed) {
+      expandCollapsedSelectionToCurrentBlock();
+    }
+
+    const activeRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+
     const tokensInSelection =
-      region && range
+      region && activeRange
         ? Array.from(
             region.querySelectorAll<HTMLElement>(
               '[data-variable-name][data-variable-type="value"]',
             ),
           ).filter((token) => {
             try {
-              return range.intersectsNode(token);
+              return activeRange.intersectsNode(token);
             } catch {
               return false;
             }

@@ -333,3 +333,10 @@ Editor fixes: variables can be dropped into body/header/footer at the pointer po
 ### 2.4.0 experimental Data Table
 
 The template editor now includes an experimental Data Table control. A Data Table owns a repeatable row definition while its columns reuse normal DocFlow variables, including their validation, formatting and calculated-number behavior. Document create/edit renders repeatable rows with local horizontal scrolling on narrow screens; preview, PDF and email rendering expand the saved rows into the template table. This is intentionally an experimental 2.4.0 iteration and should be validated before the data-table model is treated as stable.
+
+## v2.4.0 editor selection + SEO hotfix
+
+- Template-editor inline typography now applies to the current block when the caret is collapsed, while an explicit selection remains the formatting scope. Selecting the whole editor still intentionally formats the whole selection.
+- Added App Router metadata, canonical/hreflang hints, robots.txt and sitemap.xml generation.
+- Added a generated 1200x630 Open Graph/Twitter preview image for shared DocFlow links.
+- Public URL metadata uses `NEXT_PUBLIC_APP_URL` and falls back to `https://docflow.nurbyte.dev`.
