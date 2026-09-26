@@ -198,58 +198,6 @@ export function DataTableModal({
     });
   };
 
-  const resizeColumn = (columnId: string, startX: number) => {
-    const index = columns.findIndex((column) => column.id === columnId);
-    if (index < 0) return;
-    const leftStart = Math.max(
-      MIN_COLUMN_WIDTH,
-      columns[index].width ?? DEFAULT_COLUMN_WIDTH,
-    );
-    const isSingleColumn = columns.length === 1;
-    const rightStart =
-      !isSingleColumn && index < columns.length - 1
-        ? Math.max(
-            MIN_COLUMN_WIDTH,
-            columns[index + 1].width ?? DEFAULT_COLUMN_WIDTH,
-          )
-        : 0;
-    const pairTotal = leftStart + rightStart;
-
-    const onMove = (event: PointerEvent) => {
-      const delta = event.clientX - startX;
-      if (isSingleColumn || index === columns.length - 1) {
-        const width = Math.round(Math.max(MIN_COLUMN_WIDTH, leftStart + delta));
-        setColumns((current) =>
-          current.map((column, currentIndex) =>
-            currentIndex === index ? { ...column, width } : column,
-          ),
-        );
-        return;
-      }
-      const leftWidth = Math.round(
-        Math.min(
-          pairTotal - MIN_COLUMN_WIDTH,
-          Math.max(MIN_COLUMN_WIDTH, leftStart + delta),
-        ),
-      );
-      const rightWidth = pairTotal - leftWidth;
-      setColumns((current) =>
-        current.map((column, currentIndex) => {
-          if (currentIndex === index) return { ...column, width: leftWidth };
-          if (currentIndex === index + 1)
-            return { ...column, width: rightWidth };
-          return column;
-        }),
-      );
-    };
-    const onUp = () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp, { once: true });
-  };
-
   return (
     <div className="dialog-backdrop">
       <section
@@ -436,15 +384,6 @@ export function DataTableModal({
                                   <Trash2 size={15} />
                                 </button>
                               </div>
-                              <button
-                                type="button"
-                                className="data-table-column-resizer"
-                                aria-label={`Resize column ${index + 1}`}
-                                onPointerDown={(event) => {
-                                  event.preventDefault();
-                                  resizeColumn(column.id, event.clientX);
-                                }}
-                              />
                             </th>
                           );
                         })}

@@ -31,7 +31,7 @@ import { useCreateTemplateService, useUpdateTemplateService } from "../service";
 import { A4_WIDTH_PX } from "@/utils/constants";
 import { VariableModal } from "./VariableModal";
 import { DataTableModal } from "./DataTableModal";
-import { dataTableHtml } from "../data-table";
+import { dataTableHtml, ensureDataTableCaretHosts } from "../data-table";
 import { EditorToolbar, type ToolbarState } from "./EditorToolbar";
 import { VariableShelf } from "./VariableShelf";
 import { ImageContextBar } from "./ImageContextBar";
@@ -258,16 +258,19 @@ export function TemplateEditor({ template, onClose }: Props) {
         `<h1>${t("documentTitle")}</h1><p>${t("startWriting")}</p>`;
 
       normalizeEditorVariableImages(editor.current);
+      ensureDataTableCaretHosts(editor.current);
     }
 
     if (headerEditor.current) {
       headerEditor.current.innerHTML = template?.headerContent ?? "";
       normalizeEditorVariableImages(headerEditor.current);
+      ensureDataTableCaretHosts(headerEditor.current);
     }
 
     if (footerEditor.current) {
       footerEditor.current.innerHTML = template?.footerContent ?? "";
       normalizeEditorVariableImages(footerEditor.current);
+      ensureDataTableCaretHosts(footerEditor.current);
     }
   }, [template, t]);
 
@@ -1787,6 +1790,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                   false,
                   dataTableHtml(variable, variables),
                 );
+                const region = activeEditor.current ?? editor.current;
+                if (region) ensureDataTableCaretHosts(region);
                 setDirty(true);
                 rememberSelection();
                 return;
@@ -2246,6 +2251,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                   false,
                   dataTableHtml(table, variables),
                 );
+                const region = activeEditor.current ?? editor.current;
+                if (region) ensureDataTableCaretHosts(region);
               }
               setDirty(true);
               setDataTableOpen(false);

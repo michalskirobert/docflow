@@ -1807,3 +1807,97 @@ thead .data-table-actions-column {
     gap: 8px;
   }
 }
+
+/* v2.4 Data Table round 18 — Actions is a real, visually separated sticky column. */
+.data-table-field .document-data-table .data-table-actions-column {
+  border-left: 2px solid var(--border-strong) !important;
+  background-clip: padding-box;
+  box-shadow: -10px 0 18px
+    color-mix(in srgb, var(--background) 28%, transparent) !important;
+}
+.data-table-field .document-data-table thead .data-table-actions-column {
+  border-bottom-color: var(--border-strong) !important;
+}
+.data-table-field .document-data-table tbody .data-table-actions-column {
+  background-color: var(--surface) !important;
+}
+
+/* v2.4 Data Table round 20 — restore table mechanics from round 18 and keep
+   the runtime Actions column structurally distinct. */
+.data-table-field
+  .document-data-table
+  tbody
+  tr:not(.data-table-empty-row)
+  > td {
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.data-table-field .document-data-table .data-table-actions-column {
+  width: 112px !important;
+  min-width: 112px !important;
+  border-left: 2px solid var(--border-strong) !important;
+  box-shadow:
+    inset 2px 0 0 color-mix(in srgb, var(--border-strong) 75%, transparent),
+    -12px 0 18px color-mix(in srgb, var(--text) 10%, transparent) !important;
+  background-clip: padding-box;
+}
+
+.data-table-field .document-data-table thead .data-table-actions-column {
+  background: var(--surface-raised) !important;
+}
+
+.data-table-field .document-data-table tbody .data-table-actions-column {
+  background: var(--surface) !important;
+}
+
+.data-table-field .data-table-row-actions {
+  justify-content: flex-end;
+  gap: 6px;
+  padding-inline: 4px;
+}
+
+/* DOM order is intentional: delete first, drag handle always at far right. */
+.data-table-field .data-table-delete-row,
+.data-table-field .data-table-drag-handle {
+  order: initial !important;
+  flex: 0 0 auto;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+}
+
+.data-table-field .data-table-delete-row {
+  margin-left: 0;
+}
+
+.data-table-field .data-table-drag-handle {
+  margin-left: 4px;
+  cursor: grab;
+}
+
+.data-table-field .data-table-drag-handle:active {
+  cursor: grabbing;
+}
+
+.data-table-field .data-table-delete-row:hover:not(:disabled) {
+  border-color: transparent !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
+  color: var(--danger) !important;
+}
+
+.data-table-field .data-table-drag-handle:hover:not(:disabled) {
+  border-color: transparent !important;
+  background: color-mix(in srgb, var(--primary) 9%, transparent) !important;
+  color: var(--text) !important;
+}
+
+/* v2.4 Data Table round 21 — Actions stays sticky but is separated only by shadow. */
+.data-table-field .document-data-table .data-table-actions-column {
+  border-left: 0 !important;
+  box-shadow: -10px 0 16px color-mix(in srgb, var(--text) 9%, transparent) !important;
+}
+.data-table-field .document-data-table thead .data-table-actions-column {
+  border-left: 0 !important;
+}
+.data-table-field .document-data-table tbody .data-table-actions-column {
+  border-left: 0 !important;
+}

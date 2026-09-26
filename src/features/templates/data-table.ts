@@ -66,7 +66,29 @@ export function dataTableHtml(
         : `<td><span contenteditable="false">${escapeHtml(column.staticText ?? "")}</span></td>`,
     )
     .join("");
-  return `<div class="docflow-data-table" data-data-table-name="${escapeAttr(name)}" contenteditable="false"><table><colgroup>${colgroup}</colgroup><thead><tr>${head}</tr></thead><tbody><tr>${row}</tr></tbody></table></div><p><br></p>`;
+  return `<p class="docflow-table-caret-host"><br></p><div class="docflow-data-table" data-data-table-name="${escapeAttr(name)}" contenteditable="false"><table><colgroup>${colgroup}</colgroup><thead><tr>${head}</tr></thead><tbody><tr>${row}</tr></tbody></table></div><p class="docflow-table-caret-host"><br></p>`;
+}
+
+export function ensureDataTableCaretHosts(root: HTMLElement) {
+  root
+    .querySelectorAll<HTMLElement>(".docflow-data-table[data-data-table-name]")
+    .forEach((table) => {
+      const previous = table.previousElementSibling;
+      if (!previous || previous.tagName !== "P") {
+        const before = document.createElement("p");
+        before.className = "docflow-table-caret-host";
+        before.innerHTML = "<br>";
+        table.before(before);
+      }
+
+      const next = table.nextElementSibling;
+      if (!next || next.tagName !== "P") {
+        const after = document.createElement("p");
+        after.className = "docflow-table-caret-host";
+        after.innerHTML = "<br>";
+        table.after(after);
+      }
+    });
 }
 
 function escapeHtml(value: string) {

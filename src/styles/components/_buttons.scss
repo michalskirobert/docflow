@@ -1,61 +1,70 @@
-/* Shared Button uses the existing .btn visual system. */
-
-/* Global button affordance: every enabled button should visibly react to hover. */
-button {
+/* Global interaction contract. Visual hover colours belong to the component/variant,
+   so native/icon buttons do not get an unexpected square background. */
+:where(button, .btn, .icon-button, a.btn, [role="button"]) {
   transition:
     background-color 0.5s ease,
     border-color 0.5s ease,
     color 0.5s ease,
     box-shadow 0.5s ease,
-    filter 0.5s ease,
-    opacity 0.5s ease;
+    opacity 0.5s ease,
+    filter 0.5s ease !important;
 }
 
-button:not(:disabled) {
-  cursor: pointer;
-}
-
-button:not(:disabled):hover {
-  filter: brightness(0.92);
-}
-
-button:disabled {
-  cursor: not-allowed;
-}
-
-/* v2.4 round 17: one interaction contract for clickable controls in light and dark themes. */
 :where(button, .btn, .icon-button, a.btn, [role="button"]):not(:disabled):not(
     [aria-disabled="true"]
   ) {
-  cursor: pointer;
-  transition:
-    background-color 0.5s ease,
-    border-color 0.5s ease,
-    color 0.5s ease,
-    box-shadow 0.5s ease,
-    filter 0.5s ease,
-    opacity 0.5s ease !important;
+  cursor: pointer !important;
 }
-:where(button, .btn, .icon-button, a.btn, [role="button"]):not(:disabled):not(
-    [aria-disabled="true"]
-  ):hover {
-  filter: brightness(0.86) contrast(1.04);
-}
-:where(.btn.secondary, .btn.ghost, .icon-button):not(:disabled):not(
-    [aria-disabled="true"]
-  ):hover {
-  background-color: color-mix(
-    in srgb,
-    var(--text) 9%,
-    var(--surface)
-  ) !important;
-  border-color: color-mix(in srgb, var(--text) 24%, var(--border)) !important;
-}
+
 :where(button, .btn, .icon-button, a.btn, [role="button"]):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--primary) 28%, transparent);
   outline-offset: 2px;
 }
-:where(button, .btn, .icon-button, a.btn, [role="button"]):disabled,
+
+:where(button, .btn, .icon-button):disabled,
 :where(.btn, .icon-button, a.btn, [role="button"])[aria-disabled="true"] {
-  cursor: not-allowed;
+  cursor: not-allowed !important;
+}
+
+/* Shared primary button: exactly one colour path (normal -> hover). */
+.btn:not(.secondary):not(.ghost):not(.danger):not(:disabled):hover {
+  background: color-mix(in srgb, var(--primary) 82%, white) !important;
+  border-color: color-mix(in srgb, var(--primary) 78%, white) !important;
+  color: #fff !important;
+  box-shadow: 0 9px 22px color-mix(in srgb, var(--primary) 26%, transparent) !important;
+}
+
+/* Shared neutral variants. */
+.btn.secondary:not(:disabled):hover {
+  background: color-mix(
+    in srgb,
+    var(--surface-raised) 76%,
+    var(--primary) 10%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--border) 72%,
+    var(--primary) 28%
+  ) !important;
+  color: var(--text) !important;
+}
+
+.btn.ghost:not(:disabled):hover {
+  background: color-mix(in srgb, var(--primary) 9%, transparent) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 30%,
+    var(--border)
+  ) !important;
+  color: color-mix(in srgb, var(--text) 82%, var(--primary)) !important;
+}
+
+.btn.danger:not(:disabled):hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--danger) 48%, var(--border)) !important;
+  color: var(--danger) !important;
+}
+
+:where(a.btn, [role="button"]):not([aria-disabled="true"]):hover {
+  text-decoration: none;
 }
