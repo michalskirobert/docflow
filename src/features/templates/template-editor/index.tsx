@@ -30,6 +30,8 @@ import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
 import { A4_WIDTH_PX } from "@/utils/constants";
 import { VariableModal } from "./VariableModal";
+import { DataTableModal } from "./DataTableModal";
+import { dataTableHtml } from "../data-table";
 import { EditorToolbar, type ToolbarState } from "./EditorToolbar";
 import { VariableShelf } from "./VariableShelf";
 import { ImageContextBar } from "./ImageContextBar";
@@ -155,12 +157,20 @@ export function TemplateEditor({ template, onClose }: Props) {
   const [selectedVariableBox, setSelectedVariableBox] =
     useState<DOMRect | null>(null);
   const draggedVariableElement = useRef<HTMLElement | null>(null);
-  const [selectedTableCell, setSelectedTableCell] = useState<HTMLTableCellElement | null>(null);
+  const [selectedTableCell, setSelectedTableCell] =
+    useState<HTMLTableCellElement | null>(null);
   const [variables, setVariables] = useState<TemplateVariable[]>(() =>
     parseTemplateVariables(template?.variablesJson ?? "[]"),
   );
 
   const [variableOpen, setVariableOpen] = useState(false);
+  const [dataTableOpen, setDataTableOpen] = useState(false);
+  const [editingDataTable, setEditingDataTable] = useState<
+    TemplateVariable | undefined
+  >();
+  const dataTableCreatedVariableHandler = useRef<
+    ((variable: TemplateVariable) => void) | null
+  >(null);
 
   const [editingVariable, setEditingVariable] = useState<
     TemplateVariable | undefined
@@ -477,13 +487,21 @@ export function TemplateEditor({ template, onClose }: Props) {
         ? selectedVariableElement
         : null;
 
-    if (selectedToken && ["bold", "italic", "underline", "foreColor"].includes(command)) {
+    if (
+      selectedToken &&
+      ["bold", "italic", "underline", "foreColor"].includes(command)
+    ) {
       if (command === "bold")
-        selectedToken.style.fontWeight = selectedToken.style.fontWeight === "700" ? "" : "700";
+        selectedToken.style.fontWeight =
+          selectedToken.style.fontWeight === "700" ? "" : "700";
       if (command === "italic")
-        selectedToken.style.fontStyle = selectedToken.style.fontStyle === "italic" ? "" : "italic";
+        selectedToken.style.fontStyle =
+          selectedToken.style.fontStyle === "italic" ? "" : "italic";
       if (command === "underline")
-        selectedToken.style.textDecoration = selectedToken.style.textDecoration.includes("underline") ? "" : "underline";
+        selectedToken.style.textDecoration =
+          selectedToken.style.textDecoration.includes("underline")
+            ? ""
+            : "underline";
       if (command === "foreColor" && value) selectedToken.style.color = value;
       setDirty(true);
       setSelectedVariableBox(selectedToken.getBoundingClientRect());
@@ -645,27 +663,55 @@ export function TemplateEditor({ template, onClose }: Props) {
     return false;
   };
 
-  const mutateTable = (action: "rowBefore" | "rowAfter" | "rowDelete" | "colBefore" | "colAfter" | "colDelete" | "tableDelete") => {
+  const mutateTable = (
+    action:
+      | "rowBefore"
+      | "rowAfter"
+      | "rowDelete"
+      | "colBefore"
+      | "colAfter"
+      | "colDelete"
+      | "tableDelete",
+  ) => {
     const cell = selectedTableCell;
     const row = cell?.parentElement as HTMLTableRowElement | null;
     const table = cell?.closest("table");
     if (!cell || !row || !table) return;
     const columnIndex = Array.from(row.cells).indexOf(cell);
-    if (action === "tableDelete") { table.remove(); setSelectedTableCell(null); setDirty(true); return; }
+    if (action === "tableDelete") {
+      table.remove();
+      setSelectedTableCell(null);
+      setDirty(true);
+      return;
+    }
     if (action === "rowBefore" || action === "rowAfter") {
       const newRow = row.cloneNode(false) as HTMLTableRowElement;
-      for (let i = 0; i < row.cells.length; i += 1) { const td = document.createElement("td"); td.innerHTML = "<br>"; newRow.appendChild(td); }
-      row.parentElement?.insertBefore(newRow, action === "rowBefore" ? row : row.nextSibling);
+      for (let i = 0; i < row.cells.length; i += 1) {
+        const td = document.createElement("td");
+        td.innerHTML = "<br>";
+        newRow.appendChild(td);
+      }
+      row.parentElement?.insertBefore(
+        newRow,
+        action === "rowBefore" ? row : row.nextSibling,
+      );
     } else if (action === "rowDelete") {
-      const parent = row.parentElement; row.remove(); if (!parent?.querySelector("tr")) table.remove(); setSelectedTableCell(null);
+      const parent = row.parentElement;
+      row.remove();
+      if (!parent?.querySelector("tr")) table.remove();
+      setSelectedTableCell(null);
     } else if (action === "colBefore" || action === "colAfter") {
       Array.from(table.rows).forEach((tableRow) => {
-        const td = document.createElement("td"); td.innerHTML = "<br>";
-        const reference = tableRow.cells[columnIndex + (action === "colAfter" ? 1 : 0)] ?? null;
+        const td = document.createElement("td");
+        td.innerHTML = "<br>";
+        const reference =
+          tableRow.cells[columnIndex + (action === "colAfter" ? 1 : 0)] ?? null;
         tableRow.insertBefore(td, reference);
       });
     } else if (action === "colDelete") {
-      Array.from(table.rows).forEach((tableRow) => tableRow.cells[columnIndex]?.remove());
+      Array.from(table.rows).forEach((tableRow) =>
+        tableRow.cells[columnIndex]?.remove(),
+      );
       if (!table.rows[0]?.cells.length) table.remove();
       setSelectedTableCell(null);
     }
@@ -691,7 +737,10 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
-  const saveVariableDefinition = (variable: TemplateVariable, insertIntoWorkspace = true) => {
+  const saveVariableDefinition = (
+    variable: TemplateVariable,
+    insertIntoWorkspace = true,
+  ) => {
     setDirty(true);
     if (!editingVariable) {
       if (insertIntoWorkspace) insertVariable(variable);
@@ -709,7 +758,12 @@ export function TemplateEditor({ template, onClose }: Props) {
       upsertVariable(
         current.map((item) =>
           oldName !== variable.name && item.formula
-            ? { ...item, formula: item.formula.split(`{{${oldName}}}`).join(`{{${variable.name}}}`) }
+            ? {
+                ...item,
+                formula: item.formula
+                  .split(`{{${oldName}}}`)
+                  .join(`{{${variable.name}}}`),
+              }
             : item,
         ),
         variable,
@@ -1606,20 +1660,101 @@ export function TemplateEditor({ template, onClose }: Props) {
               setEditingVariable(undefined);
               setVariableOpen(true);
             }}
+            openDataTable={() => {
+              rememberSelection();
+              setEditingDataTable(undefined);
+              setDataTableOpen(true);
+            }}
             state={toolbarState}
           />
 
-          {selectedTableCell && (
-            <div className="table-context-bar" role="toolbar" aria-label="Table actions">
-              <button type="button" onClick={() => mutateTable("rowBefore")}>+ Row ↑</button>
-              <button type="button" onClick={() => mutateTable("rowAfter")}>+ Row ↓</button>
-              <button type="button" onClick={() => mutateTable("rowDelete")}>− Row</button>
-              <button type="button" onClick={() => mutateTable("colBefore")}>+ Col ←</button>
-              <button type="button" onClick={() => mutateTable("colAfter")}>+ Col →</button>
-              <button type="button" onClick={() => mutateTable("colDelete")}>− Col</button>
-              <button type="button" className="danger" onClick={() => mutateTable("tableDelete")}>Delete table</button>
-            </div>
-          )}
+          {selectedTableCell &&
+            (() => {
+              const dataTableElement = selectedTableCell.closest<HTMLElement>(
+                "[data-data-table-name]",
+              );
+              const dataTableDefinition = dataTableElement
+                ? variables.find(
+                    (item) =>
+                      item.type === "dataTable" &&
+                      item.name === dataTableElement.dataset.dataTableName,
+                  )
+                : undefined;
+              return (
+                <div
+                  className="table-context-bar"
+                  role="toolbar"
+                  aria-label="Table actions"
+                >
+                  {dataTableDefinition ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingDataTable(dataTableDefinition);
+                          setDataTableOpen(true);
+                        }}
+                      >
+                        <Pencil size={15} /> Edit table
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => mutateTable("tableDelete")}
+                      >
+                        <Trash2 size={15} /> Delete table
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("rowBefore")}
+                      >
+                        + Row ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("rowAfter")}
+                      >
+                        + Row ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("rowDelete")}
+                      >
+                        − Row
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("colBefore")}
+                      >
+                        + Col ←
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("colAfter")}
+                      >
+                        + Col →
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => mutateTable("colDelete")}
+                      >
+                        − Col
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => mutateTable("tableDelete")}
+                      >
+                        Delete table
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
           {selectedImage && (
             <ImageContextBar
@@ -1644,8 +1779,26 @@ export function TemplateEditor({ template, onClose }: Props) {
             t={t}
             variables={variables}
             rememberSelection={rememberSelection}
-            insertVariable={insertVariable}
+            insertVariable={(variable) => {
+              if (variable.type === "dataTable") {
+                restoreSelection();
+                document.execCommand(
+                  "insertHTML",
+                  false,
+                  dataTableHtml(variable, variables),
+                );
+                setDirty(true);
+                rememberSelection();
+                return;
+              }
+              insertVariable(variable);
+            }}
             editVariable={(variable) => {
+              if (variable.type === "dataTable") {
+                setEditingDataTable(variable);
+                setDataTableOpen(true);
+                return;
+              }
               setEditingVariable(variable);
               setVariableOpen(true);
             }}
@@ -1716,6 +1869,21 @@ export function TemplateEditor({ template, onClose }: Props) {
                   ref={headerEditor}
                   className="page-header-editor"
                   contentEditable
+                  onDoubleClick={(event) => {
+                    const table = (
+                      event.target as HTMLElement
+                    ).closest<HTMLElement>("[data-data-table-name]");
+                    if (!table) return;
+                    const definition = variables.find(
+                      (item) =>
+                        item.type === "dataTable" &&
+                        item.name === table.dataset.dataTableName,
+                    );
+                    if (definition) {
+                      setEditingDataTable(definition);
+                      setDataTableOpen(true);
+                    }
+                  }}
                   suppressContentEditableWarning
                   onFocus={() => {
                     activeEditor.current = headerEditor.current;
@@ -1753,6 +1921,21 @@ export function TemplateEditor({ template, onClose }: Props) {
                 className="a4-paper"
                 contentEditable
                 suppressContentEditableWarning
+                onDoubleClick={(event) => {
+                  const table = (
+                    event.target as HTMLElement
+                  ).closest<HTMLElement>("[data-data-table-name]");
+                  if (!table) return;
+                  const definition = variables.find(
+                    (item) =>
+                      item.type === "dataTable" &&
+                      item.name === table.dataset.dataTableName,
+                  );
+                  if (definition) {
+                    setEditingDataTable(definition);
+                    setDataTableOpen(true);
+                  }
+                }}
                 onDragOver={(event) => event.preventDefault()}
                 onDragStart={(event) => {
                   const target = event.target as HTMLElement;
@@ -1793,6 +1976,21 @@ export function TemplateEditor({ template, onClose }: Props) {
                   ref={footerEditor}
                   className="page-footer-editor"
                   contentEditable
+                  onDoubleClick={(event) => {
+                    const table = (
+                      event.target as HTMLElement
+                    ).closest<HTMLElement>("[data-data-table-name]");
+                    if (!table) return;
+                    const definition = variables.find(
+                      (item) =>
+                        item.type === "dataTable" &&
+                        item.name === table.dataset.dataTableName,
+                    );
+                    if (definition) {
+                      setEditingDataTable(definition);
+                      setDataTableOpen(true);
+                    }
+                  }}
                   suppressContentEditableWarning
                   onFocus={() => {
                     activeEditor.current = footerEditor.current;
@@ -2003,13 +2201,79 @@ export function TemplateEditor({ template, onClose }: Props) {
           )}
         </div>
 
+        {dataTableOpen && (
+          <DataTableModal
+            variables={variables}
+            initial={editingDataTable}
+            onClose={() => {
+              setDataTableOpen(false);
+              setEditingDataTable(undefined);
+            }}
+            onCreateVariable={(onCreated) => {
+              dataTableCreatedVariableHandler.current = onCreated;
+              setEditingVariable(undefined);
+              setVariableOpen(true);
+            }}
+            onEditVariable={(variable) => {
+              setEditingVariable(variable);
+              setVariableOpen(true);
+            }}
+            onDeleteVariable={(variable) => {
+              setVariables((current) =>
+                current.filter((item) => item.name !== variable.name),
+              );
+              setDirty(true);
+            }}
+            onSave={(table) => {
+              const previousName = editingDataTable?.name;
+              setVariables((current) =>
+                upsertVariable(current, table, previousName ?? table.name),
+              );
+              if (editingDataTable) {
+                const region = activeEditor.current ?? editor.current;
+                const existing = region?.querySelector<HTMLElement>(
+                  `[data-data-table-name="${CSS.escape(previousName ?? table.name)}"]`,
+                );
+                if (existing) {
+                  const holder = document.createElement("div");
+                  holder.innerHTML = dataTableHtml(table, variables);
+                  existing.replaceWith(holder.firstElementChild!);
+                }
+              } else {
+                restoreSelection();
+                document.execCommand(
+                  "insertHTML",
+                  false,
+                  dataTableHtml(table, variables),
+                );
+              }
+              setDirty(true);
+              setDataTableOpen(false);
+              setEditingDataTable(undefined);
+              rememberSelection();
+            }}
+          />
+        )}
+
         {variableOpen && (
           <VariableModal
             onClose={() => {
               setVariableOpen(false);
               setEditingVariable(undefined);
+              dataTableCreatedVariableHandler.current = null;
             }}
-            onInsert={saveVariableDefinition}
+            onInsert={(variable, insertIntoWorkspace) => {
+              if (dataTableCreatedVariableHandler.current && dataTableOpen) {
+                setVariables((current) => upsertVariable(current, variable));
+                dataTableCreatedVariableHandler.current(variable);
+                dataTableCreatedVariableHandler.current = null;
+                setVariableOpen(false);
+                setEditingVariable(undefined);
+                setDirty(true);
+                return;
+              }
+              saveVariableDefinition(variable, insertIntoWorkspace);
+            }}
             initial={editingVariable}
             existingVariables={variables}
             t={t}

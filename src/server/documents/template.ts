@@ -1,6 +1,7 @@
 import type { TemplateVariable } from "@/features/templates/types";
 import { resolveCalculatedValues } from "./calculations";
 import { formatTemplateNumber } from "@/features/templates/number-format";
+import { parseTableRows } from "@/features/templates/data-table";
 
 export function extractVariables(content: string) {
   const tokenNames = [...content.matchAll(/{{\s*([\w.]+)\s*}}/g)].map(
@@ -58,6 +59,90 @@ function replaceImagePlaceholders(
   );
 }
 
+function renderDataTableMarkup(
+  table: TemplateVariable,
+  data: Record<string, string | number>,
+  variables: TemplateVariable[],
+) {
+  const defs = new Map(variables.map((variable) => [variable.name, variable]));
+  const columns = table.dataTable?.columns ?? [];
+  const rows = parseTableRows(String(data[table.name] ?? "[]"));
+  const widths = columns.map((column) => Math.max(1, column.width ?? 230));
+  const totalWidth = widths.reduce((sum, width) => sum + width, 0) || 1;
+  const colgroup = widths
+    .map(
+      (width) =>
+        `<col style="width:${((width / totalWidth) * 100).toFixed(4)}%">`,
+    )
+    .join("");
+  const header = columns
+    .map(
+      (column) =>
+        `<th style="padding:8px 10px;border:1px solid #d1d5db;background:#f3f4f6;color:#111827;font-weight:600;text-align:left;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(column.label || (column.variableName ? defs.get(column.variableName)?.label : undefined) || column.variableName || "Column")}</th>`,
+    )
+    .join("");
+  const body = rows
+    .map((row) => {
+      let resolved: Record<string, string | number> = { ...data, ...row };
+      try {
+        resolved = resolveCalculatedValues(
+          variables.filter((variable) => variable.type !== "dataTable"),
+          resolved,
+        );
+      } catch {}
+      const cells = columns
+        .map((column) => {
+          if (!column.variableName)
+            return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(column.staticText ?? "")}</td>`;
+          const def = defs.get(column.variableName);
+          const raw = resolved[column.variableName] ?? "";
+          const value =
+            def?.type === "formula" && typeof raw === "number"
+              ? formatTemplateNumber(raw, def)
+              : raw;
+          return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:normal">${escapeHtml(value)}</td>`;
+        })
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+  const empty =
+    rows.length === 0
+      ? `<tr><td colspan="${Math.max(1, columns.length)}" style="height:120px;padding:24px;border:1px solid #d1d5db;background:#fff;text-align:center;vertical-align:middle;color:#64748b">No data</td></tr>`
+      : "";
+  return `<div class="docflow-rendered-data-table" style="width:100%;background:#fff;color:#111827"><table style="width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;color:#111827"><colgroup>${colgroup}</colgroup><thead><tr>${header}</tr></thead><tbody>${body || empty}</tbody></table></div>`;
+}
+
+function renderDataTables(
+  content: string,
+  data: Record<string, string | number>,
+  variables: TemplateVariable[],
+) {
+  const defs = new Map(variables.map((variable) => [variable.name, variable]));
+  let rendered = content.replace(
+    /<div\b[^>]*data-data-table-name=["']([\w-]+)["'][^>]*>[\s\S]*?<\/div>/gi,
+    (_full, name: string) => {
+      const table = defs.get(name);
+      return table?.type === "dataTable"
+        ? renderDataTableMarkup(table, data, variables)
+        : "";
+    },
+  );
+  for (const table of variables.filter(
+    (variable) => variable.type === "dataTable",
+  )) {
+    const token = new RegExp(
+      `{{\\s*${table.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*}}`,
+      "g",
+    );
+    rendered = rendered.replace(
+      token,
+      renderDataTableMarkup(table, data, variables),
+    );
+  }
+  return rendered;
+}
+
 export function renderTemplate(
   content: string,
   data: Record<string, string | number>,
@@ -65,7 +150,8 @@ export function renderTemplate(
 ) {
   const defs = new Map(variables.map((variable) => [variable.name, variable]));
   const resolvedData = resolveCalculatedValues(variables, data);
-  const withImages = replaceImagePlaceholders(content, resolvedData).replace(
+  const withTables = renderDataTables(content, resolvedData, variables);
+  const withImages = replaceImagePlaceholders(withTables, resolvedData).replace(
     /<span\b[^>]*data-variable-label=["'][^"']+["'][^>]*>[\s\S]*?<\/span>/gi,
     "",
   );

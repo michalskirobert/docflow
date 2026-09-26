@@ -34,8 +34,24 @@ const schema = z.object({
           "image",
           "select",
           "formula",
+          "dataTable",
         ]),
         formula: z.string().max(500).optional(),
+        dataTable: z
+          .object({
+            columns: z.array(
+              z.object({
+                id: z.string(),
+                label: z.string().max(120).optional(),
+                variableName: z.string().optional(),
+                staticText: z.string().max(500).optional(),
+                width: z.number().min(80).optional(),
+              }),
+            ),
+            minRows: z.number().int().nonnegative().optional(),
+            maxRows: z.number().int().positive().optional(),
+          })
+          .optional(),
         required: z.boolean().optional(),
         requiredMessage: z.string().optional(),
         mask: z.string().optional(),
@@ -110,7 +126,11 @@ export async function PUT(
     }));
   for (const variable of variableDefinitions) {
     if (variable.type !== "formula") continue;
-    const error = validateFormula(variable.formula ?? "", variableDefinitions as TemplateVariable[], variable.name);
+    const error = validateFormula(
+      variable.formula ?? "",
+      variableDefinitions as TemplateVariable[],
+      variable.name,
+    );
     if (error) return NextResponse.json({ message: error }, { status: 400 });
   }
   const { variables: _variables, ...templateData } = p;

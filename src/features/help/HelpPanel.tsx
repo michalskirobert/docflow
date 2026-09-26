@@ -150,7 +150,9 @@ export function HelpPanel() {
             <p>{t("calculationsDescription")}</p>
           </div>
         </div>
-        <Link href="/help/calculations" className="btn secondary">{t("calculationsTutorial")}</Link>
+        <Link href="/help/calculations" className="btn secondary">
+          {t("calculationsTutorial")}
+        </Link>
       </section>
 
       <section className="card help-card support-card">

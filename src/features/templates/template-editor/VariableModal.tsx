@@ -102,10 +102,18 @@ export function VariableModal({
   const [imageFit, setImageFit] = useState<"contain" | "cover" | "fill">(
     initial?.imageFit ?? "contain",
   );
-  const [minLength, setMinLength] = useState(initial?.minLength?.toString() ?? "");
-  const [maxLength, setMaxLength] = useState(initial?.maxLength?.toString() ?? "");
-  const [minNumber, setMinNumber] = useState(initial?.minNumber?.toString() ?? "");
-  const [maxNumber, setMaxNumber] = useState(initial?.maxNumber?.toString() ?? "");
+  const [minLength, setMinLength] = useState(
+    initial?.minLength?.toString() ?? "",
+  );
+  const [maxLength, setMaxLength] = useState(
+    initial?.maxLength?.toString() ?? "",
+  );
+  const [minNumber, setMinNumber] = useState(
+    initial?.minNumber?.toString() ?? "",
+  );
+  const [maxNumber, setMaxNumber] = useState(
+    initial?.maxNumber?.toString() ?? "",
+  );
   const [decimalPlaces, setDecimalPlaces] = useState(
     initial?.decimalPlaces?.toString() ?? "",
   );
@@ -132,61 +140,83 @@ export function VariableModal({
     );
   const toggle = (value: boolean, setter: (v: boolean) => void) => () =>
     setter(!value);
-  const formulaError = type === "formula" ? validateFormula(formula, existingVariables, initial?.name ?? generatedName) : null;
-  const numericVariables = existingVariables.filter((v) => v.name !== initial?.name && (v.type === "number" || v.type === "formula"));
+  const formulaError =
+    type === "formula"
+      ? validateFormula(
+          formula,
+          existingVariables,
+          initial?.name ?? generatedName,
+        )
+      : null;
+  const numericVariables = existingVariables.filter(
+    (v) =>
+      v.name !== initial?.name && (v.type === "number" || v.type === "formula"),
+  );
   const insertFormulaPart = (part: string) => {
     const input = formulaRef.current;
     const start = input?.selectionStart ?? formula.length;
     const end = input?.selectionEnd ?? start;
     const next = `${formula.slice(0, start)}${part}${formula.slice(end)}`;
     setFormula(next);
-    requestAnimationFrame(() => { input?.focus(); input?.setSelectionRange(start + part.length, start + part.length); });
+    requestAnimationFrame(() => {
+      input?.focus();
+      input?.setSelectionRange(start + part.length, start + part.length);
+    });
   };
   const submit = () => {
     if (!label.trim() || !generatedName || duplicate || formulaError) return;
     const nextDefault =
       hasDefault && defaultValueMode === "fixed" ? defaultValue : undefined;
-    onInsert({
-      name: generatedName,
-      label: label.trim(),
-      placeholder: placeholder.trim() || undefined,
-      tooltip: tooltip.trim() || undefined,
-      type,
-      formula: type === "formula" ? formula.trim() || undefined : undefined,
-      defaultValue: nextDefault,
-      defaultValueMode:
-        hasDefault && ["date", "datetime", "time"].includes(type)
-          ? defaultValueMode
+    onInsert(
+      {
+        name: generatedName,
+        label: label.trim(),
+        placeholder: placeholder.trim() || undefined,
+        tooltip: tooltip.trim() || undefined,
+        type,
+        formula: type === "formula" ? formula.trim() || undefined : undefined,
+        defaultValue: nextDefault,
+        defaultValueMode:
+          hasDefault && ["date", "datetime", "time"].includes(type)
+            ? defaultValueMode
+            : undefined,
+        locked: type === "formula" ? true : locked,
+        required,
+        requiredMessage: required ? requiredMessage : undefined,
+        mask: type === "text" && mask ? mask : undefined,
+        minLength: type === "text" ? optionalNumber(minLength) : undefined,
+        maxLength: type === "text" ? optionalNumber(maxLength) : undefined,
+        minNumber: type === "number" ? optionalNumber(minNumber) : undefined,
+        maxNumber: type === "number" ? optionalNumber(maxNumber) : undefined,
+        decimalPlaces: ["number", "formula"].includes(type)
+          ? optionalNumber(decimalPlaces)
           : undefined,
-      locked: type === "formula" ? true : locked,
-      required,
-      requiredMessage: required ? requiredMessage : undefined,
-      mask: type === "text" && mask ? mask : undefined,
-      minLength: type === "text" ? optionalNumber(minLength) : undefined,
-      maxLength: type === "text" ? optionalNumber(maxLength) : undefined,
-      minNumber: type === "number" ? optionalNumber(minNumber) : undefined,
-      maxNumber: type === "number" ? optionalNumber(maxNumber) : undefined,
-      decimalPlaces: ["number", "formula"].includes(type) ? optionalNumber(decimalPlaces) : undefined,
-      decimalSeparator: ["number", "formula"].includes(type) ? decimalSeparator : undefined,
-      thousandsSeparator: ["number", "formula"].includes(type) ? thousandsSeparator : undefined,
-      minDate:
-        ["date", "datetime"].includes(type) && minDate ? minDate : undefined,
-      maxDate:
-        ["date", "datetime"].includes(type) && maxDate ? maxDate : undefined,
-      dateFormat: ["date", "datetime", "time"].includes(type)
-        ? dateFormat
-        : undefined,
-      options: type === "select" ? cleanOptions : undefined,
-      imageWidth: type === "image" ? imageWidth : undefined,
-      imageHeight: type === "image" ? imageHeight : undefined,
-      imageAlign: type === "image" ? imageAlign : undefined,
-      imageFit: type === "image" ? imageFit : undefined,
-      fontSize: type !== "image" ? fontSize : undefined,
-      bold: type !== "image" ? bold : undefined,
-      italic: type !== "image" ? italic : undefined,
-      underline: type !== "image" ? underline : undefined,
-      color: type !== "image" ? color : undefined,
-    }, initial ? false : insertIntoWorkspace);
+        decimalSeparator: ["number", "formula"].includes(type)
+          ? decimalSeparator
+          : undefined,
+        thousandsSeparator: ["number", "formula"].includes(type)
+          ? thousandsSeparator
+          : undefined,
+        minDate:
+          ["date", "datetime"].includes(type) && minDate ? minDate : undefined,
+        maxDate:
+          ["date", "datetime"].includes(type) && maxDate ? maxDate : undefined,
+        dateFormat: ["date", "datetime", "time"].includes(type)
+          ? dateFormat
+          : undefined,
+        options: type === "select" ? cleanOptions : undefined,
+        imageWidth: type === "image" ? imageWidth : undefined,
+        imageHeight: type === "image" ? imageHeight : undefined,
+        imageAlign: type === "image" ? imageAlign : undefined,
+        imageFit: type === "image" ? imageFit : undefined,
+        fontSize: type !== "image" ? fontSize : undefined,
+        bold: type !== "image" ? bold : undefined,
+        italic: type !== "image" ? italic : undefined,
+        underline: type !== "image" ? underline : undefined,
+        color: type !== "image" ? color : undefined,
+      },
+      initial ? false : insertIntoWorkspace,
+    );
   };
   const defaultControl =
     type === "select" ? (
@@ -424,7 +454,12 @@ export function VariableModal({
             </div>
             {!initial && (
               <div className="formula-workspace-option">
-                <ChoiceField type="checkbox" checked={insertIntoWorkspace} onChange={(e) => setInsertIntoWorkspace(e.target.checked)} label={t("addToWorkspace")} />
+                <ChoiceField
+                  type="checkbox"
+                  checked={insertIntoWorkspace}
+                  onChange={(e) => setInsertIntoWorkspace(e.target.checked)}
+                  label={t("addToWorkspace")}
+                />
                 <small>{t("addToWorkspaceHelp")}</small>
               </div>
             )}
@@ -446,11 +481,30 @@ export function VariableModal({
                   onChange={(e) => setFormula(e.target.value)}
                 />
                 <div className="formula-toolbar">
-                  <select aria-label={t("formulaAvailableVariables")} defaultValue="" onChange={(e) => { if (e.target.value) insertFormulaPart(`{{${e.target.value}}}`); e.target.value = ""; }}>
+                  <select
+                    aria-label={t("formulaAvailableVariables")}
+                    defaultValue=""
+                    onChange={(e) => {
+                      if (e.target.value)
+                        insertFormulaPart(`{{${e.target.value}}}`);
+                      e.target.value = "";
+                    }}
+                  >
                     <option value="">{t("formulaInsertVariable")}</option>
-                    {numericVariables.map((v) => <option key={v.name} value={v.name}>{v.label || v.name}</option>)}
+                    {numericVariables.map((v) => (
+                      <option key={v.name} value={v.name}>
+                        {v.label || v.name}
+                      </option>
+                    ))}
                   </select>
-                  <select aria-label={t("formulaInsertOperator")} defaultValue="" onChange={(e) => { if (e.target.value) insertFormulaPart(e.target.value); e.target.value = ""; }}>
+                  <select
+                    aria-label={t("formulaInsertOperator")}
+                    defaultValue=""
+                    onChange={(e) => {
+                      if (e.target.value) insertFormulaPart(e.target.value);
+                      e.target.value = "";
+                    }}
+                  >
                     <option value="">{t("formulaInsertOperator")}</option>
                     <option value=" + ">+</option>
                     <option value=" - ">−</option>
@@ -461,7 +515,13 @@ export function VariableModal({
                     <option value=")">)</option>
                   </select>
                 </div>
-                {formula && <small className={formulaError ? "field-error" : "formula-valid"}>{formulaError || t("formulaValid")}</small>}
+                {formula && (
+                  <small
+                    className={formulaError ? "field-error" : "formula-valid"}
+                  >
+                    {formulaError || t("formulaValid")}
+                  </small>
+                )}
               </div>
             )}
 
@@ -662,92 +722,94 @@ export function VariableModal({
             )}
           </section>
 
-          {type !== "formula" && <details className="variable-section">
-            <summary>{t("validationSettings")}</summary>
-            <div className="variable-section-body">
-              <div className="check-row">
-                <ChoiceField
-                  type="checkbox"
-                  checked={required}
-                  onChange={(e) => setRequired(e.target.checked)}
-                  label={t("requiredField")}
-                />
-              </div>
-              {required && (
-                <label className="field">
-                  {t("requiredMessage")}
-                  <InputControl
-                    value={requiredMessage}
-                    onChange={(e) => setRequiredMessage(e.target.value)}
+          {type !== "formula" && (
+            <details className="variable-section">
+              <summary>{t("validationSettings")}</summary>
+              <div className="variable-section-body">
+                <div className="check-row">
+                  <ChoiceField
+                    type="checkbox"
+                    checked={required}
+                    onChange={(e) => setRequired(e.target.checked)}
+                    label={t("requiredField")}
                   />
-                </label>
-              )}
-              {type === "text" && (
-                <div className="form-grid two">
-                  <label className="field">
-                    {t("minLength")}
-                    <InputControl
-                      type="number"
-                      min="0"
-                      value={minLength}
-                      onChange={(e) => setMinLength(e.target.value)}
-                    />
-                  </label>
-                  <label className="field">
-                    {t("maxLength")}
-                    <InputControl
-                      type="number"
-                      min="0"
-                      value={maxLength}
-                      onChange={(e) => setMaxLength(e.target.value)}
-                    />
-                  </label>
                 </div>
-              )}
-              {type === "number" && (
-                <div className="form-grid two">
+                {required && (
                   <label className="field">
-                    {t("minNumber")}
+                    {t("requiredMessage")}
                     <InputControl
-                      type="number"
-                      min="0"
-                      value={minNumber}
-                      onChange={(e) => setMinNumber(e.target.value)}
+                      value={requiredMessage}
+                      onChange={(e) => setRequiredMessage(e.target.value)}
                     />
                   </label>
-                  <label className="field">
-                    {t("maxNumber")}
-                    <InputControl
-                      type="number"
-                      min="0"
-                      value={maxNumber}
-                      onChange={(e) => setMaxNumber(e.target.value)}
-                    />
-                  </label>
-                </div>
-              )}
-              {["date", "datetime"].includes(type) && (
-                <div className="form-grid two">
-                  <label className="field">
-                    {t("minDate")}
-                    <InputControl
-                      type={type === "datetime" ? "datetime-local" : "date"}
-                      value={minDate}
-                      onChange={(e) => setMinDate(e.target.value)}
-                    />
-                  </label>
-                  <label className="field">
-                    {t("maxDate")}
-                    <InputControl
-                      type={type === "datetime" ? "datetime-local" : "date"}
-                      value={maxDate}
-                      onChange={(e) => setMaxDate(e.target.value)}
-                    />
-                  </label>
-                </div>
-              )}
-            </div>
-          </details>}
+                )}
+                {type === "text" && (
+                  <div className="form-grid two">
+                    <label className="field">
+                      {t("minLength")}
+                      <InputControl
+                        type="number"
+                        min="0"
+                        value={minLength}
+                        onChange={(e) => setMinLength(e.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      {t("maxLength")}
+                      <InputControl
+                        type="number"
+                        min="0"
+                        value={maxLength}
+                        onChange={(e) => setMaxLength(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                )}
+                {type === "number" && (
+                  <div className="form-grid two">
+                    <label className="field">
+                      {t("minNumber")}
+                      <InputControl
+                        type="number"
+                        min="0"
+                        value={minNumber}
+                        onChange={(e) => setMinNumber(e.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      {t("maxNumber")}
+                      <InputControl
+                        type="number"
+                        min="0"
+                        value={maxNumber}
+                        onChange={(e) => setMaxNumber(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                )}
+                {["date", "datetime"].includes(type) && (
+                  <div className="form-grid two">
+                    <label className="field">
+                      {t("minDate")}
+                      <InputControl
+                        type={type === "datetime" ? "datetime-local" : "date"}
+                        value={minDate}
+                        onChange={(e) => setMinDate(e.target.value)}
+                      />
+                    </label>
+                    <label className="field">
+                      {t("maxDate")}
+                      <InputControl
+                        type={type === "datetime" ? "datetime-local" : "date"}
+                        value={maxDate}
+                        onChange={(e) => setMaxDate(e.target.value)}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
           {type !== "image" && (
             <details className="variable-section">
               <summary>{t("variableStyle")}</summary>
@@ -814,12 +876,22 @@ export function VariableModal({
           </button>
           <span
             className="disabled-action-reason"
-            title={!label.trim() ? t("variableNameRequired") : !generatedName ? t("variableNameRequired") : duplicate ? t("variableNameRequired") : formulaError || undefined}
+            title={
+              !label.trim()
+                ? t("variableNameRequired")
+                : !generatedName
+                  ? t("variableNameRequired")
+                  : duplicate
+                    ? t("variableNameRequired")
+                    : formulaError || undefined
+            }
           >
             <button
               className="btn"
               onClick={submit}
-              disabled={!generatedName || !label.trim() || duplicate || !!formulaError}
+              disabled={
+                !generatedName || !label.trim() || duplicate || !!formulaError
+              }
             >
               {initial ? t("saveVariableChanges") : t("insertVariable")}
             </button>

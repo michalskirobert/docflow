@@ -630,13 +630,41 @@
   }
 }
 
-
 /* Table editing controls: row/column operations plus direct horizontal cell resizing. */
-.table-context-bar { display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface-raised); }
-.table-context-bar button { min-height:32px; padding:5px 9px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); cursor:pointer; }
-.table-context-bar button:hover { background:var(--hover); }
-.table-context-bar button.danger { color:var(--danger, #dc2626); }
-.a4-paper td, .a4-paper th, .page-header-editor td, .page-header-editor th, .page-footer-editor td, .page-footer-editor th { min-width:40px; resize:horizontal; overflow:auto; }
+.table-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+.table-context-bar button {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.table-context-bar button:hover {
+  background: var(--hover);
+}
+.table-context-bar button.danger {
+  color: var(--danger, #dc2626);
+}
+.a4-paper td,
+.a4-paper th,
+.page-header-editor td,
+.page-header-editor th,
+.page-footer-editor td,
+.page-footer-editor th {
+  min-width: 40px;
+  resize: horizontal;
+  overflow: auto;
+}
 
 /* Context controls float over the workspace instead of changing the document layout. */
 .editor-sticky-controls > .table-context-bar,
@@ -651,4 +679,1687 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 12px 32px rgb(15 23 42 / 18%);
+}
+
+.docflow-data-table {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 10px 0;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+.docflow-data-table table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+.docflow-data-table th,
+.docflow-data-table td {
+  min-width: 140px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+}
+.docflow-data-table th {
+  background: var(--surface-raised);
+}
+.data-table-modal {
+  width: min(760px, calc(100vw - 32px));
+  max-height: 90vh;
+  overflow: auto;
+}
+.data-table-columns-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin: 18px 0 8px;
+}
+.data-table-columns-heading small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+.data-table-column-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.data-table-column-row {
+  display: grid;
+  grid-template-columns: 28px minmax(220px, 1fr) 110px 40px;
+  gap: 8px;
+  align-items: center;
+}
+@media (max-width: 760px) {
+  .data-table-column-row {
+    grid-template-columns: 24px minmax(180px, 1fr) 90px 40px;
+    min-width: 520px;
+  }
+  .data-table-column-list {
+    overflow-x: auto;
+  }
+}
+
+/* Visual Data Table designer */
+.data-table-designer {
+  width: min(1180px, calc(100vw - 32px));
+  max-height: 92vh;
+  overflow: hidden;
+}
+.data-table-designer .variable-dialog-scroll {
+  max-height: 92vh;
+  overflow-y: auto;
+}
+.data-table-designer-header {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: var(--surface);
+}
+.data-table-designer-body {
+  display: grid;
+  gap: 14px;
+}
+.data-table-settings {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) 140px 140px;
+  gap: 12px;
+  align-items: end;
+}
+.data-table-required-row {
+  margin: 0;
+}
+.data-table-designer-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 4px;
+}
+.data-table-designer-toolbar small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+.data-table-designer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.data-table-designer-canvas {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+.data-table-designer-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.data-table-designer-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--surface);
+}
+.data-table-designer-table th,
+.data-table-designer-table td {
+  position: relative;
+  padding: 12px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.data-table-designer-table th:last-child,
+.data-table-designer-table td:last-child {
+  border-right: 0;
+}
+.data-table-designer-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.data-table-designer-table th {
+  background: var(--surface-raised);
+  text-align: left;
+}
+.data-table-column-header {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.data-table-column-header > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compact-icon {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+}
+.data-table-column-resizer {
+  position: absolute !important;
+  z-index: 4;
+  top: 0;
+  right: -5px;
+  width: 10px !important;
+  min-width: 10px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  cursor: col-resize;
+}
+.data-table-column-resizer::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: transparent;
+}
+.data-table-column-resizer:hover::after {
+  background: var(--primary);
+}
+.data-table-variable-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.data-table-variable-preview code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.data-table-create-variable-link {
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin-top: 8px;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--primary) !important;
+  font-size: 0.82rem;
+}
+.data-table-empty-state {
+  width: 100% !important;
+  min-height: 180px !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 28px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+}
+.data-table-empty-state span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.data-table-designer-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.toolbar-table-menu {
+  position: relative;
+  display: inline-flex;
+}
+.toolbar-table-menu > button {
+  height: 100%;
+}
+.toolbar-table-popover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 270px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+}
+.toolbar-table-popover > button {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 9px 10px !important;
+  border: 0 !important;
+  background: transparent !important;
+  text-align: left;
+}
+.toolbar-table-popover > button:hover {
+  background: var(--surface-raised) !important;
+}
+.toolbar-table-popover > button > span {
+  display: grid;
+  gap: 2px;
+}
+.toolbar-table-popover strong {
+  color: var(--text);
+  font-size: 0.88rem;
+}
+.toolbar-table-popover small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+@media (max-width: 820px) {
+  .data-table-designer {
+    width: calc(100vw - 16px);
+  }
+  .data-table-settings {
+    grid-template-columns: 1fr 1fr;
+  }
+  .data-table-designer-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .data-table-designer-actions {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 560px) {
+  .data-table-settings {
+    grid-template-columns: 1fr;
+  }
+  .data-table-designer-actions > button {
+    flex: 1;
+  }
+  .toolbar-table-popover {
+    left: auto;
+    right: 0;
+  }
+}
+
+/* v2.4.0 Data Table visual polish */
+.data-table-designer {
+  width: min(1320px, calc(100vw - 40px));
+  border-radius: 18px;
+}
+.data-table-designer-header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table-title-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-width: 0;
+}
+.data-table-title-icon {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: var(--primary);
+}
+.data-table-title-block h2 {
+  margin-bottom: 4px;
+}
+.data-table-title-block p {
+  margin: 0;
+  max-width: 820px;
+  color: var(--text-muted);
+}
+.data-table-designer-body {
+  gap: 20px;
+  padding-top: 18px;
+}
+.data-table-settings {
+  grid-template-columns: minmax(260px, 1.25fr) minmax(190px, 0.75fr) minmax(
+      330px,
+      1fr
+    );
+  gap: 16px;
+  align-items: start;
+}
+.data-table-generated-tag {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.data-table-generated-tag > span {
+  font-weight: 700;
+}
+.data-table-generated-tag code {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-table-generated-tag small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+.data-table-row-rules {
+  display: grid;
+  gap: 10px;
+}
+.data-table-row-limits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.data-table-required-row {
+  min-height: 26px;
+  align-items: center;
+}
+.data-table-designer-toolbar {
+  align-items: center;
+  padding-top: 4px;
+}
+.data-table-designer-toolbar strong {
+  font-size: 1.05rem;
+}
+.data-table-designer-actions .btn {
+  min-height: 40px;
+}
+.data-table-designer-canvas {
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 2%);
+}
+.data-table-designer-table th {
+  padding: 10px 12px;
+}
+.data-table-designer-table td {
+  padding: 12px;
+}
+.data-table-column-header {
+  min-height: 30px;
+}
+.data-table-column-header > span {
+  font-weight: 750;
+}
+.data-table-variable-preview {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.data-table-designer-hint {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-muted);
+}
+.data-table-designer .modal-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 8;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Desktop zoom: the wrapper owns scaled layout dimensions while the A4 page is transformed. */
+@media (min-width: 761px) {
+  .paper-zoom {
+    position: relative !important;
+    display: block !important;
+    width: var(--scaled-a4-width) !important;
+    min-width: var(--scaled-a4-width) !important;
+    height: var(--scaled-a4-height) !important;
+    min-height: var(--scaled-a4-height) !important;
+    margin-inline: auto !important;
+    padding: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
+  }
+  .paper-zoom > .a4-page-shell {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 210mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    transform: scale(var(--editor-zoom, 1)) !important;
+    transform-origin: top left !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .data-table-settings {
+    grid-template-columns: 1fr 1fr;
+  }
+  .data-table-row-rules {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 560px) {
+  .data-table-designer {
+    width: calc(100vw - 12px);
+  }
+  .data-table-settings {
+    grid-template-columns: 1fr;
+  }
+  .data-table-row-rules {
+    grid-column: auto;
+  }
+  .data-table-row-limits {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* v2.4.0 Data Table designer — visual redesign */
+.data-table-designer {
+  width: min(1240px, calc(100vw - 40px));
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 34%);
+}
+.data-table-designer .variable-dialog-scroll {
+  display: flex;
+  flex-direction: column;
+}
+.data-table-designer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 26px 20px;
+  border-bottom: 0;
+}
+.data-table-designer-header > .icon-button {
+  flex: 0 0 auto;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+.data-table-title-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+}
+.data-table-title-block h2 {
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+.data-table-title-block p {
+  max-width: 760px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.data-table-designer-body {
+  gap: 24px;
+  padding: 0 26px 22px;
+}
+.data-table-settings {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.45fr) minmax(360px, 1fr);
+  gap: 28px;
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--border);
+  align-items: start;
+}
+.data-table-name-field {
+  margin: 0;
+}
+.data-table-inline-tag {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 7px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+.data-table-row-rules {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.data-table-required-row {
+  min-height: 34px;
+  padding: 0;
+  font-weight: 600;
+}
+.data-table-row-limits {
+  gap: 12px;
+}
+.data-table-designer-toolbar {
+  margin-top: 2px;
+  padding: 0;
+  align-items: flex-end;
+}
+.data-table-designer-toolbar > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+.data-table-designer-toolbar strong {
+  font-size: 1.12rem;
+}
+.data-table-designer-toolbar small {
+  max-width: 680px;
+  margin: 0;
+  line-height: 1.4;
+}
+.data-table-designer-actions {
+  gap: 10px;
+}
+.data-table-designer-actions .btn {
+  min-height: 42px;
+  border-radius: 10px;
+}
+.data-table-designer-canvas {
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-muted) 72%, var(--surface));
+  box-shadow: none;
+}
+.data-table-empty-state {
+  min-height: 130px !important;
+  padding: 24px !important;
+}
+.data-table-empty-state svg {
+  width: 30px;
+  height: 30px;
+  padding: 7px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+}
+.data-table-empty-state strong {
+  margin-top: 3px;
+  font-size: 0.95rem;
+}
+.data-table-designer-table th {
+  background: color-mix(in srgb, var(--surface-raised) 86%, var(--primary) 3%);
+}
+.data-table-column-header > span {
+  font-size: 0.9rem;
+}
+.data-table-designer-table td {
+  background: var(--surface);
+}
+.data-table-variable-preview span {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--text-muted);
+}
+.data-table-template-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: -6px 0 0;
+  padding: 0 2px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.data-table-template-note svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+.data-table-designer .modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 26px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.data-table-designer .modal-actions .btn:last-child {
+  min-width: 130px;
+}
+@media (max-width: 820px) {
+  .data-table-designer-header {
+    padding: 20px 18px 16px;
+  }
+  .data-table-designer-body {
+    padding: 0 18px 18px;
+  }
+  .data-table-settings {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .data-table-designer .modal-actions {
+    padding: 16px 18px 18px;
+  }
+}
+@media (max-width: 560px) {
+  .data-table-title-icon {
+    display: none;
+  }
+  .data-table-designer-header {
+    gap: 12px;
+  }
+  .data-table-row-limits {
+    grid-template-columns: 1fr 1fr;
+  }
+  .data-table-designer-actions {
+    width: 100%;
+  }
+  .data-table-designer-actions .btn {
+    flex: 1;
+  }
+}
+
+/* Data table designer polish: reuse shared controls and keep the canvas visually dominant. */
+.data-table-designer .data-table-settings {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.data-table-designer .data-table-name-field {
+  max-width: none;
+}
+.data-table-designer .data-table-row-rules {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(340px, 0.9fr);
+  align-items: end;
+  gap: 22px;
+}
+.data-table-designer .data-table-required-row {
+  align-self: center;
+  min-height: 42px;
+}
+.data-table-designer .data-table-row-limits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+}
+.data-table-designer-canvas {
+  min-height: 210px;
+}
+.data-table-designer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 42%, transparent)
+    transparent;
+}
+.data-table-designer-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.data-table-designer-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.data-table-designer-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 38%, transparent);
+}
+.data-table-designer-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-muted) 58%, transparent);
+}
+.data-table-designer-table {
+  min-height: 208px;
+}
+.data-table-column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.data-table-column-name {
+  min-width: 0;
+  height: 34px !important;
+  padding: 6px 9px !important;
+  font-size: 0.86rem !important;
+  font-weight: 700;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+.data-table-column-name:hover,
+.data-table-column-name:focus {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+.data-table-column-delete {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.data-table-column-delete:hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+.data-table-create-variable-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+}
+.data-table-designer .modal-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+@media (max-width: 820px) {
+  .data-table-designer .data-table-row-rules {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+@media (max-width: 560px) {
+  .data-table-designer .data-table-row-limits {
+    grid-template-columns: 1fr;
+  }
+  .data-table-designer-canvas {
+    min-height: 190px;
+  }
+}
+
+/* v2.4 Data Table designer: stable canvas, shared-style variable actions and clearer empty state. */
+.data-table-designer-canvas {
+  min-height: 300px;
+}
+.data-table-designer-scroll {
+  min-height: 300px;
+}
+.data-table-designer-table {
+  min-height: 298px;
+}
+.data-table-empty-state {
+  min-height: 298px;
+  width: 100%;
+}
+.data-table-variable-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+.data-table-variable-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.data-table-variable-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.data-table-variable-edit:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+}
+@media (max-width: 560px) {
+  .data-table-designer-canvas,
+  .data-table-designer-scroll {
+    min-height: 300px;
+  }
+}
+
+/* v2.4 Data Table refinement */
+.data-table-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 298px;
+  text-align: center;
+}
+.data-table-column-header {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 86px 34px;
+  gap: 8px;
+  align-items: center;
+}
+.data-table-column-name {
+  min-width: 0;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+}
+.data-table-column-width {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+.data-table-column-width .input-control {
+  min-width: 0;
+  height: 34px;
+  padding-inline: 8px;
+}
+.data-table-column-delete {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.data-table-column-delete:hover {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+.data-table-variable-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.data-table-variable-detach {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.data-table-variable-detach:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border));
+}
+.data-table-empty-cell-controls {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+.data-table-empty-cell-controls > span {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* v2.4 Data Table designer round 3 */
+.data-table-designer-canvas,
+.data-table-designer-scroll {
+  min-height: 320px;
+}
+.data-table-empty-state {
+  min-height: 318px;
+  height: 318px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.data-table-designer-table {
+  min-height: 318px;
+}
+.data-table-designer-table th {
+  vertical-align: middle;
+}
+.data-table-column-header {
+  grid-template-columns: minmax(140px, 1fr) 104px 36px;
+  padding: 8px;
+}
+.data-table-column-name {
+  height: 40px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  font-weight: 700;
+}
+.data-table-column-width {
+  position: relative;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.data-table-column-width .input-control {
+  height: 38px;
+  border: 0 !important;
+  padding-right: 30px;
+  background: transparent !important;
+}
+.data-table-column-width > span {
+  position: absolute;
+  right: 9px;
+  pointer-events: none;
+  font-size: 0.72rem;
+}
+.data-table-static-editor {
+  display: grid;
+  gap: 8px;
+}
+.data-table-content-caption {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.data-table-static-editor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 8px;
+  align-items: center;
+}
+.data-table-static-editor-row .data-table-variable-detach {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.data-table-create-variable-link {
+  margin-top: 10px;
+}
+
+/* v2.4 Data Table round 4 — fixed modal shell, real column resize and document-like workspace table. */
+.data-table-designer {
+  overflow: hidden;
+}
+.data-table-designer .variable-dialog-scroll {
+  max-height: 92vh;
+  height: min(92vh, 900px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.data-table-designer-header,
+.data-table-designer .modal-actions {
+  flex: 0 0 auto;
+}
+.data-table-designer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 38%, transparent)
+    transparent;
+}
+.data-table-designer-body::-webkit-scrollbar {
+  width: 6px;
+}
+.data-table-designer-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.data-table-designer-body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 36%, transparent);
+}
+.data-table-column-header {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 36px !important;
+  align-items: center;
+  gap: 8px;
+}
+.data-table-column-width {
+  display: none !important;
+}
+.data-table-column-resizer {
+  right: -6px !important;
+  width: 12px !important;
+  touch-action: none;
+}
+.data-table-column-resizer::after {
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.data-table-column-resizer:hover::after,
+.data-table-column-resizer:active::after {
+  background: var(--primary);
+}
+.data-table-custom-text-row .input-control {
+  min-height: 42px;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  padding: 9px 12px !important;
+  color: var(--text) !important;
+}
+.data-table-custom-text-row .input-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+/* The placed table is a WYSIWYG document table, not an application-dark-mode table. */
+.docflow-data-table {
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: #111827;
+}
+.docflow-data-table table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+  color: #111827;
+}
+.docflow-data-table th,
+.docflow-data-table td {
+  min-width: 80px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  background: #fff;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  vertical-align: top;
+}
+.docflow-data-table th {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
+  text-align: left;
+}
+.data-table-remove-variable-backdrop {
+  z-index: 10020;
+}
+.data-table-remove-variable-dialog {
+  width: min(560px, calc(100vw - 32px));
+  padding: 24px;
+}
+.data-table-remove-variable-dialog h3 {
+  margin: 0 0 8px;
+}
+.data-table-remove-variable-dialog p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.data-table-remove-variable-dialog .modal-actions {
+  position: static;
+  padding: 22px 0 0;
+  border: 0;
+  flex-wrap: wrap;
+}
+.data-table-designer-table {
+  min-width: 0 !important;
+  width: max-content !important;
+}
+.data-table-designer-table th,
+.data-table-designer-table td {
+  min-width: 80px;
+}
+.table-context-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* v2.4 Data Table round 5 — final designer interaction polish. */
+.data-table-designer-table th {
+  position: relative;
+}
+.data-table-column-resizer {
+  position: absolute !important;
+  top: 0 !important;
+  right: -5px !important;
+  bottom: 0 !important;
+  width: 10px !important;
+  height: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  cursor: col-resize !important;
+  z-index: 5;
+}
+.data-table-column-resizer::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 4px;
+  width: 2px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background-color 0.14s ease;
+}
+.data-table-column-resizer:hover::after,
+.data-table-column-resizer:active::after {
+  background: var(--primary);
+}
+.data-table-static-editor {
+  display: grid;
+  gap: 7px;
+}
+.data-table-content-caption {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.data-table-custom-text-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 8px;
+  align-items: center;
+}
+.data-table-custom-text-row .input-control {
+  width: 100%;
+}
+.data-table-custom-text-row .data-table-variable-detach {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.data-table-custom-text-row .data-table-variable-detach:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+}
+.data-table-designer-canvas .data-table-empty-state {
+  min-height: 300px !important;
+  text-align: center !important;
+}
+
+/* v2.4 Data Table round 6 — PDF-width constrained designer. */
+.data-table-designer-canvas {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.data-table-designer-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.data-table-designer-table {
+  width: auto !important;
+  max-width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed;
+}
+.data-table-designer-actions .btn:disabled {
+  cursor: not-allowed;
+}
+
+/* v2.4 Data Table round 7 — fixed 150px insertion + shared-form custom text polish. */
+.data-table-designer-table {
+  /* Keep the actual sum of column widths so the resize handles move real columns. */
+  width: max-content !important;
+  max-width: 100%;
+  table-layout: fixed;
+}
+.data-table-designer-table th,
+.data-table-designer-table td {
+  box-sizing: border-box;
+  min-width: 80px;
+}
+.data-table-column-header {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 8px;
+  align-items: center;
+}
+.data-table-column-name {
+  min-width: 0;
+  width: 100%;
+}
+.data-table-custom-text-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+.data-table-custom-text-row .input-control {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 12px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  background: var(--surface-raised) !important;
+  color: var(--text) !important;
+  font: inherit;
+  outline: none;
+}
+.data-table-custom-text-row .input-control:hover {
+  border-color: color-mix(in srgb, var(--border) 55%, var(--text-muted));
+}
+.data-table-custom-text-row .input-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent) !important;
+}
+.data-table-custom-text-row .data-table-variable-detach {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  transition:
+    color 0.14s ease,
+    border-color 0.14s ease,
+    background-color 0.14s ease;
+}
+.data-table-custom-text-row .data-table-variable-detach:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+  background: color-mix(in srgb, var(--danger) 9%, var(--surface-raised));
+}
+
+/* v2.4 Data Table round 8 — deterministic column sizing and compact cell editors. */
+.data-table-designer-canvas {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.data-table-designer-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+.data-table-designer-table {
+  display: table;
+  max-width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.data-table-designer-table th,
+.data-table-designer-table td {
+  box-sizing: border-box;
+  min-width: 80px !important;
+  overflow: hidden;
+}
+.data-table-designer-table th {
+  padding: 10px 8px !important;
+}
+.data-table-designer-table td {
+  padding: 12px 10px !important;
+  vertical-align: top;
+}
+.data-table-column-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 30px !important;
+  gap: 6px !important;
+  width: 100%;
+  min-width: 0;
+}
+.data-table-column-name.input-control {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  font: inherit !important;
+  font-weight: 700 !important;
+  text-overflow: ellipsis;
+}
+.data-table-column-delete {
+  width: 30px !important;
+  height: 38px !important;
+  min-width: 30px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+}
+.data-table-column-delete:hover {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 9%, transparent) !important;
+}
+.data-table-static-editor {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+.data-table-content-caption {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-table-custom-text-row {
+  width: 100%;
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 32px !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+.data-table-custom-text-row .input-control {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  font: inherit !important;
+  outline: none !important;
+}
+.data-table-custom-text-row .input-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent) !important;
+}
+.data-table-custom-text-row .data-table-variable-detach {
+  box-sizing: border-box !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  color: var(--text-muted) !important;
+  cursor: pointer;
+}
+.data-table-custom-text-row .data-table-variable-detach:hover {
+  color: var(--danger) !important;
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border)) !important;
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface)) !important;
+}
+.data-table-column-resizer {
+  right: -5px !important;
+  width: 10px !important;
+  cursor: col-resize !important;
+  z-index: 20 !important;
+}
+
+/* Data table designer: custom text control. */
+.data-table-custom-text-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 40px !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100%;
+  min-width: 0;
+}
+
+.data-table-custom-text-input {
+  box-sizing: border-box !important;
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  font: inherit !important;
+  line-height: 1.2 !important;
+  outline: none !important;
+  appearance: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.data-table-custom-text-input:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--border) 55%,
+    var(--text-muted)
+  ) !important;
+}
+
+.data-table-custom-text-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent) !important;
+}
+
+.data-table-custom-text-remove {
+  box-sizing: border-box;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.data-table-custom-text-remove:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+}
+
+/* Data table sizing/render parity: designer widths are proportions in the document. */
+.docflow-data-table {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  margin: 10px 0;
+  border: 0;
+  border-radius: 0;
+}
+.docflow-data-table table {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: #fff;
+  color: #111827;
+}
+.docflow-data-table th,
+.docflow-data-table td {
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  vertical-align: top;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.docflow-data-table th {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 600;
+  text-align: left;
+}
+.docflow-data-table textarea,
+.docflow-data-table [style*="resize"] {
+  resize: none !important;
+}
+
+/* Designer keeps actions usable even at the 120px minimum. */
+.data-table-variable-preview {
+  align-items: center;
+}
+.data-table-variable-meta {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+.data-table-variable-meta code,
+.data-table-variable-meta span {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-table-variable-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.data-table-variable-edit,
+.data-table-variable-detach {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+}
+.data-table-variable-edit:hover {
+  color: var(--text) !important;
+  background: var(--surface-raised) !important;
+}
+.data-table-variable-detach:hover {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 8%, transparent) !important;
+}
+
+/* Select menus may extend beyond the table row; the modal body owns vertical scrolling. */
+.data-table-designer-canvas {
+  overflow: visible;
+}
+.data-table-designer-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  min-height: 360px;
+}
+.data-table-designer-table tbody td {
+  height: 300px;
+}
+
+/* The designer is page-width constrained, so menus can escape cells without being clipped. */
+.data-table-designer-scroll {
+  overflow: visible;
+}
+.data-table-designer .shared-select {
+  position: relative;
+  z-index: 5;
+}
+.data-table-designer .shared-select.is-open {
+  z-index: 40;
+}
+.data-table-designer .shared-select-options {
+  z-index: 60;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* Round 12: compact content actions and dropdown without horizontal scrolling. */
+.data-table-content-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+.data-table-content-actions .data-table-create-variable-link {
+  margin-top: 0;
+}
+.data-table-designer .shared-select-options {
+  overflow-x: hidden !important;
+  max-width: min(360px, calc(100vw - 48px));
+}
+.data-table-designer .shared-select-options button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  text-align: left;
+}
+
+/* Round 15: table cell actions are always stacked and behave like links. */
+.data-table-content-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  margin-top: 9px;
+}
+.data-table-content-actions .data-table-create-variable-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  width: auto !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  color: var(--primary) !important;
+  transition:
+    color 0.5s ease,
+    opacity 0.5s ease !important;
+}
+.data-table-content-actions .data-table-create-variable-link:hover {
+  color: color-mix(in srgb, var(--primary) 70%, white) !important;
+  opacity: 0.9;
 }

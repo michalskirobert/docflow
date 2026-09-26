@@ -403,6 +403,8 @@ type Props = {
   value: string;
   error?: string;
   onChange: (v: string) => void;
+  compact?: boolean;
+  hideLabel?: boolean;
 };
 
 function VariableSelect({
@@ -441,7 +443,14 @@ function VariableSelect({
   );
 }
 
-export function VariableField({ variable, value, error, onChange }: Props) {
+export function VariableField({
+  variable,
+  value,
+  error,
+  onChange,
+  compact = false,
+  hideLabel = false,
+}: Props) {
   const t = useTranslations("documents");
   const label = variable.label || variable.name;
 
@@ -494,20 +503,23 @@ export function VariableField({ variable, value, error, onChange }: Props) {
     }
   };
 
-  const Label = () => (
-    <span className="field-label variable-field-label">
-      <span>{label}</span>
-      <code className="variable-field-token">{`{{${variable.name}}}`}</code>
-      {variable.tooltip && <HelpTooltip text={variable.tooltip} />}
+  const Label = () =>
+    hideLabel ? null : (
+      <span className="field-label variable-field-label">
+        <span>{label}</span>
+        {!compact && (
+          <code className="variable-field-token">{`{{${variable.name}}}`}</code>
+        )}
+        {variable.tooltip && <HelpTooltip text={variable.tooltip} />}
 
-      {variable.required && (
-        <span className="required" aria-hidden="true">
-          {" "}
-          *
-        </span>
-      )}
-    </span>
-  );
+        {variable.required && (
+          <span className="required" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        )}
+      </span>
+    );
 
   if (variableType === "select") {
     return (
@@ -554,7 +566,9 @@ export function VariableField({ variable, value, error, onChange }: Props) {
       >
         <label className="field-label variable-field-label" htmlFor={id}>
           <span>{label}</span>
-          <code className="variable-field-token">{`{{${variable.name}}}`}</code>
+          {!compact && (
+            <code className="variable-field-token">{`{{${variable.name}}}`}</code>
+          )}
           {variable.tooltip && <HelpTooltip text={variable.tooltip} />}
           {variable.required && (
             <span className="required" aria-hidden="true">

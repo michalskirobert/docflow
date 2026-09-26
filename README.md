@@ -329,3 +329,7 @@ Editor fixes: variables can be dropped into body/header/footer at the pointer po
 - Variable modal constrained to the mobile visual viewport.
 - Date/time variables can use a dynamic current date/time default resolved when a document is started.
 - Date, datetime, time and select document fields can be cleared when they are not locked.
+
+### 2.4.0 experimental Data Table
+
+The template editor now includes an experimental Data Table control. A Data Table owns a repeatable row definition while its columns reuse normal DocFlow variables, including their validation, formatting and calculated-number behavior. Document create/edit renders repeatable rows with local horizontal scrolling on narrow screens; preview, PDF and email rendering expand the saved rows into the template table. This is intentionally an experimental 2.4.0 iteration and should be validated before the data-table model is treated as stable.

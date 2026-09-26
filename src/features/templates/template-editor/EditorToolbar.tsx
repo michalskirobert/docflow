@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SelectControl } from "@/components/shared/form";
 import {
   AlignCenter,
@@ -43,6 +44,7 @@ type Props = {
   openImage: () => void;
   openLink: () => void;
   openVariable: () => void;
+  openDataTable: () => void;
   state: ToolbarState;
 };
 export function EditorToolbar({
@@ -55,8 +57,10 @@ export function EditorToolbar({
   openImage,
   openLink,
   openVariable,
+  openDataTable,
   state,
 }: Props) {
+  const [tableMenuOpen, setTableMenuOpen] = useState(false);
   const b = (active: boolean) => (active ? "active" : undefined);
   return (
     <div className="editor-toolbar">
@@ -220,9 +224,50 @@ export function EditorToolbar({
       >
         <ListOrdered />
       </button>
-      <button onMouseDown={rememberSelection} onClick={insertTable} title={t("table")}>
-        <Table2 />
-      </button>
+      <div className="toolbar-table-menu">
+        <button
+          className={tableMenuOpen ? "active" : undefined}
+          onMouseDown={rememberSelection}
+          onClick={() => setTableMenuOpen((current) => !current)}
+          title={t("table")}
+          aria-haspopup="menu"
+          aria-expanded={tableMenuOpen}
+        >
+          <Table2 />
+        </button>
+        {tableMenuOpen && (
+          <div className="toolbar-popover toolbar-table-popover" role="menu">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setTableMenuOpen(false);
+                insertTable();
+              }}
+            >
+              <Table2 />
+              <span>
+                <strong>{t("table")}</strong>
+                <small>Static layout table</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setTableMenuOpen(false);
+                openDataTable();
+              }}
+            >
+              <Table2 />
+              <span>
+                <strong>Data table</strong>
+                <small>Repeatable rows with DocFlow variables</small>
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
       <button
         onMouseDown={rememberSelection}
         onClick={openImage}

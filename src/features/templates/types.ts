@@ -1,5 +1,25 @@
 export type VariableType =
-  "text" | "number" | "date" | "datetime" | "time" | "image" | "select" | "formula";
+  | "text"
+  | "number"
+  | "date"
+  | "datetime"
+  | "time"
+  | "image"
+  | "select"
+  | "formula"
+  | "dataTable";
+export type DataTableColumn = {
+  id: string;
+  label?: string;
+  variableName?: string;
+  staticText?: string;
+  width?: number;
+};
+export type DataTableDefinition = {
+  columns: DataTableColumn[];
+  minRows?: number;
+  maxRows?: number;
+};
 export type TemplateVariable = {
   name: string;
   label?: string;
@@ -7,6 +27,7 @@ export type TemplateVariable = {
   tooltip?: string;
   type: VariableType;
   formula?: string;
+  dataTable?: DataTableDefinition;
   required?: boolean;
   requiredMessage?: string;
   mask?: string;

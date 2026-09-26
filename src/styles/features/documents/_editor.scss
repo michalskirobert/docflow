@@ -1457,3 +1457,309 @@
     grid-row: 1;
   }
 }
+
+/* Data table: only the table viewport scrolls horizontally on narrow screens. */
+.data-table-field {
+  min-width: 0;
+}
+.data-table-field-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.data-table-field-heading code {
+  margin-left: 8px;
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+.data-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.document-data-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.document-data-table th,
+.document-data-table td {
+  padding: 10px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.document-data-table th {
+  text-align: left;
+  background: var(--surface-raised);
+  white-space: nowrap;
+}
+.document-data-table tr:last-child td {
+  border-bottom: 0;
+}
+.document-data-table th:last-child,
+.document-data-table td:last-child {
+  border-right: 0;
+}
+.document-data-table .field {
+  margin: 0;
+  min-width: 0;
+}
+.document-data-table .field-label {
+  font-size: 0.75rem;
+  margin-bottom: 5px;
+}
+.data-table-actions-column {
+  width: 76px;
+  min-width: 76px;
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+thead .data-table-actions-column {
+  background: var(--surface-raised);
+  z-index: 3;
+}
+.data-table-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+}
+.data-table-calculated {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-muted);
+  font-variant-numeric: tabular-nums;
+}
+.data-table-add-row {
+  margin-top: 10px;
+}
+@media (max-width: 760px) {
+  .data-table-scroll {
+    margin-inline: 0;
+  }
+  .document-data-table {
+    min-width: max-content;
+  }
+}
+
+/* v2.4 Data Table workspace: keep a stable editing area and a clear empty state. */
+.data-table-scroll {
+  min-height: 300px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 38%, transparent)
+    transparent;
+}
+.data-table-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.data-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.data-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 36%, transparent);
+}
+.data-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text-muted) 56%, transparent);
+}
+.document-data-table {
+  min-height: 298px;
+}
+.data-table-empty-row td {
+  height: 245px;
+  padding: 24px !important;
+  border-right: 0 !important;
+}
+.data-table-empty-message {
+  min-width: 280px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-muted) 55%, transparent);
+}
+
+/* v2.4 Data Table document grid polish */
+.document-data-table th {
+  font-weight: 700;
+}
+.document-data-table td {
+  padding: 12px;
+}
+.document-data-table .variable-field-label {
+  display: none;
+}
+.data-table-actions-column {
+  width: 88px;
+  min-width: 88px;
+}
+.data-table-row-actions {
+  gap: 4px;
+}
+.data-table-delete-row {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--text-muted) !important;
+}
+.data-table-delete-row:hover:not(:disabled) {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
+}
+.data-table-drag-handle {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+}
+.data-table-drag-handle:hover {
+  color: var(--text);
+  background: var(--surface-raised);
+}
+.data-table-drag-handle:active {
+  cursor: grabbing;
+}
+.document-data-table tr.is-dragging {
+  opacity: 0.55;
+}
+.data-table-static-text {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+.data-table-empty-message > div {
+  display: grid;
+  gap: 4px;
+}
+.data-table-empty-message span {
+  font-size: 0.85rem;
+}
+
+/* v2.4 Data Table round 4 — compact content-driven rows and visible DnD target. */
+.data-table-scroll {
+  min-height: 0;
+}
+.document-data-table {
+  min-height: 0;
+}
+.document-data-table tbody tr:not(.data-table-empty-row) {
+  height: auto;
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.document-data-table tbody tr:not(.data-table-empty-row) > td {
+  height: auto;
+  min-height: 0;
+  vertical-align: middle;
+}
+.document-data-table td,
+.document-data-table th {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.document-data-table tr.is-dragging {
+  opacity: 0.32;
+}
+.document-data-table tr.is-drop-target {
+  box-shadow: inset 0 3px 0 var(--primary);
+}
+.data-table-actions-column {
+  width: 72px !important;
+  min-width: 72px !important;
+}
+.data-table-row-actions {
+  min-height: 34px;
+}
+.data-table-empty-row td {
+  height: 300px;
+}
+.data-table-static-text {
+  min-height: 0;
+  padding: 4px 2px;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* v2.4 Data Table round 5 — content-driven rows and clearer row reordering. */
+.document-data-table tbody tr:not(.data-table-empty-row) > td {
+  padding-block: 9px;
+}
+.document-data-table tbody tr.is-dragging {
+  opacity: 0.22;
+}
+.document-data-table tbody tr.is-drop-target {
+  position: relative;
+  transform: translateY(3px);
+}
+.document-data-table tbody tr.is-drop-target > td {
+  border-top: 3px solid var(--primary);
+}
+.data-table-drag-handle {
+  order: 1;
+}
+.data-table-delete-row {
+  order: 2;
+}
+.data-table-row-actions {
+  justify-content: center;
+}
+
+/* v2.4 Data Table round 14 — fixed document-form viewport.
+   Keep document creation/editing compact while rows remain fully available via
+   the table's own scroll area. This intentionally does not affect PDF output. */
+.data-table-field .data-table-scroll {
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+  overflow: auto;
+  position: relative;
+}
+.data-table-field .document-data-table {
+  min-height: 0;
+}
+.data-table-field .document-data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--surface-raised);
+}
+.data-table-field .document-data-table thead .data-table-actions-column {
+  z-index: 6;
+}
+.data-table-field .document-data-table tbody .data-table-actions-column {
+  z-index: 3;
+}
+.data-table-field .data-table-empty-row td {
+  height: 245px;
+}
+.data-table-field .data-table-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}

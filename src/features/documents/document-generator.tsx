@@ -27,6 +27,8 @@ import { formatTemplateNumber } from "@/features/templates/number-format";
 import { TemplatePicker } from "./components/TemplatePicker";
 import { DocumentPdfPreviewModal } from "./components/DocumentPdfPreviewModal";
 import { VariableField } from "./components/VariableField";
+import { DataTableField } from "./components/DataTableField";
+import { parseTableRows } from "@/features/templates/data-table";
 import { validateVariable } from "./helpers";
 import {
   useDocumentService,
@@ -72,7 +74,9 @@ const getInitialTemplateValues = (variablesJson: string) => {
   return Object.fromEntries(
     parseTemplateVariables(variablesJson).map((variable) => [
       variable.name,
-      getInitialVariableValue(variable, now),
+      variable.type === "dataTable"
+        ? "[]"
+        : getInitialVariableValue(variable, now),
     ]),
   );
 };
@@ -218,6 +222,33 @@ export default function DocumentGenerator({
     [selected],
   );
 
+  // Variables used only as table-cell definitions are filled per row. They must
+  // not be rendered or validated a second time as document-level fields. A
+  // reusable variable still becomes a normal field when its token is also used
+  // outside a data table in the template body.
+  const tableOnlyVariableNames = useMemo(() => {
+    if (!selected) return new Set<string>();
+
+    const tableColumnNames = new Set(
+      variables
+        .filter((variable) => variable.type === "dataTable")
+        .flatMap((variable) => variable.dataTable?.columns ?? [])
+        .map((column) => column.variableName)
+        .filter((name): name is string => Boolean(name)),
+    );
+
+    const contentWithoutTables = (selected.content ?? "").replace(
+      /<div\b[^>]*class=["'][^"']*\bdocflow-data-table\b[^"']*["'][^>]*>[\s\S]*?<\/div>\s*(?:<p><br><\/p>)?/gi,
+      "",
+    );
+
+    return new Set(
+      [...tableColumnNames].filter(
+        (name) => !contentWithoutTables.includes(`{{${name}}}`),
+      ),
+    );
+  }, [selected, variables]);
+
   useEffect(() => {
     if (!isEmailMode || !selected) return;
 
@@ -250,10 +281,48 @@ export default function DocumentGenerator({
   const validateValues = () => {
     const nextErrors = Object.fromEntries(
       variables
-        .map((variable) => [
-          variable.name,
-          validateVariable(variable, values[variable.name] ?? ""),
-        ])
+        .map((variable) => {
+          if (
+            variable.type !== "dataTable" &&
+            tableOnlyVariableNames.has(variable.name)
+          ) {
+            return [variable.name, ""];
+          }
+          if (variable.type === "dataTable") {
+            const rows = parseTableRows(values[variable.name] ?? "[]");
+            const minRows = Math.max(
+              variable.required ? 1 : 0,
+              variable.dataTable?.minRows ?? 0,
+            );
+            if (rows.length < minRows)
+              return [
+                variable.name,
+                `Add at least ${minRows} row${minRows === 1 ? "" : "s"}.`,
+              ];
+            const defs = new Map(variables.map((item) => [item.name, item]));
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+              for (const column of variable.dataTable?.columns ?? []) {
+                if (!column.variableName) continue;
+                const def = defs.get(column.variableName);
+                if (!def || def.type === "formula") continue;
+                const rowError = validateVariable(
+                  def,
+                  rows[rowIndex][def.name] ?? "",
+                );
+                if (rowError)
+                  return [
+                    variable.name,
+                    `Row ${rowIndex + 1} · ${def.label || def.name}: ${rowError}`,
+                  ];
+              }
+            }
+            return [variable.name, ""];
+          }
+          return [
+            variable.name,
+            validateVariable(variable, values[variable.name] ?? ""),
+          ];
+        })
         .filter(([, error]) => error),
     );
 
@@ -903,37 +972,64 @@ export default function DocumentGenerator({
         )}
 
         {variables.map((variable) => {
+          if (
+            variable.type !== "dataTable" &&
+            tableOnlyVariableNames.has(variable.name)
+          ) {
+            return null;
+          }
+          if (variable.type === "dataTable") {
+            return (
+              <DataTableField
+                key={variable.name}
+                table={variable}
+                variables={variables}
+                value={values[variable.name] ?? "[]"}
+                globalValues={values}
+                error={errors[variable.name]}
+                onChange={(nextValue) => {
+                  setDirty(true);
+                  setValues((current) => ({
+                    ...current,
+                    [variable.name]: nextValue,
+                  }));
+                  setErrors((current) => ({ ...current, [variable.name]: "" }));
+                }}
+              />
+            );
+          }
           let displayValue = values[variable.name] ?? "";
           if (variable.type === "formula") {
             try {
               const resolved = resolveCalculatedValues(variables, values);
               const result = resolved[variable.name];
-              displayValue = typeof result === "number"
-                ? formatTemplateNumber(result, variable)
-                : String(result ?? "");
+              displayValue =
+                typeof result === "number"
+                  ? formatTemplateNumber(result, variable)
+                  : String(result ?? "");
             } catch {
               displayValue = "—";
             }
           }
           return (
-          <VariableField
-            key={variable.name}
-            variable={variable}
-            value={displayValue}
-            error={errors[variable.name]}
-            onChange={(value) => {
-              if (value !== (values[variable.name] ?? "")) setDirty(true);
-              setValues((current) => ({
-                ...current,
-                [variable.name]: value,
-              }));
+            <VariableField
+              key={variable.name}
+              variable={variable}
+              value={displayValue}
+              error={errors[variable.name]}
+              onChange={(value) => {
+                if (value !== (values[variable.name] ?? "")) setDirty(true);
+                setValues((current) => ({
+                  ...current,
+                  [variable.name]: value,
+                }));
 
-              setErrors((current) => ({
-                ...current,
-                [variable.name]: "",
-              }));
-            }}
-          />
+                setErrors((current) => ({
+                  ...current,
+                  [variable.name]: "",
+                }));
+              }}
+            />
           );
         })}
 
