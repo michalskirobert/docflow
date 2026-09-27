@@ -122,6 +122,9 @@ export default function DocumentGenerator({
   const sourceTemplateQuery = useDocumentTemplateService(
     sourceDocumentQuery.data?.templateId ?? "",
   );
+  const selectedTemplateQuery = useDocumentTemplateService(
+    sourceDocumentId ? "" : templateId,
+  );
   const documentPreviewMutation = useRenderDocumentPreviewService(templateId);
   const emailSettings = useEmailSettingsStatusService();
   const sendEmailMutation = useSendPreparedEmailService();
@@ -219,7 +222,7 @@ export default function DocumentGenerator({
 
   const selected = sourceDocumentId
     ? sourceTemplateQuery.data
-    : templates.data?.find((template) => template.id === templateId);
+    : selectedTemplateQuery.data;
 
   const variables = useMemo(
     () => (selected ? parseTemplateVariables(selected.variablesJson) : []),

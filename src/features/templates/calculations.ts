@@ -49,19 +49,21 @@ export function validateFormula(
       )
         return;
       if (child.type === "OperatorNode") {
-        const op = (child as { op: string }).op;
+        const op = (child as unknown as { op: string }).op;
         if (!ALLOWED_OPERATORS.has(op))
           throw new FormulaError(`Operator "${op}" is not supported.`);
         return;
       }
       if (child.type === "FunctionNode") {
-        const fn = (child as { fn?: { name?: string }; args?: unknown[] }).fn;
+        const fn = (
+          child as unknown as { fn?: { name?: string }; args?: unknown[] }
+        ).fn;
         const name = fn?.name?.toLowerCase();
         if (!name || !ALLOWED_FUNCTIONS.has(name))
           throw new FormulaError(
             `Function "${fn?.name ?? "?"}" is not supported.`,
           );
-        const args = (child as { args?: unknown[] }).args ?? [];
+        const args = (child as unknown as { args?: unknown[] }).args ?? [];
         if (args.length === 0)
           throw new FormulaError(
             `Function "${name.toUpperCase()}" requires at least one value.`,
@@ -77,10 +79,12 @@ export function validateFormula(
     node.traverse((child) => {
       if (
         child.type === "SymbolNode" &&
-        !symbols.has((child as { name: string }).name) &&
-        !ALLOWED_FUNCTIONS.has((child as { name: string }).name.toLowerCase())
+        !symbols.has((child as unknown as { name: string }).name) &&
+        !ALLOWED_FUNCTIONS.has(
+          (child as unknown as { name: string }).name.toLowerCase(),
+        )
       )
-        unknown = (child as { name: string }).name;
+        unknown = (child as unknown as { name: string }).name;
     });
     if (unknown)
       return `Text or unknown symbol \"${unknown}\" is not allowed. Use {{variable}} for variables.`;
@@ -218,7 +222,10 @@ function aggregate(
 }
 
 function numericValue(raw: unknown, variable: TemplateVariable): number {
-  const value = parseTemplateNumber(raw ?? "", variable);
+  const value = parseTemplateNumber(
+    typeof raw === "string" || typeof raw === "number" ? raw : "",
+    variable,
+  );
   if (!Number.isFinite(value))
     throw new FormulaError(`Variable "${variable.name}" has no numeric value.`);
   return value;

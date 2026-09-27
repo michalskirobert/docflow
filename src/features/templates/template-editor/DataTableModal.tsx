@@ -299,7 +299,7 @@ export function DataTableModal({
                 <button
                   type="button"
                   className="btn compact"
-                  onClick={onCreateVariable}
+                  onClick={() => onCreateVariable(() => undefined)}
                 >
                   <Plus size={16} /> New variable
                 </button>

@@ -342,7 +342,11 @@ export function VariableModal({
       <InputControl
         type="number"
         inputMode="decimal"
-        step={decimalPlaces ? 1 / 10 ** decimalPlaces : 1}
+        step={
+          optionalNumber(decimalPlaces) !== undefined
+            ? 1 / 10 ** optionalNumber(decimalPlaces)!
+            : 1
+        }
         value={defaultValue}
         onChange={(e) => setDefaultValue(e.target.value)}
       />

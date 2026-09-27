@@ -23,7 +23,7 @@ import {
 type DateTimeVariableType = "date" | "datetime" | "time";
 
 type VariableType =
-  "text" | "number" | "select" | "image" | DateTimeVariableType;
+  "text" | "number" | "select" | "image" | "formula" | DateTimeVariableType;
 
 type DateTimeParts = {
   year?: string;
