@@ -382,12 +382,20 @@ export function TemplateEditor({ template, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectedImage]);
 
-  const syncToolbarState = () => {
+  const syncToolbarState = (explicitToken?: HTMLElement | null) => {
     try {
+      const token = explicitToken ?? selectedVariableElement;
+      const tokenStyle = token ? getComputedStyle(token) : null;
       setToolbarState({
-        bold: document.queryCommandState("bold"),
-        italic: document.queryCommandState("italic"),
-        underline: document.queryCommandState("underline"),
+        bold: tokenStyle
+          ? Number(tokenStyle.fontWeight) >= 600 || tokenStyle.fontWeight === "bold"
+          : document.queryCommandState("bold"),
+        italic: tokenStyle
+          ? tokenStyle.fontStyle === "italic"
+          : document.queryCommandState("italic"),
+        underline: tokenStyle
+          ? tokenStyle.textDecorationLine.includes("underline")
+          : document.queryCommandState("underline"),
         justifyLeft: document.queryCommandState("justifyLeft"),
         justifyCenter: document.queryCommandState("justifyCenter"),
         justifyRight: document.queryCommandState("justifyRight"),
@@ -419,6 +427,10 @@ export function TemplateEditor({ template, onClose }: Props) {
             : "p";
         })(),
         fontSize: (() => {
+          if (tokenStyle) {
+            const px = Math.round(parseFloat(tokenStyle.fontSize));
+            return px ? String(px) : "";
+          }
           const selection = window.getSelection();
           const element =
             selection?.anchorNode instanceof Element
@@ -430,6 +442,11 @@ export function TemplateEditor({ template, onClose }: Props) {
           return px ? String(px) : "";
         })(),
         lineHeight: (() => {
+          if (tokenStyle) {
+            const font = parseFloat(tokenStyle.fontSize);
+            const line = parseFloat(tokenStyle.lineHeight);
+            return font && line ? String(Math.round((line / font) * 100) / 100) : "";
+          }
           const selection = window.getSelection();
           const element =
             selection?.anchorNode instanceof Element
@@ -491,7 +508,8 @@ export function TemplateEditor({ template, onClose }: Props) {
     if (!range.collapsed) return;
 
     const anchor = range.startContainer;
-    const element = anchor instanceof Element ? anchor : anchor.parentElement;
+    const element =
+      anchor instanceof Element ? anchor : anchor.parentElement;
     const block = element?.closest<HTMLElement>(
       "p,h1,h2,h3,h4,h5,blockquote,li,div",
     );
@@ -531,6 +549,7 @@ export function TemplateEditor({ template, onClose }: Props) {
       if (command === "foreColor" && value) selectedToken.style.color = value;
       setDirty(true);
       setSelectedVariableBox(selectedToken.getBoundingClientRect());
+      syncToolbarState(selectedToken);
     } else if (command === "justifyBetween") {
       const selection = window.getSelection();
       const anchor = selection?.anchorNode;
@@ -644,15 +663,38 @@ export function TemplateEditor({ template, onClose }: Props) {
       !expectedToken ||
       element.textContent?.trim() !== expectedToken
     ) {
+      [editor.current, headerEditor.current, footerEditor.current].forEach((region) =>
+        region?.querySelectorAll<HTMLElement>("[data-variable-selected='true']").forEach((token) => token.removeAttribute("data-variable-selected")),
+      );
       setSelectedVariableElement(null);
       setSelectedVariableBox(null);
       return false;
     }
 
+    [editor.current, headerEditor.current, footerEditor.current].forEach((region) =>
+      region
+        ?.querySelectorAll<HTMLElement>("[data-variable-selected='true']")
+        .forEach((token) => token.removeAttribute("data-variable-selected")),
+    );
+
+    element.dataset.variableSelected = "true";
     setSelectedVariableElement(element);
     setSelectedVariableBox(element.getBoundingClientRect());
     setSelectedImage(null);
     setResizeBox(null);
+
+    const region = [editor.current, headerEditor.current, footerEditor.current].find(
+      (candidate) => candidate?.contains(element),
+    );
+    if (region) activeEditor.current = region;
+
+    const range = document.createRange();
+    range.selectNode(element);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    savedRange.current = range.cloneRange();
+    syncToolbarState(element);
     return true;
   };
 
@@ -751,15 +793,37 @@ export function TemplateEditor({ template, onClose }: Props) {
   const insertVariable = (variable: TemplateVariable) => {
     restoreSelection();
 
-    document.execCommand("insertHTML", false, variableHtml(variable));
+    const selection = window.getSelection();
+    const region = activeEditor.current ?? editor.current;
+    const range =
+      selection?.rangeCount && region?.contains(selection.getRangeAt(0).commonAncestorContainer)
+        ? selection.getRangeAt(0)
+        : savedRange.current;
+
+    if (range && region?.contains(range.commonAncestorContainer)) {
+      range.deleteContents();
+      const fragment = range.createContextualFragment(variableHtml(variable));
+      const lastNode = fragment.lastChild;
+      range.insertNode(fragment);
+
+      if (lastNode) {
+        const caret = document.createRange();
+        caret.setStartAfter(lastNode);
+        caret.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(caret);
+        savedRange.current = caret.cloneRange();
+      }
+    } else {
+      region?.focus();
+      document.execCommand("insertHTML", false, variableHtml(variable));
+    }
 
     setVariables((current) => upsertVariable(current, variable));
 
     setVariableOpen(false);
 
     rememberSelection();
-
-    const region = activeEditor.current ?? editor.current;
 
     if (variable.type === "image" && region) {
       normalizeEditorVariableImages(region);
@@ -1058,7 +1122,15 @@ export function TemplateEditor({ template, onClose }: Props) {
         ? selectedVariableElement
         : null;
 
-    if (!selectedToken && range?.collapsed) {
+    if (selectedToken) {
+      selectedToken.style.fontSize = `${px}px`;
+      setSelectedVariableBox(selectedToken.getBoundingClientRect());
+      syncToolbarState(selectedToken);
+      setDirty(true);
+      return;
+    }
+
+    if (range?.collapsed) {
       expandCollapsedSelectionToCurrentBlock();
     }
 
@@ -1104,6 +1176,15 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const setLineHeight = (value: string) => {
     if (!value) return;
+    const region = activeEditor.current ?? editor.current;
+    const selectedToken = selectedVariableElement && region?.contains(selectedVariableElement) ? selectedVariableElement : null;
+    if (selectedToken) {
+      selectedToken.style.lineHeight = value;
+      setSelectedVariableBox(selectedToken.getBoundingClientRect());
+      syncToolbarState(selectedToken);
+      setDirty(true);
+      return;
+    }
     restoreSelection();
     const selection = window.getSelection();
     if (!selection?.rangeCount) return;

@@ -2504,3 +2504,45 @@ body.data-table-is-resizing * {
 .data-table-column-resizer {
   display: none !important;
 }
+
+
+/* v2.4 editor line-flow hotfix — rich-text lines are independent blocks.
+   Formatting/replacing text inside one line must never let the following line
+   flow beside it. Explicit justify-between blocks keep their flex layout. */
+.a4-paper > p,
+.a4-paper > div:not([data-layout="between"]):not([data-data-table-name]),
+.a4-paper > h1,
+.a4-paper > h2,
+.a4-paper > h3,
+.a4-paper > h4,
+.a4-paper > h5,
+.a4-paper > blockquote,
+.page-header-editor > p,
+.page-header-editor > div:not([data-layout="between"]):not([data-data-table-name]),
+.page-header-editor > h1,
+.page-header-editor > h2,
+.page-header-editor > h3,
+.page-header-editor > h4,
+.page-header-editor > h5,
+.page-header-editor > blockquote,
+.page-footer-editor > p,
+.page-footer-editor > div:not([data-layout="between"]):not([data-data-table-name]),
+.page-footer-editor > h1,
+.page-footer-editor > h2,
+.page-footer-editor > h3,
+.page-footer-editor > h4,
+.page-footer-editor > h5,
+.page-footer-editor > blockquote {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  float: none;
+  clear: both;
+}
+
+.a4-paper > [data-layout="between"],
+.page-header-editor > [data-layout="between"],
+.page-footer-editor > [data-layout="between"] {
+  display: flex;
+  width: 100%;
+}

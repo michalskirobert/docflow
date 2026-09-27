@@ -659,3 +659,19 @@
     top: 64px !important;
   }
 }
+
+.a4-paper [data-variable-name][data-variable-type="value"],
+.page-header-editor [data-variable-name][data-variable-type="value"],
+.page-footer-editor [data-variable-name][data-variable-type="value"] {
+  display: inline;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.a4-paper [data-variable-selected="true"],
+.page-header-editor [data-variable-selected="true"],
+.page-footer-editor [data-variable-selected="true"] {
+  background: rgb(99 102 241 / 16%);
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 52%);
+}
