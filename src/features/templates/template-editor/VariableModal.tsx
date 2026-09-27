@@ -15,7 +15,11 @@ import {
   userMaskToIMask,
 } from "@/features/documents/components/VariableField";
 import { Bold, Italic, Plus, Trash2, Underline, Variable } from "lucide-react";
-import type { TemplateVariable, VariableType } from "../types";
+import type {
+  CalculationOperation,
+  TemplateVariable,
+  VariableType,
+} from "../types";
 import { validateFormula } from "../calculations";
 
 const makeTag = (value: string) => {
@@ -58,6 +62,30 @@ export function VariableModal({
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
   const [placeholder, setPlaceholder] = useState(initial?.placeholder ?? "");
   const [formula, setFormula] = useState(initial?.formula ?? "");
+  const [calculationMode, setCalculationMode] = useState<
+    "formula" | "fields" | "repeated"
+  >(initial?.calculation?.mode ?? "formula");
+  const [calculationOperation, setCalculationOperation] =
+    useState<CalculationOperation>(
+      initial?.calculation && initial.calculation.mode !== "formula"
+        ? initial.calculation.operation
+        : "sum",
+    );
+  const [calculationFields, setCalculationFields] = useState<string[]>(
+    initial?.calculation?.mode === "fields"
+      ? initial.calculation.sourceVariableNames
+      : [],
+  );
+  const [calculationTable, setCalculationTable] = useState(
+    initial?.calculation?.mode === "repeated"
+      ? initial.calculation.dataTableName
+      : "",
+  );
+  const [calculationRepeatedField, setCalculationRepeatedField] = useState(
+    initial?.calculation?.mode === "repeated"
+      ? initial.calculation.sourceVariableName
+      : "",
+  );
   const [insertIntoWorkspace, setInsertIntoWorkspace] = useState(true);
   const formulaRef = useRef<HTMLInputElement>(null);
   const [tooltip, setTooltip] = useState(initial?.tooltip ?? "");
@@ -124,6 +152,11 @@ export function VariableModal({
   const [thousandsSeparator, setThousandsSeparator] = useState<
     "none" | "." | "," | "space"
   >(initial?.thousandsSeparator ?? "none");
+  const [numberFormat, setNumberFormat] = useState<
+    "number" | "currency" | "percentage" | "measure"
+  >(initial?.numberFormat ?? "number");
+  const [currency, setCurrency] = useState(initial?.currency ?? "PLN");
+  const [unit, setUnit] = useState(initial?.unit ?? "");
   const [minDate, setMinDate] = useState(initial?.minDate ?? "");
   const [maxDate, setMaxDate] = useState(initial?.maxDate ?? "");
   const [fontSize, setFontSize] = useState(initial?.fontSize ?? 16);
@@ -142,17 +175,38 @@ export function VariableModal({
   const toggle = (value: boolean, setter: (v: boolean) => void) => () =>
     setter(!value);
   const formulaError =
-    type === "formula"
+    type === "formula" && calculationMode === "formula"
       ? validateFormula(
           formula,
           existingVariables,
           initial?.name ?? generatedName,
         )
       : null;
+  const localizedFormulaError = formulaError ? t("formulaInvalid") : null;
   const numericVariables = existingVariables.filter(
     (v) =>
       v.name !== initial?.name && (v.type === "number" || v.type === "formula"),
   );
+  const dataTables = existingVariables.filter((v) => v.type === "dataTable");
+  const repeatedNumericVariables = calculationTable
+    ? (() => {
+        const table = dataTables.find((v) => v.name === calculationTable);
+        const names = new Set(
+          table?.dataTable?.columns.flatMap((column) =>
+            column.variableName ? [column.variableName] : [],
+          ) ?? [],
+        );
+        return existingVariables.filter(
+          (v) =>
+            names.has(v.name) && (v.type === "number" || v.type === "formula"),
+        );
+      })()
+    : [];
+  const calculationInvalid =
+    type === "formula" &&
+    ((calculationMode === "fields" && calculationFields.length === 0) ||
+      (calculationMode === "repeated" &&
+        (!calculationTable || !calculationRepeatedField)));
   const insertFormulaPart = (part: string) => {
     const input = formulaRef.current;
     const start = input?.selectionStart ?? formula.length;
@@ -164,8 +218,29 @@ export function VariableModal({
       input?.setSelectionRange(start + part.length, start + part.length);
     });
   };
+  const insertFormulaFunction = (name: string) => {
+    const input = formulaRef.current;
+    const start = input?.selectionStart ?? formula.length;
+    const end = input?.selectionEnd ?? start;
+    const selected = formula.slice(start, end);
+    const part = `${name}(${selected})`;
+    const next = `${formula.slice(0, start)}${part}${formula.slice(end)}`;
+    setFormula(next);
+    requestAnimationFrame(() => {
+      input?.focus();
+      const caret = selected ? start + part.length : start + name.length + 1;
+      input?.setSelectionRange(caret, caret);
+    });
+  };
   const submit = () => {
-    if (!label.trim() || !generatedName || duplicate || formulaError) return;
+    if (
+      !label.trim() ||
+      !generatedName ||
+      duplicate ||
+      formulaError ||
+      calculationInvalid
+    )
+      return;
     const nextDefault =
       hasDefault && defaultValueMode === "fixed" ? defaultValue : undefined;
     onInsert(
@@ -175,7 +250,27 @@ export function VariableModal({
         placeholder: placeholder.trim() || undefined,
         tooltip: tooltip.trim() || undefined,
         type,
-        formula: type === "formula" ? formula.trim() || undefined : undefined,
+        formula:
+          type === "formula" && calculationMode === "formula"
+            ? formula.trim() || undefined
+            : undefined,
+        calculation:
+          type === "formula"
+            ? calculationMode === "formula"
+              ? { mode: "formula" }
+              : calculationMode === "fields"
+                ? {
+                    mode: "fields",
+                    operation: calculationOperation,
+                    sourceVariableNames: calculationFields,
+                  }
+                : {
+                    mode: "repeated",
+                    operation: calculationOperation,
+                    dataTableName: calculationTable,
+                    sourceVariableName: calculationRepeatedField,
+                  }
+            : undefined,
         defaultValue: nextDefault,
         defaultValueMode:
           hasDefault && ["date", "datetime", "time"].includes(type)
@@ -198,6 +293,17 @@ export function VariableModal({
         thousandsSeparator: ["number", "formula"].includes(type)
           ? thousandsSeparator
           : undefined,
+        numberFormat: ["number", "formula"].includes(type)
+          ? numberFormat
+          : undefined,
+        currency:
+          ["number", "formula"].includes(type) && numberFormat === "currency"
+            ? currency
+            : undefined,
+        unit:
+          ["number", "formula"].includes(type) && numberFormat === "measure"
+            ? unit.trim() || undefined
+            : undefined,
         minDate:
           ["date", "datetime"].includes(type) && minDate ? minDate : undefined,
         maxDate:
@@ -469,61 +575,193 @@ export function VariableModal({
           <section className="variable-form-section">
             <h4>{t("fieldSettings")}</h4>
             {type === "formula" && (
-              <div className={`field ${formulaError ? "field-error" : ""}`}>
-                <span className="field-label-with-help">
-                  {t("formulaExpression")}
-                  <HelpTooltip text={t("formulaExpressionHelp")} />
-                </span>
-                <InputControl
-                  ref={formulaRef}
-                  value={formula}
-                  maxLength={500}
-                  placeholder={t("formulaExpressionExample")}
-                  onChange={(e) => setFormula(e.target.value)}
-                />
-                <div className="formula-toolbar">
-                  <select
-                    aria-label={t("formulaAvailableVariables")}
-                    defaultValue=""
-                    onChange={(e) => {
-                      if (e.target.value)
-                        insertFormulaPart(`{{${e.target.value}}}`);
-                      e.target.value = "";
-                    }}
+              <>
+                <label className="field">
+                  {t("calculationMode")}
+                  <SelectControl
+                    value={calculationMode}
+                    onChange={(e) =>
+                      setCalculationMode(
+                        e.target.value as "formula" | "fields" | "repeated",
+                      )
+                    }
                   >
-                    <option value="">{t("formulaInsertVariable")}</option>
-                    {numericVariables.map((v) => (
-                      <option key={v.name} value={v.name}>
-                        {v.label || v.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label={t("formulaInsertOperator")}
-                    defaultValue=""
-                    onChange={(e) => {
-                      if (e.target.value) insertFormulaPart(e.target.value);
-                      e.target.value = "";
-                    }}
-                  >
-                    <option value="">{t("formulaInsertOperator")}</option>
-                    <option value=" + ">+</option>
-                    <option value=" - ">−</option>
-                    <option value=" * ">×</option>
-                    <option value=" / ">÷</option>
-                    <option value=" % ">%</option>
-                    <option value="(">(</option>
-                    <option value=")">)</option>
-                  </select>
-                </div>
-                {formula && (
-                  <small
-                    className={formulaError ? "field-error" : "formula-valid"}
-                  >
-                    {formulaError || t("formulaValid")}
-                  </small>
+                    <option value="fields">{t("calculationModeFields")}</option>
+                    <option value="repeated">
+                      {t("calculationModeRepeated")}
+                    </option>
+                    <option value="formula">
+                      {t("calculationModeFormula")}
+                    </option>
+                  </SelectControl>
+                </label>
+                {calculationMode !== "formula" && (
+                  <label className="field">
+                    {t("calculationOperation")}
+                    <SelectControl
+                      value={calculationOperation}
+                      onChange={(e) =>
+                        setCalculationOperation(
+                          e.target.value as CalculationOperation,
+                        )
+                      }
+                    >
+                      <option value="sum">{t("calculationSum")}</option>
+                      <option value="avg">{t("calculationAvg")}</option>
+                      <option value="min">{t("calculationMin")}</option>
+                      <option value="max">{t("calculationMax")}</option>
+                      <option value="count">{t("calculationCount")}</option>
+                    </SelectControl>
+                  </label>
                 )}
-              </div>
+                {calculationMode === "fields" && (
+                  <div
+                    className={`field ${calculationFields.length === 0 ? "field-error" : ""}`}
+                  >
+                    <span>{t("calculationFields")}</span>
+                    <div className="calculation-field-list">
+                      {numericVariables.length === 0 ? (
+                        <small>{t("calculationNoNumericFields")}</small>
+                      ) : (
+                        numericVariables.map((v) => (
+                          <ChoiceField
+                            key={v.name}
+                            type="checkbox"
+                            checked={calculationFields.includes(v.name)}
+                            onChange={(e) =>
+                              setCalculationFields((current) =>
+                                e.target.checked
+                                  ? [...current, v.name]
+                                  : current.filter((name) => name !== v.name),
+                              )
+                            }
+                            label={v.label || v.name}
+                          />
+                        ))
+                      )}
+                    </div>
+                    <small>{t("calculationNumericOnly")}</small>
+                  </div>
+                )}
+                {calculationMode === "repeated" && (
+                  <>
+                    <label className="field">
+                      {t("calculationTable")}
+                      <SelectControl
+                        value={calculationTable}
+                        onChange={(e) => {
+                          setCalculationTable(e.target.value);
+                          setCalculationRepeatedField("");
+                        }}
+                      >
+                        <option value="">—</option>
+                        {dataTables.map((table) => (
+                          <option key={table.name} value={table.name}>
+                            {table.label || table.name}
+                          </option>
+                        ))}
+                      </SelectControl>
+                    </label>
+                    <label className="field">
+                      {t("calculationRepeatedField")}
+                      <SelectControl
+                        value={calculationRepeatedField}
+                        disabled={!calculationTable}
+                        onChange={(e) =>
+                          setCalculationRepeatedField(e.target.value)
+                        }
+                      >
+                        <option value="">—</option>
+                        {repeatedNumericVariables.map((v) => (
+                          <option key={v.name} value={v.name}>
+                            {v.label || v.name}
+                          </option>
+                        ))}
+                      </SelectControl>
+                      <small>{t("calculationNumericOnly")}</small>
+                    </label>
+                  </>
+                )}
+                {calculationMode === "formula" && (
+                  <div
+                    className={`field ${localizedFormulaError ? "field-error" : ""}`}
+                  >
+                    <span className="field-label-with-help">
+                      {t("formulaExpression")}
+                      <HelpTooltip text={t("formulaExpressionHelp")} />
+                    </span>
+                    <InputControl
+                      ref={formulaRef}
+                      value={formula}
+                      maxLength={500}
+                      placeholder={t("formulaExpressionExample")}
+                      onChange={(e) => setFormula(e.target.value)}
+                    />
+                    <div className="formula-toolbar">
+                      <select
+                        aria-label={t("formulaAvailableVariables")}
+                        defaultValue=""
+                        onChange={(e) => {
+                          if (e.target.value)
+                            insertFormulaPart(`{{${e.target.value}}}`);
+                          e.target.value = "";
+                        }}
+                      >
+                        <option value="">{t("formulaInsertVariable")}</option>
+                        {numericVariables.map((v) => (
+                          <option key={v.name} value={v.name}>
+                            {v.label || v.name}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        aria-label={t("formulaInsertFunction")}
+                        defaultValue=""
+                        onChange={(e) => {
+                          if (e.target.value)
+                            insertFormulaFunction(e.target.value);
+                          e.target.value = "";
+                        }}
+                      >
+                        <option value="">{t("formulaInsertFunction")}</option>
+                        <option value="SUM">SUM</option>
+                        <option value="AVG">AVG</option>
+                        <option value="MIN">MIN</option>
+                        <option value="MAX">MAX</option>
+                        <option value="COUNT">COUNT</option>
+                      </select>
+                      <select
+                        aria-label={t("formulaInsertOperator")}
+                        defaultValue=""
+                        onChange={(e) => {
+                          if (e.target.value) insertFormulaPart(e.target.value);
+                          e.target.value = "";
+                        }}
+                      >
+                        <option value="">{t("formulaInsertOperator")}</option>
+                        <option value=" + ">+</option>
+                        <option value=" - ">−</option>
+                        <option value=" * ">×</option>
+                        <option value=" / ">÷</option>
+                        <option value=" % ">%</option>
+                        <option value="(">(</option>
+                        <option value=")">)</option>
+                      </select>
+                    </div>
+                    {formula && (
+                      <small
+                        className={
+                          localizedFormulaError
+                            ? "field-error"
+                            : "formula-valid"
+                        }
+                      >
+                        {localizedFormulaError || t("formulaValid")}
+                      </small>
+                    )}
+                  </div>
+                )}
+              </>
             )}
 
             {type === "text" && (
@@ -540,53 +778,108 @@ export function VariableModal({
               </label>
             )}
             {["number", "formula"].includes(type) && (
-              <div className="form-grid two">
-                <label className="field">
-                  {t("decimalPlaces")}
-                  <InputControl
-                    type="number"
-                    min="0"
-                    max="12"
-                    inputMode="numeric"
-                    value={decimalPlaces}
-                    onChange={(e) => setDecimalPlaces(e.target.value)}
-                  />
-                </label>
-                <label className="field">
-                  {t("decimalSeparator")}
-                  <SelectControl
-                    value={decimalSeparator}
-                    onChange={(e) => {
-                      const next = e.target.value as "." | ",";
-                      setDecimalSeparator(next);
-                      if (thousandsSeparator === next)
-                        setThousandsSeparator("none");
-                    }}
-                  >
-                    <option value=",">{t("separatorComma")}</option>
-                    <option value=".">{t("separatorDot")}</option>
-                  </SelectControl>
-                </label>
-                <label className="field">
-                  {t("thousandsSeparator")}
-                  <SelectControl
-                    value={thousandsSeparator}
-                    onChange={(e) =>
-                      setThousandsSeparator(
-                        e.target.value as "none" | "." | "," | "space",
-                      )
-                    }
-                  >
-                    <option value="none">{t("separatorNone")}</option>
-                    <option value="." disabled={decimalSeparator === "."}>
-                      {t("separatorDot")}
-                    </option>
-                    <option value="," disabled={decimalSeparator === ","}>
-                      {t("separatorComma")}
-                    </option>
-                    <option value="space">{t("separatorSpace")}</option>
-                  </SelectControl>
-                </label>
+              <div className="number-format-settings">
+                <div className="form-grid two">
+                  <label className="field">
+                    {t("numberFormat")}
+                    <SelectControl
+                      value={numberFormat}
+                      onChange={(e) =>
+                        setNumberFormat(
+                          e.target.value as
+                            "number" | "currency" | "percentage" | "measure",
+                        )
+                      }
+                    >
+                      <option value="number">{t("numberFormatNumber")}</option>
+                      <option value="currency">
+                        {t("numberFormatCurrency")}
+                      </option>
+                      <option value="percentage">
+                        {t("numberFormatPercentage")}
+                      </option>
+                      <option value="measure">
+                        {t("numberFormatMeasure")}
+                      </option>
+                    </SelectControl>
+                  </label>
+                  {numberFormat === "currency" && (
+                    <label className="field">
+                      {t("currency")}
+                      <SelectControl
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                      >
+                        {["PLN", "EUR", "USD", "GBP", "IDR", "CZK", "CHF"].map(
+                          (code) => (
+                            <option key={code} value={code}>
+                              {code}
+                            </option>
+                          ),
+                        )}
+                      </SelectControl>
+                    </label>
+                  )}
+                  {numberFormat === "measure" && (
+                    <label className="field">
+                      {t("unit")}
+                      <InputControl
+                        value={unit}
+                        maxLength={20}
+                        onChange={(e) => setUnit(e.target.value)}
+                        placeholder={t("unitPlaceholder")}
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="form-grid two">
+                  <label className="field">
+                    {t("decimalPlaces")}
+                    <InputControl
+                      type="number"
+                      min="0"
+                      max="12"
+                      inputMode="numeric"
+                      value={decimalPlaces}
+                      onChange={(e) => setDecimalPlaces(e.target.value)}
+                    />
+                  </label>
+                  <label className="field">
+                    {t("decimalSeparator")}
+                    <SelectControl
+                      value={decimalSeparator}
+                      onChange={(e) => {
+                        const next = e.target.value as "." | ",";
+                        setDecimalSeparator(next);
+                        if (thousandsSeparator === next)
+                          setThousandsSeparator("none");
+                      }}
+                    >
+                      <option value=",">{t("separatorComma")}</option>
+                      <option value=".">{t("separatorDot")}</option>
+                    </SelectControl>
+                  </label>
+                  <label className="field">
+                    {t("thousandsSeparator")}
+                    <SelectControl
+                      value={thousandsSeparator}
+                      onChange={(e) =>
+                        setThousandsSeparator(
+                          e.target.value as "none" | "." | "," | "space",
+                        )
+                      }
+                    >
+                      <option value="none">{t("separatorNone")}</option>
+                      <option value="." disabled={decimalSeparator === "."}>
+                        {t("separatorDot")}
+                      </option>
+                      <option value="," disabled={decimalSeparator === ","}>
+                        {t("separatorComma")}
+                      </option>
+                      <option value="space">{t("separatorSpace")}</option>
+                    </SelectControl>
+                  </label>
+                </div>
               </div>
             )}
             {["date", "datetime", "time"].includes(type) && (

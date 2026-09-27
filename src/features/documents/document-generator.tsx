@@ -112,6 +112,7 @@ export default function DocumentGenerator({
   const [initialized, setInitialized] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const navigationBypassRef = useRef(false);
   const emailMutation = useRenderEmailService(templateId);
   const documentEmailMutation = useRenderDocumentEmailService(
     sourceDocumentId ?? "",
@@ -124,6 +125,7 @@ export default function DocumentGenerator({
   const emailSettings = useEmailSettingsStatusService();
   const sendEmailMutation = useSendPreparedEmailService();
   const [recipientEmail, setRecipientEmail] = useState("");
+  const [recipientTouched, setRecipientTouched] = useState(false);
   const [emailPreview, setEmailPreview] = useState<RenderedEmail | null>(null);
   const [documentPreviewHtml, setDocumentPreviewHtml] = useState<string | null>(
     null,
@@ -277,9 +279,16 @@ export default function DocumentGenerator({
     [confirm, t],
   );
 
-  useUnsavedChanges(dirty && !isRedirecting, confirmLeave);
+  useUnsavedChanges(dirty && !isRedirecting, confirmLeave, navigationBypassRef);
 
-  const validateValues = () => {
+  const validateValues = (
+    sourceValues: Record<string, string> = values,
+    shouldScroll = true,
+  ) => {
+    const validationT = t as unknown as (
+      key: string,
+      values?: Record<string, string | number>,
+    ) => string;
     const nextErrors = Object.fromEntries(
       variables
         .map((variable) => {
@@ -290,16 +299,13 @@ export default function DocumentGenerator({
             return [variable.name, ""];
           }
           if (variable.type === "dataTable") {
-            const rows = parseTableRows(values[variable.name] ?? "[]");
+            const rows = parseTableRows(sourceValues[variable.name] ?? "[]");
             const minRows = Math.max(
               variable.required ? 1 : 0,
               variable.dataTable?.minRows ?? 0,
             );
             if (rows.length < minRows)
-              return [
-                variable.name,
-                `Add at least ${minRows} row${minRows === 1 ? "" : "s"}.`,
-              ];
+              return [variable.name, t("minimumRows", { count: minRows })];
             const defs = new Map(variables.map((item) => [item.name, item]));
             for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
               for (const column of variable.dataTable?.columns ?? []) {
@@ -309,11 +315,16 @@ export default function DocumentGenerator({
                 const rowError = validateVariable(
                   def,
                   rows[rowIndex][def.name] ?? "",
+                  validationT,
                 );
                 if (rowError)
                   return [
                     variable.name,
-                    `Row ${rowIndex + 1} · ${def.label || def.name}: ${rowError}`,
+                    t("tableRowError", {
+                      row: rowIndex + 1,
+                      field: def.label || def.name,
+                      error: rowError,
+                    }),
                   ];
               }
             }
@@ -321,7 +332,11 @@ export default function DocumentGenerator({
           }
           return [
             variable.name,
-            validateVariable(variable, values[variable.name] ?? ""),
+            validateVariable(
+              variable,
+              sourceValues[variable.name] ?? "",
+              validationT,
+            ),
           ];
         })
         .filter(([, error]) => error),
@@ -330,6 +345,7 @@ export default function DocumentGenerator({
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length) {
+      if (!shouldScroll) return false;
       const first = variables.find((variable) => nextErrors[variable.name]);
       requestAnimationFrame(() => {
         const element = first
@@ -452,8 +468,14 @@ export default function DocumentGenerator({
     }
   };
 
-  const save = () => {
-    if (!selected) return;
+  const save = async () => {
+    if (
+      !selected ||
+      generateMutation.isPending ||
+      updateMutation.isPending ||
+      isRedirecting
+    )
+      return;
 
     const trimmedDocumentName = documentName.trim();
 
@@ -476,54 +498,47 @@ export default function DocumentGenerator({
 
     if (!validateValues()) return;
 
-    if (isEditing && documentQuery.data) {
-      updateMutation.mutate(
-        {
+    try {
+      if (isEditing && documentQuery.data) {
+        await updateMutation.mutateAsync({
           name: trimmedDocumentName,
           data: values,
-        },
-        {
-          onSuccess: () => {
-            setDirty(false);
-            setIsRedirecting(true);
-            notify(t("updateSuccess"), "success");
-            router.push("/documents");
-          },
-          onError: () => {
-            notify(t("updateError"), "error");
-          },
-        },
-      );
+        });
+        navigationBypassRef.current = true;
+        setDirty(false);
+        setIsRedirecting(true);
+        notify(t("updateSuccess"), "success");
+        router.push("/documents");
+        return;
+      }
 
-      return;
-    }
-
-    generateMutation.mutate(
-      {
+      await generateMutation.mutateAsync({
         templateId,
         name: trimmedDocumentName,
         data: values,
-      },
-      {
-        onSuccess: () => {
-          setDirty(false);
-          setIsRedirecting(true);
-          notify(t("generateSuccess"), "success");
-          router.push("/documents");
-        },
-        onError: (error) => {
-          const code = axios.isAxiosError(error)
-            ? error.response?.data?.code
-            : undefined;
-          notify(
-            code === "MONTHLY_DOCUMENT_LIMIT_REACHED"
-              ? t("monthlyLimitReached")
-              : t("generateError"),
-            "error",
-          );
-        },
-      },
-    );
+      });
+      navigationBypassRef.current = true;
+      setDirty(false);
+      setIsRedirecting(true);
+      notify(t("generateSuccess"), "success");
+      router.push("/documents");
+    } catch (error) {
+      navigationBypassRef.current = false;
+      setIsRedirecting(false);
+      if (isEditing) {
+        notify(t("updateError"), "error");
+        return;
+      }
+      const code = axios.isAxiosError(error)
+        ? error.response?.data?.code
+        : undefined;
+      notify(
+        code === "MONTHLY_DOCUMENT_LIMIT_REACHED"
+          ? t("monthlyLimitReached")
+          : t("generateError"),
+        "error",
+      );
+    }
   };
 
   if (
@@ -879,9 +894,9 @@ export default function DocumentGenerator({
                 if (nextName !== documentName) setDirty(true);
                 setDocumentName(nextName);
 
-                if (documentNameError) {
-                  setDocumentNameError("");
-                }
+                setDocumentNameError(
+                  nextName.trim() ? "" : t("documentNameRequired"),
+                );
               }}
             />
 
@@ -936,7 +951,15 @@ export default function DocumentGenerator({
               type="email"
               value={recipientEmail}
               placeholder={t("recipientEmailPlaceholder")}
-              onChange={(event) => setRecipientEmail(event.target.value)}
+              error={
+                recipientTouched && !recipientEmail.trim().includes("@")
+                  ? t("recipientEmailRequired")
+                  : undefined
+              }
+              onChange={(event) => {
+                setRecipientTouched(true);
+                setRecipientEmail(event.target.value);
+              }}
             />
             <small className="field-help">{t("recipientEmailHelp")}</small>
           </div>
@@ -998,11 +1021,11 @@ export default function DocumentGenerator({
                 error={errors[variable.name]}
                 onChange={(nextValue) => {
                   setDirty(true);
-                  setValues((current) => ({
-                    ...current,
-                    [variable.name]: nextValue,
-                  }));
-                  setErrors((current) => ({ ...current, [variable.name]: "" }));
+                  setValues((current) => {
+                    const next = { ...current, [variable.name]: nextValue };
+                    queueMicrotask(() => validateValues(next, false));
+                    return next;
+                  });
                 }}
               />
             );
@@ -1010,7 +1033,9 @@ export default function DocumentGenerator({
           let displayValue = values[variable.name] ?? "";
           if (variable.type === "formula") {
             try {
-              const resolved = resolveCalculatedValues(variables, values);
+              const resolved = resolveCalculatedValues(variables, values, [
+                variable.name,
+              ]);
               const result = resolved[variable.name];
               displayValue =
                 typeof result === "number"
@@ -1028,15 +1053,11 @@ export default function DocumentGenerator({
               error={errors[variable.name]}
               onChange={(value) => {
                 if (value !== (values[variable.name] ?? "")) setDirty(true);
-                setValues((current) => ({
-                  ...current,
-                  [variable.name]: value,
-                }));
-
-                setErrors((current) => ({
-                  ...current,
-                  [variable.name]: "",
-                }));
+                setValues((current) => {
+                  const next = { ...current, [variable.name]: value };
+                  queueMicrotask(() => validateValues(next, false));
+                  return next;
+                });
               }}
             />
           );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { validateFormula } from "@/features/templates/calculations";
+import { validateCalculation } from "@/features/templates/calculations";
 import type { TemplateVariable } from "@/features/templates/types";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/server/auth/session";
@@ -34,6 +34,22 @@ const schema = z.object({
           "dataTable",
         ]),
         formula: z.string().max(500).optional(),
+        calculation: z
+          .discriminatedUnion("mode", [
+            z.object({ mode: z.literal("formula") }),
+            z.object({
+              mode: z.literal("fields"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              sourceVariableNames: z.array(z.string()).min(1),
+            }),
+            z.object({
+              mode: z.literal("repeated"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              dataTableName: z.string(),
+              sourceVariableName: z.string(),
+            }),
+          ])
+          .optional(),
         dataTable: z
           .object({
             columns: z.array(
@@ -90,6 +106,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() ?? "";
     const sort = searchParams.get("sort") ?? "newest";
+    const source = searchParams.get("source") ?? "all";
+    const dateFrom = searchParams.get("dateFrom") ?? "";
+    const dateTo = searchParams.get("dateTo") ?? "";
     const orderBy =
       sort === "oldest"
         ? { createdAt: "asc" as const }
@@ -99,67 +118,101 @@ export async function GET(req: Request) {
             ? { name: "desc" as const }
             : { createdAt: "desc" as const };
     const picker = searchParams.get("view") === "picker";
-    const savedTemplates = await prisma.template.findMany({
-      where: {
-        organizationId: s.organizationId,
-        ...(q
-          ? {
-              OR: [
-                { name: { contains: q, mode: "insensitive" as const } },
-                {
-                  description: { contains: q, mode: "insensitive" as const },
+    const savedTemplates =
+      source === "default"
+        ? []
+        : await prisma.template.findMany({
+            where: {
+              organizationId: s.organizationId,
+              ...(dateFrom || dateTo
+                ? {
+                    createdAt: {
+                      ...(dateFrom
+                        ? { gte: new Date(`${dateFrom}T00:00:00.000Z`) }
+                        : {}),
+                      ...(dateTo
+                        ? { lte: new Date(`${dateTo}T23:59:59.999Z`) }
+                        : {}),
+                    },
+                  }
+                : {}),
+              ...(q
+                ? {
+                    OR: [
+                      { name: { contains: q, mode: "insensitive" as const } },
+                      {
+                        description: {
+                          contains: q,
+                          mode: "insensitive" as const,
+                        },
+                      },
+                    ],
+                  }
+                : {}),
+            },
+            select: picker
+              ? {
+                  id: true,
+                  name: true,
+                  description: true,
+                  emailSubject: true,
+                  variablesJson: true,
+                  createdAt: true,
+                }
+              : {
+                  id: true,
+                  name: true,
+                  description: true,
+                  variablesJson: true,
+                  isExample: true,
+                  createdAt: true,
                 },
-              ],
-            }
-          : {}),
-      },
-      select: picker
-        ? {
-            id: true,
-            name: true,
-            description: true,
-            emailSubject: true,
-            variablesJson: true,
-            createdAt: true,
-          }
-        : {
-            id: true,
-            name: true,
-            description: true,
-            variablesJson: true,
-            isExample: true,
-            createdAt: true,
-          },
-      orderBy,
-    });
+            orderBy,
+          });
     const savedNames = new Set(savedTemplates.map((template) => template.name));
-    const defaults = DEFAULT_TEMPLATES.filter(
-      (template) =>
-        !savedNames.has(template.name) &&
-        (!q ||
-          `${template.name} ${template.description}`
-            .toLocaleLowerCase()
-            .includes(q.toLocaleLowerCase())),
-    ).map((template) =>
-      picker
-        ? {
-            id: template.id,
-            name: template.name,
-            description: template.description,
-            emailSubject: template.emailSubject,
-            variablesJson: template.variablesJson,
-            createdAt: template.createdAt,
-          }
-        : {
-            id: template.id,
-            name: template.name,
-            description: template.description,
-            variablesJson: template.variablesJson,
-            isExample: true,
-            createdAt: template.createdAt,
-          },
-    );
-    return NextResponse.json([...defaults, ...savedTemplates]);
+    const defaults =
+      source === "own"
+        ? []
+        : DEFAULT_TEMPLATES.filter(
+            (template) =>
+              !savedNames.has(template.name) &&
+              (!dateFrom ||
+                new Date(template.createdAt) >=
+                  new Date(`${dateFrom}T00:00:00.000Z`)) &&
+              (!dateTo ||
+                new Date(template.createdAt) <=
+                  new Date(`${dateTo}T23:59:59.999Z`)) &&
+              (!q ||
+                `${template.name} ${template.description}`
+                  .toLocaleLowerCase()
+                  .includes(q.toLocaleLowerCase())),
+          ).map((template) =>
+            picker
+              ? {
+                  id: template.id,
+                  name: template.name,
+                  description: template.description,
+                  emailSubject: template.emailSubject,
+                  variablesJson: template.variablesJson,
+                  createdAt: template.createdAt,
+                }
+              : {
+                  id: template.id,
+                  name: template.name,
+                  description: template.description,
+                  variablesJson: template.variablesJson,
+                  isExample: true,
+                  createdAt: template.createdAt,
+                },
+          );
+    const result = [...defaults, ...savedTemplates].sort((a, b) => {
+      if (sort === "nameAsc") return a.name.localeCompare(b.name);
+      if (sort === "nameDesc") return b.name.localeCompare(a.name);
+      const delta =
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sort === "oldest" ? delta : -delta;
+    });
+    return NextResponse.json(result);
   } catch {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -184,10 +237,9 @@ export async function POST(req: Request) {
       }));
     for (const variable of variableDefinitions) {
       if (variable.type !== "formula") continue;
-      const error = validateFormula(
-        variable.formula ?? "",
+      const error = validateCalculation(
+        variable as TemplateVariable,
         variableDefinitions as TemplateVariable[],
-        variable.name,
       );
       if (error) return NextResponse.json({ message: error }, { status: 400 });
     }

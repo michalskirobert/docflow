@@ -276,3 +276,36 @@
     pointer-events: auto;
   }
 }
+
+.calculation-field-list {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 180px;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+/* Calculation builder: keep the three insertion controls aligned as one unit. */
+.formula-toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: 100%;
+}
+.formula-toolbar select {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.number-format-settings {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
+}
+@media (max-width: 760px) {
+  .formula-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

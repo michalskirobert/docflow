@@ -366,3 +366,35 @@
   font: inherit;
   cursor: pointer;
 }
+
+/* 2.4.0 desktop document filters */
+@media (min-width: 901px) {
+  .document-history .filter-bar {
+    grid-template-columns: minmax(320px, 1fr) minmax(190px, 0.5fr) minmax(
+        160px,
+        0.38fr
+      ) auto;
+    align-items: end;
+  }
+  .document-history .document-create-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .document-history .document-date-filter {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(190px, 260px));
+    gap: 12px;
+    width: fit-content;
+    padding-top: 2px;
+  }
+  .document-history .document-date-field {
+    margin: 0;
+    gap: 6px;
+  }
+  .document-history .document-date-field .field-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+}

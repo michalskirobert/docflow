@@ -1,15 +1,9 @@
 "use client";
-import { InputControl, SelectControl } from "@/components/shared/form";
+import { SelectControl } from "@/components/shared/form";
+import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { useState } from "react";
-import {
-  Copy,
-  Edit3,
-  FilePlus2,
-  LoaderCircle,
-  Search,
-  Trash2,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Copy, Edit3, FilePlus2, LoaderCircle, Trash2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import {
@@ -27,33 +21,72 @@ export default function TemplateList() {
   const [editing, setEditing] = useState<Template | null | "new">(null);
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
+  const [source, setSource] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [cardActionPending, setCardActionPending] = useState(false);
-  const query = useTemplatesService(q, sort);
+  const query = useTemplatesService(q, sort, source, dateFrom, dateTo);
+  const activeFilterCount =
+    (source !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
   return (
     <>
-      <div className="page-actions template-list-actions">
-        <label className="search-field">
-          <Search size={16} />
-          <InputControl
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("search")}
-          />
-        </label>
-        <SelectControl
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          aria-label={t("sort")}
-        >
-          <option value="newest">{t("newest")}</option>
-          <option value="oldest">{t("oldest")}</option>
-          <option value="nameAsc">{t("nameAsc")}</option>
-          <option value="nameDesc">{t("nameDesc")}</option>
-        </SelectControl>
-        <button className="btn" onClick={() => setEditing("new")}>
-          <FilePlus2 size={18} /> {t("new")}
-        </button>
-      </div>
+      <ListToolbar
+        search={q}
+        searchPlaceholder={t("search")}
+        onSearchChange={setQ}
+        sort={sort}
+        sortLabel={t("sort")}
+        sortOptions={[
+          { value: "newest", label: t("newest") },
+          { value: "oldest", label: t("oldest") },
+          { value: "nameAsc", label: t("nameAsc") },
+          { value: "nameDesc", label: t("nameDesc") },
+        ]}
+        onSortChange={setSort}
+        filterLabel={t("filters")}
+        closeLabel={t("closeFilters")}
+        clearLabel={t("clearFilters")}
+        applyLabel={t("applyFilters")}
+        activeFilterCount={activeFilterCount}
+        onClearFilters={() => {
+          setSource("all");
+          setDateFrom("");
+          setDateTo("");
+        }}
+        filters={
+          <div className="list-filter-grid">
+            <label className="filter-control">
+              <span>{t("sourceFilter")}</span>
+              <SelectControl
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+              >
+                <option value="all">{t("sourceAll")}</option>
+                <option value="default">{t("sourceDefault")}</option>
+                <option value="own">{t("sourceOwn")}</option>
+              </SelectControl>
+            </label>
+            <FilterDateControl
+              label={t("dateFrom")}
+              value={dateFrom}
+              onChange={setDateFrom}
+            />
+            <FilterDateControl
+              label={t("dateTo")}
+              value={dateTo}
+              onChange={setDateTo}
+            />
+          </div>
+        }
+        action={
+          <button
+            className="btn list-toolbar-primary"
+            onClick={() => setEditing("new")}
+          >
+            <FilePlus2 size={18} /> {t("new")}
+          </button>
+        }
+      />
       {query.isLoading ? (
         <ListSkeleton rows={6} cards />
       ) : (query.data?.length ?? 0) > 0 ? (
@@ -128,6 +161,7 @@ function TemplateCard({
   onActionPendingChange: (pending: boolean) => void;
 }) {
   const t = useTranslations("templates");
+  const locale = useLocale();
   const [editPending, setEditPending] = useState(false);
   const remove = useDeleteTemplateService(template.id);
   const { confirm } = useFeedback();
@@ -159,6 +193,11 @@ function TemplateCard({
         <p className="muted clamp">
           {template.description || t("noDescription")}
         </p>
+        <span className="template-created-at">
+          {t("createdAt", {
+            date: new Date(template.createdAt).toLocaleDateString(locale),
+          })}
+        </span>
         <div className="variable-list">
           {variables.slice(0, 4).map((v) => (
             <span key={v.name}>{`{{${v.name}}}`}</span>

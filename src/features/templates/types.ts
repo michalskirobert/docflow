@@ -20,6 +20,20 @@ export type DataTableDefinition = {
   minRows?: number;
   maxRows?: number;
 };
+export type CalculationOperation = "sum" | "avg" | "min" | "max" | "count";
+export type CalculationDefinition =
+  | { mode: "formula" }
+  | {
+      mode: "fields";
+      operation: CalculationOperation;
+      sourceVariableNames: string[];
+    }
+  | {
+      mode: "repeated";
+      operation: CalculationOperation;
+      dataTableName: string;
+      sourceVariableName: string;
+    };
 export type TemplateVariable = {
   name: string;
   label?: string;
@@ -27,6 +41,7 @@ export type TemplateVariable = {
   tooltip?: string;
   type: VariableType;
   formula?: string;
+  calculation?: CalculationDefinition;
   dataTable?: DataTableDefinition;
   required?: boolean;
   requiredMessage?: string;
@@ -43,6 +58,9 @@ export type TemplateVariable = {
   decimalPlaces?: number;
   decimalSeparator?: "." | ",";
   thousandsSeparator?: "none" | "." | "," | "space";
+  numberFormat?: "number" | "currency" | "percentage" | "measure";
+  currency?: string;
+  unit?: string;
   fontSize?: number;
   bold?: boolean;
   italic?: boolean;

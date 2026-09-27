@@ -24,7 +24,7 @@ export default function CalculationsHelpPage() {
   );
   const playground = useMemo(() => {
     const error = validateFormula(formula, playgroundVariables);
-    if (error) return { error, result: null as number | null };
+    if (error) return { error: t("invalid"), result: null as number | null };
     try {
       return {
         error: null,
@@ -32,7 +32,7 @@ export default function CalculationsHelpPage() {
       };
     } catch (error) {
       return {
-        error: error instanceof Error ? error.message : t("invalid"),
+        error: t("invalid"),
         result: null,
       };
     }
@@ -83,6 +83,27 @@ export default function CalculationsHelpPage() {
           <div className="calculation-info">
             <h2>{t("validationTitle")}</h2>
             <p className="muted">{t("validation")}</p>
+          </div>
+          <div className="calculation-info">
+            <h2>{t("aggregatesTitle")}</h2>
+            <p className="muted">{t("aggregates")}</p>
+            <code>{"SUM({{GrossPrice}})"}</code>
+          </div>
+          <div className="calculation-info">
+            <h2>{t("chainTitle")}</h2>
+            <p className="muted">{t("chain")}</p>
+          </div>
+          <div className="calculation-info">
+            <h2>{t("tableExampleTitle")}</h2>
+            <p className="muted">{t("tableExample")}</p>
+          </div>
+          <div className="calculation-info">
+            <h2>{t("formatsTitle")}</h2>
+            <p className="muted">{t("formats")}</p>
+          </div>
+          <div className="calculation-info">
+            <h2>{t("emptyTitle")}</h2>
+            <p className="muted">{t("empty")}</p>
           </div>
         </section>
 

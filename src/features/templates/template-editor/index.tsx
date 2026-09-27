@@ -869,16 +869,39 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     setVariables((current) =>
       upsertVariable(
-        current.map((item) =>
-          oldName !== variable.name && item.formula
-            ? {
-                ...item,
-                formula: item.formula
+        current.map((item) => {
+          if (oldName === variable.name) return item;
+          const calculation = item.calculation;
+          return {
+            ...item,
+            formula: item.formula
+              ? item.formula
                   .split(`{{${oldName}}}`)
-                  .join(`{{${variable.name}}}`),
-              }
-            : item,
-        ),
+                  .join(`{{${variable.name}}}`)
+              : item.formula,
+            calculation:
+              calculation?.mode === "fields"
+                ? {
+                    ...calculation,
+                    sourceVariableNames: calculation.sourceVariableNames.map(
+                      (name) => (name === oldName ? variable.name : name),
+                    ),
+                  }
+                : calculation?.mode === "repeated"
+                  ? {
+                      ...calculation,
+                      dataTableName:
+                        calculation.dataTableName === oldName
+                          ? variable.name
+                          : calculation.dataTableName,
+                      sourceVariableName:
+                        calculation.sourceVariableName === oldName
+                          ? variable.name
+                          : calculation.sourceVariableName,
+                    }
+                  : calculation,
+          };
+        }),
         variable,
         oldName,
       ),
@@ -2377,8 +2400,19 @@ export function TemplateEditor({ template, onClose }: Props) {
                 );
                 if (existing) {
                   const holder = document.createElement("div");
-                  holder.innerHTML = dataTableHtml(table, variables);
-                  existing.replaceWith(holder.firstElementChild!);
+                  const nextVariables = upsertVariable(
+                    variables,
+                    table,
+                    previousName ?? table.name,
+                  );
+                  holder.innerHTML = dataTableHtml(table, nextVariables);
+                  const replacement = holder.querySelector<HTMLElement>(
+                    ".docflow-data-table",
+                  );
+                  if (replacement) {
+                    existing.replaceWith(replacement);
+                    if (region) ensureDataTableCaretHosts(region);
+                  }
                 }
               } else {
                 restoreSelection();

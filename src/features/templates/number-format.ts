@@ -5,15 +5,48 @@ export function parseTemplateNumber(
   variable: TemplateVariable,
 ): number {
   if (typeof value === "number") return value;
+
   let normalized = String(value ?? "")
     .trim()
-    .replace(/\u00a0/g, " ");
-  const thousands = variable.thousandsSeparator ?? "none";
-  if (thousands === "space") normalized = normalized.replace(/\s/g, "");
-  else if (thousands !== "none")
-    normalized = normalized.split(thousands).join("");
-  const decimal = variable.decimalSeparator ?? ",";
-  if (decimal !== ".") normalized = normalized.replace(decimal, ".");
+    .replace(/\u00a0/g, " ")
+    .replace(/[^0-9,.'+\-\s]/g, "")
+    .replace(/\s/g, "");
+
+  if (!normalized) return Number.NaN;
+
+  const configuredDecimal = variable.decimalSeparator ?? ",";
+  const lastComma = normalized.lastIndexOf(",");
+  const lastDot = normalized.lastIndexOf(".");
+  let decimalSeparator: "," | "." | null = null;
+
+  if (lastComma >= 0 && lastDot >= 0) {
+    decimalSeparator = lastComma > lastDot ? "," : ".";
+  } else if (lastComma >= 0 || lastDot >= 0) {
+    const separator = lastComma >= 0 ? "," : ".";
+    const index = separator === "," ? lastComma : lastDot;
+    const fractionLength = normalized.length - index - 1;
+    const occurrences = normalized.split(separator).length - 1;
+
+    if (
+      separator === configuredDecimal ||
+      (occurrences === 1 && fractionLength !== 3)
+    ) {
+      decimalSeparator = separator;
+    }
+  }
+
+  if (decimalSeparator) {
+    const thousandsSeparator = decimalSeparator === "," ? "." : ",";
+    normalized = normalized.split(thousandsSeparator).join("");
+    const decimalIndex = normalized.lastIndexOf(decimalSeparator);
+    normalized =
+      normalized.slice(0, decimalIndex).split(decimalSeparator).join("") +
+      "." +
+      normalized.slice(decimalIndex + 1);
+  } else {
+    normalized = normalized.replace(/[.,]/g, "");
+  }
+
   return Number(normalized);
 }
 
@@ -34,7 +67,15 @@ export function formatTemplateNumber(
     : integerPart;
   const sign = value < 0 ? "-" : "";
   const decimal = variable.decimalSeparator ?? ",";
-  return places > 0
-    ? `${sign}${groupedInteger}${decimal}${fractionPart}`
-    : `${sign}${groupedInteger}`;
+  const formatted =
+    places > 0
+      ? `${sign}${groupedInteger}${decimal}${fractionPart}`
+      : `${sign}${groupedInteger}`;
+  const numberFormat = variable.numberFormat ?? "number";
+  if (numberFormat === "currency" && variable.currency)
+    return `${formatted} ${variable.currency}`;
+  if (numberFormat === "percentage") return `${formatted}%`;
+  if (numberFormat === "measure" && variable.unit)
+    return `${formatted} ${variable.unit}`;
+  return formatted;
 }

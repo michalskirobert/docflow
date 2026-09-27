@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { validateFormula } from "@/features/templates/calculations";
+import { validateCalculation } from "@/features/templates/calculations";
 import type { TemplateVariable } from "@/features/templates/types";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
@@ -37,6 +37,22 @@ const schema = z.object({
           "dataTable",
         ]),
         formula: z.string().max(500).optional(),
+        calculation: z
+          .discriminatedUnion("mode", [
+            z.object({ mode: z.literal("formula") }),
+            z.object({
+              mode: z.literal("fields"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              sourceVariableNames: z.array(z.string()).min(1),
+            }),
+            z.object({
+              mode: z.literal("repeated"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              dataTableName: z.string(),
+              sourceVariableName: z.string(),
+            }),
+          ])
+          .optional(),
         dataTable: z
           .object({
             columns: z.array(
@@ -126,10 +142,9 @@ export async function PUT(
     }));
   for (const variable of variableDefinitions) {
     if (variable.type !== "formula") continue;
-    const error = validateFormula(
-      variable.formula ?? "",
+    const error = validateCalculation(
+      variable as TemplateVariable,
       variableDefinitions as TemplateVariable[],
-      variable.name,
     );
     if (error) return NextResponse.json({ message: error }, { status: 400 });
   }

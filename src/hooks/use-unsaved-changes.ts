@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 
 type ConfirmLeave = () => Promise<boolean>;
 
-export function useUnsavedChanges(active: boolean, confirmLeave: ConfirmLeave) {
+export function useUnsavedChanges(
+  active: boolean,
+  confirmLeave: ConfirmLeave,
+  bypassRef?: RefObject<boolean>,
+) {
   useEffect(() => {
     if (!active) return;
 
     const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (bypassRef?.current) return;
       event.preventDefault();
       event.returnValue = "";
     };
 
     const click = (event: MouseEvent) => {
+      if (bypassRef?.current) return;
       if (event.defaultPrevented || event.button !== 0) return;
       const target = event.target as Element | null;
       const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
@@ -50,6 +56,7 @@ export function useUnsavedChanges(active: boolean, confirmLeave: ConfirmLeave) {
 
     let handlingPopState = false;
     const popState = () => {
+      if (bypassRef?.current) return;
       if (handlingPopState) return;
       handlingPopState = true;
       void confirmLeave().then((leave) => {
@@ -71,5 +78,5 @@ export function useUnsavedChanges(active: boolean, confirmLeave: ConfirmLeave) {
       window.removeEventListener("popstate", popState);
       document.removeEventListener("click", click, true);
     };
-  }, [active, confirmLeave]);
+  }, [active, bypassRef, confirmLeave]);
 }

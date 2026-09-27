@@ -11,10 +11,45 @@ export default function DocumentList() {
   const t = useTranslations("documents");
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
+  const [templateFilter, setTemplateFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const documents = useDocumentsService(q, sort);
+  const allDocuments = documents.data ?? [];
+  const templateOptions = Array.from(
+    new Map(
+      allDocuments.map((document) => [
+        document.templateId ?? `deleted:${document.template?.name ?? ""}`,
+        document.template?.name ?? t("deletedTemplate"),
+      ]),
+    ).entries(),
+  );
+  const filteredDocuments = allDocuments.filter((document) => {
+    const templateKey =
+      document.templateId ?? `deleted:${document.template?.name ?? ""}`;
+    if (templateFilter !== "all" && templateKey !== templateFilter)
+      return false;
+    const createdAt = new Date(document.createdAt);
+    if (dateFrom) {
+      const from = new Date(`${dateFrom}T00:00:00`);
+      if (createdAt < from) return false;
+    }
+    if (dateTo) {
+      const to = new Date(`${dateTo}T23:59:59.999`);
+      if (createdAt > to) return false;
+    }
+    return true;
+  });
   return (
     <DocumentHistory
-      documents={documents.data ?? []}
+      documents={filteredDocuments}
+      templateFilter={templateFilter}
+      templateOptions={templateOptions}
+      dateFrom={dateFrom}
+      dateTo={dateTo}
+      onTemplateFilterChange={setTemplateFilter}
+      onDateFromChange={setDateFrom}
+      onDateToChange={setDateTo}
       loading={documents.isLoading || documents.isFetching}
       q={q}
       sort={sort}

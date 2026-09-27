@@ -322,3 +322,343 @@
 .template-card .template-action-edit .spinner {
   flex: 0 0 auto;
 }
+
+/* 2.4.0 desktop filter toolbar polish */
+@media (min-width: 1001px) {
+  .template-list-actions {
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) 190px 190px auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .template-list-actions > .btn {
+    width: auto;
+    min-width: 168px;
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .document-history .filter-bar {
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) 230px 190px auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .document-history .filter-bar .document-create-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .document-history .document-date-filter {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding-top: 2px;
+  }
+  .document-history .document-date-filter label {
+    display: grid;
+    grid-template-columns: auto 168px;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .document-history .document-date-filter input {
+    min-height: 38px;
+    height: 38px;
+  }
+  .document-history .document-date-separator {
+    align-self: center;
+    color: var(--muted);
+    margin: 18px 2px 0;
+  }
+}
+
+/* 2.4.0 shared sticky list toolbar + responsive filter panel */
+.list-toolbar-shell {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  margin-bottom: 18px;
+  padding: 10px 0;
+  background: color-mix(in srgb, var(--background) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+.list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) 190px auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.list-toolbar-search {
+  min-width: 0;
+}
+.list-toolbar .document-create-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+.list-filter-trigger {
+  position: relative;
+  min-width: 108px;
+  justify-content: center;
+}
+.filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent, #2563eb);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+.list-filter-panel {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% - 4px);
+  right: 0;
+  width: min(620px, calc(100vw - 32px));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.18);
+  overflow: visible;
+}
+.list-filter-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 800;
+}
+.list-filter-panel-heading > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.list-filter-panel-body {
+  padding: 16px;
+}
+.list-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+.filter-control,
+.filter-date-control {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.filter-date-input {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 6px;
+  align-items: center;
+}
+.filter-date-input .date-time-picker {
+  position: relative;
+}
+.filter-date-input .date-picker-trigger {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+}
+.list-filter-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+.active-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+}
+.template-card .template-created-at {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .list-toolbar-shell {
+    padding: 8px 0;
+  }
+  .list-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+  }
+  .list-toolbar-search {
+    grid-column: 1 / -1;
+  }
+  .list-toolbar > .shared-select {
+    min-width: 0;
+  }
+  .list-toolbar .document-create-actions {
+    min-width: 0;
+  }
+  .list-toolbar .document-create-actions .btn {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+    font-size: 0;
+  }
+  .list-toolbar .document-create-actions .btn svg {
+    margin: 0;
+  }
+  .list-toolbar-primary {
+    min-width: 42px;
+    padding-inline: 10px;
+  }
+  .list-filter-panel {
+    position: fixed;
+    z-index: 190;
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 78px;
+    width: auto;
+    max-height: min(68dvh, 560px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .list-filter-panel-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .list-filter-grid {
+    grid-template-columns: 1fr;
+  }
+  .list-filter-panel-actions {
+    flex: 0 0 auto;
+    background: var(--surface);
+  }
+}
+
+/* 2.4.0 list toolbar visual + mobile layout refinement */
+.list-toolbar-shell {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+@media (max-width: 760px) {
+  .list-toolbar-shell {
+    margin-bottom: 16px;
+    padding: 0;
+  }
+
+  .list-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0;
+  }
+
+  .list-toolbar-search {
+    grid-column: 1 / -1;
+  }
+
+  .list-toolbar > .shared-select,
+  .list-filter-trigger {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .list-toolbar > .list-toolbar-primary {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding-inline: 14px;
+    font-size: inherit;
+  }
+
+  .list-toolbar .document-create-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 10px;
+  }
+
+  .list-toolbar .document-create-actions .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 10px 12px;
+    font-size: 13px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .list-toolbar .document-create-actions .btn svg {
+    flex: 0 0 18px;
+  }
+
+  .template-grid {
+    gap: 14px;
+  }
+
+  .template-card {
+    min-height: 0;
+  }
+
+  .template-card .template-body {
+    padding: 18px;
+  }
+
+  .template-card .variable-list {
+    margin-bottom: 12px;
+  }
+
+  .template-card .card-actions {
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .list-toolbar .document-create-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 2.4.0 mobile list toolbar surface + spacing */
+@media (max-width: 760px) {
+  .list-toolbar-shell {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
+  }
+
+  .list-toolbar {
+    gap: 10px;
+  }
+
+  .list-toolbar > .list-toolbar-primary {
+    margin-top: 2px;
+  }
+
+  .template-grid {
+    margin-top: 0;
+  }
+}

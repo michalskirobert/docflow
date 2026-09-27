@@ -71,7 +71,10 @@ export function Sidebar() {
           <span>{t("logout")}</span>
         </button>
 
-        <span className="version desktop-version">DocFlow v{version}</span>
+        <div className="desktop-product-meta">
+          <span className="version desktop-version">DocFlow v{version}</span>
+          <span className="desktop-copyright">© NurByte 2026</span>
+        </div>
       </div>
 
       <div className="mobile-profile">
@@ -124,6 +127,7 @@ export function Sidebar() {
           onClick={() => setProfileOpen((open) => !open)}
         >
           <UserRound size={19} />
+          <span className="mobile-profile-label">{t("account")}</span>
         </button>
       </div>
 

@@ -6,10 +6,10 @@ import {
   FileText,
   LoaderCircle,
   MailPlus,
-  Search,
   Trash2,
 } from "lucide-react";
-import { InputControl, SelectControl } from "@/components/shared/form";
+import { SelectControl } from "@/components/shared/form";
+import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { type ReactNode, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -28,6 +28,13 @@ export function DocumentHistory({
   sort,
   onQueryChange,
   onSortChange,
+  templateFilter = "all",
+  templateOptions = [],
+  dateFrom = "",
+  dateTo = "",
+  onTemplateFilterChange,
+  onDateFromChange,
+  onDateToChange,
 }: {
   documents: DocumentSummary[];
   loading?: boolean;
@@ -36,6 +43,13 @@ export function DocumentHistory({
   sort: string;
   onQueryChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  templateFilter?: string;
+  templateOptions?: Array<[string, string]>;
+  dateFrom?: string;
+  dateTo?: string;
+  onTemplateFilterChange?: (value: string) => void;
+  onDateFromChange?: (value: string) => void;
+  onDateToChange?: (value: string) => void;
 }) {
   const t = useTranslations("documents");
   const { notify } = useFeedback();
@@ -121,32 +135,69 @@ export function DocumentHistory({
         </div>
       </div>
 
-      <div className="filter-bar">
-        <label className="search-field">
-          <Search size={16} />
-
-          <InputControl
-            value={q}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder={t("searchPlaceholder")}
-          />
-        </label>
-
-        <SelectControl
-          value={sort}
-          onChange={(event) => onSortChange(event.target.value)}
-          aria-label={t("sort")}
-        >
-          <option value="newest">{t("newest")}</option>
-
-          <option value="oldest">{t("oldest")}</option>
-
-          <option value="nameAsc">{t("nameAsc")}</option>
-
-          <option value="nameDesc">{t("nameDesc")}</option>
-        </SelectControl>
-        {action}
-      </div>
+      <ListToolbar
+        search={q}
+        searchPlaceholder={t("searchPlaceholder")}
+        onSearchChange={onQueryChange}
+        sort={sort}
+        sortLabel={t("sort")}
+        sortOptions={[
+          { value: "newest", label: t("newest") },
+          { value: "oldest", label: t("oldest") },
+          { value: "nameAsc", label: t("nameAsc") },
+          { value: "nameDesc", label: t("nameDesc") },
+        ]}
+        onSortChange={onSortChange}
+        filterLabel={t("filters")}
+        closeLabel={t("closeFilters")}
+        clearLabel={t("clearFilters")}
+        applyLabel={t("applyFilters")}
+        activeFilterCount={
+          (templateFilter !== "all" ? 1 : 0) +
+          (dateFrom ? 1 : 0) +
+          (dateTo ? 1 : 0)
+        }
+        onClearFilters={() => {
+          onTemplateFilterChange?.("all");
+          onDateFromChange?.("");
+          onDateToChange?.("");
+        }}
+        filters={
+          <div className="list-filter-grid">
+            {onTemplateFilterChange && (
+              <label className="filter-control">
+                <span>{t("filterByTemplate")}</span>
+                <SelectControl
+                  value={templateFilter}
+                  onChange={(e) => onTemplateFilterChange(e.target.value)}
+                >
+                  <option value="all">{t("allTemplates")}</option>
+                  {templateOptions.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </SelectControl>
+              </label>
+            )}
+            {onDateFromChange && (
+              <FilterDateControl
+                label={t("dateFrom")}
+                value={dateFrom}
+                onChange={onDateFromChange}
+              />
+            )}
+            {onDateToChange && (
+              <FilterDateControl
+                label={t("dateTo")}
+                value={dateTo}
+                onChange={onDateToChange}
+              />
+            )}
+          </div>
+        }
+        action={action}
+      />
 
       {loading ? (
         <ListSkeleton rows={5} />

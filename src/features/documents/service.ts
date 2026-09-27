@@ -19,7 +19,7 @@ export const useDocumentService = (id: string) =>
 export const useDocumentTemplatesService = (enabled = true) =>
   useGet<TemplateSummary[]>(
     ["templates", "picker"],
-    "/templates?view=picker",
+    "/templates?view=picker&sort=newest",
     enabled,
   );
 export const useDocumentTemplateService = (id: string) =>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import type { TemplateVariable } from "@/features/templates/types";
 import { resolveCalculatedValues } from "@/features/templates/calculations";
@@ -24,6 +25,7 @@ export function DataTableField({
   error?: string;
   onChange: (value: string) => void;
 }) {
+  const t = useTranslations("documents");
   const [draggedRow, setDraggedRow] = useState<number | null>(null);
   const [dropTargetRow, setDropTargetRow] = useState<number | null>(null);
   const columns = table.dataTable?.columns ?? [];
@@ -74,7 +76,9 @@ export function DataTableField({
         </div>
         <div className="data-table-field-heading-actions">
           <small>
-            {minRows > 0 ? `Minimum rows: ${minRows}` : "Add rows as needed."}
+            {minRows > 0
+              ? t("minimumRows", { count: minRows })
+              : t("addRowsAsNeeded")}
           </small>
           <button
             type="button"
@@ -82,12 +86,12 @@ export function DataTableField({
             disabled={maxRows !== undefined && rows.length >= maxRows}
             title={
               maxRows !== undefined && rows.length >= maxRows
-                ? `Maximum rows: ${maxRows}`
+                ? t("maximumRows", { count: maxRows })
                 : undefined
             }
             onClick={addRow}
           >
-            <Plus size={16} /> Add row
+            <Plus size={16} /> {t("addRow")}
           </button>
         </div>
       </div>
@@ -110,7 +114,7 @@ export function DataTableField({
                     "Column"}
                 </th>
               ))}
-              <th className="data-table-actions-column">Actions</th>
+              <th className="data-table-actions-column">{t("actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -119,10 +123,8 @@ export function DataTableField({
                 <td colSpan={Math.max(1, columns.length + 1)}>
                   <div className="data-table-empty-message">
                     <div>
-                      <strong>No data</strong>
-                      <span>
-                        Add the first row to start filling this table.
-                      </span>
+                      <strong>{t("noData")}</strong>
+                      <span>{t("addFirstRow")}</span>
                     </div>
                   </div>
                 </td>
@@ -135,8 +137,13 @@ export function DataTableField({
                 };
                 try {
                   resolved = resolveCalculatedValues(
-                    variables.filter((v) => v.type !== "dataTable"),
+                    variables,
                     resolved,
+                    columns
+                      .flatMap((column) =>
+                        column.variableName ? [column.variableName] : [],
+                      )
+                      .filter((name) => defs.get(name)?.type === "formula"),
                   );
                 } catch {}
                 return (
@@ -187,6 +194,10 @@ export function DataTableField({
                       const cellError = validateVariable(
                         variable,
                         row[variable.name] ?? "",
+                        t as unknown as (
+                          key: string,
+                          values?: Record<string, string | number>,
+                        ) => string,
                       );
                       return (
                         <td key={column.id}>
@@ -214,7 +225,7 @@ export function DataTableField({
                         <button
                           type="button"
                           className="icon-button danger data-table-delete-row"
-                          aria-label="Delete row"
+                          aria-label={t("deleteRow")}
                           disabled={rows.length <= minRows}
                           onClick={() =>
                             update(
@@ -227,7 +238,7 @@ export function DataTableField({
                         <button
                           type="button"
                           className="data-table-drag-handle"
-                          aria-label="Reorder row"
+                          aria-label={t("reorderRow")}
                           draggable
                           onDragStart={(event) => {
                             setDraggedRow(rowIndex);

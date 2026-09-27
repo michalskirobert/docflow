@@ -1,4 +1,5 @@
 import type { TemplateVariable } from "@/features/templates/types";
+import { parseTemplateNumber } from "@/features/templates/number-format";
 export function applyInputMask(value: string, mask?: string) {
   if (!mask) return value;
   const chars = value.replace(/[^a-zA-Z0-9]/g, "").split("");
@@ -17,46 +18,91 @@ export function applyInputMask(value: string, mask?: string) {
   return out;
 }
 export function parseFormattedNumber(value: string, v: TemplateVariable) {
-  let normalized = value.trim().replace(/\u00a0/g, " ");
-  const thousands = v.thousandsSeparator ?? "none";
-  if (thousands === "space") normalized = normalized.replace(/\s/g, "");
-  else if (thousands !== "none")
-    normalized = normalized.split(thousands).join("");
+  const number = parseTemplateNumber(value, v);
   const decimal = v.decimalSeparator ?? ",";
-  if (decimal !== ".") normalized = normalized.replace(decimal, ".");
-  return { normalized, number: Number(normalized) };
+  const cleaned = value
+    .trim()
+    .replace(/\u00a0/g, " ")
+    .replace(/\s/g, "");
+  const decimalIndex = cleaned.lastIndexOf(decimal);
+  const normalized = Number.isFinite(number)
+    ? decimalIndex >= 0
+      ? `${Math.trunc(number)}.${cleaned.slice(decimalIndex + 1).replace(/\D/g, "")}`
+      : String(number)
+    : cleaned;
+  return { normalized, number };
 }
 
-export function validateVariable(v: TemplateVariable, value: string) {
+export type ValidationTranslator = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
+export function validateVariable(
+  v: TemplateVariable,
+  value: string,
+  t?: ValidationTranslator,
+) {
+  const message = (
+    key: string,
+    fallback: string,
+    values?: Record<string, string | number>,
+  ) => (t ? t(key, values) : fallback);
   if (v.type === "formula") return "";
-  if (v.required && !value.trim())
-    return v.requiredMessage || "This field is required.";
+  if (v.required && !value.trim()) {
+    const customRequired = v.requiredMessage?.trim();
+    const localizedDefaults = new Set([
+      "This field is required.",
+      "To pole jest wymagane.",
+      "Kolom ini wajib diisi.",
+    ]);
+    if (customRequired && !localizedDefaults.has(customRequired))
+      return customRequired;
+    return message("fieldRequired", "This field is required.");
+  }
   if (!value) return "";
   if ((v.minLength ?? 0) > 0 && value.length < v.minLength!)
-    return `Minimum ${v.minLength} characters.`;
+    return message("minimumCharacters", `Minimum ${v.minLength} characters.`, {
+      count: v.minLength!,
+    });
   if ((v.maxLength ?? 0) > 0 && value.length > v.maxLength!)
-    return `Maximum ${v.maxLength} characters.`;
+    return message("maximumCharacters", `Maximum ${v.maxLength} characters.`, {
+      count: v.maxLength!,
+    });
   if (v.type === "number") {
     const { normalized: normalizedValue, number } = parseFormattedNumber(
       value,
       v,
     );
-    if (!Number.isFinite(number)) return "Enter a valid number.";
+    if (!Number.isFinite(number))
+      return message("validNumber", "Enter a valid number.");
     if ((v.minNumber ?? 0) > 0 && number < v.minNumber!)
-      return `Minimum value is ${v.minNumber}.`;
+      return message("minimumValue", `Minimum value is ${v.minNumber}.`, {
+        value: v.minNumber!,
+      });
     if ((v.maxNumber ?? 0) > 0 && number > v.maxNumber!)
-      return `Maximum value is ${v.maxNumber}.`;
+      return message("maximumValue", `Maximum value is ${v.maxNumber}.`, {
+        value: v.maxNumber!,
+      });
     if ((v.decimalPlaces ?? 0) > 0) {
       const decimals = (normalizedValue.split(".")[1] ?? "").length;
       if (decimals > v.decimalPlaces!)
-        return `Maximum ${v.decimalPlaces} decimal places.`;
+        return message(
+          "maximumDecimalPlaces",
+          `Maximum ${v.decimalPlaces} decimal places.`,
+          { count: v.decimalPlaces! },
+        );
     }
   }
   if (["date", "datetime"].includes(v.type)) {
     if (v.minDate && value < v.minDate)
-      return `Date must be on or after ${v.minDate}.`;
+      return message("dateMin", `Date must be on or after ${v.minDate}.`, {
+        date: v.minDate,
+      });
     if (v.maxDate && value > v.maxDate)
-      return `Date must be on or before ${v.maxDate}.`;
+      return message("dateMax", `Date must be on or before ${v.maxDate}.`, {
+        date: v.maxDate,
+      });
   }
   return "";
 }
