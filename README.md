@@ -341,9 +341,19 @@ The template editor now includes an experimental Data Table control. A Data Tabl
 - Added a generated 1200x630 Open Graph/Twitter preview image for shared DocFlow links.
 - Public URL metadata uses `NEXT_PUBLIC_APP_URL` and falls back to `https://docflow.nurbyte.dev`.
 
-
 ### v2.4.0 editor line-flow hotfix
 
 - Rich-text paragraphs/headings are explicitly isolated as block rows in body/header/footer.
 - Replacing a selection in one row no longer allows the following row to flow to its right.
 - Explicit `justify-between` rows retain their intentional flex layout.
+
+## v2.4.0 regional billing / stability hotfix
+
+- Removed the inline/`next/script` theme bootstrap from the locale layout; theme hydration remains handled by `ThemeProvider`.
+- Localized custom 404 is reached through `[locale]/[...notFound]` and returns to the localized home page.
+- Pending payments expire after 72 hours and can be retried; expired bank transfers cannot be approved.
+- FREE is enforced server-side at 10 generated documents per month.
+- Plan pricing is market-aware by billing country: Poland uses PLN, Indonesia displays IDR local pricing, other countries use EUR.
+- Default annual prices: 500 PLN, 599,000 IDR, 120 EUR; all are configurable in `.env`.
+- PayU order currency is no longer hard-coded to PLN. PLN/EUR are passed from the payment record.
+- Indonesian IDR checkout is intentionally disabled until an Indonesian payment provider is connected; PayU Europe does not provide standard IDR settlement.

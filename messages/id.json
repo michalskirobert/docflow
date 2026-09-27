@@ -283,7 +283,8 @@
     "preparingPreview": "Menyiapkan pratinjau…",
     "emailFromDocument": "Menggunakan dokumen yang sudah dibuat",
     "emailFromDocumentDescription": "Email akan menggunakan konten tersimpan dari “{name}”, sehingga sesuai dengan versi dokumen yang dibuat.",
-    "copied": "Tersalin"
+    "copied": "Tersalin",
+    "monthlyLimitReached": "Batas dokumen bulanan Anda telah tercapai. Batas akan direset pada awal bulan berikutnya, atau Anda dapat meningkatkan paket."
   },
   "settings": {
     "title": "Pengaturan",
@@ -692,5 +693,10 @@
     "invalid": "Rumus ini tidak dapat dihitung.",
     "quantity": "Jumlah",
     "price": "Harga"
+  },
+  "notFound": {
+    "title": "Halaman ini tidak ditemukan",
+    "description": "Sepertinya dokumen atau alamat ini tidak ada, telah dipindahkan, atau sudah tidak tersedia.",
+    "backHome": "Kembali ke beranda"
   }
 }

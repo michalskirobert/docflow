@@ -666,7 +666,9 @@
   display: inline;
   cursor: pointer;
   border-radius: 3px;
-  transition: background-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    background-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .a4-paper [data-variable-selected="true"],

@@ -84,6 +84,13 @@ export async function POST(request: Request) {
       data: { extOrderId },
     });
 
+    if (payment.currency !== "PLN" && payment.currency !== "EUR") {
+      return NextResponse.json(
+        { message: "This currency requires a local payment provider" },
+        { status: 409 },
+      );
+    }
+
     const order = await createPayUOrder({
       extOrderId,
       customerIp: forwarded || "127.0.0.1",
@@ -93,6 +100,7 @@ export async function POST(request: Request) {
       firstName: verification.user.firstName,
       lastName: verification.user.lastName,
       locale: verification.user.locale ?? "en",
+      currency: payment.currency,
     });
 
     await prisma.payment.update({

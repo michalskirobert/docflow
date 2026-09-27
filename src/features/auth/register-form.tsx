@@ -41,6 +41,9 @@ type PublicPlan = {
   available: boolean;
   displayAmount: number;
   displayNet: boolean;
+  currency: "PLN" | "IDR" | "EUR";
+  market: "PL" | "ID" | "INTL";
+  paymentAvailable: boolean;
 };
 
 export default function RegisterForm() {
@@ -132,10 +135,10 @@ export default function RegisterForm() {
   };
 
   const plans = useQuery({
-    queryKey: ["plans", customerType],
+    queryKey: ["plans", customerType, countryCode],
     queryFn: async () => {
       const response = await api.get<PublicPlan[]>(
-        `/plans?customerType=${customerType}`,
+        `/plans?customerType=${customerType}&countryCode=${countryCode}`,
       );
 
       return response.data;
@@ -540,13 +543,13 @@ export default function RegisterForm() {
           {plans.data?.map((plan) => (
             <label
               key={plan.code}
-              className={`plan-card ${!plan.available ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
+              className={`plan-card ${!plan.available || !plan.paymentAvailable ? "disabled" : ""} ${selectedPlan === plan.code ? "selected" : ""}`}
             >
               <input
                 className="plan-radio"
                 type="radio"
                 value={plan.code}
-                disabled={!plan.available}
+                disabled={!plan.available || !plan.paymentAvailable}
                 aria-label={
                   plan.code === "FREE" ? t("freeLicense") : t("annualLicense")
                 }
@@ -569,7 +572,7 @@ export default function RegisterForm() {
               <span>
                 {(plan.displayAmount / 100).toLocaleString(locale, {
                   style: "currency",
-                  currency: "PLN",
+                  currency: plan.currency,
                 })}{" "}
                 {plan.displayNet ? t("net") : t("gross")}
               </span>

@@ -67,7 +67,17 @@ export async function POST(req: Request) {
     const access = await getSubscriptionAccess(s);
     if (!access.allowed)
       return NextResponse.json(
-        { message: "Subscription required", access },
+        {
+          code:
+            access.reason === "monthly_document_limit_reached"
+              ? "MONTHLY_DOCUMENT_LIMIT_REACHED"
+              : "SUBSCRIPTION_REQUIRED",
+          message:
+            access.reason === "monthly_document_limit_reached"
+              ? "Monthly document limit reached"
+              : "Subscription required",
+          access,
+        },
         { status: 402 },
       );
     const p = schema.parse(await req.json());
@@ -94,20 +104,53 @@ export async function POST(req: Request) {
     const renderedFooter = t.footerContent
       ? renderTemplate(t.footerContent, p.data, variableDefinitions)
       : null;
-    const doc = await prisma.document.create({
-      data: {
-        organizationId: s.organizationId,
-        templateId: isDefaultTemplateId(p.templateId) ? null : t.id,
-        name: p.name,
-        payloadJson: JSON.stringify(p.data),
-        renderedContent: rendered,
-        renderedHeader,
-        renderedFooter,
-        pageNumbers: t.pageNumbers,
+    const doc = await prisma.$transaction(
+      async (tx) => {
+        const subscription = await tx.subscription.findUnique({
+          where: { organizationId: s.organizationId },
+          select: { monthlyDocumentLimit: true },
+        });
+        const limit = subscription?.monthlyDocumentLimit ?? 0;
+
+        if (!s.subscriptionExempt && limit > 0) {
+          const start = new Date();
+          start.setDate(1);
+          start.setHours(0, 0, 0, 0);
+          const used = await tx.document.count({
+            where: {
+              organizationId: s.organizationId,
+              createdAt: { gte: start },
+            },
+          });
+          if (used >= limit) throw new Error("MONTHLY_DOCUMENT_LIMIT_REACHED");
+        }
+
+        return tx.document.create({
+          data: {
+            organizationId: s.organizationId,
+            templateId: isDefaultTemplateId(p.templateId) ? null : t.id,
+            name: p.name,
+            payloadJson: JSON.stringify(p.data),
+            renderedContent: rendered,
+            renderedHeader,
+            renderedFooter,
+            pageNumbers: t.pageNumbers,
+          },
+        });
       },
-    });
+      { isolationLevel: "Serializable" },
+    );
     return NextResponse.json(doc, { status: 201 });
   } catch (e) {
+    if (e instanceof Error && e.message === "MONTHLY_DOCUMENT_LIMIT_REACHED") {
+      return NextResponse.json(
+        {
+          code: "MONTHLY_DOCUMENT_LIMIT_REACHED",
+          message: "Monthly document limit reached",
+        },
+        { status: 402 },
+      );
+    }
     return NextResponse.json(
       {
         message:

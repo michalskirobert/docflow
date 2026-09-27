@@ -17,6 +17,7 @@ export function HelpTooltip({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const tooltipId = useId();
+  const touchInteraction = useRef(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -72,8 +73,15 @@ export function HelpTooltip({
       }
       setOpen(false);
     };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
     document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", onKeyDown);
+    };
   }, [open]);
 
   return (
@@ -86,16 +94,23 @@ export function HelpTooltip({
         aria-expanded={open}
         aria-describedby={open ? tooltipId : undefined}
         onPointerDown={(event) => {
-          if (event.pointerType === "touch" || event.pointerType === "pen") {
+          touchInteraction.current =
+            event.pointerType === "touch" || event.pointerType === "pen";
+          if (touchInteraction.current) {
             event.preventDefault();
+            event.stopPropagation();
             setOpen((value) => !value);
           }
         }}
         onClick={(event) => {
           if (event.detail === 0) setOpen((value) => !value);
         }}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        onMouseEnter={() => {
+          if (!touchInteraction.current) setOpen(true);
+        }}
+        onMouseLeave={() => {
+          if (!touchInteraction.current) setOpen(false);
+        }}
         onFocus={() => setOpen(true)}
         onBlur={(event) => {
           if (event.currentTarget.matches(":focus-visible")) setOpen(false);

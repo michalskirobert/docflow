@@ -123,7 +123,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const plan = getPlan(data.plan);
+    const plan = getPlan(data.plan, data.countryCode);
+
+    if (data.plan !== "FREE" && !plan.paymentAvailable) {
+      return NextResponse.json(
+        {
+          code: "PAYMENT_UNAVAILABLE",
+          message:
+            "Local Indonesian pricing is configured, but IDR checkout requires an Indonesian payment provider",
+        },
+        { status: 400 },
+      );
+    }
 
     if (!plan.available) {
       return NextResponse.json(
@@ -212,6 +223,7 @@ export async function POST(request: Request) {
             vatAmount: plan.vat,
             grossAmount: plan.gross,
             vatRate: plan.vatRate,
+            currency: plan.currency,
           },
         });
 

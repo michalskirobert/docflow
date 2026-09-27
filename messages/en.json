@@ -283,7 +283,8 @@
     "preparingPreview": "Preparing preview…",
     "emailFromDocument": "Using generated document",
     "emailFromDocumentDescription": "The email will use the saved content of “{name}”, so it matches the generated document snapshot.",
-    "copied": "Copied"
+    "copied": "Copied",
+    "monthlyLimitReached": "You have reached your monthly document limit. It resets at the beginning of next month, or you can upgrade your plan."
   },
   "settings": {
     "title": "Settings",
@@ -692,5 +693,10 @@
     "invalid": "The formula cannot be calculated.",
     "quantity": "Quantity",
     "price": "Price"
+  },
+  "notFound": {
+    "title": "We couldn’t find this page",
+    "description": "It looks like this document or address does not exist, has been moved, or is no longer available.",
+    "backHome": "Back to home"
   }
 }

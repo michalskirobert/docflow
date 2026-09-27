@@ -33,6 +33,7 @@ export async function createPayUOrder(input: {
   firstName: string;
   lastName: string;
   locale: string;
+  currency: "PLN" | "EUR";
 }) {
   const token = await accessToken();
   const posId = process.env.PAYU_POS_ID;
@@ -52,7 +53,7 @@ export async function createPayUOrder(input: {
       customerIp: input.customerIp,
       merchantPosId: posId,
       description: input.description,
-      currencyCode: "PLN",
+      currencyCode: input.currency,
       totalAmount: String(input.totalAmount),
       extOrderId: input.extOrderId,
       buyer: {

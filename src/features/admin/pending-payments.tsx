@@ -6,6 +6,7 @@ import { api } from "@/lib/axios";
 type Row = {
   id: string;
   grossAmount: number;
+  currency: string;
   createdAt: string;
   transferReference?: string | null;
   organization: {
@@ -40,8 +41,11 @@ export default function PendingPayments() {
               <strong>{p.organization.name}</strong>
               <span>
                 {p.organization.billingProfile?.billingEmail} ·{" "}
-                {(p.grossAmount / 100).toFixed(2)} PLN ·{" "}
-                {new Date(p.createdAt).toLocaleDateString()}
+                {new Intl.NumberFormat(undefined, {
+                  style: "currency",
+                  currency: p.currency,
+                }).format(p.grossAmount / 100)}{" "}
+                · {new Date(p.createdAt).toLocaleDateString()}
                 {p.transferReference ? ` · ${p.transferReference}` : ""}
               </span>
             </div>

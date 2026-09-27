@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import axios from "axios";
 import { FormField, InputControl } from "@/components/shared/form";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import {
@@ -510,8 +511,16 @@ export default function DocumentGenerator({
           notify(t("generateSuccess"), "success");
           router.push("/documents");
         },
-        onError: () => {
-          notify(t("generateError"), "error");
+        onError: (error) => {
+          const code = axios.isAxiosError(error)
+            ? error.response?.data?.code
+            : undefined;
+          notify(
+            code === "MONTHLY_DOCUMENT_LIMIT_REACHED"
+              ? t("monthlyLimitReached")
+              : t("generateError"),
+            "error",
+          );
         },
       },
     );

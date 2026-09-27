@@ -55,7 +55,7 @@ async function DashboardContent() {
   start.setDate(1);
   start.setHours(0, 0, 0, 0);
 
-  const pendingVisibleSince = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const pendingVisibleSince = new Date(Date.now() - 72 * 60 * 60 * 1000);
 
   const [templates, documents, usedThisMonth, pendingPayment, subscription] =
     await Promise.all([

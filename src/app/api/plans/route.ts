@@ -5,5 +5,6 @@ export async function GET(request: Request) {
     new URL(request.url).searchParams.get("customerType") === "BUSINESS"
       ? "BUSINESS"
       : "INDIVIDUAL";
-  return NextResponse.json(publicPlans(type));
+  const countryCode = new URL(request.url).searchParams.get("countryCode");
+  return NextResponse.json(publicPlans(type, countryCode));
 }

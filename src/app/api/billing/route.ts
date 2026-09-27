@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { getPlan } from "@/server/billing/plans";
 import { createPayUOrder } from "@/server/payu/client";
+import {
+  expirePendingPayments,
+  pendingPaymentCutoff,
+} from "@/server/billing/pending-payments";
 
 async function keepOnlyLatestPendingPayment(organizationId: string) {
   const latest = await prisma.payment.findFirst({
@@ -32,16 +36,7 @@ const paymentSchema = z.object({
 export async function GET() {
   try {
     const s = await requireSession();
-    const stalePayUThreshold = new Date(Date.now() - 72 * 60 * 60 * 1000);
-    await prisma.payment.updateMany({
-      where: {
-        organizationId: s.organizationId,
-        provider: "PAYU",
-        status: "PENDING",
-        createdAt: { lt: stalePayUThreshold },
-      },
-      data: { status: "CANCELED" },
-    });
+    await expirePendingPayments(prisma, s.organizationId);
     await keepOnlyLatestPendingPayment(s.organizationId);
     const currentSubscription = await prisma.subscription.findUnique({
       where: { organizationId: s.organizationId },
@@ -101,6 +96,7 @@ async function configurePayment(
       id: paymentId,
       organizationId: s.organizationId,
       status: "PENDING",
+      createdAt: { gte: pendingPaymentCutoff() },
     },
   });
   if (!payment) throw new Error("PAYMENT_NOT_FOUND");
@@ -130,6 +126,9 @@ async function configurePayment(
     where: { id: payment.id },
     data: { extOrderId, providerOrderId: null },
   });
+  if (payment.currency !== "PLN" && payment.currency !== "EUR") {
+    throw new Error("PAYMENT_CURRENCY_UNSUPPORTED_BY_PAYU");
+  }
   const order = await createPayUOrder({
     extOrderId,
     customerIp: forwarded || "127.0.0.1",
@@ -139,6 +138,7 @@ async function configurePayment(
     firstName: s.firstName,
     lastName: s.lastName,
     locale: s.locale ?? "en",
+    currency: payment.currency,
   });
   await prisma.payment.update({
     where: { id: payment.id },
@@ -170,16 +170,7 @@ export async function POST(request: Request) {
   try {
     const s = await requireSession();
     const body = paymentSchema.parse(await request.json());
-    const stalePayUThreshold = new Date(Date.now() - 72 * 60 * 60 * 1000);
-    await prisma.payment.updateMany({
-      where: {
-        organizationId: s.organizationId,
-        provider: "PAYU",
-        status: "PENDING",
-        createdAt: { lt: stalePayUThreshold },
-      },
-      data: { status: "CANCELED" },
-    });
+    await expirePendingPayments(prisma, s.organizationId);
     await keepOnlyLatestPendingPayment(s.organizationId);
     if (body.paymentId) {
       const activePending = await prisma.payment.findFirst({
@@ -220,6 +211,7 @@ export async function POST(request: Request) {
           vatAmount: previous.vatAmount,
           grossAmount: previous.grossAmount,
           vatRate: previous.vatRate,
+          currency: previous.currency,
         },
       });
       return NextResponse.json(
@@ -241,8 +233,12 @@ export async function POST(request: Request) {
         { message: "A payment is already pending" },
         { status: 409 },
       );
-    const plan = getPlan("YEARLY");
-    if (!plan.available)
+    const billingProfile = await prisma.billingProfile.findUnique({
+      where: { organizationId: s.organizationId },
+      select: { countryCode: true },
+    });
+    const plan = getPlan("YEARLY", billingProfile?.countryCode);
+    if (!plan.available || !plan.paymentAvailable)
       return NextResponse.json(
         { message: "Annual plan is not configured" },
         { status: 400 },
@@ -257,6 +253,7 @@ export async function POST(request: Request) {
         vatAmount: plan.vat,
         grossAmount: plan.gross,
         vatRate: plan.vatRate,
+        currency: plan.currency,
       },
     });
     return NextResponse.json(

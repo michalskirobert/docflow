@@ -12,7 +12,12 @@ export async function POST(
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     const { id } = await params;
     const payment = await prisma.payment.findUnique({ where: { id } });
-    if (!payment || payment.provider !== "BANK_TRANSFER")
+    if (
+      !payment ||
+      payment.provider !== "BANK_TRANSFER" ||
+      payment.status !== "PENDING" ||
+      payment.createdAt.getTime() < Date.now() - 72 * 60 * 60 * 1000
+    )
       return NextResponse.json(
         { message: "Payment not found" },
         { status: 404 },

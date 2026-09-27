@@ -42,7 +42,10 @@ export default function SettingsPanel() {
   const t = useTranslations("settings");
   const billing = useBillingOverview();
   const account = useAccountDetails();
-  const plans = usePublicPlans(account.data?.customerType ?? "INDIVIDUAL");
+  const plans = usePublicPlans(
+    account.data?.customerType ?? "INDIVIDUAL",
+    account.data?.countryCode ?? "PL",
+  );
   const remove = useDeleteAccount();
   const start = useStartLicensePayment();
   const change = useChangePaymentMethod();
@@ -184,7 +187,11 @@ export default function SettingsPanel() {
                       type="button"
                       key={plan.code}
                       className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
-                      disabled={!plan.available || currentPlan === "YEARLY"}
+                      disabled={
+                        !plan.available ||
+                        !plan.paymentAvailable ||
+                        currentPlan === "YEARLY"
+                      }
                       onClick={() => setSelectedPlan(plan.code)}
                     >
                       <div className="plan-visual" aria-hidden="true">
@@ -204,7 +211,7 @@ export default function SettingsPanel() {
                       <span className="settings-plan-price">
                         {(plan.displayAmount / 100).toLocaleString(undefined, {
                           style: "currency",
-                          currency: "PLN",
+                          currency: plan.currency,
                         })}{" "}
                         {plan.displayNet ? t("net") : t("gross")}
                       </span>
@@ -302,29 +309,32 @@ export default function SettingsPanel() {
                     </div>
                     <div className="payment-row-actions">
                       <StatusBadge status={payment.status} />
-                      {payment.status === "CANCELED" &&
-                        payment.provider === "PAYU" && (
-                          <button
-                            type="button"
-                            className="btn secondary compact"
-                            disabled={start.isPending}
-                            onClick={async () => {
-                              try {
-                                const result = await start.mutateAsync({
-                                  paymentMethod: "PAYU",
-                                  paymentId: payment.id,
-                                });
-                                if (result.redirectUri) {
-                                  window.location.assign(result.redirectUri);
-                                }
-                              } catch {
-                                notify(t("paymentStartError"), "error");
+                      {payment.status === "CANCELED" && (
+                        <button
+                          type="button"
+                          className="btn secondary compact"
+                          disabled={start.isPending}
+                          onClick={async () => {
+                            try {
+                              const paymentMethod =
+                                payment.provider === "BANK_TRANSFER"
+                                  ? "BANK_TRANSFER"
+                                  : "PAYU";
+                              const result = await start.mutateAsync({
+                                paymentMethod,
+                                paymentId: payment.id,
+                              });
+                              if (result.redirectUri) {
+                                window.location.assign(result.redirectUri);
                               }
-                            }}
-                          >
-                            {t("payAgain")}
-                          </button>
-                        )}
+                            } catch {
+                              notify(t("paymentStartError"), "error");
+                            }
+                          }}
+                        >
+                          {t("payAgain")}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))

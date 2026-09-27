@@ -283,7 +283,8 @@
     "preparingPreview": "Przygotowywanie podglądu…",
     "emailFromDocument": "Używasz wygenerowanego dokumentu",
     "emailFromDocumentDescription": "E-mail użyje zapisanej treści dokumentu „{name}”, dzięki czemu odpowiada wygenerowanej wersji dokumentu.",
-    "copied": "Skopiowano"
+    "copied": "Skopiowano",
+    "monthlyLimitReached": "Wykorzystano miesięczny limit dokumentów. Limit odnowi się z początkiem następnego miesiąca lub możesz przejść na wyższy plan."
   },
   "settings": {
     "title": "Ustawienia",
@@ -692,5 +693,10 @@
     "invalid": "Nie można obliczyć tej formuły.",
     "quantity": "Ilość",
     "price": "Cena"
+  },
+  "notFound": {
+    "title": "Nie znaleźliśmy tej strony",
+    "description": "Wygląda na to, że ten dokument lub adres nie istnieje, został przeniesiony albo jest już niedostępny.",
+    "backHome": "Wróć do strony głównej"
   }
 }

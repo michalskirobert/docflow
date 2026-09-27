@@ -58,11 +58,17 @@ export type PublicPlan = {
   available: boolean;
   displayAmount: number;
   displayNet: boolean;
+  currency: "PLN" | "IDR" | "EUR";
+  market: "PL" | "ID" | "INTL";
+  paymentAvailable: boolean;
 };
-export const usePublicPlans = (customerType: "INDIVIDUAL" | "BUSINESS") =>
+export const usePublicPlans = (
+  customerType: "INDIVIDUAL" | "BUSINESS",
+  countryCode = "PL",
+) =>
   useGet<PublicPlan[]>(
-    ["plans", customerType],
-    `/plans?customerType=${customerType}`,
+    ["plans", customerType, countryCode],
+    `/plans?customerType=${customerType}&countryCode=${countryCode}`,
   );
 export type AccountDetails = {
   firstName: string;

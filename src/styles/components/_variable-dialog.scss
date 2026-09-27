@@ -258,3 +258,21 @@
 .disabled-action-reason > .btn {
   width: 100%;
 }
+
+@media (pointer: coarse), (max-width: 760px) {
+  .help-tooltip-trigger {
+    width: 32px;
+    height: 32px;
+    touch-action: manipulation;
+  }
+
+  .help-tooltip-content {
+    z-index: 2000;
+    max-width: calc(100vw - 24px);
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    pointer-events: auto;
+  }
+}
