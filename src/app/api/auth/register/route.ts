@@ -129,7 +129,8 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           code: "PAYMENT_UNAVAILABLE",
-          message: "Local Indonesian pricing is configured, but IDR checkout requires an Indonesian payment provider",
+          message:
+            "Local Indonesian pricing is configured, but IDR checkout requires an Indonesian payment provider",
         },
         { status: 400 },
       );

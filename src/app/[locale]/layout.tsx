@@ -53,7 +53,14 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     title: "DocFlow – dokumenty, szablony i fakturowanie",
     description: siteConfig.description,
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "DocFlow by NurByte Software Lab" }],
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "DocFlow by NurByte Software Lab",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -64,7 +71,12 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 

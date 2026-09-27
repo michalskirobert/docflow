@@ -39,14 +39,28 @@ export default function OpenGraphImage() {
         <div style={{ fontSize: 34, fontWeight: 700 }}>DocFlow</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <div style={{ fontSize: 68, lineHeight: 1.05, fontWeight: 800, maxWidth: 980 }}>
+        <div
+          style={{
+            fontSize: 68,
+            lineHeight: 1.05,
+            fontWeight: 800,
+            maxWidth: 980,
+          }}
+        >
           Dokumenty. Szablony. E-mail. Faktury.
         </div>
         <div style={{ fontSize: 29, color: "#b8c0cc", maxWidth: 900 }}>
           Jeden uporządkowany workflow do tworzenia i obsługi dokumentów.
         </div>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 22, color: "#8f9baa" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 22,
+          color: "#8f9baa",
+        }}
+      >
         <span>NurByte Software Lab</span>
         <span>docflow.nurbyte.dev</span>
       </div>

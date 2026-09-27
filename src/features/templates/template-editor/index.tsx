@@ -392,7 +392,8 @@ export function TemplateEditor({ template, onClose }: Props) {
       const tokenStyle = token ? getComputedStyle(token) : null;
       setToolbarState({
         bold: tokenStyle
-          ? Number(tokenStyle.fontWeight) >= 600 || tokenStyle.fontWeight === "bold"
+          ? Number(tokenStyle.fontWeight) >= 600 ||
+            tokenStyle.fontWeight === "bold"
           : document.queryCommandState("bold"),
         italic: tokenStyle
           ? tokenStyle.fontStyle === "italic"
@@ -449,7 +450,9 @@ export function TemplateEditor({ template, onClose }: Props) {
           if (tokenStyle) {
             const font = parseFloat(tokenStyle.fontSize);
             const line = parseFloat(tokenStyle.lineHeight);
-            return font && line ? String(Math.round((line / font) * 100) / 100) : "";
+            return font && line
+              ? String(Math.round((line / font) * 100) / 100)
+              : "";
           }
           const selection = window.getSelection();
           const element =
@@ -512,8 +515,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     if (!range.collapsed) return;
 
     const anchor = range.startContainer;
-    const element =
-      anchor instanceof Element ? anchor : anchor.parentElement;
+    const element = anchor instanceof Element ? anchor : anchor.parentElement;
     const block = element?.closest<HTMLElement>(
       "p,h1,h2,h3,h4,h5,blockquote,li,div",
     );
@@ -542,7 +544,8 @@ export function TemplateEditor({ template, onClose }: Props) {
       if (command === "bold") {
         const computedWeight = getComputedStyle(selectedToken).fontWeight;
         const isBold =
-          computedWeight === "bold" || Number.parseInt(computedWeight, 10) >= 600;
+          computedWeight === "bold" ||
+          Number.parseInt(computedWeight, 10) >= 600;
 
         selectedToken.style.fontWeight = isBold ? "400" : "700";
       }
@@ -671,18 +674,24 @@ export function TemplateEditor({ template, onClose }: Props) {
       !expectedToken ||
       element.textContent?.trim() !== expectedToken
     ) {
-      [editor.current, headerEditor.current, footerEditor.current].forEach((region) =>
-        region?.querySelectorAll<HTMLElement>("[data-variable-selected='true']").forEach((token) => token.removeAttribute("data-variable-selected")),
+      [editor.current, headerEditor.current, footerEditor.current].forEach(
+        (region) =>
+          region
+            ?.querySelectorAll<HTMLElement>("[data-variable-selected='true']")
+            .forEach((token) =>
+              token.removeAttribute("data-variable-selected"),
+            ),
       );
       setSelectedVariableElement(null);
       setSelectedVariableBox(null);
       return false;
     }
 
-    [editor.current, headerEditor.current, footerEditor.current].forEach((region) =>
-      region
-        ?.querySelectorAll<HTMLElement>("[data-variable-selected='true']")
-        .forEach((token) => token.removeAttribute("data-variable-selected")),
+    [editor.current, headerEditor.current, footerEditor.current].forEach(
+      (region) =>
+        region
+          ?.querySelectorAll<HTMLElement>("[data-variable-selected='true']")
+          .forEach((token) => token.removeAttribute("data-variable-selected")),
     );
 
     element.dataset.variableSelected = "true";
@@ -691,9 +700,11 @@ export function TemplateEditor({ template, onClose }: Props) {
     setSelectedImage(null);
     setResizeBox(null);
 
-    const region = [editor.current, headerEditor.current, footerEditor.current].find(
-      (candidate) => candidate?.contains(element),
-    );
+    const region = [
+      editor.current,
+      headerEditor.current,
+      footerEditor.current,
+    ].find((candidate) => candidate?.contains(element));
     if (region) activeEditor.current = region;
 
     const range = document.createRange();
@@ -804,7 +815,8 @@ export function TemplateEditor({ template, onClose }: Props) {
     const selection = window.getSelection();
     const region = activeEditor.current ?? editor.current;
     const range =
-      selection?.rangeCount && region?.contains(selection.getRangeAt(0).commonAncestorContainer)
+      selection?.rangeCount &&
+      region?.contains(selection.getRangeAt(0).commonAncestorContainer)
         ? selection.getRangeAt(0)
         : savedRange.current;
 
@@ -863,16 +875,29 @@ export function TemplateEditor({ template, onClose }: Props) {
           return {
             ...item,
             formula: item.formula
-              ? item.formula.split(`{{${oldName}}}`).join(`{{${variable.name}}}`)
+              ? item.formula
+                  .split(`{{${oldName}}}`)
+                  .join(`{{${variable.name}}}`)
               : item.formula,
             calculation:
               calculation?.mode === "fields"
-                ? { ...calculation, sourceVariableNames: calculation.sourceVariableNames.map((name) => name === oldName ? variable.name : name) }
+                ? {
+                    ...calculation,
+                    sourceVariableNames: calculation.sourceVariableNames.map(
+                      (name) => (name === oldName ? variable.name : name),
+                    ),
+                  }
                 : calculation?.mode === "repeated"
                   ? {
                       ...calculation,
-                      dataTableName: calculation.dataTableName === oldName ? variable.name : calculation.dataTableName,
-                      sourceVariableName: calculation.sourceVariableName === oldName ? variable.name : calculation.sourceVariableName,
+                      dataTableName:
+                        calculation.dataTableName === oldName
+                          ? variable.name
+                          : calculation.dataTableName,
+                      sourceVariableName:
+                        calculation.sourceVariableName === oldName
+                          ? variable.name
+                          : calculation.sourceVariableName,
                     }
                   : calculation,
           };
@@ -1195,7 +1220,10 @@ export function TemplateEditor({ template, onClose }: Props) {
   const setLineHeight = (value: string) => {
     if (!value) return;
     const region = activeEditor.current ?? editor.current;
-    const selectedToken = selectedVariableElement && region?.contains(selectedVariableElement) ? selectedVariableElement : null;
+    const selectedToken =
+      selectedVariableElement && region?.contains(selectedVariableElement)
+        ? selectedVariableElement
+        : null;
     if (selectedToken) {
       selectedToken.style.lineHeight = value;
       setSelectedVariableBox(selectedToken.getBoundingClientRect());
@@ -2378,8 +2406,9 @@ export function TemplateEditor({ template, onClose }: Props) {
                     previousName ?? table.name,
                   );
                   holder.innerHTML = dataTableHtml(table, nextVariables);
-                  const replacement =
-                    holder.querySelector<HTMLElement>(".docflow-data-table");
+                  const replacement = holder.querySelector<HTMLElement>(
+                    ".docflow-data-table",
+                  );
                   if (replacement) {
                     existing.replaceWith(replacement);
                     if (region) ensureDataTableCaretHosts(region);
@@ -2440,9 +2469,10 @@ export function TemplateEditor({ template, onClose }: Props) {
                   type="button"
                   className="variable-removal-option"
                   onClick={() => {
-                    const wrapper = variableRemoval.element.closest<HTMLElement>(
-                      "[data-variable-editor-wrapper]",
-                    );
+                    const wrapper =
+                      variableRemoval.element.closest<HTMLElement>(
+                        "[data-variable-editor-wrapper]",
+                      );
                     (wrapper ?? variableRemoval.element).remove();
                     setVariableRemoval(null);
                     setSelectedVariableElement(null);
@@ -2462,20 +2492,22 @@ export function TemplateEditor({ template, onClose }: Props) {
                   className="variable-removal-option variable-removal-option-danger"
                   onClick={() => {
                     const variableName = variableRemoval.variable.name;
-                    [editor.current, headerEditor.current, footerEditor.current].forEach(
-                      (region) => {
-                        region
-                          ?.querySelectorAll<HTMLElement>(
-                            `[data-variable-name="${CSS.escape(variableName)}"]`,
-                          )
-                          .forEach((node) => {
-                            const wrapper = node.closest<HTMLElement>(
-                              "[data-variable-editor-wrapper]",
-                            );
-                            (wrapper ?? node).remove();
-                          });
-                      },
-                    );
+                    [
+                      editor.current,
+                      headerEditor.current,
+                      footerEditor.current,
+                    ].forEach((region) => {
+                      region
+                        ?.querySelectorAll<HTMLElement>(
+                          `[data-variable-name="${CSS.escape(variableName)}"]`,
+                        )
+                        .forEach((node) => {
+                          const wrapper = node.closest<HTMLElement>(
+                            "[data-variable-editor-wrapper]",
+                          );
+                          (wrapper ?? node).remove();
+                        });
+                    });
                     setVariables((current) =>
                       current.filter((item) => item.name !== variableName),
                     );

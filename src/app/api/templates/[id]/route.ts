@@ -37,20 +37,22 @@ const schema = z.object({
           "dataTable",
         ]),
         formula: z.string().max(500).optional(),
-        calculation: z.discriminatedUnion("mode", [
-          z.object({ mode: z.literal("formula") }),
-          z.object({
-            mode: z.literal("fields"),
-            operation: z.enum(["sum", "avg", "min", "max", "count"]),
-            sourceVariableNames: z.array(z.string()).min(1),
-          }),
-          z.object({
-            mode: z.literal("repeated"),
-            operation: z.enum(["sum", "avg", "min", "max", "count"]),
-            dataTableName: z.string(),
-            sourceVariableName: z.string(),
-          }),
-        ]).optional(),
+        calculation: z
+          .discriminatedUnion("mode", [
+            z.object({ mode: z.literal("formula") }),
+            z.object({
+              mode: z.literal("fields"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              sourceVariableNames: z.array(z.string()).min(1),
+            }),
+            z.object({
+              mode: z.literal("repeated"),
+              operation: z.enum(["sum", "avg", "min", "max", "count"]),
+              dataTableName: z.string(),
+              sourceVariableName: z.string(),
+            }),
+          ])
+          .optional(),
         dataTable: z
           .object({
             columns: z.array(

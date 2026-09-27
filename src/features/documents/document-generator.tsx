@@ -490,7 +490,13 @@ export default function DocumentGenerator({
   };
 
   const save = async () => {
-    if (!selected || generateMutation.isPending || updateMutation.isPending || isRedirecting) return;
+    if (
+      !selected ||
+      generateMutation.isPending ||
+      updateMutation.isPending ||
+      isRedirecting
+    )
+      return;
 
     const trimmedDocumentName = documentName.trim();
 
@@ -909,7 +915,9 @@ export default function DocumentGenerator({
                 if (nextName !== documentName) setDirty(true);
                 setDocumentName(nextName);
 
-                setDocumentNameError(nextName.trim() ? "" : t("documentNameRequired"));
+                setDocumentNameError(
+                  nextName.trim() ? "" : t("documentNameRequired"),
+                );
               }}
             />
 
@@ -1036,7 +1044,9 @@ export default function DocumentGenerator({
                   setDirty(true);
                   setValues((current) => {
                     const next = { ...current, [variable.name]: nextValue };
-                    queueMicrotask(() => validateChangedVariable(variable, next));
+                    queueMicrotask(() =>
+                      validateChangedVariable(variable, next),
+                    );
                     return next;
                   });
                 }}
@@ -1046,7 +1056,9 @@ export default function DocumentGenerator({
           let displayValue = values[variable.name] ?? "";
           if (variable.type === "formula") {
             try {
-              const resolved = resolveCalculatedValues(variables, values, [variable.name]);
+              const resolved = resolveCalculatedValues(variables, values, [
+                variable.name,
+              ]);
               const result = resolved[variable.name];
               displayValue =
                 typeof result === "number"

@@ -4,7 +4,11 @@
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 34rem),
+    radial-gradient(
+      circle at 50% 20%,
+      color-mix(in srgb, var(--primary) 13%, transparent),
+      transparent 34rem
+    ),
     var(--background);
   color: var(--text);
 }
@@ -83,8 +87,18 @@
 }
 
 @media (max-width: 520px) {
-  .not-found-page { padding: 14px; }
-  .not-found-card { border-radius: 18px; }
-  .not-found-visual { width: 126px; height: 126px; border-radius: 22px; }
-  .not-found-home-link { width: 100%; }
+  .not-found-page {
+    padding: 14px;
+  }
+  .not-found-card {
+    border-radius: 18px;
+  }
+  .not-found-visual {
+    width: 126px;
+    height: 126px;
+    border-radius: 22px;
+  }
+  .not-found-home-link {
+    width: 100%;
+  }
 }

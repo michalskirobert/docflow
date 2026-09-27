@@ -60,7 +60,10 @@ function marketConfig(countryCode?: string | null) {
   };
 }
 
-export function getPlan(code: PlanCode, countryCode?: string | null): PlanPrice {
+export function getPlan(
+  code: PlanCode,
+  countryCode?: string | null,
+): PlanPrice {
   const config = marketConfig(countryCode);
 
   if (code === "FREE") {
@@ -95,8 +98,12 @@ export function getPlan(code: PlanCode, countryCode?: string | null): PlanPrice 
   };
 }
 
-export function publicPlans(customerType: CustomerType, countryCode?: string | null) {
-  const codes: PlanCode[] = customerType === "BUSINESS" ? ["YEARLY"] : ["FREE", "YEARLY"];
+export function publicPlans(
+  customerType: CustomerType,
+  countryCode?: string | null,
+) {
+  const codes: PlanCode[] =
+    customerType === "BUSINESS" ? ["YEARLY"] : ["FREE", "YEARLY"];
 
   return codes.map((code) => {
     const plan = getPlan(code, countryCode);

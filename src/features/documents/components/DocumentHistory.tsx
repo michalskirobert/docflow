@@ -153,13 +153,48 @@ export function DocumentHistory({
         closeLabel={t("closeFilters")}
         clearLabel={t("clearFilters")}
         applyLabel={t("applyFilters")}
-        activeFilterCount={(templateFilter !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)}
-        onClearFilters={() => { onTemplateFilterChange?.("all"); onDateFromChange?.(""); onDateToChange?.(""); }}
-        filters={<div className="list-filter-grid">
-          {onTemplateFilterChange && <SelectField label={t("filterByTemplate")} value={templateFilter} onChange={(e) => onTemplateFilterChange(e.target.value)}><option value="all">{t("allTemplates")}</option>{templateOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</SelectField>}
-          {onDateFromChange && <FilterDateControl label={t("dateFrom")} value={dateFrom} onChange={onDateFromChange} />}
-          {onDateToChange && <FilterDateControl label={t("dateTo")} value={dateTo} onChange={onDateToChange} />}
-        </div>}
+        activeFilterCount={
+          (templateFilter !== "all" ? 1 : 0) +
+          (dateFrom ? 1 : 0) +
+          (dateTo ? 1 : 0)
+        }
+        onClearFilters={() => {
+          onTemplateFilterChange?.("all");
+          onDateFromChange?.("");
+          onDateToChange?.("");
+        }}
+        filters={
+          <div className="list-filter-grid">
+            {onTemplateFilterChange && (
+              <SelectField
+                label={t("filterByTemplate")}
+                value={templateFilter}
+                onChange={(e) => onTemplateFilterChange(e.target.value)}
+              >
+                <option value="all">{t("allTemplates")}</option>
+                {templateOptions.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+            {onDateFromChange && (
+              <FilterDateControl
+                label={t("dateFrom")}
+                value={dateFrom}
+                onChange={onDateFromChange}
+              />
+            )}
+            {onDateToChange && (
+              <FilterDateControl
+                label={t("dateTo")}
+                value={dateTo}
+                onChange={onDateToChange}
+              />
+            )}
+          </div>
+        }
         action={action}
       />
 

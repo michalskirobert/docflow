@@ -27,7 +27,10 @@ export function parseTemplateNumber(
     const fractionLength = normalized.length - index - 1;
     const occurrences = normalized.split(separator).length - 1;
 
-    if (separator === configuredDecimal || occurrences === 1 && fractionLength !== 3) {
+    if (
+      separator === configuredDecimal ||
+      (occurrences === 1 && fractionLength !== 3)
+    ) {
       decimalSeparator = separator;
     }
   }
@@ -47,7 +50,6 @@ export function parseTemplateNumber(
   return Number(normalized);
 }
 
-
 export function formatTemplateNumber(
   value: number,
   variable: TemplateVariable,
@@ -65,9 +67,10 @@ export function formatTemplateNumber(
     : integerPart;
   const sign = value < 0 ? "-" : "";
   const decimal = variable.decimalSeparator ?? ",";
-  const formatted = places > 0
-    ? `${sign}${groupedInteger}${decimal}${fractionPart}`
-    : `${sign}${groupedInteger}`;
+  const formatted =
+    places > 0
+      ? `${sign}${groupedInteger}${decimal}${fractionPart}`
+      : `${sign}${groupedInteger}`;
   const numberFormat = variable.numberFormat ?? "number";
   if (numberFormat === "currency" && variable.currency)
     return `${formatted} ${variable.currency}`;

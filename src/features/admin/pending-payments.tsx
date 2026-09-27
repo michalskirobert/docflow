@@ -44,8 +44,8 @@ export default function PendingPayments() {
                 {new Intl.NumberFormat(undefined, {
                   style: "currency",
                   currency: p.currency,
-                }).format(p.grossAmount / 100)} ·{" "}
-                {new Date(p.createdAt).toLocaleDateString()}
+                }).format(p.grossAmount / 100)}{" "}
+                · {new Date(p.createdAt).toLocaleDateString()}
                 {p.transferReference ? ` · ${p.transferReference}` : ""}
               </span>
             </div>
