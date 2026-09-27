@@ -541,9 +541,14 @@ export function TemplateEditor({ template, onClose }: Props) {
       selectedToken &&
       ["bold", "italic", "underline", "foreColor"].includes(command)
     ) {
-      if (command === "bold")
-        selectedToken.style.fontWeight =
-          selectedToken.style.fontWeight === "700" ? "" : "700";
+      if (command === "bold") {
+        const computedWeight = getComputedStyle(selectedToken).fontWeight;
+        const isBold =
+          computedWeight === "bold" ||
+          Number.parseInt(computedWeight, 10) >= 600;
+
+        selectedToken.style.fontWeight = isBold ? "400" : "700";
+      }
       if (command === "italic")
         selectedToken.style.fontStyle =
           selectedToken.style.fontStyle === "italic" ? "" : "italic";
@@ -924,14 +929,14 @@ export function TemplateEditor({ template, onClose }: Props) {
           return;
         }
 
-        /*
-         * Zwykłe text/date/select variables nadal istnieją jako token:
-         *
-         * {{variableName}}
-         */
-        region.innerHTML = region.innerHTML
-          .split(`{{${oldName}}}`)
-          .join(`{{${variable.name}}}`);
+        region
+          .querySelectorAll<HTMLElement>(
+            `[data-variable-name="${CSS.escape(oldName)}"]`,
+          )
+          .forEach((token) => {
+            token.dataset.variableName = variable.name;
+            token.textContent = `{{${variable.name}}}`;
+          });
       },
     );
 

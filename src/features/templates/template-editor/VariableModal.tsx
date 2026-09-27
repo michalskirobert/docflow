@@ -50,10 +50,11 @@ export function VariableModal({
   existingVariables: TemplateVariable[];
 }) {
   const [label, setLabel] = useState(initial?.label ?? initial?.name ?? "");
-  const generatedName = useMemo(
-    () => initial?.name ?? makeTag(label),
-    [initial?.name, label],
-  );
+  const generatedName = useMemo(() => {
+    const initialLabel = initial?.label ?? initial?.name ?? "";
+
+    return initial && label === initialLabel ? initial.name : makeTag(label);
+  }, [initial, label]);
   const [type, setType] = useState<VariableType>(initial?.type ?? "text");
   const [placeholder, setPlaceholder] = useState(initial?.placeholder ?? "");
   const [formula, setFormula] = useState(initial?.formula ?? "");
