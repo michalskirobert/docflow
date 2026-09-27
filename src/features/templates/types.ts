@@ -23,17 +23,8 @@ export type DataTableDefinition = {
 export type CalculationOperation = "sum" | "avg" | "min" | "max" | "count";
 export type CalculationDefinition =
   | { mode: "formula" }
-  | {
-      mode: "fields";
-      operation: CalculationOperation;
-      sourceVariableNames: string[];
-    }
-  | {
-      mode: "repeated";
-      operation: CalculationOperation;
-      dataTableName: string;
-      sourceVariableName: string;
-    };
+  | { mode: "fields"; operation: CalculationOperation; sourceVariableNames: string[] }
+  | { mode: "repeated"; operation: CalculationOperation; dataTableName: string; sourceVariableName: string };
 export type TemplateVariable = {
   name: string;
   label?: string;

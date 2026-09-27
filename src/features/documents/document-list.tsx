@@ -25,10 +25,8 @@ export default function DocumentList() {
     ).entries(),
   );
   const filteredDocuments = allDocuments.filter((document) => {
-    const templateKey =
-      document.templateId ?? `deleted:${document.template?.name ?? ""}`;
-    if (templateFilter !== "all" && templateKey !== templateFilter)
-      return false;
+    const templateKey = document.templateId ?? `deleted:${document.template?.name ?? ""}`;
+    if (templateFilter !== "all" && templateKey !== templateFilter) return false;
     const createdAt = new Date(document.createdAt);
     if (dateFrom) {
       const from = new Date(`${dateFrom}T00:00:00`);

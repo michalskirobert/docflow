@@ -1,8 +1,15 @@
 "use client";
-import { SelectControl } from "@/components/shared/form";
+import { SelectField } from "@/components/shared/form";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { useState } from "react";
-import { Copy, Edit3, FilePlus2, LoaderCircle, Trash2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Copy,
+  Edit3,
+  FilePlus2,
+  LoaderCircle,
+  Trash2,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -26,8 +33,7 @@ export default function TemplateList() {
   const [dateTo, setDateTo] = useState("");
   const [cardActionPending, setCardActionPending] = useState(false);
   const query = useTemplatesService(q, sort, source, dateFrom, dateTo);
-  const activeFilterCount =
-    (source !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+  const activeFilterCount = (source !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
   return (
     <>
       <ListToolbar
@@ -48,44 +54,13 @@ export default function TemplateList() {
         clearLabel={t("clearFilters")}
         applyLabel={t("applyFilters")}
         activeFilterCount={activeFilterCount}
-        onClearFilters={() => {
-          setSource("all");
-          setDateFrom("");
-          setDateTo("");
-        }}
-        filters={
-          <div className="list-filter-grid">
-            <label className="filter-control">
-              <span>{t("sourceFilter")}</span>
-              <SelectControl
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-              >
-                <option value="all">{t("sourceAll")}</option>
-                <option value="default">{t("sourceDefault")}</option>
-                <option value="own">{t("sourceOwn")}</option>
-              </SelectControl>
-            </label>
-            <FilterDateControl
-              label={t("dateFrom")}
-              value={dateFrom}
-              onChange={setDateFrom}
-            />
-            <FilterDateControl
-              label={t("dateTo")}
-              value={dateTo}
-              onChange={setDateTo}
-            />
-          </div>
-        }
-        action={
-          <button
-            className="btn list-toolbar-primary"
-            onClick={() => setEditing("new")}
-          >
-            <FilePlus2 size={18} /> {t("new")}
-          </button>
-        }
+        onClearFilters={() => { setSource("all"); setDateFrom(""); setDateTo(""); }}
+        filters={<div className="list-filter-grid">
+          <SelectField label={t("sourceFilter")} value={source} onChange={(e) => setSource(e.target.value)}><option value="all">{t("sourceAll")}</option><option value="default">{t("sourceDefault")}</option><option value="own">{t("sourceOwn")}</option></SelectField>
+          <FilterDateControl label={t("dateFrom")} value={dateFrom} onChange={setDateFrom} />
+          <FilterDateControl label={t("dateTo")} value={dateTo} onChange={setDateTo} />
+        </div>}
+        action={<button className="btn list-toolbar-primary" onClick={() => setEditing("new")}><FilePlus2 size={18} /> {t("new")}</button>}
       />
       {query.isLoading ? (
         <ListSkeleton rows={6} cards />
@@ -164,6 +139,7 @@ function TemplateCard({
   const locale = useLocale();
   const [editPending, setEditPending] = useState(false);
   const remove = useDeleteTemplateService(template.id);
+  const queryClient = useQueryClient();
   const { confirm } = useFeedback();
   const variables = parseTemplateVariables(template.variablesJson);
   const del = async () => {
@@ -178,6 +154,13 @@ function TemplateCard({
       onActionPendingChange(true);
       try {
         await remove.mutateAsync(undefined);
+        queryClient.setQueriesData<TemplateSummary[]>(
+          { queryKey: ["templates"] },
+          (current) =>
+            Array.isArray(current)
+              ? current.filter((item) => item.id !== template.id)
+              : current,
+        );
       } finally {
         onActionPendingChange(false);
       }
@@ -193,11 +176,7 @@ function TemplateCard({
         <p className="muted clamp">
           {template.description || t("noDescription")}
         </p>
-        <span className="template-created-at">
-          {t("createdAt", {
-            date: new Date(template.createdAt).toLocaleDateString(locale),
-          })}
-        </span>
+        <span className="template-created-at">{t("createdAt", { date: new Date(template.createdAt).toLocaleDateString(locale) })}</span>
         <div className="variable-list">
           {variables.slice(0, 4).map((v) => (
             <span key={v.name}>{`{{${v.name}}}`}</span>

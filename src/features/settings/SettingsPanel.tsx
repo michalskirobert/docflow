@@ -187,11 +187,7 @@ export default function SettingsPanel() {
                       type="button"
                       key={plan.code}
                       className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
-                      disabled={
-                        !plan.available ||
-                        !plan.paymentAvailable ||
-                        currentPlan === "YEARLY"
-                      }
+                      disabled={!plan.available || !plan.paymentAvailable || currentPlan === "YEARLY"}
                       onClick={() => setSelectedPlan(plan.code)}
                     >
                       <div className="plan-visual" aria-hidden="true">

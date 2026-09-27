@@ -341,6 +341,7 @@ The template editor now includes an experimental Data Table control. A Data Tabl
 - Added a generated 1200x630 Open Graph/Twitter preview image for shared DocFlow links.
 - Public URL metadata uses `NEXT_PUBLIC_APP_URL` and falls back to `https://docflow.nurbyte.dev`.
 
+
 ### v2.4.0 editor line-flow hotfix
 
 - Rich-text paragraphs/headings are explicitly isolated as block rows in body/header/footer.

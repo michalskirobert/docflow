@@ -1,5 +1,7 @@
 "use client";
-import { DateTimePicker, InputControl } from "@/components/shared/form";
+
+import { DateTimePicker, FormField } from "@/components/shared/form";
+
 export function FilterDateControl({
   label,
   value,
@@ -10,22 +12,21 @@ export function FilterDateControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="filter-date-control">
-      <span>{label}</span>
-      <div className="filter-date-input">
-        <InputControl
-          value={value}
-          readOnly
-          placeholder="YYYY-MM-DD"
-          aria-label={label}
-        />
+    <FormField
+      label={label}
+      type="text"
+      inputMode="numeric"
+      value={value}
+      placeholder="YYYY-MM-DD"
+      onChange={(event) => onChange(event.target.value)}
+      suffix={
         <DateTimePicker
           type="date"
           value={value}
           label={label}
           onChange={onChange}
         />
-      </div>
-    </label>
+      }
+    />
   );
 }

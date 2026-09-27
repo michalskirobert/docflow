@@ -11,13 +11,7 @@ export type TemplateInput = {
   pageNumbers?: boolean;
   variables?: TemplateVariable[];
 };
-export const useTemplatesService = (
-  q = "",
-  sort = "newest",
-  source = "all",
-  dateFrom = "",
-  dateTo = "",
-) => {
+export const useTemplatesService = (q = "", sort = "newest", source = "all", dateFrom = "", dateTo = "") => {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
   params.set("sort", sort);
@@ -34,4 +28,4 @@ export const useCreateTemplateService = () =>
 export const useUpdateTemplateService = (id: string) =>
   usePut<Template, TemplateInput>(`/templates/${id}`, [["templates"]]);
 export const useDeleteTemplateService = (id: string) =>
-  useDelete<{ ok: boolean }>(`/templates/${id}`, [["templates"]]);
+  useDelete<{ ok: boolean }>(`/templates/${id}`);

@@ -8,9 +8,10 @@ import {
   MailPlus,
   Trash2,
 } from "lucide-react";
-import { SelectControl } from "@/components/shared/form";
+import { SelectField } from "@/components/shared/form";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { type ReactNode, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
@@ -152,50 +153,13 @@ export function DocumentHistory({
         closeLabel={t("closeFilters")}
         clearLabel={t("clearFilters")}
         applyLabel={t("applyFilters")}
-        activeFilterCount={
-          (templateFilter !== "all" ? 1 : 0) +
-          (dateFrom ? 1 : 0) +
-          (dateTo ? 1 : 0)
-        }
-        onClearFilters={() => {
-          onTemplateFilterChange?.("all");
-          onDateFromChange?.("");
-          onDateToChange?.("");
-        }}
-        filters={
-          <div className="list-filter-grid">
-            {onTemplateFilterChange && (
-              <label className="filter-control">
-                <span>{t("filterByTemplate")}</span>
-                <SelectControl
-                  value={templateFilter}
-                  onChange={(e) => onTemplateFilterChange(e.target.value)}
-                >
-                  <option value="all">{t("allTemplates")}</option>
-                  {templateOptions.map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </SelectControl>
-              </label>
-            )}
-            {onDateFromChange && (
-              <FilterDateControl
-                label={t("dateFrom")}
-                value={dateFrom}
-                onChange={onDateFromChange}
-              />
-            )}
-            {onDateToChange && (
-              <FilterDateControl
-                label={t("dateTo")}
-                value={dateTo}
-                onChange={onDateToChange}
-              />
-            )}
-          </div>
-        }
+        activeFilterCount={(templateFilter !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0)}
+        onClearFilters={() => { onTemplateFilterChange?.("all"); onDateFromChange?.(""); onDateToChange?.(""); }}
+        filters={<div className="list-filter-grid">
+          {onTemplateFilterChange && <SelectField label={t("filterByTemplate")} value={templateFilter} onChange={(e) => onTemplateFilterChange(e.target.value)}><option value="all">{t("allTemplates")}</option>{templateOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</SelectField>}
+          {onDateFromChange && <FilterDateControl label={t("dateFrom")} value={dateFrom} onChange={onDateFromChange} />}
+          {onDateToChange && <FilterDateControl label={t("dateTo")} value={dateTo} onChange={onDateToChange} />}
+        </div>}
         action={action}
       />
 
@@ -250,6 +214,7 @@ function DocumentRow({
 }) {
   const t = useTranslations("documents");
   const remove = useDeleteDocumentService(d.id);
+  const queryClient = useQueryClient();
   const { confirm, notify } = useFeedback();
   const locale = useLocale();
 
@@ -267,6 +232,13 @@ function DocumentRow({
       onActionPendingChange(true);
       try {
         await remove.mutateAsync(undefined);
+        queryClient.setQueriesData<DocumentSummary[]>(
+          { queryKey: ["documents"] },
+          (current) =>
+            Array.isArray(current)
+              ? current.filter((item) => item.id !== d.id)
+              : current,
+        );
         notify(t("deleteSuccess"), "success");
       } catch {
         notify(t("deleteError"), "error");

@@ -28,6 +28,7 @@ export function DataTableField({
   const t = useTranslations("documents");
   const [draggedRow, setDraggedRow] = useState<number | null>(null);
   const [dropTargetRow, setDropTargetRow] = useState<number | null>(null);
+  const [touchedCells, setTouchedCells] = useState<Set<string>>(() => new Set());
   const columns = table.dataTable?.columns ?? [];
   const defs = new Map(variables.map((item) => [item.name, item]));
   const rows = parseTableRows(value);
@@ -76,9 +77,7 @@ export function DataTableField({
         </div>
         <div className="data-table-field-heading-actions">
           <small>
-            {minRows > 0
-              ? t("minimumRows", { count: minRows })
-              : t("addRowsAsNeeded")}
+            {minRows > 0 ? t("minimumRows", { count: minRows }) : t("addRowsAsNeeded")}
           </small>
           <button
             type="button"
@@ -139,11 +138,7 @@ export function DataTableField({
                   resolved = resolveCalculatedValues(
                     variables,
                     resolved,
-                    columns
-                      .flatMap((column) =>
-                        column.variableName ? [column.variableName] : [],
-                      )
-                      .filter((name) => defs.get(name)?.type === "formula"),
+                    columns.flatMap((column) => column.variableName ? [column.variableName] : []).filter((name) => defs.get(name)?.type === "formula"),
                   );
                 } catch {}
                 return (
@@ -191,14 +186,14 @@ export function DataTableField({
                           </td>
                         );
                       }
-                      const cellError = validateVariable(
-                        variable,
-                        row[variable.name] ?? "",
-                        t as unknown as (
-                          key: string,
-                          values?: Record<string, string | number>,
-                        ) => string,
-                      );
+                      const cellKey = `${rowIndex}:${variable.name}`;
+                      const cellError = touchedCells.has(cellKey)
+                        ? validateVariable(
+                            variable,
+                            row[variable.name] ?? "",
+                            t as unknown as (key: string, values?: Record<string, string | number>) => string,
+                          )
+                        : "";
                       return (
                         <td key={column.id}>
                           <VariableField
@@ -207,15 +202,20 @@ export function DataTableField({
                             error={cellError}
                             compact
                             hideLabel
-                            onChange={(nextValue) =>
+                            onChange={(nextValue) => {
+                              setTouchedCells((current) => {
+                                const next = new Set(current);
+                                next.add(cellKey);
+                                return next;
+                              });
                               update(
                                 rows.map((item, index) =>
                                   index === rowIndex
                                     ? { ...item, [variable.name]: nextValue }
                                     : item,
                                 ),
-                              )
-                            }
+                              );
+                            }}
                           />
                         </td>
                       );

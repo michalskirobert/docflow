@@ -17,9 +17,8 @@ function normalizedExpression(expression: string) {
   return expression
     .replace(/×/g, "*")
     .replace(/÷/g, "/")
-    .replace(
-      /\b(SUM|AVG|MIN|MAX|COUNT)\s*\(/gi,
-      (_, name: string) => `${name.toLowerCase()}(`,
+    .replace(/\b(SUM|AVG|MIN|MAX|COUNT)\s*\(/gi, (_, name: string) =>
+      `${name.toLowerCase()}(`,
     )
     .replace(TOKEN, (_, name: string) => name);
 }
@@ -58,14 +57,10 @@ export function validateFormula(
         const fn = (child as { fn?: { name?: string }; args?: unknown[] }).fn;
         const name = fn?.name?.toLowerCase();
         if (!name || !ALLOWED_FUNCTIONS.has(name))
-          throw new FormulaError(
-            `Function "${fn?.name ?? "?"}" is not supported.`,
-          );
+          throw new FormulaError(`Function "${fn?.name ?? "?"}" is not supported.`);
         const args = (child as { args?: unknown[] }).args ?? [];
         if (args.length === 0)
-          throw new FormulaError(
-            `Function "${name.toUpperCase()}" requires at least one value.`,
-          );
+          throw new FormulaError(`Function "${name.toUpperCase()}" requires at least one value.`);
         return;
       }
       throw new FormulaError(
@@ -90,39 +85,27 @@ export function validateFormula(
   }
 }
 
-export function validateCalculation(
-  variable: TemplateVariable,
-  variables: TemplateVariable[],
-): string | null {
+export function validateCalculation(variable: TemplateVariable, variables: TemplateVariable[]): string | null {
   if (variable.type !== "formula") return null;
   const calculation = variable.calculation;
   if (!calculation || calculation.mode === "formula")
     return validateFormula(variable.formula ?? "", variables, variable.name);
   const byName = new Map(variables.map((item) => [item.name, item]));
   if (calculation.mode === "fields") {
-    if (calculation.sourceVariableNames.length === 0)
-      return "Select at least one numeric field.";
+    if (calculation.sourceVariableNames.length === 0) return "Select at least one numeric field.";
     for (const name of calculation.sourceVariableNames) {
-      if (name === variable.name)
-        return `Variable "${name}" cannot reference itself.`;
+      if (name === variable.name) return `Variable "${name}" cannot reference itself.`;
       const source = byName.get(name);
-      if (!source || (source.type !== "number" && source.type !== "formula"))
-        return `Variable "${name}" is not numeric.`;
+      if (!source || (source.type !== "number" && source.type !== "formula")) return `Variable "${name}" is not numeric.`;
     }
     return null;
   }
   const table = byName.get(calculation.dataTableName);
-  if (!table || table.type !== "dataTable")
-    return "Repeated calculation table does not exist.";
+  if (!table || table.type !== "dataTable") return "Repeated calculation table does not exist.";
   const source = byName.get(calculation.sourceVariableName);
-  if (!source || (source.type !== "number" && source.type !== "formula"))
-    return `Variable "${calculation.sourceVariableName}" is not numeric.`;
-  const belongsToTable = table.dataTable?.columns.some(
-    (column) => column.variableName === calculation.sourceVariableName,
-  );
-  return belongsToTable
-    ? null
-    : `Variable "${calculation.sourceVariableName}" is not a column of the selected table.`;
+  if (!source || (source.type !== "number" && source.type !== "formula")) return `Variable "${calculation.sourceVariableName}" is not numeric.`;
+  const belongsToTable = table.dataTable?.columns.some((column) => column.variableName === calculation.sourceVariableName);
+  return belongsToTable ? null : `Variable "${calculation.sourceVariableName}" is not a column of the selected table.`;
 }
 
 export function evaluateFormula(
@@ -138,14 +121,7 @@ export function evaluateFormula(
       scope[name] = raw;
       continue;
     }
-    const value =
-      typeof raw === "number"
-        ? raw
-        : Number(
-            String(raw ?? "")
-              .replace(/\s/g, "")
-              .replace(",", "."),
-          );
+    const value = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(/\s/g, "").replace(",", "."));
     if (!Number.isFinite(value))
       throw new FormulaError(`Variable "${name}" has no numeric value.`);
     scope[name] = value;
@@ -159,16 +135,12 @@ export function evaluateFormula(
     if (node.type === "ParenthesisNode") return evaluateNode(node.content);
     if (node.type === "SymbolNode") {
       const value = scope[node.name];
-      if (value === undefined)
-        throw new FormulaError(`Variable "${node.name}" has no numeric value.`);
+      if (value === undefined) throw new FormulaError(`Variable "${node.name}" has no numeric value.`);
       return value;
     }
     if (node.type === "OperatorNode") {
       const args = node.args.map((arg: any) => evaluateNode(arg));
-      if (args.some(Array.isArray))
-        throw new FormulaError(
-          "A repeated field must be used inside SUM, AVG, MIN, MAX or COUNT.",
-        );
+      if (args.some(Array.isArray)) throw new FormulaError("A repeated field must be used inside SUM, AVG, MIN, MAX or COUNT.");
       const [left, right] = args as number[];
       if (node.op === "+") return left + right;
       if (node.op === "-") return args.length === 1 ? -left : left - right;
@@ -179,23 +151,16 @@ export function evaluateFormula(
     }
     if (node.type === "FunctionNode") {
       const name = String(node.fn?.name ?? "").toLowerCase();
-      if (!ALLOWED_FUNCTIONS.has(name))
-        throw new FormulaError(`Function "${name}" is not supported.`);
+      if (!ALLOWED_FUNCTIONS.has(name)) throw new FormulaError(`Function "${name}" is not supported.`);
       const numbers = flatten(node.args.map((arg: any) => evaluateNode(arg)));
       if (name === "count") return numbers.length;
       if (numbers.length === 0) return 0;
-      if (name === "sum")
-        return numbers.reduce((total, value) => total + value, 0);
-      if (name === "avg")
-        return (
-          numbers.reduce((total, value) => total + value, 0) / numbers.length
-        );
+      if (name === "sum") return numbers.reduce((total, value) => total + value, 0);
+      if (name === "avg") return numbers.reduce((total, value) => total + value, 0) / numbers.length;
       if (name === "min") return Math.min(...numbers);
       if (name === "max") return Math.max(...numbers);
     }
-    throw new FormulaError(
-      `Expression element "${node.type}" is not supported.`,
-    );
+    throw new FormulaError(`Expression element "${node.type}" is not supported.`);
   };
 
   const result = evaluateNode(parse(normalizedExpression(expression)));
@@ -204,23 +169,18 @@ export function evaluateFormula(
   return result;
 }
 
-function aggregate(
-  operation: "sum" | "avg" | "min" | "max" | "count",
-  values: number[],
-): number {
+function aggregate(operation: "sum" | "avg" | "min" | "max" | "count", values: number[]): number {
   if (operation === "count") return values.length;
   if (values.length === 0) return 0;
   if (operation === "sum") return values.reduce((sum, value) => sum + value, 0);
-  if (operation === "avg")
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  if (operation === "avg") return values.reduce((sum, value) => sum + value, 0) / values.length;
   if (operation === "min") return Math.min(...values);
   return Math.max(...values);
 }
 
 function numericValue(raw: unknown, variable: TemplateVariable): number {
   const value = parseTemplateNumber(raw ?? "", variable);
-  if (!Number.isFinite(value))
-    throw new FormulaError(`Variable "${variable.name}" has no numeric value.`);
+  if (!Number.isFinite(value)) throw new FormulaError(`Variable "${variable.name}" has no numeric value.`);
   return value;
 }
 
@@ -254,8 +214,7 @@ export function resolveCalculatedValues(
     const definition = byName.get(name);
     if (!definition)
       throw new FormulaError(`Variable "${name}" does not exist.`);
-    if (definition.type === "number")
-      return numericValue(row[name], definition);
+    if (definition.type === "number") return numericValue(row[name], definition);
     if (definition.type !== "formula")
       throw new FormulaError(`Variable "${name}" is not numeric.`);
 
@@ -322,8 +281,7 @@ export function resolveCalculatedValues(
     if (resolving.has(name))
       throw new FormulaError(`Circular calculation dependency: ${name}`);
     const variable = formulas.get(name);
-    if (!variable)
-      throw new FormulaError(`Calculation is missing for ${name}.`);
+    if (!variable) throw new FormulaError(`Calculation is missing for ${name}.`);
 
     resolving.add(name);
     try {
@@ -334,9 +292,7 @@ export function resolveCalculatedValues(
           if (owningTable(dependency)) {
             const repeated = repeatedValues(dependency);
             if (repeated.length !== 1)
-              throw new FormulaError(
-                `Repeated variable "${dependency}" must be used with a repeated aggregation.`,
-              );
+              throw new FormulaError(`Repeated variable "${dependency}" must be used with a repeated aggregation.`);
             return repeated[0];
           }
           if (formulas.has(dependency)) return resolve(dependency);
@@ -351,16 +307,9 @@ export function resolveCalculatedValues(
         const definition = byName.get(calculation.sourceVariableName);
         if (!table || table.type !== "dataTable")
           throw new FormulaError("Repeated calculation table does not exist.");
-        if (
-          !definition ||
-          (definition.type !== "number" && definition.type !== "formula")
-        )
-          throw new FormulaError(
-            `Variable "${calculation.sourceVariableName}" is not numeric.`,
-          );
-        const rows = parseTableRows(
-          String(values[calculation.dataTableName] ?? "[]"),
-        );
+        if (!definition || (definition.type !== "number" && definition.type !== "formula"))
+          throw new FormulaError(`Variable "${calculation.sourceVariableName}" is not numeric.`);
+        const rows = parseTableRows(String(values[calculation.dataTableName] ?? "[]"));
         const numbers = rows.flatMap((row) => {
           try {
             return [resolveRowValue(calculation.sourceVariableName, row)];
@@ -370,17 +319,10 @@ export function resolveCalculatedValues(
         });
         result = aggregate(calculation.operation, numbers);
       } else {
-        if (!variable.formula)
-          throw new FormulaError(`Formula is missing for ${name}.`);
-        const validationError = validateFormula(
-          variable.formula,
-          variables,
-          name,
-        );
+        if (!variable.formula) throw new FormulaError(`Formula is missing for ${name}.`);
+        const validationError = validateFormula(variable.formula, variables, name);
         if (validationError) throw new FormulaError(validationError);
-        const formulaValues: Record<string, string | number | number[]> = {
-          ...values,
-        };
+        const formulaValues: Record<string, string | number | number[]> = { ...values };
         for (const dependency of formulaDependencies(variable.formula)) {
           const dependencyVariable = byName.get(dependency);
           if (!dependencyVariable) continue;
@@ -391,10 +333,7 @@ export function resolveCalculatedValues(
           } else if (dependencyVariable.type === "formula") {
             formulaValues[dependency] = resolve(dependency);
           } else if (dependencyVariable.type === "number") {
-            formulaValues[dependency] = numericValue(
-              values[dependency],
-              dependencyVariable,
-            );
+            formulaValues[dependency] = numericValue(values[dependency], dependencyVariable);
           }
         }
         result = evaluateFormula(variable.formula, formulaValues);

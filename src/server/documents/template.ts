@@ -119,15 +119,19 @@ function renderDataTables(
   variables: TemplateVariable[],
 ) {
   const defs = new Map(variables.map((variable) => [variable.name, variable]));
+  const renderedBlockNames = new Set<string>();
+
   let rendered = content.replace(
     /<div\b[^>]*data-data-table-name=["']([\w-]+)["'][^>]*>[\s\S]*?<\/div>/gi,
     (_full, name: string) => {
       const table = defs.get(name);
-      return table?.type === "dataTable"
-        ? renderDataTableMarkup(table, data, variables)
-        : "";
+      if (table?.type !== "dataTable") return "";
+
+      renderedBlockNames.add(name);
+      return renderDataTableMarkup(table, data, variables);
     },
   );
+
   for (const table of variables.filter(
     (variable) => variable.type === "dataTable",
   )) {
@@ -135,11 +139,15 @@ function renderDataTables(
       `{{\\s*${table.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*}}`,
       "g",
     );
+
     rendered = rendered.replace(
       token,
-      renderDataTableMarkup(table, data, variables),
+      renderedBlockNames.has(table.name)
+        ? ""
+        : renderDataTableMarkup(table, data, variables),
     );
   }
+
   return rendered;
 }
 

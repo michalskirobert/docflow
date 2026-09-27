@@ -23,6 +23,7 @@ import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import { parseTemplateVariables } from "@/features/templates/types";
+import type { TemplateVariable } from "@/features/templates/types";
 import { resolveCalculatedValues } from "@/features/templates/calculations";
 import { formatTemplateNumber } from "@/features/templates/number-format";
 import { TemplatePicker } from "./components/TemplatePicker";
@@ -281,64 +282,84 @@ export default function DocumentGenerator({
 
   useUnsavedChanges(dirty && !isRedirecting, confirmLeave, navigationBypassRef);
 
-  const validateValues = (
-    sourceValues: Record<string, string> = values,
-    shouldScroll = true,
+  const validateSingleVariable = (
+    variable: TemplateVariable,
+    sourceValues: Record<string, string>,
   ) => {
     const validationT = t as unknown as (
       key: string,
       values?: Record<string, string | number>,
     ) => string;
+
+    if (
+      variable.type !== "dataTable" &&
+      tableOnlyVariableNames.has(variable.name)
+    ) {
+      return "";
+    }
+
+    if (variable.type !== "dataTable") {
+      return validateVariable(
+        variable,
+        sourceValues[variable.name] ?? "",
+        validationT,
+      );
+    }
+
+    const rows = parseTableRows(sourceValues[variable.name] ?? "[]");
+    const minRows = Math.max(
+      variable.required ? 1 : 0,
+      variable.dataTable?.minRows ?? 0,
+    );
+    if (rows.length < minRows) return t("minimumRows", { count: minRows });
+
+    const defs = new Map(variables.map((item) => [item.name, item]));
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      for (const column of variable.dataTable?.columns ?? []) {
+        if (!column.variableName) continue;
+        const def = defs.get(column.variableName);
+        if (!def || def.type === "formula") continue;
+        const rowError = validateVariable(
+          def,
+          rows[rowIndex][def.name] ?? "",
+          validationT,
+        );
+        if (rowError) {
+          return t("tableRowError", {
+            row: rowIndex + 1,
+            field: def.label || def.name,
+            error: rowError,
+          });
+        }
+      }
+    }
+    return "";
+  };
+
+  const validateChangedVariable = (
+    variable: TemplateVariable,
+    sourceValues: Record<string, string>,
+  ) => {
+    const error = validateSingleVariable(variable, sourceValues);
+    setErrors((current) => {
+      const next = { ...current };
+      if (error) next[variable.name] = error;
+      else delete next[variable.name];
+      return next;
+    });
+    return !error;
+  };
+
+  const validateValues = (
+    sourceValues: Record<string, string> = values,
+    shouldScroll = true,
+  ) => {
     const nextErrors = Object.fromEntries(
       variables
-        .map((variable) => {
-          if (
-            variable.type !== "dataTable" &&
-            tableOnlyVariableNames.has(variable.name)
-          ) {
-            return [variable.name, ""];
-          }
-          if (variable.type === "dataTable") {
-            const rows = parseTableRows(sourceValues[variable.name] ?? "[]");
-            const minRows = Math.max(
-              variable.required ? 1 : 0,
-              variable.dataTable?.minRows ?? 0,
-            );
-            if (rows.length < minRows)
-              return [variable.name, t("minimumRows", { count: minRows })];
-            const defs = new Map(variables.map((item) => [item.name, item]));
-            for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
-              for (const column of variable.dataTable?.columns ?? []) {
-                if (!column.variableName) continue;
-                const def = defs.get(column.variableName);
-                if (!def || def.type === "formula") continue;
-                const rowError = validateVariable(
-                  def,
-                  rows[rowIndex][def.name] ?? "",
-                  validationT,
-                );
-                if (rowError)
-                  return [
-                    variable.name,
-                    t("tableRowError", {
-                      row: rowIndex + 1,
-                      field: def.label || def.name,
-                      error: rowError,
-                    }),
-                  ];
-              }
-            }
-            return [variable.name, ""];
-          }
-          return [
-            variable.name,
-            validateVariable(
-              variable,
-              sourceValues[variable.name] ?? "",
-              validationT,
-            ),
-          ];
-        })
+        .map((variable) => [
+          variable.name,
+          validateSingleVariable(variable, sourceValues),
+        ])
         .filter(([, error]) => error),
     );
 
@@ -469,13 +490,7 @@ export default function DocumentGenerator({
   };
 
   const save = async () => {
-    if (
-      !selected ||
-      generateMutation.isPending ||
-      updateMutation.isPending ||
-      isRedirecting
-    )
-      return;
+    if (!selected || generateMutation.isPending || updateMutation.isPending || isRedirecting) return;
 
     const trimmedDocumentName = documentName.trim();
 
@@ -894,9 +909,7 @@ export default function DocumentGenerator({
                 if (nextName !== documentName) setDirty(true);
                 setDocumentName(nextName);
 
-                setDocumentNameError(
-                  nextName.trim() ? "" : t("documentNameRequired"),
-                );
+                setDocumentNameError(nextName.trim() ? "" : t("documentNameRequired"));
               }}
             />
 
@@ -1023,7 +1036,7 @@ export default function DocumentGenerator({
                   setDirty(true);
                   setValues((current) => {
                     const next = { ...current, [variable.name]: nextValue };
-                    queueMicrotask(() => validateValues(next, false));
+                    queueMicrotask(() => validateChangedVariable(variable, next));
                     return next;
                   });
                 }}
@@ -1033,9 +1046,7 @@ export default function DocumentGenerator({
           let displayValue = values[variable.name] ?? "";
           if (variable.type === "formula") {
             try {
-              const resolved = resolveCalculatedValues(variables, values, [
-                variable.name,
-              ]);
+              const resolved = resolveCalculatedValues(variables, values, [variable.name]);
               const result = resolved[variable.name];
               displayValue =
                 typeof result === "number"
@@ -1055,7 +1066,7 @@ export default function DocumentGenerator({
                 if (value !== (values[variable.name] ?? "")) setDirty(true);
                 setValues((current) => {
                   const next = { ...current, [variable.name]: value };
-                  queueMicrotask(() => validateValues(next, false));
+                  queueMicrotask(() => validateChangedVariable(variable, next));
                   return next;
                 });
               }}

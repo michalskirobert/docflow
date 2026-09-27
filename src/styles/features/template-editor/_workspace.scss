@@ -2505,6 +2505,7 @@ body.data-table-is-resizing * {
   display: none !important;
 }
 
+
 /* v2.4 editor line-flow hotfix — rich-text lines are independent blocks.
    Formatting/replacing text inside one line must never let the following line
    flow beside it. Explicit justify-between blocks keep their flex layout. */
@@ -2517,8 +2518,7 @@ body.data-table-is-resizing * {
 .a4-paper > h5,
 .a4-paper > blockquote,
 .page-header-editor > p,
-.page-header-editor
-  > div:not([data-layout="between"]):not([data-data-table-name]),
+.page-header-editor > div:not([data-layout="between"]):not([data-data-table-name]),
 .page-header-editor > h1,
 .page-header-editor > h2,
 .page-header-editor > h3,
@@ -2526,8 +2526,7 @@ body.data-table-is-resizing * {
 .page-header-editor > h5,
 .page-header-editor > blockquote,
 .page-footer-editor > p,
-.page-footer-editor
-  > div:not([data-layout="between"]):not([data-data-table-name]),
+.page-footer-editor > div:not([data-layout="between"]):not([data-data-table-name]),
 .page-footer-editor > h1,
 .page-footer-editor > h2,
 .page-footer-editor > h3,
@@ -2601,10 +2600,7 @@ body.data-table-is-resizing * {
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition:
-    border-color 150ms ease,
-    background 150ms ease,
-    transform 150ms ease;
+  transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
 }
 .variable-removal-option:hover,
 .variable-removal-option:focus-visible {

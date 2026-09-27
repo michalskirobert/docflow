@@ -55,7 +55,7 @@ export const useUpdateDocumentService = (id: string) =>
     [["documents"], ["documents", id]],
   );
 export const useDeleteDocumentService = (id: string) =>
-  useDelete<void>(`/documents/${id}`, [["documents"]]);
+  useDelete<void>(`/documents/${id}`);
 
 export type EmailSettingsStatus = { configured: boolean };
 export const useEmailSettingsStatusService = () =>
