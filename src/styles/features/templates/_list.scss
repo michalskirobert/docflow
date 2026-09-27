@@ -312,3 +312,13 @@
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
+
+/* 2.4.0: make template loading state explicit while the full editor payload is fetched. */
+.template-card .card-actions .template-action-edit[aria-busy="true"] {
+  min-width: 132px;
+  cursor: wait;
+  opacity: 0.85;
+}
+.template-card .template-action-edit .spinner {
+  flex: 0 0 auto;
+}

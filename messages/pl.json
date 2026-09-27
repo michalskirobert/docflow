@@ -177,7 +177,8 @@
     "newest": "Najnowsze",
     "oldest": "Najstarsze",
     "nameAsc": "Nazwa A–Z",
-    "nameDesc": "Nazwa Z–A"
+    "nameDesc": "Nazwa Z–A",
+    "openingEditor": "Otwieranie…"
   },
   "documents": {
     "close": "Zamknij",
@@ -503,6 +504,10 @@
     "back": "Wróć",
     "variables": "Zmienne",
     "removeVariable": "Usuń zmienną",
+    "removeVariableDialogTitle": "Usuń zmienną",
+    "removeVariableDialogMessage": "Co chcesz zrobić ze zmienną „{variable}”?",
+    "removeVariableFromHere": "Usuń z tego miejsca",
+    "removeVariableFromTemplate": "Usuń zmienną z szablonu",
     "header": "Nagłówek",
     "footer": "Stopka",
     "pageNumbers": "Numeracja stron",
@@ -591,7 +596,9 @@
     "formulaValid": "Formuła jest poprawna.",
     "addToWorkspace": "Dodaj do obszaru roboczego",
     "addToWorkspaceHelp": "Po wyłączeniu zmienna zostanie utworzona, ale nie będzie automatycznie wstawiona do dokumentu.",
-    "formulaInsertOperator": "Wstaw operator…"
+    "formulaInsertOperator": "Wstaw operator…",
+    "removeVariableFromHereDescription": "Zmienna pozostanie dostępna w szablonie i będzie można wstawić ją ponownie.",
+    "removeVariableFromTemplateDescription": "Usunie definicję zmiennej oraz wszystkie jej wystąpienia w nagłówku, treści i stopce."
   },
   "help": {
     "title": "Pomoc",

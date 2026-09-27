@@ -128,6 +128,7 @@ function TemplateCard({
   onActionPendingChange: (pending: boolean) => void;
 }) {
   const t = useTranslations("templates");
+  const [editPending, setEditPending] = useState(false);
   const remove = useDeleteTemplateService(template.id);
   const { confirm } = useFeedback();
   const variables = parseTemplateVariables(template.variablesJson);
@@ -166,10 +167,22 @@ function TemplateCard({
         <div className="card-actions">
           <button
             className="template-action-edit"
-            onClick={() => void onEdit()}
+            onClick={() => {
+              setEditPending(true);
+              void onEdit().finally(() => setEditPending(false));
+            }}
             disabled={actionsDisabled}
+            aria-busy={editPending}
           >
-            <Edit3 /> {t("edit")}
+            {editPending ? (
+              <>
+                <LoaderCircle className="spinner" /> {t("openingEditor")}
+              </>
+            ) : (
+              <>
+                <Edit3 /> {t("edit")}
+              </>
+            )}
           </button>
           <button
             className="template-action-duplicate"

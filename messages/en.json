@@ -177,7 +177,8 @@
     "newest": "Newest first",
     "oldest": "Oldest first",
     "nameAsc": "Name A–Z",
-    "nameDesc": "Name Z–A"
+    "nameDesc": "Name Z–A",
+    "openingEditor": "Opening…"
   },
   "documents": {
     "close": "Zamknij",
@@ -503,6 +504,10 @@
     "back": "Back",
     "variables": "Variables",
     "removeVariable": "Remove variable",
+    "removeVariableDialogTitle": "Remove variable",
+    "removeVariableDialogMessage": "What do you want to do with the variable “{variable}”?",
+    "removeVariableFromHere": "Remove from this location",
+    "removeVariableFromTemplate": "Remove variable from template",
     "header": "Header",
     "footer": "Footer",
     "pageNumbers": "Page numbers",
@@ -591,7 +596,9 @@
     "formulaValid": "Formula is valid.",
     "addToWorkspace": "Add to workspace",
     "addToWorkspaceHelp": "When disabled, the variable is created but is not automatically inserted into the document.",
-    "formulaInsertOperator": "Insert operator…"
+    "formulaInsertOperator": "Insert operator…",
+    "removeVariableFromHereDescription": "The variable will remain available in the template and can be inserted again.",
+    "removeVariableFromTemplateDescription": "Removes the variable definition and all of its occurrences from the header, content and footer."
   },
   "help": {
     "title": "Help",

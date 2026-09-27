@@ -177,7 +177,8 @@
     "newest": "Terbaru",
     "oldest": "Terlama",
     "nameAsc": "Nama A–Z",
-    "nameDesc": "Nama Z–A"
+    "nameDesc": "Nama Z–A",
+    "openingEditor": "Membuka…"
   },
   "documents": {
     "close": "Zamknij",
@@ -503,6 +504,10 @@
     "back": "Kembali",
     "variables": "Variabel",
     "removeVariable": "Hapus variabel",
+    "removeVariableDialogTitle": "Hapus variabel",
+    "removeVariableDialogMessage": "Apa yang ingin Anda lakukan dengan variabel “{variable}”?",
+    "removeVariableFromHere": "Hapus dari lokasi ini",
+    "removeVariableFromTemplate": "Hapus variabel dari templat",
     "header": "Header",
     "footer": "Footer",
     "pageNumbers": "Nomor halaman",
@@ -591,7 +596,9 @@
     "formulaValid": "Rumus valid.",
     "addToWorkspace": "Tambahkan ke area kerja",
     "addToWorkspaceHelp": "Jika dinonaktifkan, variabel dibuat tetapi tidak otomatis disisipkan ke dokumen.",
-    "formulaInsertOperator": "Sisipkan operator…"
+    "formulaInsertOperator": "Sisipkan operator…",
+    "removeVariableFromHereDescription": "Variabel akan tetap tersedia di templat dan dapat disisipkan kembali.",
+    "removeVariableFromTemplateDescription": "Menghapus definisi variabel dan semua kemunculannya dari header, isi, dan footer."
   },
   "help": {
     "title": "Bantuan",

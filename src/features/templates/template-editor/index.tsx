@@ -156,6 +156,10 @@ export function TemplateEditor({ template, onClose }: Props) {
     useState<HTMLElement | null>(null);
   const [selectedVariableBox, setSelectedVariableBox] =
     useState<DOMRect | null>(null);
+  const [variableRemoval, setVariableRemoval] = useState<{
+    element: HTMLElement;
+    variable: TemplateVariable;
+  } | null>(null);
   const draggedVariableElement = useRef<HTMLElement | null>(null);
   const [selectedTableCell, setSelectedTableCell] =
     useState<HTMLTableCellElement | null>(null);
@@ -2215,10 +2219,10 @@ export function TemplateEditor({ template, onClose }: Props) {
                     aria-label={t("removeVariable")}
                     title={t("removeVariable")}
                     onClick={() => {
-                      selectedVariableElement.remove();
-                      setSelectedVariableElement(null);
-                      setSelectedVariableBox(null);
-                      setDirty(true);
+                      setVariableRemoval({
+                        element: selectedVariableElement,
+                        variable,
+                      });
                     }}
                   >
                     <Trash2 size={14} />
@@ -2387,6 +2391,112 @@ export function TemplateEditor({ template, onClose }: Props) {
               rememberSelection();
             }}
           />
+        )}
+
+        {variableRemoval && (
+          <div className="dialog-backdrop">
+            <section
+              className="dialog variable-removal-dialog"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="remove-workspace-variable-title"
+            >
+              <div className="variable-removal-dialog-header">
+                <div>
+                  <h3 id="remove-workspace-variable-title">
+                    {t("removeVariableDialogTitle")}
+                  </h3>
+                  <p>
+                    {t("removeVariableDialogMessage", {
+                      variable:
+                        variableRemoval.variable.label ||
+                        variableRemoval.variable.name,
+                    })}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="variable-removal-dialog-close"
+                  onClick={() => setVariableRemoval(null)}
+                  aria-label={t("cancel")}
+                  title={t("cancel")}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="variable-removal-options">
+                <button
+                  type="button"
+                  className="variable-removal-option"
+                  onClick={() => {
+                    const wrapper =
+                      variableRemoval.element.closest<HTMLElement>(
+                        "[data-variable-editor-wrapper]",
+                      );
+                    (wrapper ?? variableRemoval.element).remove();
+                    setVariableRemoval(null);
+                    setSelectedVariableElement(null);
+                    setSelectedVariableBox(null);
+                    setDirty(true);
+                  }}
+                >
+                  <Trash2 size={20} />
+                  <span>
+                    <strong>{t("removeVariableFromHere")}</strong>
+                    <small>{t("removeVariableFromHereDescription")}</small>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className="variable-removal-option variable-removal-option-danger"
+                  onClick={() => {
+                    const variableName = variableRemoval.variable.name;
+                    [
+                      editor.current,
+                      headerEditor.current,
+                      footerEditor.current,
+                    ].forEach((region) => {
+                      region
+                        ?.querySelectorAll<HTMLElement>(
+                          `[data-variable-name="${CSS.escape(variableName)}"]`,
+                        )
+                        .forEach((node) => {
+                          const wrapper = node.closest<HTMLElement>(
+                            "[data-variable-editor-wrapper]",
+                          );
+                          (wrapper ?? node).remove();
+                        });
+                    });
+                    setVariables((current) =>
+                      current.filter((item) => item.name !== variableName),
+                    );
+                    setVariableRemoval(null);
+                    setSelectedVariableElement(null);
+                    setSelectedVariableBox(null);
+                    setDirty(true);
+                  }}
+                >
+                  <Trash2 size={20} />
+                  <span>
+                    <strong>{t("removeVariableFromTemplate")}</strong>
+                    <small>{t("removeVariableFromTemplateDescription")}</small>
+                  </span>
+                </button>
+              </div>
+
+              <div className="variable-removal-dialog-footer">
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => setVariableRemoval(null)}
+                >
+                  {t("cancel")}
+                </button>
+              </div>
+            </section>
+          </div>
         )}
 
         {variableOpen && (

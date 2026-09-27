@@ -2547,3 +2547,114 @@ body.data-table-is-resizing * {
   display: flex;
   width: 100%;
 }
+
+/* 2.4.0: clear variable-removal decision dialog. */
+.variable-removal-dialog {
+  width: min(560px, calc(100vw - 32px));
+  padding: 24px;
+}
+.variable-removal-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.variable-removal-dialog-header h3 {
+  margin: 0 0 8px;
+}
+.variable-removal-dialog-header p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.variable-removal-dialog-close {
+  display: inline-grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.variable-removal-dialog-close:hover,
+.variable-removal-dialog-close:focus-visible {
+  background: var(--surface-soft, #f8fafc);
+  color: var(--text);
+}
+.variable-removal-options {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+.variable-removal-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+.variable-removal-option:hover,
+.variable-removal-option:focus-visible {
+  border-color: #94a3b8;
+  background: rgb(148 163 184 / 8%);
+  transform: translateY(-1px);
+}
+.variable-removal-option > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.variable-removal-option span {
+  display: grid;
+  gap: 4px;
+}
+.variable-removal-option strong {
+  font-size: 0.98rem;
+}
+.variable-removal-option small {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.variable-removal-option-danger {
+  border-color: rgb(220 38 38 / 35%);
+}
+.variable-removal-option-danger > svg,
+.variable-removal-option-danger strong {
+  color: #dc2626;
+}
+.variable-removal-option-danger:hover,
+.variable-removal-option-danger:focus-visible {
+  border-color: #dc2626;
+  background: rgb(220 38 38 / 7%);
+}
+.variable-removal-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 560px) {
+  .variable-removal-dialog {
+    padding: 18px;
+  }
+  .variable-removal-option {
+    padding: 14px;
+  }
+  .variable-removal-dialog-footer .btn {
+    width: 100%;
+  }
+}
