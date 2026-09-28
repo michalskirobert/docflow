@@ -370,9 +370,10 @@
 /* 2.4.0 desktop document filters */
 @media (min-width: 901px) {
   .document-history .filter-bar {
-    grid-template-columns:
-      minmax(320px, 1fr) minmax(190px, 0.5fr) minmax(160px, 0.38fr)
-      auto;
+    grid-template-columns: minmax(320px, 1fr) minmax(190px, 0.5fr) minmax(
+        160px,
+        0.38fr
+      ) auto;
     align-items: end;
   }
   .document-history .document-create-actions {

@@ -18,23 +18,15 @@ export default function NotFound() {
           <DocFlowMark className="not-found-brand-mark" />
           <span className="not-found-code">404</span>
         </div>
-        <p className="not-found-eyebrow">
-          DocFlow <span>by NurByte</span>
-        </p>
+        <p className="not-found-eyebrow">DocFlow <span>by NurByte</span></p>
         <h1 id="not-found-title">{t("title")}</h1>
         <p className="not-found-description">{t("description")}</p>
         <div className="not-found-actions">
           <Link href="/" className="btn not-found-home-link">
-            <Home size={18} />
-            {t("backHome")}
+            <Home size={18} />{t("backHome")}
           </Link>
-          <button
-            type="button"
-            className="btn secondary not-found-back-link"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft size={18} />
-            {t("backPrevious")}
+          <button type="button" className="btn secondary not-found-back-link" onClick={() => router.back()}>
+            <ArrowLeft size={18} />{t("backPrevious")}
           </button>
         </div>
       </section>

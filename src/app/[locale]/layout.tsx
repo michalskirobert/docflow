@@ -10,6 +10,38 @@ import { Providers } from "@/components/layout/providers";
 import { routing } from "@/i18n/navigation";
 import { siteConfig } from "@/lib/site";
 
+const themeBootstrapScript = `
+(() => {
+  try {
+    const key = "docflow-theme";
+    const stored = localStorage.getItem(key);
+    const preference =
+      stored === "light" || stored === "dark" || stored === "system"
+        ? stored
+        : "system";
+    const resolved =
+      preference === "system"
+        ? window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light"
+        : preference;
+
+    const root = document.documentElement;
+    root.dataset.theme = resolved;
+    root.dataset.themePreference = preference;
+    root.style.colorScheme = resolved;
+  } catch {
+    const root = document.documentElement;
+    const resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+    root.dataset.theme = resolved;
+    root.dataset.themePreference = "system";
+    root.style.colorScheme = resolved;
+  }
+})();
+`;
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -102,6 +134,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
