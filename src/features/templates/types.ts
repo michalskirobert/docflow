@@ -58,7 +58,8 @@ export type TemplateVariable = {
   decimalPlaces?: number;
   decimalSeparator?: "." | ",";
   thousandsSeparator?: "none" | "." | "," | "space";
-  numberFormat?: "number" | "currency" | "percentage" | "measure";
+  numberFormat?: "number" | "currency" | "percentage" | "measure" | "quantity";
+  numberLocale?: string;
   currency?: string;
   unit?: string;
   fontSize?: number;

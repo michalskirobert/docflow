@@ -50,32 +50,64 @@ export function parseTemplateNumber(
   return Number(normalized);
 }
 
+export function getTemplateNumberDecimalPlaces(
+  variable: TemplateVariable,
+): number {
+  const numberFormat = variable.numberFormat ?? "number";
+
+  if (numberFormat === "quantity") return 0;
+
+  if (numberFormat === "currency" && variable.currency) {
+    try {
+      return new Intl.NumberFormat(variable.numberLocale || "pl-PL", {
+        style: "currency",
+        currency: variable.currency,
+      }).resolvedOptions().maximumFractionDigits;
+    } catch {
+      return 2;
+    }
+  }
+
+  return Math.max(0, variable.decimalPlaces ?? 0);
+}
+
 export function formatTemplateNumber(
   value: number,
   variable: TemplateVariable,
 ): string {
   if (!Number.isFinite(value)) return "";
-  const places = Math.max(0, variable.decimalPlaces ?? 0);
-  const [integerPart, fractionPart] = Math.abs(value)
-    .toFixed(places)
-    .split(".");
-  const separator = variable.thousandsSeparator ?? "none";
-  const grouping =
-    separator === "space" ? " " : separator === "none" ? "" : separator;
-  const groupedInteger = grouping
-    ? integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, grouping)
-    : integerPart;
-  const sign = value < 0 ? "-" : "";
-  const decimal = variable.decimalSeparator ?? ",";
-  const formatted =
-    places > 0
-      ? `${sign}${groupedInteger}${decimal}${fractionPart}`
-      : `${sign}${groupedInteger}`;
+
+  const places = getTemplateNumberDecimalPlaces(variable);
   const numberFormat = variable.numberFormat ?? "number";
-  if (numberFormat === "currency" && variable.currency)
-    return `${formatted} ${variable.currency}`;
-  if (numberFormat === "percentage") return `${formatted}%`;
-  if (numberFormat === "measure" && variable.unit)
-    return `${formatted} ${variable.unit}`;
-  return formatted;
+  const locale = variable.numberLocale || "pl-PL";
+
+  try {
+    if (numberFormat === "currency" && variable.currency) {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: variable.currency,
+      }).format(value);
+    }
+
+    const decimalSeparator = variable.decimalSeparator ?? ",";
+    const thousandsSeparator = variable.thousandsSeparator ?? "none";
+    const [integerPart, fractionPart] = value.toFixed(places).split(".");
+    const groupingCharacter =
+      thousandsSeparator === "space" ? " " : thousandsSeparator;
+    const groupedInteger =
+      groupingCharacter && groupingCharacter !== "none"
+        ? integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, groupingCharacter)
+        : integerPart;
+    const formatted = fractionPart
+      ? `${groupedInteger}${decimalSeparator}${fractionPart}`
+      : groupedInteger;
+
+    if (numberFormat === "percentage") return `${formatted}%`;
+    if (["measure", "quantity"].includes(numberFormat) && variable.unit) {
+      return `${formatted} ${variable.unit}`;
+    }
+    return formatted;
+  } catch {
+    return value.toFixed(places);
+  }
 }

@@ -1700,3 +1700,87 @@ body {
     display: flex !important;
   }
 }
+
+/* 2.4.0 final mobile navigation: four equal slots; account owns settings/help/logout. */
+@media (max-width: 900px) {
+  .sidebar {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: 66px !important;
+    column-gap: 4px !important;
+  }
+
+  .sidebar nav {
+    display: contents !important;
+  }
+
+  .sidebar nav .mobile-hidden,
+  .sidebar nav .nav-account,
+  .sidebar nav .nav-settings,
+  .sidebar nav .nav-help {
+    display: none !important;
+  }
+
+  .sidebar nav .nav-dashboard {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .sidebar nav .nav-templates {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .sidebar nav .nav-documents {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .mobile-profile {
+    position: relative !important;
+    grid-column: 4;
+    grid-row: 1;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .sidebar nav a,
+  .mobile-profile-trigger {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+}
+
+/* 2.4.0 final compact mobile footer branding */
+@media (max-width: 900px) {
+  .app-footer {
+    margin: 12px 0 8px !important;
+    padding: 8px 8px 10px !important;
+    gap: 4px !important;
+    min-height: 0 !important;
+  }
+
+  .mobile-footer-brand .docflow-logo-mark,
+  .mobile-footer-brand img.docflow-logo-mark {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    aspect-ratio: 1 / 1;
+    object-fit: contain !important;
+    object-position: center;
+  }
+
+  .mobile-footer-brand {
+    gap: 5px !important;
+  }
+  .mobile-footer-brand .docflow-logo-wordmark {
+    font-size: 10px !important;
+  }
+  .mobile-footer-brand > span,
+  .app-footer-copy {
+    font-size: 9px !important;
+  }
+}

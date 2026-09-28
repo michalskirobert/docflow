@@ -1,5 +1,8 @@
 import type { TemplateVariable } from "@/features/templates/types";
-import { parseTemplateNumber } from "@/features/templates/number-format";
+import {
+  getTemplateNumberDecimalPlaces,
+  parseTemplateNumber,
+} from "@/features/templates/number-format";
 export function applyInputMask(value: string, mask?: string) {
   if (!mask) return value;
   const chars = value.replace(/[^a-zA-Z0-9]/g, "").split("");
@@ -84,13 +87,14 @@ export function validateVariable(
       return message("maximumValue", `Maximum value is ${v.maxNumber}.`, {
         value: v.maxNumber!,
       });
-    if ((v.decimalPlaces ?? 0) > 0) {
+    const decimalPlaces = getTemplateNumberDecimalPlaces(v);
+    if (decimalPlaces >= 0) {
       const decimals = (normalizedValue.split(".")[1] ?? "").length;
-      if (decimals > v.decimalPlaces!)
+      if (decimals > decimalPlaces)
         return message(
           "maximumDecimalPlaces",
-          `Maximum ${v.decimalPlaces} decimal places.`,
-          { count: v.decimalPlaces! },
+          `Maximum ${decimalPlaces} decimal places.`,
+          { count: decimalPlaces },
         );
     }
   }

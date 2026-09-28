@@ -205,7 +205,10 @@
     "applyFilters": "Terapkan",
     "dateFrom": "Tanggal dari",
     "dateTo": "Tanggal sampai",
-    "createdAt": "Dibuat: {date}"
+    "createdAt": "Dibuat: {date}",
+    "numberFormatQuantity": "Jumlah / satuan",
+    "numberLocale": "Wilayah pemformatan",
+    "fontFamily": "Font"
   },
   "documents": {
     "close": "Zamknij",
@@ -678,7 +681,10 @@
     "numberFormatMeasure": "Satuan",
     "currency": "Mata uang",
     "unit": "Satuan",
-    "unitPlaceholder": "mis. kg, m², kWh"
+    "unitPlaceholder": "mis. kg, m², kWh",
+    "numberFormatQuantity": "Jumlah / satuan",
+    "numberLocale": "Wilayah pemformatan",
+    "fontFamily": "Font"
   },
   "help": {
     "title": "Bantuan",
@@ -794,6 +800,7 @@
   "notFound": {
     "title": "Halaman ini tidak ditemukan",
     "description": "Sepertinya dokumen atau alamat ini tidak ada, telah dipindahkan, atau sudah tidak tersedia.",
-    "backHome": "Kembali ke beranda"
+    "backHome": "Kembali ke beranda",
+    "backPrevious": "Kembali"
   }
 }

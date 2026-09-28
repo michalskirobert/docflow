@@ -32,12 +32,14 @@ export type ToolbarState = {
   orderedList: boolean;
   block: string;
   fontSize: string;
+  fontFamily: string;
   lineHeight: string;
 };
 type Props = {
   t: (key: string) => string;
   cmd: (command: string, value?: string) => void;
   setPx: (px: string) => void;
+  setFontFamily: (value: string) => void;
   setLineHeight: (value: string) => void;
   insertTable: () => void;
   rememberSelection: () => void;
@@ -51,6 +53,7 @@ export function EditorToolbar({
   t,
   cmd,
   setPx,
+  setFontFamily,
   setLineHeight,
   insertTable,
   rememberSelection,
@@ -93,6 +96,23 @@ export function EditorToolbar({
         <option value="h4">{t("heading4")}</option>
         <option value="h5">{t("subtitle")}</option>
         <option value="blockquote">{t("quote")}</option>
+      </SelectControl>
+      <SelectControl
+        className="editor-select editor-select-font"
+        value={state.fontFamily}
+        onPointerDown={rememberSelection}
+        onChange={(e) => setFontFamily(e.target.value)}
+        aria-label={t("fontFamily")}
+        title={t("fontFamily")}
+      >
+        <option value="">{t("fontFamily")}</option>
+        <option value="Arial, Helvetica, sans-serif">Arial</option>
+        <option value="'Times New Roman', Times, serif">Times New Roman</option>
+        <option value="Georgia, serif">Georgia</option>
+        <option value="Verdana, Geneva, sans-serif">Verdana</option>
+        <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+        <option value="'Trebuchet MS', Arial, sans-serif">Trebuchet MS</option>
+        <option value="'Courier New', Courier, monospace">Courier New</option>
       </SelectControl>
       <SelectControl
         className="editor-select editor-select-size"

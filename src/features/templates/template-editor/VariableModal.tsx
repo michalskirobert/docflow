@@ -153,9 +153,12 @@ export function VariableModal({
     "none" | "." | "," | "space"
   >(initial?.thousandsSeparator ?? "none");
   const [numberFormat, setNumberFormat] = useState<
-    "number" | "currency" | "percentage" | "measure"
+    "number" | "currency" | "percentage" | "measure" | "quantity"
   >(initial?.numberFormat ?? "number");
   const [currency, setCurrency] = useState(initial?.currency ?? "PLN");
+  const [numberLocale, setNumberLocale] = useState(
+    initial?.numberLocale ?? "pl-PL",
+  );
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [minDate, setMinDate] = useState(initial?.minDate ?? "");
   const [maxDate, setMaxDate] = useState(initial?.maxDate ?? "");
@@ -285,7 +288,11 @@ export function VariableModal({
         minNumber: type === "number" ? optionalNumber(minNumber) : undefined,
         maxNumber: type === "number" ? optionalNumber(maxNumber) : undefined,
         decimalPlaces: ["number", "formula"].includes(type)
-          ? optionalNumber(decimalPlaces)
+          ? numberFormat === "currency"
+            ? undefined
+            : numberFormat === "quantity"
+              ? 0
+              : optionalNumber(decimalPlaces)
           : undefined,
         decimalSeparator: ["number", "formula"].includes(type)
           ? decimalSeparator
@@ -296,12 +303,17 @@ export function VariableModal({
         numberFormat: ["number", "formula"].includes(type)
           ? numberFormat
           : undefined,
+        numberLocale:
+          ["number", "formula"].includes(type) && numberFormat === "currency"
+            ? numberLocale
+            : undefined,
         currency:
           ["number", "formula"].includes(type) && numberFormat === "currency"
             ? currency
             : undefined,
         unit:
-          ["number", "formula"].includes(type) && numberFormat === "measure"
+          ["number", "formula"].includes(type) &&
+          ["measure", "quantity"].includes(numberFormat)
             ? unit.trim() || undefined
             : undefined,
         minDate:
@@ -791,7 +803,11 @@ export function VariableModal({
                       onChange={(e) =>
                         setNumberFormat(
                           e.target.value as
-                            "number" | "currency" | "percentage" | "measure",
+                            | "number"
+                            | "currency"
+                            | "percentage"
+                            | "measure"
+                            | "quantity",
                         )
                       }
                     >
@@ -805,26 +821,59 @@ export function VariableModal({
                       <option value="measure">
                         {t("numberFormatMeasure")}
                       </option>
+                      <option value="quantity">
+                        {t("numberFormatQuantity")}
+                      </option>
                     </SelectControl>
                   </label>
                   {numberFormat === "currency" && (
-                    <label className="field">
-                      {t("currency")}
-                      <SelectControl
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                      >
-                        {["PLN", "EUR", "USD", "GBP", "IDR", "CZK", "CHF"].map(
-                          (code) => (
+                    <>
+                      <label className="field">
+                        {t("currency")}
+                        <SelectControl
+                          value={currency}
+                          onChange={(e) => setCurrency(e.target.value)}
+                        >
+                          {[
+                            "PLN",
+                            "EUR",
+                            "USD",
+                            "GBP",
+                            "CHF",
+                            "CZK",
+                            "IDR",
+                            "JPY",
+                            "AUD",
+                            "CAD",
+                            "SGD",
+                            "SEK",
+                            "NOK",
+                            "DKK",
+                          ].map((code) => (
                             <option key={code} value={code}>
                               {code}
                             </option>
-                          ),
-                        )}
-                      </SelectControl>
-                    </label>
+                          ))}
+                        </SelectControl>
+                      </label>
+                      <label className="field">
+                        {t("numberLocale")}
+                        <SelectControl
+                          value={numberLocale}
+                          onChange={(e) => setNumberLocale(e.target.value)}
+                        >
+                          <option value="pl-PL">Polska (pl-PL)</option>
+                          <option value="en-US">United States (en-US)</option>
+                          <option value="en-GB">United Kingdom (en-GB)</option>
+                          <option value="de-DE">Deutschland (de-DE)</option>
+                          <option value="id-ID">Indonesia (id-ID)</option>
+                          <option value="cs-CZ">Česko (cs-CZ)</option>
+                          <option value="fr-FR">France (fr-FR)</option>
+                        </SelectControl>
+                      </label>
+                    </>
                   )}
-                  {numberFormat === "measure" && (
+                  {["measure", "quantity"].includes(numberFormat) && (
                     <label className="field">
                       {t("unit")}
                       <InputControl
@@ -837,52 +886,58 @@ export function VariableModal({
                   )}
                 </div>
                 <div className="form-grid two">
-                  <label className="field">
-                    {t("decimalPlaces")}
-                    <InputControl
-                      type="number"
-                      min="0"
-                      max="12"
-                      inputMode="numeric"
-                      value={decimalPlaces}
-                      onChange={(e) => setDecimalPlaces(e.target.value)}
-                    />
-                  </label>
-                  <label className="field">
-                    {t("decimalSeparator")}
-                    <SelectControl
-                      value={decimalSeparator}
-                      onChange={(e) => {
-                        const next = e.target.value as "." | ",";
-                        setDecimalSeparator(next);
-                        if (thousandsSeparator === next)
-                          setThousandsSeparator("none");
-                      }}
-                    >
-                      <option value=",">{t("separatorComma")}</option>
-                      <option value=".">{t("separatorDot")}</option>
-                    </SelectControl>
-                  </label>
-                  <label className="field">
-                    {t("thousandsSeparator")}
-                    <SelectControl
-                      value={thousandsSeparator}
-                      onChange={(e) =>
-                        setThousandsSeparator(
-                          e.target.value as "none" | "." | "," | "space",
-                        )
-                      }
-                    >
-                      <option value="none">{t("separatorNone")}</option>
-                      <option value="." disabled={decimalSeparator === "."}>
-                        {t("separatorDot")}
-                      </option>
-                      <option value="," disabled={decimalSeparator === ","}>
-                        {t("separatorComma")}
-                      </option>
-                      <option value="space">{t("separatorSpace")}</option>
-                    </SelectControl>
-                  </label>
+                  {!["currency", "quantity"].includes(numberFormat) && (
+                    <label className="field">
+                      {t("decimalPlaces")}
+                      <InputControl
+                        type="number"
+                        min="0"
+                        max="12"
+                        inputMode="numeric"
+                        value={decimalPlaces}
+                        onChange={(e) => setDecimalPlaces(e.target.value)}
+                      />
+                    </label>
+                  )}
+                  {numberFormat === "number" && (
+                    <>
+                      <label className="field">
+                        {t("decimalSeparator")}
+                        <SelectControl
+                          value={decimalSeparator}
+                          onChange={(e) => {
+                            const next = e.target.value as "." | ",";
+                            setDecimalSeparator(next);
+                            if (thousandsSeparator === next)
+                              setThousandsSeparator("none");
+                          }}
+                        >
+                          <option value=",">{t("separatorComma")}</option>
+                          <option value=".">{t("separatorDot")}</option>
+                        </SelectControl>
+                      </label>
+                      <label className="field">
+                        {t("thousandsSeparator")}
+                        <SelectControl
+                          value={thousandsSeparator}
+                          onChange={(e) =>
+                            setThousandsSeparator(
+                              e.target.value as "none" | "." | "," | "space",
+                            )
+                          }
+                        >
+                          <option value="none">{t("separatorNone")}</option>
+                          <option value="." disabled={decimalSeparator === "."}>
+                            {t("separatorDot")}
+                          </option>
+                          <option value="," disabled={decimalSeparator === ","}>
+                            {t("separatorComma")}
+                          </option>
+                          <option value="space">{t("separatorSpace")}</option>
+                        </SelectControl>
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
             )}

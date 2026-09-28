@@ -205,7 +205,10 @@
     "applyFilters": "Zastosuj",
     "dateFrom": "Data od",
     "dateTo": "Data do",
-    "createdAt": "Utworzono: {date}"
+    "createdAt": "Utworzono: {date}",
+    "numberFormatQuantity": "Ilość / sztuki",
+    "numberLocale": "Region formatowania",
+    "fontFamily": "Czcionka"
   },
   "documents": {
     "close": "Zamknij",
@@ -678,7 +681,10 @@
     "numberFormatMeasure": "Jednostka",
     "currency": "Waluta",
     "unit": "Jednostka",
-    "unitPlaceholder": "np. kg, m², kWh"
+    "unitPlaceholder": "np. kg, m², kWh",
+    "numberFormatQuantity": "Ilość / sztuki",
+    "numberLocale": "Region formatowania",
+    "fontFamily": "Czcionka"
   },
   "help": {
     "title": "Pomoc",
@@ -794,6 +800,7 @@
   "notFound": {
     "title": "Nie znaleźliśmy tej strony",
     "description": "Wygląda na to, że ten dokument lub adres nie istnieje, został przeniesiony albo jest już niedostępny.",
-    "backHome": "Wróć do strony głównej"
+    "backHome": "Wróć do strony głównej",
+    "backPrevious": "Wróć do poprzedniej strony"
   }
 }

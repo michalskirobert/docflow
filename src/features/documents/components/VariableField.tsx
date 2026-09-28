@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import type { TemplateVariable } from "@/features/templates/types";
 import { parseFormattedNumber } from "@/features/documents/helpers";
+import { getTemplateNumberDecimalPlaces } from "@/features/templates/number-format";
 import {
   DateTimePicker,
   InputControl,
@@ -724,7 +725,7 @@ export function VariableField({
   }
 
   if (variableType === "number") {
-    const decimalPlaces = Math.max(0, variable.decimalPlaces ?? 0);
+    const decimalPlaces = getTemplateNumberDecimalPlaces(variable);
 
     const formatNumberOnBlur = () => {
       if (!value.trim()) return;

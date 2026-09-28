@@ -217,3 +217,66 @@
     grid-row: 1 / span 3;
   }
 }
+
+/* 2.4.0 final help information architecture: one readable content column. */
+.help-layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+.help-layout .help-card {
+  min-width: 0;
+}
+
+.help-layout .calculation-help-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-block: 20px;
+}
+
+.help-layout .calculation-help-card .section-heading {
+  flex: 1 1 auto;
+  margin-bottom: 0;
+}
+
+.help-layout .calculation-help-card .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (min-width: 901px) {
+  .help-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-layout .support-card,
+  .help-layout .calculation-help-card {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .help-layout {
+    gap: 14px;
+  }
+
+  .help-layout .calculation-help-card {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .help-layout .calculation-help-card .btn {
+    width: 100%;
+  }
+
+  .faq-question {
+    padding: 14px;
+  }
+
+  .faq-answer {
+    padding: 0 14px 14px;
+  }
+}

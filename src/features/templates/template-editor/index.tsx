@@ -193,6 +193,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     orderedList: false,
     block: "p",
     fontSize: "",
+    fontFamily: "",
     lineHeight: "",
   });
 
@@ -445,6 +446,15 @@ export function TemplateEditor({ template, onClose }: Props) {
             ? Math.round(parseFloat(getComputedStyle(element).fontSize))
             : 0;
           return px ? String(px) : "";
+        })(),
+        fontFamily: (() => {
+          const selection = window.getSelection();
+          const element = tokenStyle
+            ? selectedVariableElement
+            : selection?.anchorNode instanceof Element
+              ? selection.anchorNode
+              : selection?.anchorNode?.parentElement;
+          return element ? getComputedStyle(element).fontFamily : "";
         })(),
         lineHeight: (() => {
           if (tokenStyle) {
@@ -1217,6 +1227,26 @@ export function TemplateEditor({ template, onClose }: Props) {
     setDirty(true);
   };
 
+  const setFontFamily = (value: string) => {
+    if (!value) return;
+    restoreSelection();
+    const region = activeEditor.current ?? editor.current;
+    const selection = window.getSelection();
+    if (selection?.rangeCount && selection.getRangeAt(0).collapsed) {
+      expandCollapsedSelectionToCurrentBlock();
+    }
+    document.execCommand("fontName", false, value);
+    region?.querySelectorAll("font[face]").forEach((element) => {
+      const html = element as HTMLElement;
+      html.style.fontFamily = html.getAttribute("face") || value;
+      html.removeAttribute("face");
+    });
+    region?.focus();
+    rememberSelection();
+    syncToolbarState();
+    setDirty(true);
+  };
+
   const setLineHeight = (value: string) => {
     if (!value) return;
     const region = activeEditor.current ?? editor.current;
@@ -1808,6 +1838,7 @@ export function TemplateEditor({ template, onClose }: Props) {
             t={t}
             cmd={cmd}
             setPx={setPx}
+            setFontFamily={setFontFamily}
             setLineHeight={setLineHeight}
             insertTable={() =>
               cmd(

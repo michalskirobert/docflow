@@ -205,7 +205,10 @@
     "applyFilters": "Apply",
     "dateFrom": "Date from",
     "dateTo": "Date to",
-    "createdAt": "Created: {date}"
+    "createdAt": "Created: {date}",
+    "numberFormatQuantity": "Quantity / pieces",
+    "numberLocale": "Formatting region",
+    "fontFamily": "Font"
   },
   "documents": {
     "close": "Zamknij",
@@ -678,7 +681,10 @@
     "numberFormatMeasure": "Measure",
     "currency": "Currency",
     "unit": "Unit",
-    "unitPlaceholder": "e.g. kg, m², kWh"
+    "unitPlaceholder": "e.g. kg, m², kWh",
+    "numberFormatQuantity": "Quantity / pieces",
+    "numberLocale": "Formatting region",
+    "fontFamily": "Font"
   },
   "help": {
     "title": "Help",
@@ -794,6 +800,7 @@
   "notFound": {
     "title": "We couldn’t find this page",
     "description": "It looks like this document or address does not exist, has been moved, or is no longer available.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "backPrevious": "Go back"
   }
 }
