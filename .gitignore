@@ -5,3 +5,7 @@ node_modules
 *.log
 storage/generated/*
 !storage/generated/.gitkeep
+
+# macOS
+.DS_Store
+**/.DS_Store
