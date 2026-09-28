@@ -1773,7 +1773,14 @@ body {
     object-position: center;
   }
 
-  .mobile-footer-brand { gap: 5px !important; }
-  .mobile-footer-brand .docflow-logo-wordmark { font-size: 10px !important; }
-  .mobile-footer-brand > span, .app-footer-copy { font-size: 9px !important; }
+  .mobile-footer-brand {
+    gap: 5px !important;
+  }
+  .mobile-footer-brand .docflow-logo-wordmark {
+    font-size: 10px !important;
+  }
+  .mobile-footer-brand > span,
+  .app-footer-copy {
+    font-size: 9px !important;
+  }
 }

@@ -59,10 +59,12 @@ export function getTemplateNumberDecimalPlaces(
 
   if (numberFormat === "currency" && variable.currency) {
     try {
-      return new Intl.NumberFormat(variable.numberLocale || "pl-PL", {
-        style: "currency",
-        currency: variable.currency,
-      }).resolvedOptions().maximumFractionDigits ?? 2;
+      return (
+        new Intl.NumberFormat(variable.numberLocale || "pl-PL", {
+          style: "currency",
+          currency: variable.currency,
+        }).resolvedOptions().maximumFractionDigits ?? 2
+      );
     } catch {
       return 2;
     }

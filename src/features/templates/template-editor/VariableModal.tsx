@@ -156,7 +156,9 @@ export function VariableModal({
     "number" | "currency" | "percentage" | "measure" | "quantity"
   >(initial?.numberFormat ?? "number");
   const [currency, setCurrency] = useState(initial?.currency ?? "PLN");
-  const [numberLocale, setNumberLocale] = useState(initial?.numberLocale ?? "pl-PL");
+  const [numberLocale, setNumberLocale] = useState(
+    initial?.numberLocale ?? "pl-PL",
+  );
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [minDate, setMinDate] = useState(initial?.minDate ?? "");
   const [maxDate, setMaxDate] = useState(initial?.maxDate ?? "");
@@ -310,7 +312,8 @@ export function VariableModal({
             ? currency
             : undefined,
         unit:
-          ["number", "formula"].includes(type) && ["measure", "quantity"].includes(numberFormat)
+          ["number", "formula"].includes(type) &&
+          ["measure", "quantity"].includes(numberFormat)
             ? unit.trim() || undefined
             : undefined,
         minDate:
@@ -800,7 +803,11 @@ export function VariableModal({
                       onChange={(e) =>
                         setNumberFormat(
                           e.target.value as
-                            "number" | "currency" | "percentage" | "measure" | "quantity",
+                            | "number"
+                            | "currency"
+                            | "percentage"
+                            | "measure"
+                            | "quantity",
                         )
                       }
                     >
@@ -827,13 +834,26 @@ export function VariableModal({
                           value={currency}
                           onChange={(e) => setCurrency(e.target.value)}
                         >
-                          {["PLN", "EUR", "USD", "GBP", "CHF", "CZK", "IDR", "JPY", "AUD", "CAD", "SGD", "SEK", "NOK", "DKK"].map(
-                            (code) => (
-                              <option key={code} value={code}>
-                                {code}
-                              </option>
-                            ),
-                          )}
+                          {[
+                            "PLN",
+                            "EUR",
+                            "USD",
+                            "GBP",
+                            "CHF",
+                            "CZK",
+                            "IDR",
+                            "JPY",
+                            "AUD",
+                            "CAD",
+                            "SGD",
+                            "SEK",
+                            "NOK",
+                            "DKK",
+                          ].map((code) => (
+                            <option key={code} value={code}>
+                              {code}
+                            </option>
+                          ))}
                         </SelectControl>
                       </label>
                       <label className="field">

@@ -26,13 +26,18 @@ export function DocFlowLogo({
   showByline = false,
 }: DocFlowLogoProps) {
   return (
-    <div className={`docflow-logo ${compact ? "is-compact" : ""} ${className}`.trim()}>
+    <div
+      className={`docflow-logo ${compact ? "is-compact" : ""} ${className}`.trim()}
+    >
       <DocFlowMark className="docflow-logo-mark" />
       <div className="docflow-logo-copy">
         <div className="docflow-logo-wordmark">
-          <span>Doc</span><strong>Flow</strong>
+          <span>Doc</span>
+          <strong>Flow</strong>
         </div>
-        {!compact && showByline && <span className="docflow-logo-byline">by NurByte</span>}
+        {!compact && showByline && (
+          <span className="docflow-logo-byline">by NurByte</span>
+        )}
       </div>
     </div>
   );

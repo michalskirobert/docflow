@@ -5,19 +5,114 @@
   padding: 24px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 30%, rgb(245 158 11 / 14%), transparent 28rem),
+    radial-gradient(
+      circle at 50% 30%,
+      rgb(245 158 11 / 14%),
+      transparent 28rem
+    ),
     var(--background);
   color: var(--text);
 }
-.not-found-card { width:min(760px,100%); padding:clamp(28px,6vw,56px); text-align:center; border:1px solid var(--border); border-radius:28px; background:color-mix(in srgb,var(--surface) 94%,transparent); box-shadow:0 30px 90px rgb(0 0 0 / 18%); }
-.not-found-visual { position:relative; width:min(440px,88vw); height:260px; margin:0 auto 20px; display:grid; place-items:center; }
-.not-found-brand-glow { position:absolute; width:240px; height:150px; border-radius:50%; background:#f59e0b; filter:blur(70px); opacity:.18; }
-.not-found-brand-mark { position:absolute; width:220px; height:220px; object-fit:contain; transform:translateY(-12px); filter:drop-shadow(0 18px 28px rgb(0 0 0 / 28%)); }
-.not-found-code { position:absolute; bottom:0; font-size:clamp(72px,15vw,128px); font-weight:950; line-height:.75; letter-spacing:-.08em; color:color-mix(in srgb,var(--text) 88%,transparent); text-shadow:0 3px 0 rgb(245 158 11 / 35%); }
-.not-found-eyebrow { margin:28px 0 10px; color:#f59e0b; font-size:14px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
-.not-found-eyebrow span { color:var(--muted); font-weight:650; text-transform:none; letter-spacing:.02em; }
-.not-found-card h1 { margin:0; font-size:clamp(30px,6vw,46px); line-height:1.08; }
-.not-found-description { max-width:520px; margin:16px auto 28px; color:var(--muted); line-height:1.65; }
-.not-found-actions { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
-.not-found-home-link,.not-found-back-link { display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; min-height:44px; }
-@media(max-width:520px){.not-found-page{padding:14px}.not-found-card{padding:24px 18px;border-radius:20px}.not-found-visual{height:210px}.not-found-brand-mark{width:180px;height:180px}.not-found-actions>*{width:100%}}
+.not-found-card {
+  width: min(760px, 100%);
+  padding: clamp(28px, 6vw, 56px);
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 30px 90px rgb(0 0 0 / 18%);
+}
+.not-found-visual {
+  position: relative;
+  width: min(440px, 88vw);
+  height: 260px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+}
+.not-found-brand-glow {
+  position: absolute;
+  width: 240px;
+  height: 150px;
+  border-radius: 50%;
+  background: #f59e0b;
+  filter: blur(70px);
+  opacity: 0.18;
+}
+.not-found-brand-mark {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  transform: translateY(-12px);
+  filter: drop-shadow(0 18px 28px rgb(0 0 0 / 28%));
+}
+.not-found-code {
+  position: absolute;
+  bottom: 0;
+  font-size: clamp(72px, 15vw, 128px);
+  font-weight: 950;
+  line-height: 0.75;
+  letter-spacing: -0.08em;
+  color: color-mix(in srgb, var(--text) 88%, transparent);
+  text-shadow: 0 3px 0 rgb(245 158 11 / 35%);
+}
+.not-found-eyebrow {
+  margin: 28px 0 10px;
+  color: #f59e0b;
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.not-found-eyebrow span {
+  color: var(--muted);
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+.not-found-card h1 {
+  margin: 0;
+  font-size: clamp(30px, 6vw, 46px);
+  line-height: 1.08;
+}
+.not-found-description {
+  max-width: 520px;
+  margin: 16px auto 28px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.not-found-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.not-found-home-link,
+.not-found-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  min-height: 44px;
+}
+@media (max-width: 520px) {
+  .not-found-page {
+    padding: 14px;
+  }
+  .not-found-card {
+    padding: 24px 18px;
+    border-radius: 20px;
+  }
+  .not-found-visual {
+    height: 210px;
+  }
+  .not-found-brand-mark {
+    width: 180px;
+    height: 180px;
+  }
+  .not-found-actions > * {
+    width: 100%;
+  }
+}
