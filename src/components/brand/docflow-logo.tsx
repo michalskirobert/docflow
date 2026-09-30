@@ -6,7 +6,13 @@ type DocFlowLogoProps = {
   showByline?: boolean;
 };
 
-export function DocFlowMark({ className = "" }: { className?: string }) {
+export function DocFlowMark({
+  className = "",
+  priority = false,
+}: {
+  className?: string;
+  priority?: boolean;
+}) {
   return (
     <Image
       aria-hidden="true"
@@ -15,7 +21,8 @@ export function DocFlowMark({ className = "" }: { className?: string }) {
       alt=""
       width={256}
       height={256}
-      priority
+      priority={priority}
+      sizes="(max-width: 900px) 32px, 40px"
     />
   );
 }

@@ -1,8 +1,9 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "./session";
 
-export async function requireSession() {
+async function readRequiredSession() {
   const session = await getSession();
   if (!session) redirect("/login");
 
@@ -25,3 +26,5 @@ export async function requireSession() {
 
   return session;
 }
+
+export const requireSession = cache(readRequiredSession);

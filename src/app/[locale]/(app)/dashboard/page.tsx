@@ -36,19 +36,11 @@ function DashboardStatsSkeleton() {
   );
 }
 
-async function WorkspaceName() {
-  const session = await requireSession();
-  const organization = await prisma.organization.findUnique({
-    where: { id: session.organizationId },
-    select: { name: true },
-  });
-  return (
-    <p className="muted">{organization?.name ?? session.organizationName}</p>
-  );
-}
-
-async function DashboardContent() {
-  const session = await requireSession();
+async function DashboardContent({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const t = await getTranslations("dashboard");
 
   const start = new Date();
@@ -60,20 +52,20 @@ async function DashboardContent() {
   const [templates, documents, usedThisMonth, pendingPayment, subscription] =
     await Promise.all([
       prisma.template.count({
-        where: { organizationId: session.organizationId },
+        where: { organizationId: organizationId },
       }),
       prisma.document.count({
-        where: { organizationId: session.organizationId },
+        where: { organizationId: organizationId },
       }),
       prisma.document.count({
         where: {
-          organizationId: session.organizationId,
+          organizationId: organizationId,
           createdAt: { gte: start },
         },
       }),
       prisma.payment.findFirst({
         where: {
-          organizationId: session.organizationId,
+          organizationId: organizationId,
           status: "PENDING",
           plan: "YEARLY",
           createdAt: { gte: pendingVisibleSince },
@@ -81,7 +73,7 @@ async function DashboardContent() {
         orderBy: { createdAt: "desc" },
       }),
       prisma.subscription.findUnique({
-        where: { organizationId: session.organizationId },
+        where: { organizationId: organizationId },
       }),
     ]);
 
@@ -201,7 +193,7 @@ async function DashboardContent() {
 }
 
 export default async function DashboardPage() {
-  await requireSession();
+  const session = await requireSession();
   const t = await getTranslations("dashboard");
 
   return (
@@ -210,9 +202,7 @@ export default async function DashboardPage() {
         <div>
           <span className="eyebrow">WORKSPACE</span>
           <h1>{t("title")}</h1>
-          <Suspense fallback={<span className="skeleton-line short" />}>
-            <WorkspaceName />
-          </Suspense>
+          <p className="muted">{session.organizationName}</p>
         </div>
         <Link href="/templates" className="btn">
           <Sparkles size={17} />
@@ -220,7 +210,7 @@ export default async function DashboardPage() {
         </Link>
       </div>
       <Suspense fallback={<DashboardStatsSkeleton />}>
-        <DashboardContent />
+        <DashboardContent organizationId={session.organizationId} />
       </Suspense>
     </>
   );
