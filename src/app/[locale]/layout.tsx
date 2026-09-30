@@ -1,5 +1,3 @@
-import "@/styles/globals.scss";
-
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -9,107 +7,88 @@ import { notFound } from "next/navigation";
 import { Providers } from "@/components/layout/providers";
 import { routing } from "@/i18n/navigation";
 import { siteConfig } from "@/lib/site";
-
-const themeBootstrapScript = `
-(() => {
-  try {
-    const key = "docflow-theme";
-    const stored = localStorage.getItem(key);
-    const preference =
-      stored === "light" || stored === "dark" || stored === "system"
-        ? stored
-        : "system";
-    const resolved =
-      preference === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : preference;
-
-    const root = document.documentElement;
-    root.dataset.theme = resolved;
-    root.dataset.themePreference = preference;
-    root.style.colorScheme = resolved;
-  } catch {
-    const root = document.documentElement;
-    const resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-    root.dataset.theme = resolved;
-    root.dataset.themePreference = "system";
-    root.style.colorScheme = resolved;
-  }
-})();
-`;
+import { isLocale, type Locale } from "@/i18n/config";
+import { seoCopy } from "@/lib/seo";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: "DocFlow – dokumenty, szablony i fakturowanie | NurByte",
-    template: "%s | DocFlow",
-  },
-  description: siteConfig.description,
-  applicationName: siteConfig.name,
-  authors: [{ name: siteConfig.company, url: "https://nurbyte.dev" }],
-  creator: siteConfig.company,
-  publisher: siteConfig.company,
-  category: "business software",
-  keywords: [
-    "DocFlow",
-    "obieg dokumentów",
-    "generator dokumentów",
-    "szablony dokumentów",
-    "szablony e-mail",
-    "fakturowanie",
-    "automatyzacja dokumentów",
-    "NurByte",
-  ],
-  alternates: {
-    canonical: "/",
-    languages: {
-      "pl-PL": "/",
-      "en-US": "/en",
-      "id-ID": "/id",
-      "x-default": "/",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale: Locale = isLocale(rawLocale) ? rawLocale : "en";
+  const copy = seoCopy[locale];
+
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: { default: copy.title, template: "%s | DocFlow" },
+    description: copy.description,
+    applicationName: siteConfig.name,
+    authors: [{ name: siteConfig.company, url: "https://nurbyte.dev" }],
+    creator: siteConfig.company,
+    publisher: siteConfig.company,
+    category: "business software",
+    referrer: "origin-when-cross-origin",
+    formatDetection: { email: false, address: false, telephone: false },
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        {
+          url: "/brand/docflow-icon-192.png",
+          type: "image/png",
+          sizes: "192x192",
+        },
+        {
+          url: "/brand/docflow-icon-512.png",
+          type: "image/png",
+          sizes: "512x512",
+        },
+      ],
+      apple: [
+        {
+          url: "/brand/docflow-icon-180.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
     },
-  },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: siteConfig.name,
-    title: "DocFlow – dokumenty, szablony i fakturowanie",
-    description: siteConfig.description,
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "DocFlow by NurByte Software Lab",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "DocFlow – dokumenty, szablony i fakturowanie",
-    description: siteConfig.description,
-    images: ["/opengraph-image"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    openGraph: {
+      type: "website",
+      siteName: siteConfig.name,
+      title: copy.ogTitle,
+      description: copy.ogDescription,
+      images: [
+        {
+          url: "/social/docflow-social-preview.png",
+          width: 1200,
+          height: 630,
+          alt: "DocFlow by NurByte – document creation, templates, PDF and email workflow",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: copy.ogTitle,
+      description: copy.ogDescription,
+      images: ["/social/docflow-social-preview.png"],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-};
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -132,15 +111,8 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
-      </head>
-      <body>
-        <NextIntlClientProvider messages={messages}>
-          <Providers>{children}</Providers>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages}>
+      <Providers>{children}</Providers>
+    </NextIntlClientProvider>
   );
 }

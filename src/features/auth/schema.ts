@@ -38,6 +38,9 @@ export const registerSchema = z
     paymentMethod: z.enum(["PAYU", "BANK_TRANSFER"]),
     locale: z.enum(["pl", "en", "id"]),
     captchaToken: z.string().min(1, "captchaUnavailable"),
+    termsAccepted: z.boolean().refine(Boolean, "termsRequired"),
+    privacyAccepted: z.boolean().refine(Boolean, "privacyRequired"),
+    paidServiceAccepted: z.boolean(),
     captchaAnswer: z
       .string()
       .trim()
@@ -45,6 +48,12 @@ export const registerSchema = z
       .regex(/^\d+$/, "captchaNumber"),
   })
   .superRefine((data, ctx) => {
+    if (data.plan === "YEARLY" && !data.paidServiceAccepted)
+      ctx.addIssue({
+        code: "custom",
+        message: "paidServiceRequired",
+        path: ["paidServiceAccepted"],
+      });
     if (!isValidPostalCode(data.countryCode, data.postalCode))
       ctx.addIssue({
         code: "custom",

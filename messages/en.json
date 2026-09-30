@@ -66,7 +66,10 @@
       "max80": "Maximum 80 characters.",
       "max100": "Maximum 100 characters.",
       "max120": "Maximum 120 characters.",
-      "max128": "Maximum 128 characters."
+      "max128": "Maximum 128 characters.",
+      "termsRequired": "You must accept the terms",
+      "privacyRequired": "You must confirm that you have read the privacy policy",
+      "paidServiceRequired": "This acknowledgement is required for the paid plan"
     },
     "firstName": "First name",
     "lastName": "Last name",
@@ -111,7 +114,13 @@
     "alreadyAccount": "Already have an account?",
     "workspaceName": "Workspace name",
     "country": "Country",
-    "emailDeliveryFailed": "The verification email could not be sent. Please try again."
+    "emailDeliveryFailed": "The verification email could not be sent. Please try again.",
+    "acceptTermsPrefix": "I accept the",
+    "terms": "DocFlow Terms",
+    "acceptPrivacyPrefix": "I confirm that I have read the",
+    "privacy": "Privacy Policy",
+    "paidServiceConsent": "I request the paid service to start immediately after payment, before the statutory withdrawal period expires, and acknowledge the consequences under applicable consumer law. I know I can test DocFlow using the free plan before purchasing.",
+    "learnMore": "Learn more"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -462,7 +471,14 @@
     "payAgain": "Pay again",
     "paymentStartError": "Could not start the payment. Please try again.",
     "paymentMethodChanged": "Payment method changed.",
-    "payNow": "Pay now"
+    "payNow": "Pay now",
+    "consentsAndDocuments": "Consents and documents",
+    "consentsHelp": "History of documents accepted on this account.",
+    "termsDocument": "DocFlow Terms",
+    "privacyDocument": "Privacy Policy",
+    "paidServiceDocument": "Immediate paid service",
+    "acceptedVersion": "Accepted · version {version} · {date}",
+    "viewDocument": "View"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

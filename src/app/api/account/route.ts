@@ -17,7 +17,7 @@ export async function GET() {
         },
       },
       include: {
-        user: true,
+        user: { include: { consents: { orderBy: { acceptedAt: "desc" } } } },
         organization: { include: { billingProfile: true } },
       },
     });
@@ -41,6 +41,11 @@ export async function GET() {
       apartmentNumber: b?.apartmentNumber ?? "",
       postalCode: b?.postalCode ?? "",
       city: b?.city ?? "",
+      consents: membership.user.consents.map((consent) => ({
+        type: consent.type,
+        version: consent.version,
+        acceptedAt: consent.acceptedAt.toISOString(),
+      })),
     });
   } catch (error) {
     console.error("[GET account]", error);

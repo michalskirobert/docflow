@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { useUpdateLocale } from "./service";
 import { SelectControl } from "@/components/shared/form";
+import { Globe2 } from "lucide-react";
 
 const labels: Record<Locale, string> = {
   pl: "Polski",
@@ -14,7 +15,11 @@ const labels: Record<Locale, string> = {
   id: "Bahasa Indonesia",
 };
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({
+  compact = false,
+}: {
+  compact?: boolean;
+}) {
   const locale = useLocale() as Locale;
   const t = useTranslations("common");
   const router = useRouter();
@@ -37,8 +42,15 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <label className="field language-field">
-      {t("language")}
+    <label className={`field language-field${compact ? " compact" : ""}`}>
+      {compact ? (
+        <span className="language-compact-label">
+          <Globe2 size={16} />
+          {t("language")}
+        </span>
+      ) : (
+        t("language")
+      )}
       <SelectControl
         value={locale}
         onChange={(event) => change(event.target.value as Locale)}

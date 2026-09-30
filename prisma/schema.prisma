@@ -22,6 +22,7 @@ model User {
   verificationTokens EmailVerificationToken[]
   memberships        Membership[]
   emailSettings      UserEmailSettings?
+  consents           UserConsent[]
 }
 
 model UserEmailSettings {
@@ -225,4 +226,16 @@ enum DocumentStatus {
 enum SalesDocumentType {
   RECEIPT
   INVOICE
+}
+
+model UserConsent {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  version   String
+  acceptedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, version])
+  @@index([userId, type])
 }

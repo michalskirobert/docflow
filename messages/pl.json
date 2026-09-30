@@ -66,7 +66,10 @@
       "max80": "Maksymalnie 80 znaków.",
       "max100": "Maksymalnie 100 znaków.",
       "max120": "Maksymalnie 120 znaków.",
-      "max128": "Maksymalnie 128 znaków."
+      "max128": "Maksymalnie 128 znaków.",
+      "termsRequired": "Akceptacja regulaminu jest wymagana",
+      "privacyRequired": "Potwierdzenie zapoznania się z polityką prywatności jest wymagane",
+      "paidServiceRequired": "Ta zgoda jest wymagana dla planu płatnego"
     },
     "firstName": "Imię",
     "lastName": "Nazwisko",
@@ -111,7 +114,13 @@
     "alreadyAccount": "Masz już konto?",
     "workspaceName": "Nazwa obszaru roboczego",
     "country": "Kraj",
-    "emailDeliveryFailed": "Nie udało się wysłać wiadomości weryfikacyjnej. Spróbuj ponownie."
+    "emailDeliveryFailed": "Nie udało się wysłać wiadomości weryfikacyjnej. Spróbuj ponownie.",
+    "acceptTermsPrefix": "Akceptuję",
+    "terms": "Regulamin DocFlow",
+    "acceptPrivacyPrefix": "Potwierdzam zapoznanie się z",
+    "privacy": "Polityką prywatności",
+    "paidServiceConsent": "Żądam rozpoczęcia płatnej usługi niezwłocznie po płatności, przed upływem ustawowego terminu na odstąpienie, i przyjmuję do wiadomości skutki przewidziane przez prawo konsumenckie. Wiem, że przed zakupem mogę przetestować DocFlow w planie bezpłatnym.",
+    "learnMore": "Dowiedz się więcej"
   },
   "dashboard": {
     "title": "Panel",
@@ -462,7 +471,14 @@
     "payAgain": "Zapłać ponownie",
     "paymentStartError": "Nie udało się rozpocząć płatności. Spróbuj ponownie.",
     "paymentMethodChanged": "Metoda płatności została zmieniona.",
-    "payNow": "Zapłać teraz"
+    "payNow": "Zapłać teraz",
+    "consentsAndDocuments": "Zgody i dokumenty",
+    "consentsHelp": "Historia dokumentów zaakceptowanych na tym koncie.",
+    "termsDocument": "Regulamin DocFlow",
+    "privacyDocument": "Polityka prywatności",
+    "paidServiceDocument": "Rozpoczęcie płatnej usługi",
+    "acceptedVersion": "Zaakceptowano · wersja {version} · {date}",
+    "viewDocument": "Wyświetl"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",

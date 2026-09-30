@@ -66,7 +66,10 @@
       "max80": "Maksimal 80 karakter.",
       "max100": "Maksimal 100 karakter.",
       "max120": "Maksimal 120 karakter.",
-      "max128": "Maksimal 128 karakter."
+      "max128": "Maksimal 128 karakter.",
+      "termsRequired": "Anda harus menyetujui ketentuan",
+      "privacyRequired": "Anda harus mengonfirmasi telah membaca kebijakan privasi",
+      "paidServiceRequired": "Persetujuan ini diperlukan untuk paket berbayar"
     },
     "firstName": "Nama depan",
     "lastName": "Nama belakang",
@@ -111,7 +114,13 @@
     "alreadyAccount": "Sudah punya akun?",
     "workspaceName": "Nama ruang kerja",
     "country": "Negara",
-    "emailDeliveryFailed": "Email verifikasi tidak dapat dikirim. Silakan coba lagi."
+    "emailDeliveryFailed": "Email verifikasi tidak dapat dikirim. Silakan coba lagi.",
+    "acceptTermsPrefix": "Saya menyetujui",
+    "terms": "Ketentuan DocFlow",
+    "acceptPrivacyPrefix": "Saya mengonfirmasi telah membaca",
+    "privacy": "Kebijakan Privasi",
+    "paidServiceConsent": "Saya meminta layanan berbayar dimulai segera setelah pembayaran, sebelum masa pembatalan menurut hukum berakhir, dan memahami konsekuensinya menurut hukum konsumen yang berlaku. Saya tahu bahwa DocFlow dapat dicoba dengan paket gratis sebelum membeli.",
+    "learnMore": "Pelajari lebih lanjut"
   },
   "dashboard": {
     "title": "Dasbor",
@@ -462,7 +471,14 @@
     "payAgain": "Bayar lagi",
     "paymentStartError": "Pembayaran tidak dapat dimulai. Silakan coba lagi.",
     "paymentMethodChanged": "Metode pembayaran telah diubah.",
-    "payNow": "Bayar sekarang"
+    "payNow": "Bayar sekarang",
+    "consentsAndDocuments": "Persetujuan dan dokumen",
+    "consentsHelp": "Riwayat dokumen yang disetujui pada akun ini.",
+    "termsDocument": "Ketentuan DocFlow",
+    "privacyDocument": "Kebijakan Privasi",
+    "paidServiceDocument": "Layanan berbayar segera",
+    "acceptedVersion": "Disetujui · versi {version} · {date}",
+    "viewDocument": "Lihat"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

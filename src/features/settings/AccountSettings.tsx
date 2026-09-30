@@ -2,7 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  LegalModal,
+  type LegalDocument,
+} from "@/features/auth/legal-documents";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/shared/button";
 import {
@@ -28,6 +32,9 @@ export function AccountSettings() {
   const { notify } = useFeedback();
   const account = useAccountDetails();
   const update = useUpdateAccount();
+  const [legalDocument, setLegalDocument] = useState<LegalDocument | null>(
+    null,
+  );
   const {
     register,
     handleSubmit,
@@ -208,6 +215,59 @@ export function AccountSettings() {
           {t("saveChanges")}
         </Button>
       </form>
+      <div className="account-consents">
+        <h3>{t("consentsAndDocuments")}</h3>
+        <p className="muted">{t("consentsHelp")}</p>
+        {[
+          {
+            type: "TERMS",
+            label: t("termsDocument"),
+            doc: "terms" as LegalDocument,
+          },
+          {
+            type: "PRIVACY",
+            label: t("privacyDocument"),
+            doc: "privacy" as LegalDocument,
+          },
+          {
+            type: "PAID_SERVICE_IMMEDIATE",
+            label: t("paidServiceDocument"),
+            doc: "paidService" as LegalDocument,
+          },
+        ].map((item) => {
+          const consent = account.data?.consents?.find(
+            (entry) => entry.type === item.type,
+          );
+          if (!consent) return null;
+          return (
+            <div className="consent-row" key={item.type}>
+              <div>
+                <strong>{item.label}</strong>
+                <small>
+                  {t("acceptedVersion", {
+                    version: consent.version,
+                    date: new Intl.DateTimeFormat(locale, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(new Date(consent.acceptedAt)),
+                  })}
+                </small>
+              </div>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => setLegalDocument(item.doc)}
+              >
+                {t("viewDocument")}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <LegalModal
+        document={legalDocument}
+        onClose={() => setLegalDocument(null)}
+      />
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { LegalModal, type LegalDocument } from "./legal-documents";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -55,6 +56,9 @@ export default function RegisterForm() {
   const captcha = useCaptcha();
   const mutation = useRegister();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [legalDocument, setLegalDocument] = useState<LegalDocument | null>(
+    null,
+  );
 
   const {
     register,
@@ -90,6 +94,9 @@ export default function RegisterForm() {
       locale,
       captchaToken: "",
       captchaAnswer: "",
+      termsAccepted: false,
+      privacyAccepted: false,
+      paidServiceAccepted: false,
     },
   });
 
@@ -577,17 +584,18 @@ export default function RegisterForm() {
                 {plan.displayNet ? t("net") : t("gross")}
               </span>
 
-              {plan.code !== "FREE" && (
+              <div className="plan-meta">
+                {plan.code !== "FREE" && (
+                  <small>
+                    {plan.displayNet
+                      ? `+ ${plan.vatRate}% VAT`
+                      : t("vatIncluded")}
+                  </small>
+                )}
                 <small>
-                  {plan.displayNet
-                    ? `+ ${plan.vatRate}% VAT`
-                    : t("vatIncluded")}
+                  {plan.documentLimit} {t("documentsPerMonth")}
                 </small>
-              )}
-
-              <small>
-                {plan.documentLimit} {t("documentsPerMonth")}
-              </small>
+              </div>
             </label>
           ))}
         </div>
@@ -633,6 +641,66 @@ export default function RegisterForm() {
           </>
         )}
 
+        <div className="legal-consents">
+          <label className="legal-consent">
+            <input type="checkbox" {...register("termsAccepted")} />
+            <span>
+              {t("acceptTermsPrefix")}{" "}
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => setLegalDocument("terms")}
+              >
+                {t("terms")}
+              </button>{" "}
+              *
+            </span>
+          </label>
+          {errors.termsAccepted && (
+            <p className="form-error">{t("validation.termsRequired")}</p>
+          )}
+          <label className="legal-consent">
+            <input type="checkbox" {...register("privacyAccepted")} />
+            <span>
+              {t("acceptPrivacyPrefix")}{" "}
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => setLegalDocument("privacy")}
+              >
+                {t("privacy")}
+              </button>{" "}
+              *
+            </span>
+          </label>
+          {errors.privacyAccepted && (
+            <p className="form-error">{t("validation.privacyRequired")}</p>
+          )}
+          {selectedPlan === "YEARLY" && (
+            <>
+              <label className="legal-consent paid-consent">
+                <input type="checkbox" {...register("paidServiceAccepted")} />
+                <span>
+                  {t("paidServiceConsent")}{" "}
+                  <button
+                    type="button"
+                    className="text-link"
+                    onClick={() => setLegalDocument("paidService")}
+                  >
+                    {t("learnMore")}
+                  </button>{" "}
+                  *
+                </span>
+              </label>
+              {errors.paidServiceAccepted && (
+                <p className="form-error">
+                  {t("validation.paidServiceRequired")}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
         <div
           className={`captcha-box${errors.captchaAnswer ? " captcha-error" : ""}`}
         >
@@ -677,6 +745,10 @@ export default function RegisterForm() {
           {mutation.isPending ? t("creatingAccount") : t("register")}
         </button>
       </fieldset>
+      <LegalModal
+        document={legalDocument}
+        onClose={() => setLegalDocument(null)}
+      />
     </form>
   );
 }

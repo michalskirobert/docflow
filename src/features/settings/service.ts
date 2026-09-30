@@ -87,6 +87,7 @@ export type AccountDetails = {
   apartmentNumber: string;
   postalCode: string;
   city: string;
+  consents: Array<{ type: string; version: string; acceptedAt: string }>;
 };
 export const useAccountDetails = () =>
   useGet<AccountDetails>(["account"], "/account");

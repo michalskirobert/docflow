@@ -88,6 +88,23 @@ export async function POST(request: Request) {
         );
       }
 
+      await prisma.userConsent.createMany({
+        data: [
+          { userId: existingUser.id, type: "TERMS", version: "1.0" },
+          { userId: existingUser.id, type: "PRIVACY", version: "1.0" },
+          ...(data.plan === "YEARLY" && data.paidServiceAccepted
+            ? [
+                {
+                  userId: existingUser.id,
+                  type: "PAID_SERVICE_IMMEDIATE",
+                  version: "1.0",
+                },
+              ]
+            : []),
+        ],
+        skipDuplicates: true,
+      });
+
       try {
         await sendVerificationEmail(existingUser);
       } catch (error) {
@@ -157,6 +174,22 @@ export async function POST(request: Request) {
           passwordHash,
           locale: data.locale,
         },
+      });
+
+      await tx.userConsent.createMany({
+        data: [
+          { userId: user.id, type: "TERMS", version: "1.0" },
+          { userId: user.id, type: "PRIVACY", version: "1.0" },
+          ...(data.plan === "YEARLY" && data.paidServiceAccepted
+            ? [
+                {
+                  userId: user.id,
+                  type: "PAID_SERVICE_IMMEDIATE",
+                  version: "1.0",
+                },
+              ]
+            : []),
+        ],
       });
 
       const organization = await tx.organization.create({
