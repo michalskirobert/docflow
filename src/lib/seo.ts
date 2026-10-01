@@ -43,10 +43,9 @@ export function languageAlternates(
   path: string,
 ): NonNullable<Metadata["alternates"]>["languages"] {
   return {
-    "en-US": localizedPath("en", path),
-    "en-GB": localizedPath("en", path),
-    "pl-PL": localizedPath("pl", path),
-    "id-ID": localizedPath("id", path),
+    en: localizedPath("en", path),
+    pl: localizedPath("pl", path),
+    id: localizedPath("id", path),
     "x-default": localizedPath("en", path),
   };
 }
