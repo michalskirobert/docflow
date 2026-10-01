@@ -6,7 +6,13 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  enableVercelInsights = false,
+}: {
+  children: ReactNode;
+  enableVercelInsights?: boolean;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -21,8 +27,12 @@ export function Providers({ children }: { children: ReactNode }) {
       <ThemeProvider>
         <FeedbackProvider>{children}</FeedbackProvider>
       </ThemeProvider>
-      <SpeedInsights />
-      <Analytics />
+      {enableVercelInsights ? (
+        <>
+          <SpeedInsights />
+          <Analytics />
+        </>
+      ) : null}
     </QueryClientProvider>
   );
 }

@@ -112,7 +112,9 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <Providers>{children}</Providers>
+      <Providers enableVercelInsights={process.env.VERCEL === "1"}>
+        {children}
+      </Providers>
     </NextIntlClientProvider>
   );
 }

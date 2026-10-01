@@ -73,6 +73,21 @@
   color: #6366f1;
 }
 
+/* Keep the primary full-width auth action above WCAG AA contrast in both themes. */
+.login-card .btn.full:not(.secondary):not(.ghost):not(.danger),
+.auth-card .btn.full:not(.secondary):not(.ghost):not(.danger) {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.login-card
+  .btn.full:not(.secondary):not(.ghost):not(.danger):not(:disabled):hover,
+.auth-card
+  .btn.full:not(.secondary):not(.ghost):not(.danger):not(:disabled):hover {
+  background: #4338ca !important;
+  color: #fff !important;
+}
+
 .auth-form {
   gap: 14px;
 }
