@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import LoginForm from "@/features/auth/login-form";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { getSession } from "@/server/auth/session";
@@ -8,7 +8,6 @@ import LanguageSwitcher from "@/features/language/language-switcher";
 import { DocFlowLogo } from "@/components/brand/docflow-logo";
 import { isLocale, type Locale } from "@/i18n/config";
 import { publicPageMetadata } from "@/lib/seo";
-const LoginForm = dynamic(() => import("@/features/auth/login-form"));
 export async function generateMetadata({
   params,
 }: {

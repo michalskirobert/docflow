@@ -1,5 +1,5 @@
 import { AppLoader } from "@/components/ui/app-loader";
 
-export default function LocaleLoading() {
+export default function RootLoading() {
   return <AppLoader />;
 }

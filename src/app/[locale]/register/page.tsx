@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import RegisterForm from "@/features/auth/register-form";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { getSession } from "@/server/auth/session";
@@ -10,7 +10,6 @@ import { isLocale, type Locale } from "@/i18n/config";
 import { publicPageMetadata } from "@/lib/seo";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-const RegisterForm = dynamic(() => import("@/features/auth/register-form"));
 export async function generateMetadata({
   params,
 }: {
