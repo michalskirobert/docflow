@@ -217,7 +217,10 @@
     "createdAt": "Dibuat: {date}",
     "numberFormatQuantity": "Jumlah / satuan",
     "numberLocale": "Wilayah pemformatan",
-    "fontFamily": "Font"
+    "fontFamily": "Font",
+    "loadErrorTitle": "Data tidak dapat dimuat",
+    "loadErrorMessage": "Terjadi masalah saat memuat data. Tetap di halaman ini dan coba lagi.",
+    "retry": "Coba lagi"
   },
   "documents": {
     "close": "Zamknij",
@@ -352,7 +355,10 @@
     "filters": "Filter",
     "closeFilters": "Tutup filter",
     "clearFilters": "Hapus",
-    "applyFilters": "Terapkan"
+    "applyFilters": "Terapkan",
+    "loadErrorTitle": "Data tidak dapat dimuat",
+    "loadErrorMessage": "Terjadi masalah saat memuat data. Tetap di halaman ini dan coba lagi.",
+    "retry": "Coba lagi"
   },
   "settings": {
     "title": "Pengaturan",
@@ -479,7 +485,8 @@
     "paidServiceDocument": "Layanan berbayar segera",
     "acceptedVersion": "Disetujui · versi {version} · {date}",
     "viewDocument": "Lihat",
-    "retry": "Coba lagi"
+    "retry": "Coba lagi",
+    "consentHistoryUnavailable": "Riwayat persetujuan untuk akun ini belum tersimpan. Dokumen tetap dapat ditampilkan."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -819,5 +826,23 @@
     "description": "Sepertinya dokumen atau alamat ini tidak ada, telah dipindahkan, atau sudah tidak tersedia.",
     "backHome": "Kembali ke beranda",
     "backPrevious": "Kembali"
+  },
+  "categories": {
+    "label": "Kategori",
+    "addCustom": "Tambah kategori sendiri",
+    "customPlaceholder": "Nama kategori",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "system": {
+      "GENERAL": "Umum",
+      "CONTRACTS": "Kontrak",
+      "INVOICES": "Faktur",
+      "EMAIL": "Email",
+      "HR": "SDM",
+      "FINANCE": "Keuangan dan akuntansi",
+      "SALES": "Penjualan",
+      "CORRESPONDENCE": "Korespondensi",
+      "OTHER": "Lainnya"
+    }
   }
 }

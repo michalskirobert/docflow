@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useDocumentsService } from "./service";
 import { DocumentHistory } from "./components/DocumentHistory";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 
 export default function DocumentList() {
   const t = useTranslations("documents");
@@ -40,6 +41,21 @@ export default function DocumentList() {
     }
     return true;
   });
+
+  if (documents.isError && !documents.data) {
+    return (
+      <section className="document-history">
+        <QueryErrorState
+          title={t("loadErrorTitle")}
+          message={t("loadErrorMessage")}
+          retryLabel={t("retry")}
+          retrying={documents.isFetching}
+          onRetry={() => void documents.refetch()}
+        />
+      </section>
+    );
+  }
+
   return (
     <DocumentHistory
       documents={filteredDocuments}

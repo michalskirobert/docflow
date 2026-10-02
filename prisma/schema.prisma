@@ -63,7 +63,9 @@ model Organization {
   payments       Payment[]
   salesDocuments SalesDocument[]
   subscription   Subscription?
-  templates      Template[]
+  templates        Template[]
+  customCategories Category[]
+
 }
 
 model Membership {
@@ -163,6 +165,7 @@ model Template {
   footerContent  String?
   headerContent  String?
   pageNumbers    Boolean      @default(false)
+  category       String       @default("system:GENERAL")
   documents      Document[]
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -179,6 +182,7 @@ model Document {
   renderedContent String
   createdAt       DateTime       @default(now())
   pageNumbers     Boolean        @default(false)
+  category        String         @default("system:GENERAL")
   renderedFooter  String?
   renderedHeader  String?
   organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -186,6 +190,17 @@ model Document {
 
   @@index([organizationId])
   @@index([templateId])
+}
+
+model Category {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
 }
 
 enum Role {

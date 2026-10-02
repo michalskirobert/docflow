@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireSession } from "@/server/auth/require-session";
+import { getSession } from "@/server/auth/session";
 import { getSubscriptionAccess } from "@/server/subscription/access";
 import { renderTemplate } from "@/server/documents/template";
 import {
@@ -12,11 +12,14 @@ import { renderDocument } from "@/server/documents/renderer";
 const schema = z.object({
   templateId: z.string(),
   name: z.string().min(2),
+  category: z.string().min(1).max(100).optional(),
   data: z.record(z.string(), z.union([z.string(), z.number()])),
 });
 export async function GET(req: Request) {
   try {
-    const s = await requireSession();
+    const s = await getSession();
+    if (!s)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() ?? "";
     const sort = searchParams.get("sort") ?? "newest";
@@ -52,18 +55,25 @@ export async function GET(req: Request) {
           name: true,
           templateId: true,
           createdAt: true,
+          category: true,
           template: { select: { name: true } },
         },
         orderBy,
       }),
     );
-  } catch {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  } catch (error) {
+    console.error("GET /api/documents failed", error);
+    return NextResponse.json(
+      { message: "Could not load documents" },
+      { status: 500 },
+    );
   }
 }
 export async function POST(req: Request) {
   try {
-    const s = await requireSession();
+    const s = await getSession();
+    if (!s)
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     const access = await getSubscriptionAccess(s);
     if (!access.allowed)
       return NextResponse.json(
@@ -130,6 +140,7 @@ export async function POST(req: Request) {
             organizationId: s.organizationId,
             templateId: isDefaultTemplateId(p.templateId) ? null : t.id,
             name: p.name,
+            category: p.category ?? t.category ?? "system:GENERAL",
             payloadJson: JSON.stringify(p.data),
             renderedContent: rendered,
             renderedHeader,
@@ -151,12 +162,16 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     }
+    if (e instanceof z.ZodError)
+      return NextResponse.json(
+        { message: "Invalid document data" },
+        { status: 400 },
+      );
+
+    console.error("POST /api/documents failed", e);
     return NextResponse.json(
-      {
-        message:
-          e instanceof z.ZodError ? "Invalid document data" : "Unauthorized",
-      },
-      { status: e instanceof z.ZodError ? 400 : 401 },
+      { message: "Could not create document" },
+      { status: 500 },
     );
   }
 }

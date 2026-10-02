@@ -8,14 +8,5 @@ export const api = axios.create({
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (
-      typeof window !== "undefined" &&
-      error?.response?.status === 401 &&
-      !window.location.pathname.includes("/login")
-    ) {
-      window.location.assign("/login");
-    }
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );

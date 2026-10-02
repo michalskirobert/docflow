@@ -1,4 +1,5 @@
 import { EXAMPLE_TEMPLATES } from "./examples";
+import { getDefaultTemplateCategory } from "@/features/categories/definitions";
 
 export const DEFAULT_TEMPLATE_PREFIX = "default:";
 
@@ -13,6 +14,7 @@ export type DefaultTemplate = {
   pageNumbers: false;
   variablesJson: string;
   isExample: true;
+  category: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -31,6 +33,10 @@ export const DEFAULT_TEMPLATES: DefaultTemplate[] = EXAMPLE_TEMPLATES.map(
     pageNumbers: false,
     variablesJson: JSON.stringify(template.variables),
     isExample: true,
+    category: getDefaultTemplateCategory(
+      template.name,
+      "emailSubject" in template ? template.emailSubject : null,
+    ),
     createdAt: epoch,
     updatedAt: epoch,
   }),

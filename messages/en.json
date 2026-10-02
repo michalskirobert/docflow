@@ -217,7 +217,10 @@
     "createdAt": "Created: {date}",
     "numberFormatQuantity": "Quantity / pieces",
     "numberLocale": "Formatting region",
-    "fontFamily": "Font"
+    "fontFamily": "Font",
+    "loadErrorTitle": "Could not load data",
+    "loadErrorMessage": "There was a problem loading the data. Stay on this page and try again.",
+    "retry": "Try again"
   },
   "documents": {
     "close": "Zamknij",
@@ -352,7 +355,10 @@
     "filters": "Filters",
     "closeFilters": "Close filters",
     "clearFilters": "Clear",
-    "applyFilters": "Apply"
+    "applyFilters": "Apply",
+    "loadErrorTitle": "Could not load data",
+    "loadErrorMessage": "There was a problem loading the data. Stay on this page and try again.",
+    "retry": "Try again"
   },
   "settings": {
     "title": "Settings",
@@ -479,7 +485,8 @@
     "paidServiceDocument": "Immediate paid service",
     "acceptedVersion": "Accepted · version {version} · {date}",
     "viewDocument": "View",
-    "retry": "Try again"
+    "retry": "Try again",
+    "consentHistoryUnavailable": "No acceptance history is stored for this account. You can still view the document."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -819,5 +826,23 @@
     "description": "It looks like this document or address does not exist, has been moved, or is no longer available.",
     "backHome": "Back to home",
     "backPrevious": "Go back"
+  },
+  "categories": {
+    "label": "Category",
+    "addCustom": "Add custom category",
+    "customPlaceholder": "Custom category name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "system": {
+      "GENERAL": "General",
+      "CONTRACTS": "Contracts",
+      "INVOICES": "Invoices",
+      "EMAIL": "Email",
+      "HR": "HR",
+      "FINANCE": "Finance and accounting",
+      "SALES": "Sales",
+      "CORRESPONDENCE": "Correspondence",
+      "OTHER": "Other"
+    }
   }
 }

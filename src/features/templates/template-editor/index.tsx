@@ -1,4 +1,6 @@
 "use client";
+import { CategoryField } from "@/features/categories/CategoryField";
+import { DEFAULT_CATEGORY } from "@/features/categories/definitions";
 
 import { InputControl } from "@/components/shared/form";
 import {
@@ -120,6 +122,9 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
+  const [category, setCategory] = useState(
+    template?.category ?? DEFAULT_CATEGORY,
+  );
   const [emailSubject, setEmailSubject] = useState(
     template?.emailSubject ?? "",
   );
@@ -1561,6 +1566,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     const payload = {
       name: name.trim(),
       description: description.trim(),
+      category,
       emailSubject: emailSubject.trim(),
 
       content: serializeRegion(editor.current),

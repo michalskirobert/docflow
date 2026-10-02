@@ -217,7 +217,10 @@
     "createdAt": "Utworzono: {date}",
     "numberFormatQuantity": "Ilość / sztuki",
     "numberLocale": "Region formatowania",
-    "fontFamily": "Czcionka"
+    "fontFamily": "Czcionka",
+    "loadErrorTitle": "Nie udało się pobrać danych",
+    "loadErrorMessage": "Wystąpił problem podczas pobierania danych. Pozostań na tej stronie i spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
   },
   "documents": {
     "close": "Zamknij",
@@ -352,7 +355,10 @@
     "filters": "Filtry",
     "closeFilters": "Zamknij filtry",
     "clearFilters": "Wyczyść",
-    "applyFilters": "Zastosuj"
+    "applyFilters": "Zastosuj",
+    "loadErrorTitle": "Nie udało się pobrać danych",
+    "loadErrorMessage": "Wystąpił problem podczas pobierania danych. Pozostań na tej stronie i spróbuj ponownie.",
+    "retry": "Spróbuj ponownie"
   },
   "settings": {
     "title": "Ustawienia",
@@ -479,7 +485,8 @@
     "paidServiceDocument": "Rozpoczęcie płatnej usługi",
     "acceptedVersion": "Zaakceptowano · wersja {version} · {date}",
     "viewDocument": "Wyświetl",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "consentHistoryUnavailable": "Brak zapisanej historii akceptacji dla tego konta. Dokument nadal możesz wyświetlić."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -819,5 +826,23 @@
     "description": "Wygląda na to, że ten dokument lub adres nie istnieje, został przeniesiony albo jest już niedostępny.",
     "backHome": "Wróć do strony głównej",
     "backPrevious": "Wróć do poprzedniej strony"
+  },
+  "categories": {
+    "label": "Kategoria",
+    "addCustom": "Dodaj własną kategorię",
+    "customPlaceholder": "Nazwa własnej kategorii",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "system": {
+      "GENERAL": "Ogólne",
+      "CONTRACTS": "Umowy",
+      "INVOICES": "Faktury",
+      "EMAIL": "E-mail",
+      "HR": "Kadry i HR",
+      "FINANCE": "Finanse i księgowość",
+      "SALES": "Sprzedaż",
+      "CORRESPONDENCE": "Korespondencja",
+      "OTHER": "Inne"
+    }
   }
 }

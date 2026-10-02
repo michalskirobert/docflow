@@ -12,6 +12,7 @@ import {
 } from "@/server/templates/defaults";
 const schema = z.object({
   name: z.string().min(2).max(250),
+  category: z.string().min(1).max(100).default("system:GENERAL"),
   description: z.string().max(400).optional(),
   emailSubject: z.string().max(250).optional(),
   content: z.string().min(1),

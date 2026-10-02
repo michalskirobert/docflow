@@ -3,6 +3,7 @@ import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
 import type { Template, TemplateSummary, TemplateVariable } from "./types";
 export type TemplateInput = {
   name: string;
+  category: string;
   description?: string;
   emailSubject?: string;
   content: string;

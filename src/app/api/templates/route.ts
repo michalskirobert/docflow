@@ -9,6 +9,7 @@ import { sanitizeTemplateHtml } from "@/server/documents/sanitize-template";
 import { DEFAULT_TEMPLATES } from "@/server/templates/defaults";
 const schema = z.object({
   name: z.string().min(2).max(250),
+  category: z.string().min(1).max(100).default("system:GENERAL"),
   description: z.string().max(400).optional(),
   emailSubject: z.string().max(250).optional(),
   content: z.string().min(1),
@@ -213,8 +214,12 @@ export async function GET(req: Request) {
       return sort === "oldest" ? delta : -delta;
     });
     return NextResponse.json(result);
-  } catch {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  } catch (error) {
+    console.error("GET /api/templates failed", error);
+    return NextResponse.json(
+      { message: "Could not load templates" },
+      { status: 500 },
+    );
   }
 }
 export async function POST(req: Request) {

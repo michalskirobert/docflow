@@ -29,7 +29,12 @@ export const useDocumentTemplateService = (id: string) =>
 export const useGenerateDocumentService = () =>
   usePost<
     Document,
-    { templateId: string; name: string; data: Record<string, string> }
+    {
+      templateId: string;
+      name: string;
+      category: string;
+      data: Record<string, string>;
+    }
   >("/documents", [["documents"]]);
 export type RenderedEmail = {
   subject: string;
@@ -50,10 +55,10 @@ export const useRenderDocumentPreviewService = (templateId: string) =>
     `/templates/${templateId}/preview`,
   );
 export const useUpdateDocumentService = (id: string) =>
-  usePut<Document, { name: string; data: Record<string, string> }>(
-    `/documents/${id}`,
-    [["documents"], ["documents", id]],
-  );
+  usePut<
+    Document,
+    { name: string; category: string; data: Record<string, string> }
+  >(`/documents/${id}`, [["documents"], ["documents", id]]);
 export const useDeleteDocumentService = (id: string) =>
   useDelete<void>(`/documents/${id}`);
 

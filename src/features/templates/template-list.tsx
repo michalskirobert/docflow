@@ -1,5 +1,6 @@
 "use client";
 import { SelectField } from "@/components/shared/form";
+import { QueryErrorState } from "@/components/ui/query-error-state";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,6 +30,19 @@ export default function TemplateList() {
   const query = useTemplatesService(q, sort, source, dateFrom, dateTo);
   const activeFilterCount =
     (source !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+
+  if (query.isError && !query.data) {
+    return (
+      <QueryErrorState
+        title={t("loadErrorTitle")}
+        message={t("loadErrorMessage")}
+        retryLabel={t("retry")}
+        retrying={query.isFetching}
+        onRetry={() => void query.refetch()}
+      />
+    );
+  }
+
   return (
     <>
       <ListToolbar
@@ -87,7 +101,9 @@ export default function TemplateList() {
         }
       />
       {query.isPending && !query.data ? (
-        <ListSkeleton rows={6} cards />
+        <div className="query-initial-loading" aria-busy="true">
+          <ListSkeleton rows={6} cards />
+        </div>
       ) : (query.data?.length ?? 0) > 0 ? (
         <div className="template-grid">
           {query.data!.map((item) => (

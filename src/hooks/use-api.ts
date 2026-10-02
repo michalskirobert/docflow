@@ -20,6 +20,7 @@ export function useGet<T>(
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
     refetchOnMount: options?.refetchOnMount,
+    retry: false,
   });
 }
 function useWrite<TData, TBody>(

@@ -82,6 +82,7 @@ export type TemplateSummary = {
   isExample?: boolean;
   emailSubject?: string | null;
   createdAt: string;
+  category: string;
 };
 
 export type Template = TemplateSummary & {

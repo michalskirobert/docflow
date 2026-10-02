@@ -233,51 +233,59 @@ export function AccountSettings() {
       <div className="account-consents">
         <h3>{t("consentsAndDocuments")}</h3>
         <p className="muted">{t("consentsHelp")}</p>
-        {[
-          {
-            type: "TERMS",
-            label: t("termsDocument"),
-            doc: "terms" as LegalDocument,
-          },
-          {
-            type: "PRIVACY",
-            label: t("privacyDocument"),
-            doc: "privacy" as LegalDocument,
-          },
-          {
-            type: "PAID_SERVICE_IMMEDIATE",
-            label: t("paidServiceDocument"),
-            doc: "paidService" as LegalDocument,
-          },
-        ].map((item) => {
-          const consent = account.data?.consents?.find(
-            (entry) => entry.type === item.type,
-          );
-          if (!consent) return null;
-          return (
-            <div className="consent-row" key={item.type}>
-              <div>
-                <strong>{item.label}</strong>
-                <small>
-                  {t("acceptedVersion", {
-                    version: consent.version,
-                    date: new Intl.DateTimeFormat(locale, {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }).format(new Date(consent.acceptedAt)),
-                  })}
-                </small>
+        <div className="consent-list">
+          {[
+            {
+              type: "TERMS",
+              label: t("termsDocument"),
+              doc: "terms" as LegalDocument,
+              required: true,
+            },
+            {
+              type: "PRIVACY",
+              label: t("privacyDocument"),
+              doc: "privacy" as LegalDocument,
+              required: true,
+            },
+            {
+              type: "PAID_SERVICE_IMMEDIATE",
+              label: t("paidServiceDocument"),
+              doc: "paidService" as LegalDocument,
+              required: false,
+            },
+          ].map((item) => {
+            const consent = account.data?.consents?.find(
+              (entry) => entry.type === item.type,
+            );
+            if (!consent && !item.required) return null;
+
+            return (
+              <div className="consent-row" key={item.type}>
+                <div className="consent-copy">
+                  <strong>{item.label}</strong>
+                  <small className={consent ? undefined : "muted"}>
+                    {consent
+                      ? t("acceptedVersion", {
+                          version: consent.version,
+                          date: new Intl.DateTimeFormat(locale, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(consent.acceptedAt)),
+                        })
+                      : t("consentHistoryUnavailable")}
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="btn secondary"
+                  onClick={() => setLegalDocument(item.doc)}
+                >
+                  {t("viewDocument")}
+                </button>
               </div>
-              <button
-                type="button"
-                className="btn secondary"
-                onClick={() => setLegalDocument(item.doc)}
-              >
-                {t("viewDocument")}
-              </button>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
       <LegalModal
         document={legalDocument}

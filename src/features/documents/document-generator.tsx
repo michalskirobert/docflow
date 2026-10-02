@@ -1,4 +1,6 @@
 "use client";
+import { CategoryField } from "@/features/categories/CategoryField";
+import { DEFAULT_CATEGORY } from "@/features/categories/definitions";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
@@ -106,6 +108,7 @@ export default function DocumentGenerator({
 
   const [templateId, setTemplateId] = useState("");
   const [documentName, setDocumentName] = useState("");
+  const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [documentNameError, setDocumentNameError] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
@@ -526,6 +529,7 @@ export default function DocumentGenerator({
       if (isEditing && documentQuery.data) {
         await updateMutation.mutateAsync({
           name: trimmedDocumentName,
+          category,
           data: values,
         });
         navigationBypassRef.current = true;
@@ -878,6 +882,7 @@ export default function DocumentGenerator({
               );
 
               setDocumentNameError("");
+              setCategory(nextTemplate?.category ?? DEFAULT_CATEGORY);
               setEmailSubject(
                 emailSettings.data?.configured
                   ? nextTemplate?.emailSubject?.trim() ||
@@ -930,6 +935,16 @@ export default function DocumentGenerator({
               </small>
             )}
           </label>
+        )}
+
+        {selected && !isEmailMode && (
+          <CategoryField
+            value={category}
+            onChange={(next) => {
+              setCategory(next);
+              setDirty(true);
+            }}
+          />
         )}
 
         {selected && isEmailMode && (

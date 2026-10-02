@@ -126,7 +126,7 @@ export function DocumentHistory({
   };
 
   return (
-    <section className="document-history">
+    <section className="document-history" aria-busy={loading}>
       <div className="section-heading">
         <FileText />
 

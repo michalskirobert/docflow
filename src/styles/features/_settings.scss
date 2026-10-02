@@ -866,3 +866,38 @@
 .settings-load-error .btn {
   justify-self: start;
 }
+
+.account-consents {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+.consent-list {
+  display: grid;
+  gap: 10px;
+}
+.consent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.consent-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.consent-copy small {
+  display: block;
+}
+@media (max-width: 640px) {
+  .consent-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .consent-row .btn {
+    width: 100%;
+  }
+}
