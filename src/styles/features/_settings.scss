@@ -901,3 +901,72 @@
     width: 100%;
   }
 }
+
+.billing-invoices-section {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.billing-invoices-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.billing-invoices-heading small,
+.billing-invoice-list small,
+.billing-invoices-empty small {
+  color: var(--muted);
+}
+
+.billing-invoice-list {
+  display: grid;
+  gap: 10px;
+}
+
+.billing-invoice-list .invoice-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.billing-invoice-list .invoice-row:last-child {
+  border-bottom: 0;
+}
+
+.invoice-row-label > div {
+  display: grid;
+  gap: 3px;
+}
+
+.billing-invoices-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 82px;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface-muted);
+}
+
+.billing-invoices-empty > div {
+  display: grid;
+  gap: 4px;
+}
+
+.billing-invoice-pending {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .billing-invoice-list .invoice-row {
+    align-items: stretch;
+  }
+
+  .billing-invoice-list .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

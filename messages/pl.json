@@ -486,7 +486,13 @@
     "acceptedVersion": "Zaakceptowano · wersja {version} · {date}",
     "viewDocument": "Wyświetl",
     "retry": "Spróbuj ponownie",
-    "consentHistoryUnavailable": "Brak zapisanej historii akceptacji dla tego konta. Dokument nadal możesz wyświetlić."
+    "consentHistoryUnavailable": "Brak zapisanej historii akceptacji dla tego konta. Dokument nadal możesz wyświetlić.",
+    "billingInvoices": "Faktury od NurByte",
+    "billingInvoicesHelp": "Tutaj pojawią się faktury i rachunki wystawione do płatności za licencję DocFlow.",
+    "receipt": "Rachunek",
+    "invoiceFilePending": "PDF jest przygotowywany",
+    "noBillingInvoices": "Brak faktur",
+    "noBillingInvoicesHelp": "Dokumenty wystawione w Backoffice pojawią się tutaj automatycznie."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",

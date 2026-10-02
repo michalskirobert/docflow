@@ -343,16 +343,56 @@ export default function SettingsPanel() {
                 <p className="muted">{t("noTransactions")}</p>
               )}
 
-              {billing.data?.salesDocuments.map((document) => (
-                <a
-                  className="invoice-row"
-                  key={document.id}
-                  href={document.fileUrl || "#"}
-                >
-                  <FileText size={16} /> {t("invoice")}{" "}
-                  {document.number || document.id.slice(-6)}
-                </a>
-              ))}
+              <div className="billing-invoices-section">
+                <div className="billing-invoices-heading">
+                  <strong>{t("billingInvoices")}</strong>
+                  <small>{t("billingInvoicesHelp")}</small>
+                </div>
+                {billing.data?.salesDocuments.length ? (
+                  <div className="billing-invoice-list">
+                    {billing.data.salesDocuments.map((document) => (
+                      <div className="invoice-row" key={document.id}>
+                        <div className="invoice-row-label">
+                          <FileText size={16} />
+                          <div>
+                            <strong>
+                              {document.type === "RECEIPT"
+                                ? t("receipt")
+                                : t("invoice")}{" "}
+                              {document.number || document.id.slice(-6)}
+                            </strong>
+                            <small>
+                              {new Date(
+                                document.createdAt,
+                              ).toLocaleDateString()}
+                            </small>
+                          </div>
+                        </div>
+                        {document.fileUrl ? (
+                          <a
+                            className="btn secondary compact"
+                            href={`/api/billing/invoices/${document.id}/download`}
+                          >
+                            {t("downloadInvoice")}
+                          </a>
+                        ) : (
+                          <span className="muted billing-invoice-pending">
+                            {t("invoiceFilePending")}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="billing-invoices-empty">
+                    <FileText size={22} />
+                    <div>
+                      <strong>{t("noBillingInvoices")}</strong>
+                      <small>{t("noBillingInvoicesHelp")}</small>
+                    </div>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </section>

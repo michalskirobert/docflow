@@ -81,8 +81,12 @@ export async function GET() {
       billingProfile,
       salesDocuments,
     });
-  } catch {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  } catch (error) {
+    console.error("[GET billing]", error);
+    return NextResponse.json(
+      { message: "Could not load billing" },
+      { status: 500 },
+    );
   }
 }
 async function configurePayment(

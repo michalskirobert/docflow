@@ -486,7 +486,13 @@
     "acceptedVersion": "Disetujui · versi {version} · {date}",
     "viewDocument": "Lihat",
     "retry": "Coba lagi",
-    "consentHistoryUnavailable": "Riwayat persetujuan untuk akun ini belum tersimpan. Dokumen tetap dapat ditampilkan."
+    "consentHistoryUnavailable": "Riwayat persetujuan untuk akun ini belum tersimpan. Dokumen tetap dapat ditampilkan.",
+    "billingInvoices": "Faktur dari NurByte",
+    "billingInvoicesHelp": "Faktur dan tanda terima untuk pembayaran lisensi DocFlow akan muncul di sini.",
+    "receipt": "Tanda terima",
+    "invoiceFilePending": "PDF sedang disiapkan",
+    "noBillingInvoices": "Belum ada faktur",
+    "noBillingInvoicesHelp": "Dokumen yang diterbitkan melalui Backoffice akan muncul di sini secara otomatis."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

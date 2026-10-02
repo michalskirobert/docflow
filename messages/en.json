@@ -486,7 +486,13 @@
     "acceptedVersion": "Accepted · version {version} · {date}",
     "viewDocument": "View",
     "retry": "Try again",
-    "consentHistoryUnavailable": "No acceptance history is stored for this account. You can still view the document."
+    "consentHistoryUnavailable": "No acceptance history is stored for this account. You can still view the document.",
+    "billingInvoices": "Invoices from NurByte",
+    "billingInvoicesHelp": "Invoices and receipts issued for your DocFlow license payments will appear here.",
+    "receipt": "Receipt",
+    "invoiceFilePending": "PDF is being prepared",
+    "noBillingInvoices": "No invoices yet",
+    "noBillingInvoicesHelp": "Documents issued from Backoffice will appear here automatically."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

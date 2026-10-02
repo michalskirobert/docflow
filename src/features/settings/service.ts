@@ -18,6 +18,7 @@ export type BillingOverview = {
   }>;
   salesDocuments: Array<{
     id: string;
+    type: "RECEIPT" | "INVOICE";
     number: string | null;
     fileUrl: string | null;
     sentAt: string | null;
