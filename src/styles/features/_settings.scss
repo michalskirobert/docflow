@@ -593,3 +593,276 @@
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+/* 2.4.0 account plan selector polish. Keep active plans readable even when
+   plan changes are unavailable for an already active yearly licence. */
+.settings-plan-card {
+  min-height: 176px;
+  padding: 18px !important;
+  opacity: 1;
+}
+
+.settings-plan-card:disabled {
+  opacity: 1;
+}
+
+.settings-plan-card:not(.selected):disabled {
+  opacity: 0.82;
+}
+
+.settings-plan-card.selected {
+  padding: 17px !important;
+}
+
+.settings-plan-card .plan-copy,
+.settings-plan-card small {
+  color: var(--text-muted, var(--muted));
+}
+
+.settings-plan-card.selected .plan-check {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.settings-plan-card.selected .plan-check::after {
+  display: none;
+}
+
+:root[data-theme="dark"] .settings-plan-card {
+  border-color: var(--border) !important;
+  background: var(--surface);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .settings-plan-card.selected {
+  border-color: color-mix(in srgb, var(--primary) 72%, #fff) !important;
+  background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+/* 2.4.0 final account stability: explicit geometry for the billing card. */
+.settings-card .license-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0 0;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-card .license-summary > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.settings-card .license-summary strong,
+.settings-plan-heading > strong {
+  display: block;
+  line-height: 1.25;
+}
+
+.settings-card .license-expiry,
+.settings-plan-heading > small {
+  display: block;
+  line-height: 1.45;
+}
+
+.settings-card .settings-plan-section {
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.settings-card .settings-plan-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-card .settings-plan-grid {
+  gap: 12px;
+}
+
+.settings-card .settings-plan-card {
+  align-content: start;
+  min-width: 0;
+  min-height: 176px;
+}
+
+.settings-card .settings-plan-card .plan-name,
+.settings-card .settings-plan-card .plan-copy,
+.settings-card .settings-plan-card > span:not(.plan-check),
+.settings-card .settings-plan-card > small {
+  opacity: 1;
+}
+
+.settings-card .settings-plan-card:disabled {
+  color: var(--text);
+}
+
+.settings-card .settings-plan-card:not(.selected):disabled {
+  opacity: 0.9;
+}
+
+.settings-card .settings-plan-card.selected {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.account-consents-skeleton {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+}
+
+.consent-row-skeleton > div {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.consent-row-skeleton .skeleton-line {
+  display: block;
+  margin: 0;
+}
+
+.consent-row-skeleton .skeleton-action {
+  width: 132px;
+  height: 38px;
+}
+
+@media (max-width: 760px) {
+  .settings-card .license-summary {
+    align-items: flex-start;
+  }
+
+  .consent-row-skeleton {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .consent-row-skeleton .skeleton-action {
+    width: 100%;
+  }
+}
+
+/* 2.4.0 final billing card: compact layout isolated from auth plan-card rules. */
+.settings-card .settings-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-card .settings-plan-card {
+  display: grid !important;
+  grid-template-columns: 42px minmax(0, 1fr) 24px !important;
+  grid-template-areas:
+    "visual name check"
+    "visual copy copy"
+    ". price price"
+    ". meta meta" !important;
+  align-items: start;
+  align-content: start;
+  column-gap: 12px;
+  row-gap: 3px;
+  min-height: 0 !important;
+  padding: 14px !important;
+  border-radius: 14px !important;
+  text-align: left;
+}
+
+.settings-card .settings-plan-card.selected {
+  padding: 13px !important;
+}
+
+.settings-card .settings-plan-card .plan-visual {
+  grid-area: visual;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.settings-card .settings-plan-card .plan-check {
+  grid-area: check;
+  position: static;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  align-self: start;
+}
+
+.settings-card .settings-plan-card .plan-name {
+  grid-area: name;
+  margin: 1px 0 0;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.settings-card .settings-plan-card .plan-copy {
+  grid-area: copy;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.settings-card .settings-plan-card .settings-plan-price {
+  grid-area: price;
+  margin: 7px 0 0;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.settings-card .settings-plan-card > small:not(.plan-copy) {
+  grid-area: meta;
+  margin: 0 !important;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.settings-card .settings-plan-card > small:not(.plan-copy) + small {
+  margin-top: 16px !important;
+}
+
+.settings-card .settings-plan-section {
+  margin-top: 14px;
+}
+
+.settings-card .settings-plan-heading {
+  margin-bottom: 0;
+}
+
+.settings-card .field:has(.select-control),
+.settings-card .field:has(select) {
+  margin-top: 14px;
+}
+
+.settings-card .settings-payment-actions {
+  margin-top: 10px;
+}
+
+@media (max-width: 760px) {
+  .settings-card .settings-plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Stable account loading + final plan selection alignment. */
+.settings-card .settings-plan-card .plan-check {
+  align-self: start;
+  justify-self: end;
+  margin-top: -4px;
+  transform: translateY(0);
+}
+
+.settings-load-error {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.settings-load-error .btn {
+  justify-self: start;
+}

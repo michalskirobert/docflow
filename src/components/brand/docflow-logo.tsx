@@ -22,7 +22,7 @@ export function DocFlowMark({
       width={256}
       height={256}
       priority={priority}
-      sizes="(max-width: 900px) 46px, 46px"
+      unoptimized
     />
   );
 }

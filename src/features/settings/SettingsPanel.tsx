@@ -109,7 +109,8 @@ export default function SettingsPanel() {
 
       <div className="settings-column">
         <section className="card settings-card">
-          {billing.isLoading ? (
+          {(billing.isPending && !billing.data) ||
+          (plans.isPending && !plans.data) ? (
             <SettingsCardSkeleton rows={4} />
           ) : (
             <>
@@ -282,7 +283,7 @@ export default function SettingsPanel() {
         </section>
 
         <section className="card settings-card">
-          {billing.isLoading ? (
+          {billing.isPending && !billing.data ? (
             <SettingsCardSkeleton rows={3} />
           ) : (
             <>

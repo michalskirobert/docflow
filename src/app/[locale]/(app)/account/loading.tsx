@@ -15,6 +15,19 @@ function AccountDetailsSkeleton() {
         ))}
       </div>
       <span className="skeleton-action account-save-skeleton" />
+      <div className="account-consents account-consents-skeleton">
+        <span className="skeleton-line section-title-skeleton" />
+        <span className="skeleton-line section-description-skeleton" />
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div className="consent-row consent-row-skeleton" key={index}>
+            <div>
+              <span className="skeleton-line short" />
+              <span className="skeleton-line wide" />
+            </div>
+            <span className="skeleton-action" />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

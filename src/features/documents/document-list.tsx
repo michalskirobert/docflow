@@ -50,7 +50,7 @@ export default function DocumentList() {
       onTemplateFilterChange={setTemplateFilter}
       onDateFromChange={setDateFrom}
       onDateToChange={setDateTo}
-      loading={documents.isLoading || documents.isFetching}
+      loading={documents.isPending && !documents.data}
       q={q}
       sort={sort}
       onQueryChange={setQ}

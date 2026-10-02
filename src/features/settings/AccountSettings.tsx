@@ -69,7 +69,7 @@ export function AccountSettings() {
       notify(t("profileSaveError"), "error");
     }
   });
-  if (account.isLoading)
+  if (account.isPending && !account.data)
     return (
       <section
         className="card settings-card settings-skeleton"
@@ -89,6 +89,21 @@ export function AccountSettings() {
         <div className="settings-skeleton-button" />
       </section>
     );
+  if (account.isError && !account.data)
+    return (
+      <section className="card settings-card settings-load-error" role="alert">
+        <h2>{t("accountData")}</h2>
+        <p className="muted">{t("accountDataHelp")}</p>
+        <button
+          type="button"
+          className="btn secondary"
+          onClick={() => void account.refetch()}
+        >
+          {t("retry")}
+        </button>
+      </section>
+    );
+
   return (
     <section className="card settings-card">
       <h2>{t("accountData")}</h2>

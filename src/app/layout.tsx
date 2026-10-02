@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
 };
 
-const themeBootstrapScript = `
+const themeInitScript = `
 (() => {
   try {
     const stored = localStorage.getItem("docflow-theme");
@@ -33,9 +33,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

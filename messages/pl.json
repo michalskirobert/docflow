@@ -478,7 +478,8 @@
     "privacyDocument": "Polityka prywatności",
     "paidServiceDocument": "Rozpoczęcie płatnej usługi",
     "acceptedVersion": "Zaakceptowano · wersja {version} · {date}",
-    "viewDocument": "Wyświetl"
+    "viewDocument": "Wyświetl",
+    "retry": "Spróbuj ponownie"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -811,7 +812,7 @@
     "emptyTitle": "Puste wartości i tabele",
     "empty": "SUM pustego zbioru zwraca 0. Puste komórki są pomijane w agregacjach. Nieprawidłowa wartość numeryczna powoduje błąd kalkulacji zamiast cichego podmieniania wyniku.",
     "tableExampleTitle": "Przykład z tabelą produktów",
-    "tableExample": "W każdym wierszu: CenaNetto + VAT → CenaBRUTTO. Poza tabelą: SUM({{CenaBRUTTO}}) → RazemDoZaplaty. CenaBRUTTO może być polem kalkulacyjnym — nie musi być zwykłym polem liczbowym."
+    "tableExample": "W każdym wierszu: CenaNetto + VAT → CenaBRUTTO. Poza tabelą: SUM(CenaBRUTTO) → RazemDoZaplaty. CenaBRUTTO może być polem kalkulacyjnym — nie musi być zwykłym polem liczbowym."
   },
   "notFound": {
     "title": "Nie znaleźliśmy tej strony",

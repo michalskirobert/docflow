@@ -9,18 +9,45 @@ import { sendVerificationEmail } from "@/server/email/verification";
 export async function GET() {
   try {
     const s = await requireSession();
-    const membership = await prisma.membership.findUnique({
-      where: {
-        userId_organizationId: {
-          userId: s.id,
-          organizationId: s.organizationId,
+    let membership;
+    try {
+      membership = await prisma.membership.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: s.id,
+            organizationId: s.organizationId,
+          },
         },
-      },
-      include: {
-        user: { include: { consents: { orderBy: { acceptedAt: "desc" } } } },
-        organization: { include: { billingProfile: true } },
-      },
-    });
+        include: {
+          user: { include: { consents: { orderBy: { acceptedAt: "desc" } } } },
+          organization: { include: { billingProfile: true } },
+        },
+      });
+    } catch (error) {
+      const missingUserConsentTable =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2021" &&
+        String(error.meta?.table ?? "").includes("UserConsent");
+
+      if (!missingUserConsentTable) throw error;
+
+      const fallback = await prisma.membership.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: s.id,
+            organizationId: s.organizationId,
+          },
+        },
+        include: {
+          user: true,
+          organization: { include: { billingProfile: true } },
+        },
+      });
+
+      membership = fallback
+        ? { ...fallback, user: { ...fallback.user, consents: [] } }
+        : null;
+    }
     if (!membership)
       return NextResponse.json({ message: "Not found" }, { status: 404 });
     const b = membership.organization.billingProfile;

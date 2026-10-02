@@ -36,11 +36,9 @@ function DashboardStatsSkeleton() {
   );
 }
 
-async function DashboardContent({
-  organizationId,
-}: {
-  organizationId: string;
-}) {
+async function DashboardContent() {
+  const session = await requireSession();
+  const organizationId = session.organizationId;
   const t = await getTranslations("dashboard");
 
   const start = new Date();
@@ -84,6 +82,17 @@ async function DashboardContent({
 
   return (
     <>
+      <div className="row between dashboard-heading">
+        <div>
+          <span className="eyebrow">WORKSPACE</span>
+          <h1>{t("title")}</h1>
+          <p className="muted">{session.organizationName}</p>
+        </div>
+        <Link href="/templates" className="btn">
+          <Sparkles size={17} />
+          {t("createTemplate")}
+        </Link>
+      </div>
       <div className="grid dashboard-stats">
         <Link href="/templates" className="card stat-card stat-card-link">
           <div className="stat-card-icon">
@@ -192,26 +201,27 @@ async function DashboardContent({
   );
 }
 
-export default async function DashboardPage() {
-  const session = await requireSession();
-  const t = await getTranslations("dashboard");
-
+export default function DashboardPage() {
   return (
-    <>
-      <div className="row between dashboard-heading">
-        <div>
-          <span className="eyebrow">WORKSPACE</span>
-          <h1>{t("title")}</h1>
-          <p className="muted">{session.organizationName}</p>
-        </div>
-        <Link href="/templates" className="btn">
-          <Sparkles size={17} />
-          {t("createTemplate")}
-        </Link>
+    <Suspense fallback={<DashboardPageSkeleton />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardPageSkeleton() {
+  return (
+    <div
+      className="dashboard-route-skeleton"
+      aria-busy="true"
+      aria-label="Loading dashboard"
+    >
+      <div className="dashboard-heading">
+        <span className="skeleton-line short" />
+        <span className="skeleton-line wide" />
+        <span className="skeleton-line short" />
       </div>
-      <Suspense fallback={<DashboardStatsSkeleton />}>
-        <DashboardContent organizationId={session.organizationId} />
-      </Suspense>
-    </>
+      <DashboardStatsSkeleton />
+    </div>
   );
 }

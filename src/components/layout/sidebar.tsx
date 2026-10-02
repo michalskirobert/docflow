@@ -46,9 +46,13 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-brand">
+      <Link
+        href="/dashboard"
+        className="sidebar-brand"
+        aria-label="DocFlow by NurByte — Dashboard"
+      >
         <DocFlowLogo showByline />
-      </div>
+      </Link>
 
       <nav>
         {links.map(({ href, key, icon: Icon }) => (

@@ -478,7 +478,8 @@
     "privacyDocument": "Privacy Policy",
     "paidServiceDocument": "Immediate paid service",
     "acceptedVersion": "Accepted · version {version} · {date}",
-    "viewDocument": "View"
+    "viewDocument": "View",
+    "retry": "Try again"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -811,7 +812,7 @@
     "emptyTitle": "Empty values and tables",
     "empty": "SUM of an empty set returns 0. Empty cells are skipped by aggregates. An invalid numeric value causes a calculation error instead of silently replacing the result.",
     "tableExampleTitle": "Product table example",
-    "tableExample": "In every row: NetPrice + VAT → GrossPrice. Outside the table: SUM({{GrossPrice}}) → AmountDue. GrossPrice may itself be a calculated field; it does not have to be a plain numeric field."
+    "tableExample": "In every row: NetPrice + VAT → GrossPrice. Outside the table: SUM(GrossPrice) → AmountDue. GrossPrice may itself be a calculated field; it does not have to be a plain numeric field."
   },
   "notFound": {
     "title": "We couldn’t find this page",

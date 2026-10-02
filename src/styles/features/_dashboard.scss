@@ -277,6 +277,39 @@
   min-height: 142px;
 }
 
+.calculated-variables-news {
+  .quick-start-actions .btn.secondary {
+    border-color: #f59e0b;
+    background: #f59e0b;
+    color: #1c1406;
+
+    &:hover {
+      border-color: #fbbf24;
+      background: #fbbf24;
+      color: #171006;
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgb(245 158 11 / 32%);
+      outline-offset: 3px;
+    }
+  }
+}
+
+:root[data-theme="dark"] .calculated-variables-news {
+  .quick-start-actions .btn.secondary {
+    border-color: #f59e0b;
+    background: #f59e0b;
+    color: #1c1406;
+
+    &:hover {
+      border-color: #fbbf24;
+      background: #fbbf24;
+      color: #171006;
+    }
+  }
+}
+
 .quick-start-actions {
   display: flex;
   flex-wrap: wrap;

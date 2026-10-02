@@ -86,7 +86,7 @@ export default function TemplateList() {
           </button>
         }
       />
-      {query.isLoading ? (
+      {query.isPending && !query.data ? (
         <ListSkeleton rows={6} cards />
       ) : (query.data?.length ?? 0) > 0 ? (
         <div className="template-grid">

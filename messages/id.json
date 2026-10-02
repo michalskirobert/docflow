@@ -478,7 +478,8 @@
     "privacyDocument": "Kebijakan Privasi",
     "paidServiceDocument": "Layanan berbayar segera",
     "acceptedVersion": "Disetujui · versi {version} · {date}",
-    "viewDocument": "Lihat"
+    "viewDocument": "Lihat",
+    "retry": "Coba lagi"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -811,7 +812,7 @@
     "emptyTitle": "Nilai dan tabel kosong",
     "empty": "SUM dari kumpulan kosong menghasilkan 0. Sel kosong dilewati dalam agregasi. Nilai numerik yang tidak valid menghasilkan kesalahan perhitungan, bukan mengganti hasil secara diam-diam.",
     "tableExampleTitle": "Contoh tabel produk",
-    "tableExample": "Di setiap baris: HargaNeto + VAT → HargaBruto. Di luar tabel: SUM({{HargaBruto}}) → TotalPembayaran. HargaBruto boleh berupa field perhitungan dan tidak harus field angka biasa."
+    "tableExample": "Di setiap baris: HargaNeto + VAT → HargaBruto. Di luar tabel: SUM(HargaBruto) → TotalPembayaran. HargaBruto boleh berupa field perhitungan dan tidak harus field angka biasa."
   },
   "notFound": {
     "title": "Halaman ini tidak ditemukan",

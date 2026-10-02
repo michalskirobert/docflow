@@ -46,7 +46,6 @@ export function languageAlternates(
     en: localizedPath("en", path),
     pl: localizedPath("pl", path),
     id: localizedPath("id", path),
-    "x-default": localizedPath("en", path),
   };
 }
 

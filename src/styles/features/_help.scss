@@ -280,3 +280,74 @@
     padding: 0 14px 14px;
   }
 }
+
+/* 2.4.0 desktop readability: Help should not stretch edge-to-edge on wide screens. */
+@media (min-width: 1200px) {
+  .help-layout {
+    width: min(100%, 1240px);
+    margin-inline: auto;
+  }
+
+  .help-layout .support-card {
+    padding: 28px 30px;
+  }
+
+  .help-layout .support-form .pending-fieldset {
+    grid-template-columns: minmax(300px, 0.72fr) minmax(460px, 1.28fr);
+    gap: 18px 28px;
+  }
+
+  .help-layout .support-form .pending-fieldset > .field:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+}
+
+/* 2.4.0 final desktop Help composition: match the two-column rhythm used by My Account. */
+@media (min-width: 1100px) {
+  .help-layout {
+    width: 100%;
+    margin-inline: 0;
+    grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+    gap: 18px;
+    align-items: start;
+  }
+
+  .help-layout > .help-card:first-child {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .help-layout .calculation-help-card {
+    grid-column: 2;
+    grid-row: 1;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding-block: 24px;
+  }
+
+  .help-layout .calculation-help-card .btn {
+    width: auto;
+  }
+
+  .help-layout .support-card {
+    grid-column: 2;
+    grid-row: 2;
+    padding: 24px;
+  }
+
+  .help-layout .support-form,
+  .help-layout .support-form .pending-fieldset {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-layout .support-form .pending-fieldset {
+    gap: 16px;
+  }
+
+  .help-layout .support-form .pending-fieldset > .field:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
