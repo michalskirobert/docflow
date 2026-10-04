@@ -1,7 +1,8 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { BookOpen, ChevronRight, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import LanguageSwitcher from "@/features/language/language-switcher";
 import { Section } from "@/components/shared/layout";
 import EmailSettingsCard from "./email-settings";
@@ -45,6 +46,19 @@ export default function PreferencesSettings() {
           <h2>{t("language")}</h2>
           <p className="muted">{t("languageHelp")}</p>
           <LanguageSwitcher />
+        </Section>
+        <Section className="settings-card">
+          <div className="section-heading">
+            <BookOpen />
+            <div>
+              <h2>{t("categories")}</h2>
+              <p>{t("categoriesHelp")}</p>
+            </div>
+          </div>
+          <Link href="/settings/categories" className="settings-link-row">
+            <span>{t("manageCategories")}</span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </Link>
         </Section>
         <Section className="settings-card">
           <h2>{t("appearance")}</h2>

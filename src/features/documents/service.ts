@@ -3,12 +3,17 @@ import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
 import type { Document, DocumentSummary } from "./types";
 import type { Template, TemplateSummary } from "@/features/templates/types";
 
-export const useDocumentsService = (q = "", sort = "newest") => {
+export const useDocumentsService = (
+  q = "",
+  sort = "newest",
+  category = "all",
+) => {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
   params.set("sort", sort);
+  if (category !== "all") params.set("category", category);
   return useGet<DocumentSummary[]>(
-    ["documents", q, sort],
+    ["documents", q, sort, category],
     `/documents?${params.toString()}`,
   );
 };

@@ -23,6 +23,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() ?? "";
     const sort = searchParams.get("sort") ?? "newest";
+    const category = searchParams.get("category") ?? "all";
     const orderBy =
       sort === "oldest"
         ? { createdAt: "asc" as const }
@@ -30,11 +31,16 @@ export async function GET(req: Request) {
           ? { name: "asc" as const }
           : sort === "nameDesc"
             ? { name: "desc" as const }
-            : { createdAt: "desc" as const };
+            : sort === "categoryAsc"
+              ? { category: "asc" as const }
+              : sort === "categoryDesc"
+                ? { category: "desc" as const }
+                : { createdAt: "desc" as const };
     return NextResponse.json(
       await prisma.document.findMany({
         where: {
           organizationId: s.organizationId,
+          ...(category !== "all" ? { category } : {}),
           ...(q
             ? {
                 OR: [

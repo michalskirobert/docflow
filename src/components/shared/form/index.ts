@@ -6,3 +6,4 @@ export { SelectControl } from "./SelectControl";
 export { SelectField } from "./SelectField";
 
 export * from "./SearchableSelectField";
+export { InputAction, InputActions } from "./InputActions";

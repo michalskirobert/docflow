@@ -134,10 +134,11 @@ export function TemplateEditor({ template, onClose }: Props) {
     name: template?.name ?? t("defaultTemplateName"),
     description: template?.description ?? "",
     emailSubject: template?.emailSubject ?? "",
+    category: template?.category ?? DEFAULT_CATEGORY,
   });
 
   const openMetadataEditor = () => {
-    metadataSnapshot.current = { name, description, emailSubject };
+    metadataSnapshot.current = { name, description, emailSubject, category };
     setEditingName(true);
     requestAnimationFrame(() => nameRef.current?.focus());
   };
@@ -146,6 +147,7 @@ export function TemplateEditor({ template, onClose }: Props) {
     setName(metadataSnapshot.current.name);
     setDescription(metadataSnapshot.current.description);
     setEmailSubject(metadataSnapshot.current.emailSubject);
+    setCategory(metadataSnapshot.current.category);
     setEditingName(false);
   };
 
@@ -1719,7 +1721,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                     <div className="editor-header-meta-actions">
                       <button
                         type="button"
-                        className="btn secondary compact"
+                        className="btn ghost compact editor-header-meta-cancel"
                         onClick={cancelMetadataEditor}
                       >
                         <X size={16} /> {t("cancel")}

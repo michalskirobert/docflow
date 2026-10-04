@@ -106,27 +106,6 @@
   gap: 10px;
 }
 
-.category-field-actions {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  display: flex;
-  gap: 2px;
-  transform: translateY(-50%);
-}
-
-.category-field .field-control > input {
-  padding-right: 84px;
-}
-
-.category-field-action.btn {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  min-height: 34px;
-  padding: 0;
-}
-
 .query-error-state {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

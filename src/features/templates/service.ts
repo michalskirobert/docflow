@@ -18,6 +18,7 @@ export const useTemplatesService = (
   source = "all",
   dateFrom = "",
   dateTo = "",
+  category = "all",
 ) => {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
@@ -25,8 +26,9 @@ export const useTemplatesService = (
   params.set("source", source);
   if (dateFrom) params.set("dateFrom", dateFrom);
   if (dateTo) params.set("dateTo", dateTo);
+  if (category !== "all") params.set("category", category);
   return useGet<TemplateSummary[]>(
-    ["templates", q, sort, source, dateFrom, dateTo],
+    ["templates", q, sort, source, dateFrom, dateTo, category],
     `/templates?${params.toString()}`,
   );
 };

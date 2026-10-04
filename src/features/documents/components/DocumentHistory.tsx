@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { SelectField } from "@/components/shared/form";
+import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { type ReactNode, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,10 +31,12 @@ export function DocumentHistory({
   onQueryChange,
   onSortChange,
   templateFilter = "all",
+  categoryFilter = "all",
   templateOptions = [],
   dateFrom = "",
   dateTo = "",
   onTemplateFilterChange,
+  onCategoryFilterChange,
   onDateFromChange,
   onDateToChange,
 }: {
@@ -45,10 +48,12 @@ export function DocumentHistory({
   onQueryChange: (value: string) => void;
   onSortChange: (value: string) => void;
   templateFilter?: string;
+  categoryFilter?: string;
   templateOptions?: Array<[string, string]>;
   dateFrom?: string;
   dateTo?: string;
   onTemplateFilterChange?: (value: string) => void;
+  onCategoryFilterChange?: (value: string) => void;
   onDateFromChange?: (value: string) => void;
   onDateToChange?: (value: string) => void;
 }) {
@@ -147,6 +152,8 @@ export function DocumentHistory({
           { value: "oldest", label: t("oldest") },
           { value: "nameAsc", label: t("nameAsc") },
           { value: "nameDesc", label: t("nameDesc") },
+          { value: "categoryAsc", label: t("categoryAsc") },
+          { value: "categoryDesc", label: t("categoryDesc") },
         ]}
         onSortChange={onSortChange}
         filterLabel={t("filters")}
@@ -155,16 +162,24 @@ export function DocumentHistory({
         applyLabel={t("applyFilters")}
         activeFilterCount={
           (templateFilter !== "all" ? 1 : 0) +
+          (categoryFilter !== "all" ? 1 : 0) +
           (dateFrom ? 1 : 0) +
           (dateTo ? 1 : 0)
         }
         onClearFilters={() => {
           onTemplateFilterChange?.("all");
+          onCategoryFilterChange?.("all");
           onDateFromChange?.("");
           onDateToChange?.("");
         }}
         filters={
           <div className="list-filter-grid">
+            {onCategoryFilterChange && (
+              <CategoryFilterField
+                value={categoryFilter}
+                onChange={onCategoryFilterChange}
+              />
+            )}
             {onTemplateFilterChange && (
               <SelectField
                 label={t("filterByTemplate")}

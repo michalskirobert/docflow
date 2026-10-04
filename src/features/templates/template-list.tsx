@@ -1,5 +1,6 @@
 "use client";
 import { SelectField } from "@/components/shared/form";
+import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
 import { QueryErrorState } from "@/components/ui/query-error-state";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
 import { useState } from "react";
@@ -26,10 +27,21 @@ export default function TemplateList() {
   const [source, setSource] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [cardActionPending, setCardActionPending] = useState(false);
-  const query = useTemplatesService(q, sort, source, dateFrom, dateTo);
+  const query = useTemplatesService(
+    q,
+    sort,
+    source,
+    dateFrom,
+    dateTo,
+    categoryFilter,
+  );
   const activeFilterCount =
-    (source !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
+    (source !== "all" ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (dateFrom ? 1 : 0) +
+    (dateTo ? 1 : 0);
 
   if (query.isError && !query.data) {
     return (
@@ -56,6 +68,10 @@ export default function TemplateList() {
           { value: "oldest", label: t("oldest") },
           { value: "nameAsc", label: t("nameAsc") },
           { value: "nameDesc", label: t("nameDesc") },
+          { value: "categoryAsc", label: t("categoryAsc") },
+          { value: "categoryDesc", label: t("categoryDesc") },
+          { value: "typeDefaultFirst", label: t("typeDefaultFirst") },
+          { value: "typeOwnFirst", label: t("typeOwnFirst") },
         ]}
         onSortChange={setSort}
         filterLabel={t("filters")}
@@ -65,6 +81,7 @@ export default function TemplateList() {
         activeFilterCount={activeFilterCount}
         onClearFilters={() => {
           setSource("all");
+          setCategoryFilter("all");
           setDateFrom("");
           setDateTo("");
         }}
@@ -79,6 +96,10 @@ export default function TemplateList() {
               <option value="default">{t("sourceDefault")}</option>
               <option value="own">{t("sourceOwn")}</option>
             </SelectField>
+            <CategoryFilterField
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+            />
             <FilterDateControl
               label={t("dateFrom")}
               value={dateFrom}

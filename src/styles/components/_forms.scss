@@ -485,3 +485,34 @@
 .choice-field:has(> input:disabled):hover .choice-indicator {
   border-color: var(--border);
 }
+
+.field-input-actions {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transform: translateY(-50%);
+}
+.field-input-action {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+}
+.field-input-action:not(:disabled):hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.field-input-action:disabled {
+  opacity: 0.38;
+}
+.field-control:has(.field-input-actions) > input {
+  padding-right: 78px;
+}

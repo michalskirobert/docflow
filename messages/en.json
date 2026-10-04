@@ -220,7 +220,11 @@
     "fontFamily": "Font",
     "loadErrorTitle": "Could not load data",
     "loadErrorMessage": "There was a problem loading the data. Stay on this page and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "categoryAsc": "Category A–Z",
+    "categoryDesc": "Category Z–A",
+    "typeDefaultFirst": "Type: default first",
+    "typeOwnFirst": "Type: my templates first"
   },
   "documents": {
     "close": "Zamknij",
@@ -358,7 +362,10 @@
     "applyFilters": "Apply",
     "loadErrorTitle": "Could not load data",
     "loadErrorMessage": "There was a problem loading the data. Stay on this page and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "categoryAsc": "Category A–Z",
+    "categoryDesc": "Category Z–A",
+    "loadingTemplate": "Loading template…"
   },
   "settings": {
     "title": "Settings",
@@ -492,7 +499,13 @@
     "receipt": "Receipt",
     "invoiceFilePending": "PDF is being prepared",
     "noBillingInvoices": "No invoices yet",
-    "noBillingInvoicesHelp": "Documents issued from Backoffice will appear here automatically."
+    "noBillingInvoicesHelp": "Documents issued from Backoffice will appear here automatically.",
+    "dictionaries": "Dictionaries",
+    "dictionariesHelp": "Manage values used across DocFlow.",
+    "manageDictionaries": "Manage dictionaries",
+    "categories": "Categories",
+    "categoriesHelp": "Manage categories used in documents and templates.",
+    "manageCategories": "Manage categories"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -849,6 +862,28 @@
       "SALES": "Sales",
       "CORRESPONDENCE": "Correspondence",
       "OTHER": "Other"
-    }
+    },
+    "filterLabel": "Filter by category",
+    "all": "All categories",
+    "saveError": "Could not save category.",
+    "dictionaries": "Dictionaries",
+    "dictionariesDescription": "Manage shared values used in documents and templates.",
+    "backToAccount": "Back to account",
+    "dictionaryTitle": "Dictionaries",
+    "dictionaryHelp": "Manage your own values used across DocFlow.",
+    "dictionaryCategories": "Categories",
+    "dictionaryCategoriesHelp": "System categories are fixed. You can add and delete custom categories.",
+    "systemBadge": "System",
+    "usage": "Templates: {templates} · Documents: {documents}",
+    "deleteTitle": "Delete category “{name}”?",
+    "deleteUsedMessage": "This category is used by {templates} templates and {documents} documents. After deletion they will be moved to “General”.",
+    "deleteUnusedMessage": "This category is not currently used. Deletion cannot be undone.",
+    "deleteConfirm": "Delete",
+    "deleteAria": "Delete category {name}",
+    "deleted": "Category deleted.",
+    "deleteError": "Could not delete category.",
+    "saved": "Category saved.",
+    "loading": "Loading categories…",
+    "backToSettings": "Back to settings"
   }
 }

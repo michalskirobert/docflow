@@ -7,12 +7,27 @@ const createSchema = z.object({ name: z.string().trim().min(2).max(60) });
 
 export async function GET() {
   const session = await requireSession();
+  const categories = await prisma.category.findMany({
+    where: { organizationId: session.organizationId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+
   return NextResponse.json(
-    await prisma.category.findMany({
-      where: { organizationId: session.organizationId },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
+    await Promise.all(
+      categories.map(async (category) => {
+        const value = `custom:${category.id}`;
+        const [templatesCount, documentsCount] = await Promise.all([
+          prisma.template.count({
+            where: { organizationId: session.organizationId, category: value },
+          }),
+          prisma.document.count({
+            where: { organizationId: session.organizationId, category: value },
+          }),
+        ]);
+        return { ...category, templatesCount, documentsCount };
+      }),
+    ),
   );
 }
 

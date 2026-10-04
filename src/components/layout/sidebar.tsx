@@ -57,7 +57,7 @@ export function Sidebar() {
       <nav>
         {links.map(({ href, key, icon: Icon }) => (
           <Link
-            className={`${pathname === href ? "active" : ""} nav-${key}${
+            className={`${pathname === href || pathname.startsWith(`${href}/`) ? "active" : ""} nav-${key}${
               mobileHiddenLinks.has(href) ? " mobile-hidden" : ""
             }`.trim()}
             href={href}

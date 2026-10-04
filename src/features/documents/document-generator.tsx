@@ -900,6 +900,31 @@ export default function DocumentGenerator({
             }}
           />
         )}
+        {!isEditing &&
+          !sourceDocumentId &&
+          templateId &&
+          selectedTemplateQuery.isFetching &&
+          !selected && (
+            <div
+              className="document-template-loading document-edit-form-skeleton"
+              aria-busy="true"
+              aria-label={t("loadingTemplate")}
+            >
+              <div className="document-loading-heading">
+                <span className="skeleton-icon" />
+                <div>
+                  <span className="skeleton-line wide" />
+                  <span className="skeleton-line" />
+                </div>
+              </div>
+              {Array.from({ length: 5 }).map((_, index) => (
+                <div className="document-field-skeleton" key={index}>
+                  <span className="skeleton-line short" />
+                  <span className="skeleton-input" />
+                </div>
+              ))}
+            </div>
+          )}
         {selected && !isEmailMode && (
           <label
             className={`field ${documentNameError ? "field-error" : ""}`}

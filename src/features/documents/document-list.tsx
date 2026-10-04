@@ -13,9 +13,10 @@ export default function DocumentList() {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("newest");
   const [templateFilter, setTemplateFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const documents = useDocumentsService(q, sort);
+  const documents = useDocumentsService(q, sort, categoryFilter);
   const allDocuments = documents.data ?? [];
   const templateOptions = Array.from(
     new Map(
@@ -60,10 +61,12 @@ export default function DocumentList() {
     <DocumentHistory
       documents={filteredDocuments}
       templateFilter={templateFilter}
+      categoryFilter={categoryFilter}
       templateOptions={templateOptions}
       dateFrom={dateFrom}
       dateTo={dateTo}
       onTemplateFilterChange={setTemplateFilter}
+      onCategoryFilterChange={setCategoryFilter}
       onDateFromChange={setDateFrom}
       onDateToChange={setDateTo}
       loading={documents.isPending && !documents.data}

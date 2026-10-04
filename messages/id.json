@@ -220,7 +220,11 @@
     "fontFamily": "Font",
     "loadErrorTitle": "Data tidak dapat dimuat",
     "loadErrorMessage": "Terjadi masalah saat memuat data. Tetap di halaman ini dan coba lagi.",
-    "retry": "Coba lagi"
+    "retry": "Coba lagi",
+    "categoryAsc": "Kategori A–Z",
+    "categoryDesc": "Kategori Z–A",
+    "typeDefaultFirst": "Jenis: bawaan lebih dulu",
+    "typeOwnFirst": "Jenis: templat saya lebih dulu"
   },
   "documents": {
     "close": "Zamknij",
@@ -358,7 +362,10 @@
     "applyFilters": "Terapkan",
     "loadErrorTitle": "Data tidak dapat dimuat",
     "loadErrorMessage": "Terjadi masalah saat memuat data. Tetap di halaman ini dan coba lagi.",
-    "retry": "Coba lagi"
+    "retry": "Coba lagi",
+    "categoryAsc": "Kategori A–Z",
+    "categoryDesc": "Kategori Z–A",
+    "loadingTemplate": "Memuat templat…"
   },
   "settings": {
     "title": "Pengaturan",
@@ -492,7 +499,13 @@
     "receipt": "Tanda terima",
     "invoiceFilePending": "PDF sedang disiapkan",
     "noBillingInvoices": "Belum ada faktur",
-    "noBillingInvoicesHelp": "Dokumen yang diterbitkan melalui Backoffice akan muncul di sini secara otomatis."
+    "noBillingInvoicesHelp": "Dokumen yang diterbitkan melalui Backoffice akan muncul di sini secara otomatis.",
+    "dictionaries": "Kamus",
+    "dictionariesHelp": "Kelola nilai yang digunakan di DocFlow.",
+    "manageDictionaries": "Kelola kamus",
+    "categories": "Kategori",
+    "categoriesHelp": "Kelola kategori yang digunakan dalam dokumen dan templat.",
+    "manageCategories": "Kelola kategori"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -849,6 +862,28 @@
       "SALES": "Penjualan",
       "CORRESPONDENCE": "Korespondensi",
       "OTHER": "Lainnya"
-    }
+    },
+    "filterLabel": "Filter berdasarkan kategori",
+    "all": "Semua kategori",
+    "saveError": "Kategori tidak dapat disimpan.",
+    "dictionaries": "Kamus",
+    "dictionariesDescription": "Kelola nilai bersama yang digunakan dalam dokumen dan templat.",
+    "backToAccount": "Kembali ke akun",
+    "dictionaryTitle": "Kamus",
+    "dictionaryHelp": "Kelola nilai buatan Anda yang digunakan di DocFlow.",
+    "dictionaryCategories": "Kategori",
+    "dictionaryCategoriesHelp": "Kategori sistem bersifat tetap. Kategori sendiri dapat ditambahkan dan dihapus.",
+    "systemBadge": "Sistem",
+    "usage": "Templat: {templates} · Dokumen: {documents}",
+    "deleteTitle": "Hapus kategori “{name}”?",
+    "deleteUsedMessage": "Kategori ini digunakan oleh {templates} templat dan {documents} dokumen. Setelah dihapus, semuanya akan dipindahkan ke kategori “Umum”.",
+    "deleteUnusedMessage": "Kategori ini sedang tidak digunakan. Penghapusan tidak dapat dibatalkan.",
+    "deleteConfirm": "Hapus",
+    "deleteAria": "Hapus kategori {name}",
+    "deleted": "Kategori telah dihapus.",
+    "deleteError": "Kategori tidak dapat dihapus.",
+    "saved": "Kategori telah disimpan.",
+    "loading": "Memuat kategori…",
+    "backToSettings": "Kembali ke pengaturan"
   }
 }

@@ -220,7 +220,11 @@
     "fontFamily": "Czcionka",
     "loadErrorTitle": "Nie udało się pobrać danych",
     "loadErrorMessage": "Wystąpił problem podczas pobierania danych. Pozostań na tej stronie i spróbuj ponownie.",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "categoryAsc": "Kategoria A–Z",
+    "categoryDesc": "Kategoria Z–A",
+    "typeDefaultFirst": "Typ: najpierw domyślne",
+    "typeOwnFirst": "Typ: najpierw moje"
   },
   "documents": {
     "close": "Zamknij",
@@ -358,7 +362,10 @@
     "applyFilters": "Zastosuj",
     "loadErrorTitle": "Nie udało się pobrać danych",
     "loadErrorMessage": "Wystąpił problem podczas pobierania danych. Pozostań na tej stronie i spróbuj ponownie.",
-    "retry": "Spróbuj ponownie"
+    "retry": "Spróbuj ponownie",
+    "categoryAsc": "Kategoria A–Z",
+    "categoryDesc": "Kategoria Z–A",
+    "loadingTemplate": "Ładowanie szablonu…"
   },
   "settings": {
     "title": "Ustawienia",
@@ -492,7 +499,13 @@
     "receipt": "Rachunek",
     "invoiceFilePending": "PDF jest przygotowywany",
     "noBillingInvoices": "Brak faktur",
-    "noBillingInvoicesHelp": "Dokumenty wystawione w Backoffice pojawią się tutaj automatycznie."
+    "noBillingInvoicesHelp": "Dokumenty wystawione w Backoffice pojawią się tutaj automatycznie.",
+    "dictionaries": "Słowniki",
+    "dictionariesHelp": "Zarządzaj wartościami używanymi w DocFlow.",
+    "manageDictionaries": "Zarządzaj słownikami",
+    "categories": "Kategorie",
+    "categoriesHelp": "Zarządzaj kategoriami używanymi w dokumentach i szablonach.",
+    "manageCategories": "Zarządzaj kategoriami"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -849,6 +862,28 @@
       "SALES": "Sprzedaż",
       "CORRESPONDENCE": "Korespondencja",
       "OTHER": "Inne"
-    }
+    },
+    "filterLabel": "Filtruj po kategorii",
+    "all": "Wszystkie kategorie",
+    "saveError": "Nie udało się zapisać kategorii.",
+    "dictionaries": "Słowniki",
+    "dictionariesDescription": "Zarządzaj wspólnymi wartościami używanymi w dokumentach i szablonach.",
+    "backToAccount": "Wróć do konta",
+    "dictionaryTitle": "Słowniki",
+    "dictionaryHelp": "W tym miejscu możesz zarządzać własnymi wartościami używanymi w DocFlow.",
+    "dictionaryCategories": "Kategorie",
+    "dictionaryCategoriesHelp": "Kategorie systemowe są stałe. Własne kategorie możesz dodawać i usuwać.",
+    "systemBadge": "Systemowa",
+    "usage": "Szablony: {templates} · Dokumenty: {documents}",
+    "deleteTitle": "Usunąć kategorię „{name}”?",
+    "deleteUsedMessage": "Kategoria jest używana przez {templates} szablonów i {documents} dokumentów. Po usunięciu zostaną przeniesione do kategorii „Ogólne”.",
+    "deleteUnusedMessage": "Kategoria nie jest obecnie używana. Jej usunięcia nie można cofnąć.",
+    "deleteConfirm": "Usuń",
+    "deleteAria": "Usuń kategorię {name}",
+    "deleted": "Kategoria została usunięta.",
+    "deleteError": "Nie udało się usunąć kategorii.",
+    "saved": "Kategoria została zapisana.",
+    "loading": "Ładowanie kategorii…",
+    "backToSettings": "Wróć do ustawień"
   }
 }

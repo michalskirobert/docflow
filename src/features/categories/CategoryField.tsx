@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X } from "lucide-react";
-import { Button } from "@/components/shared/button";
-import { FormField, SelectField } from "@/components/shared/form";
+import { Check, LoaderCircle, X } from "lucide-react";
+import {
+  FormField,
+  InputAction,
+  InputActions,
+  SelectField,
+} from "@/components/shared/form";
 import { useGet, usePost } from "@/hooks/use-api";
 import { SYSTEM_CATEGORY_KEYS, systemCategoryValue } from "./definitions";
 import { useTranslations } from "next-intl";
+import { useFeedback } from "@/components/ui/feedback-provider";
 
 type CustomCategory = { id: string; name: string };
 
@@ -18,6 +23,7 @@ export function CategoryField({
   onChange: (value: string) => void;
 }) {
   const t = useTranslations("categories");
+  const { notify } = useFeedback();
   const categories = useGet<CustomCategory[]>(["categories"], "/categories");
   const create = usePost<CustomCategory, { name: string }>("/categories", [
     ["categories"],
@@ -33,10 +39,14 @@ export function CategoryField({
   const add = async () => {
     const trimmed = name.trim();
     if (trimmed.length < 2 || create.isPending) return;
-    const saved = await create.mutateAsync({ name: trimmed });
-    onChange(`custom:${saved.id}`);
-    setName("");
-    setAdding(false);
+    try {
+      const saved = await create.mutateAsync({ name: trimmed });
+      onChange(`custom:${saved.id}`);
+      setName("");
+      setAdding(false);
+    } catch {
+      notify(t("saveError"), "error");
+    }
   };
 
   if (adding) {
@@ -48,6 +58,7 @@ export function CategoryField({
           maxLength={60}
           autoFocus
           placeholder={t("customPlaceholder")}
+          disabled={create.isPending}
           onChange={(event) => setName(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -57,31 +68,30 @@ export function CategoryField({
             if (event.key === "Escape") cancel();
           }}
           suffix={
-            <span className="category-field-actions">
-              <Button
-                type="button"
-                variant="ghost"
-                className="category-field-action"
+            <InputActions>
+              <InputAction
+                label={t("save")}
                 onClick={() => void add()}
-                disabled={name.trim().length < 2}
-                loading={create.isPending}
-                aria-label={t("save")}
-                title={t("save")}
+                disabled={name.trim().length < 2 || create.isPending}
               >
-                <Check size={18} aria-hidden="true" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="category-field-action"
+                {create.isPending ? (
+                  <LoaderCircle
+                    className="spinner"
+                    size={18}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Check size={18} aria-hidden="true" />
+                )}
+              </InputAction>
+              <InputAction
+                label={t("cancel")}
                 onClick={cancel}
                 disabled={create.isPending}
-                aria-label={t("cancel")}
-                title={t("cancel")}
               >
                 <X size={18} aria-hidden="true" />
-              </Button>
-            </span>
+              </InputAction>
+            </InputActions>
           }
         />
       </div>

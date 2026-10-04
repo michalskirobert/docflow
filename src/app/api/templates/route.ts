@@ -110,6 +110,7 @@ export async function GET(req: Request) {
     const source = searchParams.get("source") ?? "all";
     const dateFrom = searchParams.get("dateFrom") ?? "";
     const dateTo = searchParams.get("dateTo") ?? "";
+    const category = searchParams.get("category") ?? "all";
     const orderBy =
       sort === "oldest"
         ? { createdAt: "asc" as const }
@@ -137,6 +138,7 @@ export async function GET(req: Request) {
                     },
                   }
                 : {}),
+              ...(category !== "all" ? { category } : {}),
               ...(q
                 ? {
                     OR: [
@@ -179,6 +181,7 @@ export async function GET(req: Request) {
         : DEFAULT_TEMPLATES.filter(
             (template) =>
               !savedNames.has(template.name) &&
+              (category === "all" || template.category === category) &&
               (!dateFrom ||
                 new Date(template.createdAt) >=
                   new Date(`${dateFrom}T00:00:00.000Z`)) &&
@@ -213,6 +216,23 @@ export async function GET(req: Request) {
     const result = [...defaults, ...savedTemplates].sort((a, b) => {
       if (sort === "nameAsc") return a.name.localeCompare(b.name);
       if (sort === "nameDesc") return b.name.localeCompare(a.name);
+      if (sort === "categoryAsc")
+        return (
+          a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+        );
+      if (sort === "categoryDesc")
+        return (
+          b.category.localeCompare(a.category) || a.name.localeCompare(b.name)
+        );
+      if (sort === "typeDefaultFirst" || sort === "typeOwnFirst") {
+        const aDefault = a.id.startsWith("default:") ? 0 : 1;
+        const bDefault = b.id.startsWith("default:") ? 0 : 1;
+        const delta = aDefault - bDefault;
+        return (
+          (sort === "typeDefaultFirst" ? delta : -delta) ||
+          a.name.localeCompare(b.name)
+        );
+      }
       const delta =
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       return sort === "oldest" ? delta : -delta;
