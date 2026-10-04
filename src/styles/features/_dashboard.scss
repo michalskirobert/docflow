@@ -354,9 +354,10 @@
   .dashboard-license-alert {
     grid-template-columns: auto 1fr;
 
-    .btn {
+    .dashboard-license-renew {
       grid-column: 1 / -1;
       width: 100%;
+      justify-content: center;
     }
   }
 }
@@ -377,21 +378,37 @@
   color: var(--text);
 }
 
-.dashboard-license-alert .btn {
-  border-color: var(--warning-border);
-  background: color-mix(
-    in srgb,
-    var(--warning-text) 14%,
-    var(--warning-surface)
-  );
+.dashboard-license-renew {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 13px;
+  border: 1px solid var(--warning-border);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--warning-text) 8%, transparent);
   color: var(--warning-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
-.dashboard-license-alert .btn:hover,
-.dashboard-license-alert .btn:focus-visible {
-  background: color-mix(
-    in srgb,
-    var(--warning-text) 22%,
-    var(--warning-surface)
-  );
+.dashboard-license-renew:hover {
+  background: color-mix(in srgb, var(--warning-text) 15%, transparent);
+  border-color: var(--warning-text);
+}
+
+.dashboard-license-renew:focus-visible {
+  outline: 2px solid var(--warning-text);
+  outline-offset: 3px;
+}
+
+.dashboard-license-renew:active {
+  transform: translateY(1px);
 }
