@@ -360,3 +360,38 @@
     }
   }
 }
+
+/* 2.4.5 renewal warning QA */
+.dashboard-license-alert {
+  border-color: var(--warning-border);
+  background: var(--warning-surface);
+  box-shadow: 0 8px 28px
+    color-mix(in srgb, var(--warning-border) 10%, transparent);
+}
+
+.dashboard-license-alert > svg {
+  color: var(--warning-text);
+}
+
+.dashboard-license-alert strong {
+  color: var(--text);
+}
+
+.dashboard-license-alert .btn {
+  border-color: var(--warning-border);
+  background: color-mix(
+    in srgb,
+    var(--warning-text) 14%,
+    var(--warning-surface)
+  );
+  color: var(--warning-text);
+}
+
+.dashboard-license-alert .btn:hover,
+.dashboard-license-alert .btn:focus-visible {
+  background: color-mix(
+    in srgb,
+    var(--warning-text) 22%,
+    var(--warning-surface)
+  );
+}

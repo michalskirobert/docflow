@@ -147,7 +147,15 @@ async function DashboardContent() {
           <div>
             <b>{t("license")}</b>
             <h2>{isAnnual ? t("annualLicense") : t("freeLicense")}</h2>
-            <span className="status-pill success">{t("active")}</span>
+            <span
+              className={`status-pill ${showExpiryAlert ? "warning" : "success"}`}
+            >
+              {showExpiryAlert &&
+              daysUntilExpiry !== null &&
+              daysUntilExpiry > 0
+                ? t("daysLeft", { count: daysUntilExpiry })
+                : t("active")}
+            </span>
             {subscription?.currentPeriodEndsAt && (
               <div className="muted">
                 {t("validUntil", {

@@ -158,7 +158,8 @@
     "licenseExpiredTitle": "Your license has expired",
     "licenseExpiryDescription": "Your annual license expires in {count, plural, one {# day} other {# days}}. You can renew now without losing the remaining time.",
     "licenseExpiredDescription": "Your annual license has expired. Renew it to restore the annual document limit.",
-    "renewLicense": "Renew license"
+    "renewLicense": "Renew license",
+    "daysLeft": "{count, plural, one {# day left} other {# days left}}"
   },
   "templates": {
     "title": "Templates",
@@ -415,6 +416,9 @@
     "validUntil": "Valid until",
     "daysRemaining": "days remaining",
     "licenseReminder": "Your license expires soon. Renew it to keep the annual document limit.",
+    "activeDaysLeft": "ACTIVE · {count} DAYS LEFT",
+    "licenseReminderTitle": "Your license expires in {count, plural, one {# day} other {# days}}",
+    "licenseReminderDescription": "Renew now. Your remaining {count, plural, one {# day will} other {# days will}} not be lost.",
     "onlinePayment": "online payment",
     "pending": "Pending",
     "paymentMethod": "Payment method",

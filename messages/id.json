@@ -158,7 +158,8 @@
     "licenseExpiredTitle": "Lisensi Anda telah berakhir",
     "licenseExpiryDescription": "Lisensi tahunan Anda akan berakhir dalam {count} hari. Anda dapat memperpanjang sekarang tanpa kehilangan sisa waktu.",
     "licenseExpiredDescription": "Lisensi tahunan Anda telah berakhir. Perpanjang untuk memulihkan batas dokumen tahunan.",
-    "renewLicense": "Perpanjang lisensi"
+    "renewLicense": "Perpanjang lisensi",
+    "daysLeft": "{count} hari tersisa"
   },
   "templates": {
     "title": "Templat",
@@ -415,6 +416,9 @@
     "validUntil": "Berlaku hingga",
     "daysRemaining": "hari tersisa",
     "licenseReminder": "Lisensi Anda akan segera berakhir. Perpanjang untuk mempertahankan batas dokumen tahunan.",
+    "activeDaysLeft": "AKTIF · {count} HARI TERSISA",
+    "licenseReminderTitle": "Lisensi Anda berakhir dalam {count} hari",
+    "licenseReminderDescription": "Perpanjang sekarang. Sisa waktu lisensi Anda tidak akan hilang.",
     "onlinePayment": "pembayaran online",
     "pending": "Tertunda",
     "paymentMethod": "Metode pembayaran",
