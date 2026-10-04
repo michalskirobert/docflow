@@ -33,7 +33,7 @@ export const useDocumentsService = (
       if (q.trim()) params.set("q", q.trim());
       params.set("sort", sort);
       params.set("offset", String(offset));
-      params.set("limit", "30");
+      params.set("limit", "20");
       if (category !== "all") params.set("category", category);
       if (templateId !== "all") params.set("templateId", templateId);
       if (dateFrom) params.set("dateFrom", dateFrom);

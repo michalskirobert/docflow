@@ -28,6 +28,10 @@ export default function TemplateList() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [draftSource, setDraftSource] = useState("all");
+  const [draftCategoryFilter, setDraftCategoryFilter] = useState("all");
+  const [draftDateFrom, setDraftDateFrom] = useState("");
+  const [draftDateTo, setDraftDateTo] = useState("");
   const [cardActionPending, setCardActionPending] = useState(false);
   const query = useTemplatesService(
     q,
@@ -99,35 +103,47 @@ export default function TemplateList() {
         applyLabel={t("applyFilters")}
         activeFilterCount={activeFilterCount}
         onClearFilters={() => {
-          setSource("all");
-          setCategoryFilter("all");
-          setDateFrom("");
-          setDateTo("");
+          setDraftSource("all");
+          setDraftCategoryFilter("all");
+          setDraftDateFrom("");
+          setDraftDateTo("");
+        }}
+        onApplyFilters={() => {
+          setSource(draftSource);
+          setCategoryFilter(draftCategoryFilter);
+          setDateFrom(draftDateFrom);
+          setDateTo(draftDateTo);
+        }}
+        onCancelFilters={() => {
+          setDraftSource(source);
+          setDraftCategoryFilter(categoryFilter);
+          setDraftDateFrom(dateFrom);
+          setDraftDateTo(dateTo);
         }}
         filters={
           <div className="list-filter-grid">
             <SelectField
               label={t("sourceFilter")}
-              value={source}
-              onChange={(e) => setSource(e.target.value)}
+              value={draftSource}
+              onChange={(e) => setDraftSource(e.target.value)}
             >
               <option value="all">{t("sourceAll")}</option>
               <option value="default">{t("sourceDefault")}</option>
               <option value="own">{t("sourceOwn")}</option>
             </SelectField>
             <CategoryFilterField
-              value={categoryFilter}
-              onChange={setCategoryFilter}
+              value={draftCategoryFilter}
+              onChange={setDraftCategoryFilter}
             />
             <FilterDateControl
               label={t("dateFrom")}
-              value={dateFrom}
-              onChange={setDateFrom}
+              value={draftDateFrom}
+              onChange={setDraftDateFrom}
             />
             <FilterDateControl
               label={t("dateTo")}
-              value={dateTo}
-              onChange={setDateTo}
+              value={draftDateTo}
+              onChange={setDraftDateTo}
             />
           </div>
         }
@@ -193,7 +209,7 @@ export default function TemplateList() {
             className="infinite-scroll-sentinel"
             aria-hidden="true"
           />
-          {query.isFetchingNextPage && <ListSkeleton rows={3} cards />}
+          {query.isFetchingNextPage && <ListSkeleton rows={20} cards />}
         </>
       ) : (
         <div className="empty-state">

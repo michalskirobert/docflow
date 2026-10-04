@@ -23,6 +23,8 @@ type Props = {
   filters?: ReactNode;
   chips?: ReactNode;
   onClearFilters?: () => void;
+  onApplyFilters?: () => void;
+  onCancelFilters?: () => void;
   action?: ReactNode;
 };
 
@@ -42,6 +44,8 @@ export function ListToolbar({
   filters,
   chips,
   onClearFilters,
+  onApplyFilters,
+  onCancelFilters,
   action,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -49,12 +53,14 @@ export function ListToolbar({
 
   useEffect(() => {
     const close = (event: PointerEvent) => {
-      if (root.current && !root.current.contains(event.target as Node))
+      if (root.current && !root.current.contains(event.target as Node)) {
+        onCancelFilters?.();
         setOpen(false);
+      }
     };
     document.addEventListener("pointerdown", close);
     return () => document.removeEventListener("pointerdown", close);
-  }, []);
+  }, [onCancelFilters]);
 
   return (
     <div className="list-toolbar-shell" ref={root}>
@@ -82,7 +88,10 @@ export function ListToolbar({
           <button
             type="button"
             className={`btn secondary list-filter-trigger${open ? " active" : ""}`}
-            onClick={() => setOpen((value) => !value)}
+            onClick={() => {
+              if (open) onCancelFilters?.();
+              setOpen((value) => !value);
+            }}
             aria-expanded={open}
           >
             <SlidersHorizontal size={17} /> {filterLabel}
@@ -108,7 +117,10 @@ export function ListToolbar({
               type="button"
               className="icon-button"
               aria-label={closeLabel}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                onCancelFilters?.();
+                setOpen(false);
+              }}
             >
               <X size={18} />
             </button>
@@ -119,14 +131,16 @@ export function ListToolbar({
               type="button"
               className="btn secondary"
               onClick={onClearFilters}
-              disabled={!activeFilterCount}
             >
               {clearLabel}
             </button>
             <button
               type="button"
               className="btn"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                onApplyFilters?.();
+                setOpen(false);
+              }}
             >
               {applyLabel}
             </button>

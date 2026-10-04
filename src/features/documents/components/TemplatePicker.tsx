@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, LoaderCircle, Search, X } from "lucide-react";
+import { Check, ChevronDown, Search, X } from "lucide-react";
 import { InputControl } from "@/components/shared/form";
 import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
 import { useEffect, useRef, useState } from "react";
@@ -150,7 +150,7 @@ export function TemplatePicker({
             />
             {loadingMore && (
               <div className="template-picker-loading-more" aria-busy="true">
-                <LoaderCircle className="spinner" size={18} />
+                <ListSkeleton rows={20} />
               </div>
             )}
           </div>

@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     const offset = Math.max(0, Number(searchParams.get("offset") ?? "0") || 0);
     const limit = Math.min(
       100,
-      Math.max(1, Number(searchParams.get("limit") ?? "30") || 30),
+      Math.max(1, Number(searchParams.get("limit") ?? "20") || 20),
     );
 
     if (view === "filters") {

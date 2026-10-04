@@ -121,7 +121,7 @@ export async function GET(req: Request) {
       50,
       Math.max(
         10,
-        Number.parseInt(searchParams.get("limit") ?? "30", 10) || 30,
+        Number.parseInt(searchParams.get("limit") ?? "20", 10) || 20,
       ),
     );
 

@@ -64,6 +64,12 @@ export function DocumentHistory({
   const t = useTranslations("documents");
   const { notify } = useFeedback();
   const [actionPending, setActionPending] = useState(false);
+  const [draftTemplateFilter, setDraftTemplateFilter] =
+    useState(templateFilter);
+  const [draftCategoryFilter, setDraftCategoryFilter] =
+    useState(categoryFilter);
+  const [draftDateFrom, setDraftDateFrom] = useState(dateFrom);
+  const [draftDateTo, setDraftDateTo] = useState(dateTo);
   const [previewDocument, setPreviewDocument] =
     useState<DocumentSummary | null>(null);
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
@@ -171,24 +177,36 @@ export function DocumentHistory({
           (dateTo ? 1 : 0)
         }
         onClearFilters={() => {
-          onTemplateFilterChange?.("all");
-          onCategoryFilterChange?.("all");
-          onDateFromChange?.("");
-          onDateToChange?.("");
+          setDraftTemplateFilter("all");
+          setDraftCategoryFilter("all");
+          setDraftDateFrom("");
+          setDraftDateTo("");
+        }}
+        onApplyFilters={() => {
+          onTemplateFilterChange?.(draftTemplateFilter);
+          onCategoryFilterChange?.(draftCategoryFilter);
+          onDateFromChange?.(draftDateFrom);
+          onDateToChange?.(draftDateTo);
+        }}
+        onCancelFilters={() => {
+          setDraftTemplateFilter(templateFilter);
+          setDraftCategoryFilter(categoryFilter);
+          setDraftDateFrom(dateFrom);
+          setDraftDateTo(dateTo);
         }}
         filters={
           <div className="list-filter-grid">
             {onCategoryFilterChange && (
               <CategoryFilterField
-                value={categoryFilter}
-                onChange={onCategoryFilterChange}
+                value={draftCategoryFilter}
+                onChange={setDraftCategoryFilter}
               />
             )}
             {onTemplateFilterChange && (
               <SelectField
                 label={t("filterByTemplate")}
-                value={templateFilter}
-                onChange={(e) => onTemplateFilterChange(e.target.value)}
+                value={draftTemplateFilter}
+                onChange={(e) => setDraftTemplateFilter(e.target.value)}
               >
                 <option value="all">{t("allTemplates")}</option>
                 {templateOptions.map(([value, label]) => (
@@ -201,15 +219,15 @@ export function DocumentHistory({
             {onDateFromChange && (
               <FilterDateControl
                 label={t("dateFrom")}
-                value={dateFrom}
-                onChange={onDateFromChange}
+                value={draftDateFrom}
+                onChange={setDraftDateFrom}
               />
             )}
             {onDateToChange && (
               <FilterDateControl
                 label={t("dateTo")}
-                value={dateTo}
-                onChange={onDateToChange}
+                value={draftDateTo}
+                onChange={setDraftDateTo}
               />
             )}
           </div>
@@ -243,7 +261,7 @@ export function DocumentHistory({
           aria-hidden="true"
         />
       )}
-      {loadingMore && <ListSkeleton rows={3} />}
+      {loadingMore && <ListSkeleton rows={20} />}
 
       {previewDocument && (
         <DocumentPdfPreviewModal

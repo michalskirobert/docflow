@@ -42,7 +42,7 @@ export const useTemplatesService = (
       params.set("sort", sort);
       params.set("source", source);
       params.set("offset", String(offset));
-      params.set("limit", "30");
+      params.set("limit", "20");
       if (dateFrom) params.set("dateFrom", dateFrom);
       if (dateTo) params.set("dateTo", dateTo);
       if (category !== "all") params.set("category", category);
