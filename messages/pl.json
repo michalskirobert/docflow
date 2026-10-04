@@ -884,6 +884,11 @@
     "deleteError": "Nie udało się usunąć kategorii.",
     "saved": "Kategoria została zapisana.",
     "loading": "Ładowanie kategorii…",
-    "backToSettings": "Wróć do ustawień"
+    "backToSettings": "Wróć do ustawień",
+    "systemCategoriesTitle": "Kategorie systemowe",
+    "systemCategoriesHelp": "Wbudowane kategorie DocFlow. Nie można ich usuwać.",
+    "customCategoriesTitle": "Własne kategorie",
+    "customCategoriesHelp": "Kategorie utworzone przez Ciebie dla szablonów i dokumentów.",
+    "customCategoriesEmpty": "Nie masz jeszcze własnych kategorii."
   }
 }

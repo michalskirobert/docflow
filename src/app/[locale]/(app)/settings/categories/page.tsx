@@ -14,7 +14,7 @@ export default function CategoriesSettingsPage() {
           <h1>{t("dictionaryCategories")}</h1>
           <p className="muted">{t("dictionaryCategoriesHelp")}</p>
         </div>
-        <Link href="/settings" className="btn secondary dictionaries-back">
+        <Link href="/settings" className="dictionaries-back">
           <ArrowLeft size={17} />
           {t("backToSettings")}
         </Link>

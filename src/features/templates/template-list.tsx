@@ -3,7 +3,7 @@ import { SelectField } from "@/components/shared/form";
 import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
 import { QueryErrorState } from "@/components/ui/query-error-state";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Copy, Edit3, FilePlus2, LoaderCircle, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -37,6 +37,25 @@ export default function TemplateList() {
     dateTo,
     categoryFilter,
   );
+  const templates = useMemo(
+    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    [query.data],
+  );
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !query.hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !query.isFetchingNextPage) {
+          void query.fetchNextPage();
+        }
+      },
+      { rootMargin: "240px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [query.hasNextPage, query.isFetchingNextPage, query.fetchNextPage]);
   const activeFilterCount =
     (source !== "all" ? 1 : 0) +
     (categoryFilter !== "all" ? 1 : 0) +
@@ -125,49 +144,57 @@ export default function TemplateList() {
         <div className="query-initial-loading" aria-busy="true">
           <ListSkeleton rows={6} cards />
         </div>
-      ) : (query.data?.length ?? 0) > 0 ? (
-        <div className="template-grid">
-          {query.data!.map((item) => (
-            <TemplateCard
-              key={item.id}
-              template={item}
-              actionsDisabled={cardActionPending}
-              onActionPendingChange={setCardActionPending}
-              onEdit={async () => {
-                setCardActionPending(true);
-                try {
-                  const full = (
-                    await api.get<Template>(`/templates/${item.id}`)
-                  ).data;
-                  setEditing(full);
-                } finally {
-                  setCardActionPending(false);
-                }
-              }}
-              onDuplicate={async () => {
-                setCardActionPending(true);
-                try {
-                  const full = (
-                    await api.get<Template>(`/templates/${item.id}`)
-                  ).data;
-                  await create.mutateAsync({
-                    name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
-                    category: full.category ?? "system:GENERAL",
-                    description: full.description ?? "",
-                    emailSubject: full.emailSubject ?? "",
-                    content: full.content,
-                    headerContent: full.headerContent ?? "",
-                    footerContent: full.footerContent ?? "",
-                    pageNumbers: full.pageNumbers,
-                    variables: parseTemplateVariables(full.variablesJson),
-                  });
-                } finally {
-                  setCardActionPending(false);
-                }
-              }}
-            />
-          ))}
-        </div>
+      ) : templates.length > 0 ? (
+        <>
+          <div className="template-grid">
+            {templates.map((item) => (
+              <TemplateCard
+                key={item.id}
+                template={item}
+                actionsDisabled={cardActionPending}
+                onActionPendingChange={setCardActionPending}
+                onEdit={async () => {
+                  setCardActionPending(true);
+                  try {
+                    const full = (
+                      await api.get<Template>(`/templates/${item.id}`)
+                    ).data;
+                    setEditing(full);
+                  } finally {
+                    setCardActionPending(false);
+                  }
+                }}
+                onDuplicate={async () => {
+                  setCardActionPending(true);
+                  try {
+                    const full = (
+                      await api.get<Template>(`/templates/${item.id}`)
+                    ).data;
+                    await create.mutateAsync({
+                      name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                      category: full.category ?? "system:GENERAL",
+                      description: full.description ?? "",
+                      emailSubject: full.emailSubject ?? "",
+                      content: full.content,
+                      headerContent: full.headerContent ?? "",
+                      footerContent: full.footerContent ?? "",
+                      pageNumbers: full.pageNumbers,
+                      variables: parseTemplateVariables(full.variablesJson),
+                    });
+                  } finally {
+                    setCardActionPending(false);
+                  }
+                }}
+              />
+            ))}
+          </div>
+          <div
+            ref={loadMoreRef}
+            className="infinite-scroll-sentinel"
+            aria-hidden="true"
+          />
+          {query.isFetchingNextPage && <ListSkeleton rows={3} cards />}
+        </>
       ) : (
         <div className="empty-state">
           <FilePlus2 />
@@ -216,13 +243,7 @@ function TemplateCard({
       onActionPendingChange(true);
       try {
         await remove.mutateAsync(undefined);
-        queryClient.setQueriesData<TemplateSummary[]>(
-          { queryKey: ["templates"] },
-          (current) =>
-            Array.isArray(current)
-              ? current.filter((item) => item.id !== template.id)
-              : current,
-        );
+        await queryClient.invalidateQueries({ queryKey: ["templates"] });
       } finally {
         onActionPendingChange(false);
       }

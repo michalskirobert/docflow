@@ -1,5 +1,6 @@
 "use client";
 import {
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -20,6 +21,26 @@ export function useGet<T>(
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
     refetchOnMount: options?.refetchOnMount,
+    retry: false,
+  });
+}
+
+export function useInfiniteGet<T>(
+  key: QueryKey,
+  buildUrl: (offset: number) => string,
+  enabled = true,
+) {
+  return useInfiniteQuery({
+    queryKey: key,
+    queryFn: async ({ pageParam }) =>
+      (await api.get<T>(buildUrl(pageParam))).data,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: any) =>
+      lastPage?.nextOffset == null ? undefined : lastPage.nextOffset,
+    enabled,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
     retry: false,
   });
 }

@@ -884,6 +884,11 @@
     "deleteError": "Could not delete category.",
     "saved": "Category saved.",
     "loading": "Loading categories…",
-    "backToSettings": "Back to settings"
+    "backToSettings": "Back to settings",
+    "systemCategoriesTitle": "System categories",
+    "systemCategoriesHelp": "Built-in DocFlow categories. They cannot be deleted.",
+    "customCategoriesTitle": "Custom categories",
+    "customCategoriesHelp": "Categories created by you for templates and documents.",
+    "customCategoriesEmpty": "You do not have any custom categories yet."
   }
 }

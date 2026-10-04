@@ -884,6 +884,11 @@
     "deleteError": "Kategori tidak dapat dihapus.",
     "saved": "Kategori telah disimpan.",
     "loading": "Memuat kategori…",
-    "backToSettings": "Kembali ke pengaturan"
+    "backToSettings": "Kembali ke pengaturan",
+    "systemCategoriesTitle": "Kategori sistem",
+    "systemCategoriesHelp": "Kategori bawaan DocFlow. Kategori ini tidak dapat dihapus.",
+    "customCategoriesTitle": "Kategori sendiri",
+    "customCategoriesHelp": "Kategori yang Anda buat untuk templat dan dokumen.",
+    "customCategoriesEmpty": "Anda belum memiliki kategori sendiri."
   }
 }

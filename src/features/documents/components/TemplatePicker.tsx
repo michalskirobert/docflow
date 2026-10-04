@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, ChevronDown, Search, X } from "lucide-react";
+import { Check, ChevronDown, LoaderCircle, Search, X } from "lucide-react";
 import { InputControl } from "@/components/shared/form";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import type { TemplateSummary } from "@/features/templates/types";
@@ -10,8 +11,15 @@ import type { TemplateSummary } from "@/features/templates/types";
 type Props = {
   templates: TemplateSummary[];
   loading?: boolean;
+  loadingMore?: boolean;
+  hasMore?: boolean;
   value: string;
   disabled?: boolean;
+  search: string;
+  category: string;
+  onSearchChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
+  onLoadMore: () => void;
   onChange: (id: string) => void;
 };
 
@@ -20,22 +28,20 @@ export function TemplatePicker({
   value,
   onChange,
   loading = false,
+  loadingMore = false,
+  hasMore = false,
   disabled = false,
+  search,
+  category,
+  onSearchChange,
+  onCategoryChange,
+  onLoadMore,
 }: Props) {
   const t = useTranslations("documents");
   const rootRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
   const selected = templates.find((template) => template.id === value);
-  const filtered = useMemo(
-    () =>
-      templates.filter((template) =>
-        `${template.name} ${template.description ?? ""}`
-          .toLowerCase()
-          .includes(q.trim().toLowerCase()),
-      ),
-    [templates, q],
-  );
 
   useEffect(() => {
     const close = (event: PointerEvent) => {
@@ -45,12 +51,19 @@ export function TemplatePicker({
     return () => document.removeEventListener("pointerdown", close);
   }, []);
 
-  if (loading)
-    return (
-      <div className="template-combobox">
-        <ListSkeleton rows={1} />
-      </div>
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!open || !target || !hasMore) return;
+    const root = target.closest(".template-combobox-options");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !loadingMore) onLoadMore();
+      },
+      { root, rootMargin: "120px" },
     );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [open, hasMore, loadingMore, onLoadMore]);
 
   return (
     <div className="template-combobox" ref={rootRef}>
@@ -77,14 +90,14 @@ export function TemplatePicker({
               onClick={(event) => {
                 event.stopPropagation();
                 onChange("");
-                setQ("");
+                onSearchChange("");
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   event.stopPropagation();
                   onChange("");
-                  setQ("");
+                  onSearchChange("");
                 }
               }}
             >
@@ -100,30 +113,46 @@ export function TemplatePicker({
             <Search size={16} />
             <InputControl
               autoFocus
-              value={q}
-              onChange={(event) => setQ(event.target.value)}
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
               placeholder={t("searchTemplates")}
             />
           </label>
+          <div className="template-combobox-filter">
+            <CategoryFilterField value={category} onChange={onCategoryChange} />
+          </div>
           <div className="template-combobox-options">
-            {filtered.map((template) => (
-              <button
-                type="button"
-                key={template.id}
-                className={value === template.id ? "selected" : ""}
-                onClick={() => {
-                  onChange(template.id);
-                  setOpen(false);
-                  setQ("");
-                }}
-              >
-                <span>
-                  <strong>{template.name}</strong>
-                  <small>{template.description || t("noDescription")}</small>
-                </span>
-                {value === template.id && <Check size={17} />}
-              </button>
-            ))}
+            {loading && templates.length === 0 ? (
+              <ListSkeleton rows={5} />
+            ) : (
+              templates.map((template) => (
+                <button
+                  type="button"
+                  key={template.id}
+                  className={value === template.id ? "selected" : ""}
+                  onClick={() => {
+                    onChange(template.id);
+                    setOpen(false);
+                  }}
+                >
+                  <span>
+                    <strong>{template.name}</strong>
+                    <small>{template.description || t("noDescription")}</small>
+                  </span>
+                  {value === template.id && <Check size={17} />}
+                </button>
+              ))
+            )}
+            <div
+              ref={sentinelRef}
+              className="template-picker-sentinel"
+              aria-hidden="true"
+            />
+            {loadingMore && (
+              <div className="template-picker-loading-more" aria-busy="true">
+                <LoaderCircle className="spinner" size={18} />
+              </div>
+            )}
           </div>
         </div>
       )}

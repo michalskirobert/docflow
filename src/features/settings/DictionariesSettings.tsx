@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Check, LoaderCircle, Trash2, X } from "lucide-react";
+import { Check, LoaderCircle, Plus, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/shared/button";
 import { FormField, InputAction, InputActions } from "@/components/shared/form";
@@ -69,86 +69,89 @@ export function DictionariesSettings() {
   };
 
   return (
-    <section className="card settings-card dictionaries-card">
-      <div className="section-heading">
-        <BookOpen />
-        <div>
-          <h2>{t("dictionaryCategories")}</h2>
-          <p>{t("dictionaryCategoriesHelp")}</p>
-        </div>
-      </div>
-
-      <div className="dictionary-section-heading">
-        <div>
-          <h3>{t("dictionaryCategories")}</h3>
-          <p className="muted">{t("dictionaryCategoriesHelp")}</p>
-        </div>
-        {!adding && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setAdding(true)}
-          >
-            {t("addCustom")}
-          </Button>
-        )}
-      </div>
-
-      {adding && (
-        <div className="dictionary-add-category">
-          <FormField
-            label={t("customPlaceholder")}
-            value={name}
-            maxLength={60}
-            autoFocus
-            disabled={create.isPending}
-            onChange={(event) => setName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                void add();
-              }
-              if (event.key === "Escape" && !create.isPending) {
-                setAdding(false);
-                setName("");
-              }
-            }}
-            suffix={
-              <InputActions>
-                <InputAction
-                  label={t("save")}
-                  onClick={() => void add()}
-                  disabled={name.trim().length < 2 || create.isPending}
-                >
-                  {create.isPending ? (
-                    <LoaderCircle className="spinner" size={18} />
-                  ) : (
-                    <Check size={18} />
-                  )}
-                </InputAction>
-                <InputAction
-                  label={t("cancel")}
-                  onClick={() => {
-                    setAdding(false);
-                    setName("");
-                  }}
-                  disabled={create.isPending}
-                >
-                  <X size={18} />
-                </InputAction>
-              </InputActions>
-            }
-          />
-        </div>
-      )}
-
-      <div className="dictionary-list">
-        {SYSTEM_CATEGORY_KEYS.map((key) => (
-          <div className="dictionary-row" key={key}>
-            <span>{t(`system.${key}`)}</span>
-            <span className="dictionary-system-badge">{t("systemBadge")}</span>
+    <section className="settings-categories-section">
+      <div className="dictionary-group">
+        <div className="dictionary-group-heading">
+          <div>
+            <h2>{t("systemCategoriesTitle")}</h2>
+            <p>{t("systemCategoriesHelp")}</p>
           </div>
-        ))}
+        </div>
+        <div className="dictionary-system-chips">
+          {SYSTEM_CATEGORY_KEYS.map((key) => (
+            <span className="dictionary-system-chip" key={key}>
+              {t(`system.${key}`)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="dictionary-group dictionary-custom-group">
+        <div className="dictionary-group-heading">
+          <div>
+            <h2>{t("customCategoriesTitle")}</h2>
+            <p>{t("customCategoriesHelp")}</p>
+          </div>
+          {!adding && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="settings-category-add"
+              onClick={() => setAdding(true)}
+            >
+              <Plus size={17} />
+              {t("addCustom")}
+            </Button>
+          )}
+        </div>
+
+        {adding && (
+          <div className="dictionary-add-category">
+            <FormField
+              label={t("customPlaceholder")}
+              value={name}
+              maxLength={60}
+              autoFocus
+              disabled={create.isPending}
+              onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void add();
+                }
+                if (event.key === "Escape" && !create.isPending) {
+                  setAdding(false);
+                  setName("");
+                }
+              }}
+              suffix={
+                <InputActions>
+                  <InputAction
+                    label={t("save")}
+                    onClick={() => void add()}
+                    disabled={name.trim().length < 2 || create.isPending}
+                  >
+                    {create.isPending ? (
+                      <LoaderCircle className="spinner" size={18} />
+                    ) : (
+                      <Check size={18} />
+                    )}
+                  </InputAction>
+                  <InputAction
+                    label={t("cancel")}
+                    onClick={() => {
+                      setAdding(false);
+                      setName("");
+                    }}
+                    disabled={create.isPending}
+                  >
+                    <X size={18} />
+                  </InputAction>
+                </InputActions>
+              }
+            />
+          </div>
+        )}
 
         {categories.isPending && !categories.data && (
           <div className="dictionary-loading">
@@ -156,32 +159,42 @@ export function DictionariesSettings() {
           </div>
         )}
 
-        {(categories.data ?? []).map((category) => (
-          <div className="dictionary-row" key={category.id}>
-            <div className="dictionary-category-copy">
-              <strong>{category.name}</strong>
-              <small>
-                {t("usage", {
-                  templates: category.templatesCount,
-                  documents: category.documentsCount,
-                })}
-              </small>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              className="dictionary-delete"
-              loading={deletingId === category.id}
-              disabled={deletingId !== null && deletingId !== category.id}
-              onClick={() => void remove(category)}
-              aria-label={t("deleteAria", { name: category.name })}
-              title={t("deleteConfirm")}
-            >
-              <Trash2 size={17} />
-              <span>{t("deleteConfirm")}</span>
-            </Button>
+        {!categories.isPending &&
+          (categories.data ?? []).length === 0 &&
+          !adding && (
+            <p className="dictionary-empty">{t("customCategoriesEmpty")}</p>
+          )}
+
+        {(categories.data ?? []).length > 0 && (
+          <div className="dictionary-custom-list">
+            {(categories.data ?? []).map((category) => (
+              <div className="dictionary-custom-row" key={category.id}>
+                <div className="dictionary-category-copy">
+                  <strong>{category.name}</strong>
+                  <small>
+                    {t("usage", {
+                      templates: category.templatesCount,
+                      documents: category.documentsCount,
+                    })}
+                  </small>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="dictionary-delete"
+                  loading={deletingId === category.id}
+                  disabled={deletingId !== null && deletingId !== category.id}
+                  onClick={() => void remove(category)}
+                  aria-label={t("deleteAria", { name: category.name })}
+                  title={t("deleteConfirm")}
+                >
+                  <Trash2 size={16} />
+                  <span>{t("deleteConfirm")}</span>
+                </Button>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </section>
   );

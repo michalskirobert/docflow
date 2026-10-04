@@ -104,6 +104,7 @@ export async function GET(req: Request) {
     const s = await getSession();
     if (!s)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() ?? "";
     const sort = searchParams.get("sort") ?? "newest";
@@ -111,48 +112,131 @@ export async function GET(req: Request) {
     const dateFrom = searchParams.get("dateFrom") ?? "";
     const dateTo = searchParams.get("dateTo") ?? "";
     const category = searchParams.get("category") ?? "all";
+    const picker = searchParams.get("view") === "picker";
+    const offset = Math.max(
+      0,
+      Number.parseInt(searchParams.get("offset") ?? "0", 10) || 0,
+    );
+    const limit = Math.min(
+      50,
+      Math.max(
+        10,
+        Number.parseInt(searchParams.get("limit") ?? "30", 10) || 30,
+      ),
+    );
+
     const orderBy =
       sort === "oldest"
-        ? { createdAt: "asc" as const }
+        ? [{ createdAt: "asc" as const }, { id: "asc" as const }]
         : sort === "nameAsc"
-          ? { name: "asc" as const }
+          ? [{ name: "asc" as const }, { id: "asc" as const }]
           : sort === "nameDesc"
-            ? { name: "desc" as const }
-            : { createdAt: "desc" as const };
-    const picker = searchParams.get("view") === "picker";
+            ? [{ name: "desc" as const }, { id: "asc" as const }]
+            : sort === "categoryAsc"
+              ? [
+                  { category: "asc" as const },
+                  { name: "asc" as const },
+                  { id: "asc" as const },
+                ]
+              : sort === "categoryDesc"
+                ? [
+                    { category: "desc" as const },
+                    { name: "asc" as const },
+                    { id: "asc" as const },
+                  ]
+                : sort === "typeDefaultFirst" || sort === "typeOwnFirst"
+                  ? [{ name: "asc" as const }, { id: "asc" as const }]
+                  : [{ createdAt: "desc" as const }, { id: "asc" as const }];
+
+    const where = {
+      organizationId: s.organizationId,
+      ...(dateFrom || dateTo
+        ? {
+            createdAt: {
+              ...(dateFrom
+                ? { gte: new Date(`${dateFrom}T00:00:00.000Z`) }
+                : {}),
+              ...(dateTo ? { lte: new Date(`${dateTo}T23:59:59.999Z`) } : {}),
+            },
+          }
+        : {}),
+      ...(category !== "all" ? { category } : {}),
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" as const } },
+              { description: { contains: q, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const defaultsCandidate =
+      source === "own"
+        ? []
+        : DEFAULT_TEMPLATES.filter(
+            (template) =>
+              (category === "all" || template.category === category) &&
+              (!dateFrom ||
+                new Date(template.createdAt) >=
+                  new Date(`${dateFrom}T00:00:00.000Z`)) &&
+              (!dateTo ||
+                new Date(template.createdAt) <=
+                  new Date(`${dateTo}T23:59:59.999Z`)) &&
+              (!q ||
+                `${template.name} ${template.description}`
+                  .toLocaleLowerCase()
+                  .includes(q.toLocaleLowerCase())),
+          );
+
+    const overriddenNames =
+      defaultsCandidate.length && source !== "default"
+        ? new Set(
+            (
+              await prisma.template.findMany({
+                where: {
+                  organizationId: s.organizationId,
+                  name: {
+                    in: defaultsCandidate.map((template) => template.name),
+                  },
+                },
+                select: { name: true },
+              })
+            ).map((template) => template.name),
+          )
+        : new Set<string>();
+
+    const defaults = defaultsCandidate
+      .filter((template) => !overriddenNames.has(template.name))
+      .map((template) =>
+        picker
+          ? {
+              id: template.id,
+              name: template.name,
+              description: template.description,
+              emailSubject: template.emailSubject,
+              category: template.category,
+              variablesJson: template.variablesJson,
+              createdAt: template.createdAt,
+            }
+          : {
+              id: template.id,
+              name: template.name,
+              description: template.description,
+              category: template.category,
+              variablesJson: template.variablesJson,
+              isExample: true,
+              createdAt: template.createdAt,
+            },
+      );
+
+    const savedCount =
+      source === "default" ? 0 : await prisma.template.count({ where });
     const savedTemplates =
       source === "default"
         ? []
         : await prisma.template.findMany({
-            where: {
-              organizationId: s.organizationId,
-              ...(dateFrom || dateTo
-                ? {
-                    createdAt: {
-                      ...(dateFrom
-                        ? { gte: new Date(`${dateFrom}T00:00:00.000Z`) }
-                        : {}),
-                      ...(dateTo
-                        ? { lte: new Date(`${dateTo}T23:59:59.999Z`) }
-                        : {}),
-                    },
-                  }
-                : {}),
-              ...(category !== "all" ? { category } : {}),
-              ...(q
-                ? {
-                    OR: [
-                      { name: { contains: q, mode: "insensitive" as const } },
-                      {
-                        description: {
-                          contains: q,
-                          mode: "insensitive" as const,
-                        },
-                      },
-                    ],
-                  }
-                : {}),
-            },
+            where,
             select: picker
               ? {
                   id: true,
@@ -173,56 +257,25 @@ export async function GET(req: Request) {
                   createdAt: true,
                 },
             orderBy,
+            take: Math.min(savedCount, offset + limit + defaults.length),
           });
-    const savedNames = new Set(savedTemplates.map((template) => template.name));
-    const defaults =
-      source === "own"
-        ? []
-        : DEFAULT_TEMPLATES.filter(
-            (template) =>
-              !savedNames.has(template.name) &&
-              (category === "all" || template.category === category) &&
-              (!dateFrom ||
-                new Date(template.createdAt) >=
-                  new Date(`${dateFrom}T00:00:00.000Z`)) &&
-              (!dateTo ||
-                new Date(template.createdAt) <=
-                  new Date(`${dateTo}T23:59:59.999Z`)) &&
-              (!q ||
-                `${template.name} ${template.description}`
-                  .toLocaleLowerCase()
-                  .includes(q.toLocaleLowerCase())),
-          ).map((template) =>
-            picker
-              ? {
-                  id: template.id,
-                  name: template.name,
-                  description: template.description,
-                  emailSubject: template.emailSubject,
-                  category: template.category,
-                  variablesJson: template.variablesJson,
-                  createdAt: template.createdAt,
-                }
-              : {
-                  id: template.id,
-                  name: template.name,
-                  description: template.description,
-                  category: template.category,
-                  variablesJson: template.variablesJson,
-                  isExample: true,
-                  createdAt: template.createdAt,
-                },
-          );
+
     const result = [...defaults, ...savedTemplates].sort((a, b) => {
-      if (sort === "nameAsc") return a.name.localeCompare(b.name);
-      if (sort === "nameDesc") return b.name.localeCompare(a.name);
+      if (sort === "nameAsc")
+        return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+      if (sort === "nameDesc")
+        return b.name.localeCompare(a.name) || a.id.localeCompare(b.id);
       if (sort === "categoryAsc")
         return (
-          a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+          a.category.localeCompare(b.category) ||
+          a.name.localeCompare(b.name) ||
+          a.id.localeCompare(b.id)
         );
       if (sort === "categoryDesc")
         return (
-          b.category.localeCompare(a.category) || a.name.localeCompare(b.name)
+          b.category.localeCompare(a.category) ||
+          a.name.localeCompare(b.name) ||
+          a.id.localeCompare(b.id)
         );
       if (sort === "typeDefaultFirst" || sort === "typeOwnFirst") {
         const aDefault = a.id.startsWith("default:") ? 0 : 1;
@@ -230,14 +283,20 @@ export async function GET(req: Request) {
         const delta = aDefault - bDefault;
         return (
           (sort === "typeDefaultFirst" ? delta : -delta) ||
-          a.name.localeCompare(b.name)
+          a.name.localeCompare(b.name) ||
+          a.id.localeCompare(b.id)
         );
       }
       const delta =
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      return sort === "oldest" ? delta : -delta;
+      return (sort === "oldest" ? delta : -delta) || a.id.localeCompare(b.id);
     });
-    return NextResponse.json(result);
+
+    const total = defaults.length + savedCount;
+    const items = result.slice(offset, offset + limit);
+    const nextOffset =
+      offset + items.length < total ? offset + items.length : null;
+    return NextResponse.json({ items, nextOffset, total });
   } catch (error) {
     console.error("GET /api/templates failed", error);
     return NextResponse.json(

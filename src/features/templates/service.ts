@@ -1,5 +1,11 @@
 "use client";
-import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
+import {
+  useDelete,
+  useGet,
+  useInfiniteGet,
+  usePost,
+  usePut,
+} from "@/hooks/use-api";
 import type { Template, TemplateSummary, TemplateVariable } from "./types";
 export type TemplateInput = {
   name: string;
@@ -12,6 +18,12 @@ export type TemplateInput = {
   pageNumbers?: boolean;
   variables?: TemplateVariable[];
 };
+export type TemplatePage = {
+  items: TemplateSummary[];
+  nextOffset: number | null;
+  total: number;
+};
+
 export const useTemplatesService = (
   q = "",
   sort = "newest",
@@ -19,19 +31,26 @@ export const useTemplatesService = (
   dateFrom = "",
   dateTo = "",
   category = "all",
-) => {
-  const params = new URLSearchParams();
-  if (q.trim()) params.set("q", q.trim());
-  params.set("sort", sort);
-  params.set("source", source);
-  if (dateFrom) params.set("dateFrom", dateFrom);
-  if (dateTo) params.set("dateTo", dateTo);
-  if (category !== "all") params.set("category", category);
-  return useGet<TemplateSummary[]>(
-    ["templates", q, sort, source, dateFrom, dateTo, category],
-    `/templates?${params.toString()}`,
+  enabled = true,
+  view?: "picker",
+) =>
+  useInfiniteGet<TemplatePage>(
+    ["templates", view ?? "list", q, sort, source, dateFrom, dateTo, category],
+    (offset) => {
+      const params = new URLSearchParams();
+      if (q.trim()) params.set("q", q.trim());
+      params.set("sort", sort);
+      params.set("source", source);
+      params.set("offset", String(offset));
+      params.set("limit", "30");
+      if (dateFrom) params.set("dateFrom", dateFrom);
+      if (dateTo) params.set("dateTo", dateTo);
+      if (category !== "all") params.set("category", category);
+      if (view) params.set("view", view);
+      return `/templates?${params.toString()}`;
+    },
+    enabled,
   );
-};
 export const useCreateTemplateService = () =>
   usePost<Template, TemplateInput>("/templates", [["templates"]]);
 export const useUpdateTemplateService = (id: string) =>

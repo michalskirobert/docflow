@@ -98,7 +98,25 @@ export default function DocumentGenerator({
   const router = useRouter();
   const { notify, confirm } = useFeedback();
 
-  const templates = useDocumentTemplatesService(!sourceDocumentId);
+  const [templateSearch, setTemplateSearch] = useState("");
+  const [templateSearchQuery, setTemplateSearchQuery] = useState("");
+  const [templateCategory, setTemplateCategory] = useState("all");
+  useEffect(() => {
+    const timeout = window.setTimeout(
+      () => setTemplateSearchQuery(templateSearch.trim()),
+      250,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [templateSearch]);
+  const templates = useDocumentTemplatesService(
+    templateSearchQuery,
+    templateCategory,
+    !sourceDocumentId,
+  );
+  const templateOptions = useMemo(
+    () => templates.data?.pages.flatMap((page) => page.items) ?? [],
+    [templates.data],
+  );
   const documentQuery = useDocumentService(documentId ?? "");
   const generateMutation = useGenerateDocumentService();
   const updateMutation = useUpdateDocumentService(documentId ?? "");
@@ -858,8 +876,15 @@ export default function DocumentGenerator({
 
         {!isEditing && !sourceDocumentId && (
           <TemplatePicker
-            templates={templates.data ?? []}
-            loading={templates.isLoading}
+            templates={templateOptions}
+            loading={templates.isPending || templates.isFetching}
+            loadingMore={templates.isFetchingNextPage}
+            hasMore={Boolean(templates.hasNextPage)}
+            search={templateSearch}
+            category={templateCategory}
+            onSearchChange={setTemplateSearch}
+            onCategoryChange={setTemplateCategory}
+            onLoadMore={() => void templates.fetchNextPage()}
             value={templateId}
             disabled={isEditing}
             onChange={(id) => {
@@ -867,7 +892,7 @@ export default function DocumentGenerator({
 
               const nextTemplateId = id === templateId ? "" : id;
 
-              const nextTemplate = templates.data?.find(
+              const nextTemplate = templateOptions.find(
                 (template) => template.id === nextTemplateId,
               );
 

@@ -1,7 +1,8 @@
 "use client";
 import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
+import { useTemplatesService } from "@/features/templates/service";
 import type { Document, DocumentSummary } from "./types";
-import type { Template, TemplateSummary } from "@/features/templates/types";
+import type { Template } from "@/features/templates/types";
 
 export const useDocumentsService = (
   q = "",
@@ -21,12 +22,12 @@ export const useDocumentService = (id: string) =>
   useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id), {
     refetchOnMount: "always",
   });
-export const useDocumentTemplatesService = (enabled = true) =>
-  useGet<TemplateSummary[]>(
-    ["templates", "picker"],
-    "/templates?view=picker&sort=newest",
-    enabled,
-  );
+export const useDocumentTemplatesService = (
+  q = "",
+  category = "all",
+  enabled = true,
+) =>
+  useTemplatesService(q, "newest", "all", "", "", category, enabled, "picker");
 export const useDocumentTemplateService = (id: string) =>
   useGet<Template>(["templates", id], `/templates/${id}`, Boolean(id), {
     refetchOnMount: "always",
