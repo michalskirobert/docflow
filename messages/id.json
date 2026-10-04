@@ -153,7 +153,12 @@
     "newFeature": "BARU DI DOCFLOW",
     "calculatedVariablesTitle": "Variabel perhitungan",
     "calculatedVariablesDescription": "Hitung nilai secara otomatis dari angka dan bidang dokumen lainnya. Ketik rumus atau gunakan bantuan.",
-    "calculatedVariablesTutorial": "Lihat panduan"
+    "calculatedVariablesTutorial": "Lihat panduan",
+    "licenseExpiryTitle": "Lisensi Anda akan segera berakhir",
+    "licenseExpiredTitle": "Lisensi Anda telah berakhir",
+    "licenseExpiryDescription": "Lisensi tahunan Anda akan berakhir dalam {count} hari. Anda dapat memperpanjang sekarang tanpa kehilangan sisa waktu.",
+    "licenseExpiredDescription": "Lisensi tahunan Anda telah berakhir. Perpanjang untuk memulihkan batas dokumen tahunan.",
+    "renewLicense": "Perpanjang lisensi"
   },
   "templates": {
     "title": "Templat",
@@ -505,7 +510,8 @@
     "manageDictionaries": "Kelola kamus",
     "categories": "Kategori",
     "categoriesHelp": "Kelola kategori yang digunakan dalam dokumen dan templat.",
-    "manageCategories": "Kelola kategori"
+    "manageCategories": "Kelola kategori",
+    "renewNow": "Perpanjang sekarang"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

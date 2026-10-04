@@ -75,11 +75,18 @@ export async function GET() {
           orderBy: { createdAt: "desc" },
         }),
       ]);
+    const renewalAvailable = Boolean(
+      subscription?.plan === "YEARLY" &&
+      subscription.status === "ACTIVE" &&
+      subscription.currentPeriodEndsAt &&
+      subscription.currentPeriodEndsAt.getTime() <= renewalWindowStartsAt,
+    );
     return NextResponse.json({
       subscription,
       payments,
       billingProfile,
       salesDocuments,
+      renewalAvailable,
     });
   } catch (error) {
     console.error("[GET billing]", error);
@@ -221,6 +228,23 @@ export async function POST(request: Request) {
       return NextResponse.json(
         await configurePayment(request, retryPayment.id, body.paymentMethod),
         { status: 201 },
+      );
+    }
+
+    const currentSubscription = await prisma.subscription.findUnique({
+      where: { organizationId: s.organizationId },
+      select: { plan: true, status: true, currentPeriodEndsAt: true },
+    });
+    const renewalWindowStartsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    if (
+      currentSubscription?.plan === "YEARLY" &&
+      currentSubscription.status === "ACTIVE" &&
+      currentSubscription.currentPeriodEndsAt &&
+      currentSubscription.currentPeriodEndsAt.getTime() > renewalWindowStartsAt
+    ) {
+      return NextResponse.json(
+        { message: "License can be renewed up to 7 days before expiry" },
+        { status: 409 },
       );
     }
 

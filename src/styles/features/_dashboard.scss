@@ -328,3 +328,35 @@
     justify-content: center;
   }
 }
+
+.dashboard-license-alert {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+
+  > svg {
+    color: var(--warning, #f59e0b);
+  }
+
+  strong {
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-license-alert {
+    grid-template-columns: auto 1fr;
+
+    .btn {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+}

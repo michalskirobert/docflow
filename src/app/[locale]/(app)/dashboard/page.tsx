@@ -9,6 +9,7 @@ import {
   Mail,
   FilePlus2,
   Calculator,
+  TriangleAlert,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -79,6 +80,13 @@ async function DashboardContent() {
   const remaining = limit == null ? null : Math.max(0, limit - usedThisMonth);
   const isAnnual =
     subscription?.plan === "YEARLY" && subscription.status === "ACTIVE";
+  const daysUntilExpiry = subscription?.currentPeriodEndsAt
+    ? Math.ceil(
+        (subscription.currentPeriodEndsAt.getTime() - Date.now()) / 86400000,
+      )
+    : null;
+  const showExpiryAlert =
+    isAnnual && daysUntilExpiry !== null && daysUntilExpiry <= 7;
 
   return (
     <>
@@ -93,6 +101,26 @@ async function DashboardContent() {
           {t("createTemplate")}
         </Link>
       </div>
+      {showExpiryAlert && (
+        <div className="card dashboard-license-alert" role="status">
+          <TriangleAlert size={21} />
+          <div>
+            <strong>
+              {daysUntilExpiry !== null && daysUntilExpiry > 0
+                ? t("licenseExpiryTitle")
+                : t("licenseExpiredTitle")}
+            </strong>
+            <p className="muted">
+              {daysUntilExpiry !== null && daysUntilExpiry > 0
+                ? t("licenseExpiryDescription", { count: daysUntilExpiry })
+                : t("licenseExpiredDescription")}
+            </p>
+          </div>
+          <Link href="/account" className="btn secondary">
+            {t("renewLicense")}
+          </Link>
+        </div>
+      )}
       <div className="grid dashboard-stats">
         <Link href="/templates" className="card stat-card stat-card-link">
           <div className="stat-card-icon">
