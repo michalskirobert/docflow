@@ -20,10 +20,36 @@ export async function GET(req: Request) {
     const s = await getSession();
     if (!s)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() ?? "";
     const sort = searchParams.get("sort") ?? "newest";
     const category = searchParams.get("category") ?? "all";
+    const templateId = searchParams.get("templateId") ?? "all";
+    const dateFrom = searchParams.get("dateFrom")?.trim() ?? "";
+    const dateTo = searchParams.get("dateTo")?.trim() ?? "";
+    const view = searchParams.get("view");
+    const offset = Math.max(0, Number(searchParams.get("offset") ?? "0") || 0);
+    const limit = Math.min(
+      100,
+      Math.max(1, Number(searchParams.get("limit") ?? "30") || 30),
+    );
+
+    if (view === "filters") {
+      const templates = await prisma.document.findMany({
+        where: { organizationId: s.organizationId, templateId: { not: null } },
+        distinct: ["templateId"],
+        select: { templateId: true, template: { select: { name: true } } },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(
+        templates
+          .filter((item) => item.templateId && item.template)
+          .map((item) => ({ id: item.templateId!, name: item.template!.name }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+    }
+
     const orderBy =
       sort === "oldest"
         ? { createdAt: "asc" as const }
@@ -36,26 +62,33 @@ export async function GET(req: Request) {
               : sort === "categoryDesc"
                 ? { category: "desc" as const }
                 : { createdAt: "desc" as const };
-    return NextResponse.json(
-      await prisma.document.findMany({
-        where: {
-          organizationId: s.organizationId,
-          ...(category !== "all" ? { category } : {}),
-          ...(q
-            ? {
-                OR: [
-                  { name: { contains: q, mode: "insensitive" as const } },
-                  {
-                    template: {
-                      is: {
-                        name: { contains: q, mode: "insensitive" as const },
-                      },
-                    },
-                  },
-                ],
-              }
-            : {}),
-        },
+
+    const createdAt = {
+      ...(dateFrom ? { gte: new Date(`${dateFrom}T00:00:00`) } : {}),
+      ...(dateTo ? { lte: new Date(`${dateTo}T23:59:59.999`) } : {}),
+    };
+    const where = {
+      organizationId: s.organizationId,
+      ...(category !== "all" ? { category } : {}),
+      ...(templateId !== "all" ? { templateId } : {}),
+      ...(dateFrom || dateTo ? { createdAt } : {}),
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" as const } },
+              {
+                template: {
+                  is: { name: { contains: q, mode: "insensitive" as const } },
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [items, total] = await Promise.all([
+      prisma.document.findMany({
+        where,
         select: {
           id: true,
           name: true,
@@ -64,9 +97,16 @@ export async function GET(req: Request) {
           category: true,
           template: { select: { name: true } },
         },
-        orderBy,
+        orderBy: [orderBy, { id: "asc" }],
+        skip: offset,
+        take: limit,
       }),
-    );
+      prisma.document.count({ where }),
+    ]);
+
+    const nextOffset =
+      offset + items.length < total ? offset + items.length : null;
+    return NextResponse.json({ items, nextOffset, total });
   } catch (error) {
     console.error("GET /api/documents failed", error);
     return NextResponse.json(

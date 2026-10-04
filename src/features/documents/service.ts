@@ -1,23 +1,52 @@
 "use client";
-import { useDelete, useGet, usePost, usePut } from "@/hooks/use-api";
+import {
+  useDelete,
+  useGet,
+  useInfiniteGet,
+  usePost,
+  usePut,
+} from "@/hooks/use-api";
 import { useTemplatesService } from "@/features/templates/service";
 import type { Document, DocumentSummary } from "./types";
 import type { Template } from "@/features/templates/types";
+
+export type DocumentPage = {
+  items: DocumentSummary[];
+  nextOffset: number | null;
+  total: number;
+};
+
+export type DocumentTemplateFilter = { id: string; name: string };
 
 export const useDocumentsService = (
   q = "",
   sort = "newest",
   category = "all",
-) => {
-  const params = new URLSearchParams();
-  if (q.trim()) params.set("q", q.trim());
-  params.set("sort", sort);
-  if (category !== "all") params.set("category", category);
-  return useGet<DocumentSummary[]>(
-    ["documents", q, sort, category],
-    `/documents?${params.toString()}`,
+  templateId = "all",
+  dateFrom = "",
+  dateTo = "",
+) =>
+  useInfiniteGet<DocumentPage>(
+    ["documents", "list", q, sort, category, templateId, dateFrom, dateTo],
+    (offset) => {
+      const params = new URLSearchParams();
+      if (q.trim()) params.set("q", q.trim());
+      params.set("sort", sort);
+      params.set("offset", String(offset));
+      params.set("limit", "30");
+      if (category !== "all") params.set("category", category);
+      if (templateId !== "all") params.set("templateId", templateId);
+      if (dateFrom) params.set("dateFrom", dateFrom);
+      if (dateTo) params.set("dateTo", dateTo);
+      return `/documents?${params.toString()}`;
+    },
   );
-};
+
+export const useDocumentTemplateFiltersService = () =>
+  useGet<DocumentTemplateFilter[]>(
+    ["documents", "template-filters"],
+    "/documents?view=filters",
+  );
 export const useDocumentService = (id: string) =>
   useGet<Document>(["documents", id], `/documents/${id}`, Boolean(id), {
     refetchOnMount: "always",

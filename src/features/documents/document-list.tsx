@@ -1,10 +1,13 @@
 "use client";
 
 import { FilePlus2, MailPlus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { useDocumentsService } from "./service";
+import {
+  useDocumentsService,
+  useDocumentTemplateFiltersService,
+} from "./service";
 import { DocumentHistory } from "./components/DocumentHistory";
 import { QueryErrorState } from "@/components/ui/query-error-state";
 
@@ -16,32 +19,46 @@ export default function DocumentList() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const documents = useDocumentsService(q, sort, categoryFilter);
-  const allDocuments = documents.data ?? [];
-  const templateOptions = Array.from(
-    new Map(
-      allDocuments.map((document) => [
-        document.templateId ?? `deleted:${document.template?.name ?? ""}`,
-        document.template?.name ?? t("deletedTemplate"),
-      ]),
-    ).entries(),
+  const documents = useDocumentsService(
+    q,
+    sort,
+    categoryFilter,
+    templateFilter,
+    dateFrom,
+    dateTo,
   );
-  const filteredDocuments = allDocuments.filter((document) => {
-    const templateKey =
-      document.templateId ?? `deleted:${document.template?.name ?? ""}`;
-    if (templateFilter !== "all" && templateKey !== templateFilter)
-      return false;
-    const createdAt = new Date(document.createdAt);
-    if (dateFrom) {
-      const from = new Date(`${dateFrom}T00:00:00`);
-      if (createdAt < from) return false;
-    }
-    if (dateTo) {
-      const to = new Date(`${dateTo}T23:59:59.999`);
-      if (createdAt > to) return false;
-    }
-    return true;
-  });
+  const templateFilters = useDocumentTemplateFiltersService();
+  const allDocuments = useMemo(
+    () => documents.data?.pages.flatMap((page) => page.items) ?? [],
+    [documents.data],
+  );
+  const templateOptions = useMemo(
+    () =>
+      (templateFilters.data ?? []).map(
+        (item) => [item.id, item.name] as [string, string],
+      ),
+    [templateFilters.data],
+  );
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !documents.hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !documents.isFetchingNextPage) {
+          void documents.fetchNextPage();
+        }
+      },
+      { rootMargin: "240px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [
+    documents.hasNextPage,
+    documents.isFetchingNextPage,
+    documents.fetchNextPage,
+  ]);
 
   if (documents.isError && !documents.data) {
     return (
@@ -59,7 +76,7 @@ export default function DocumentList() {
 
   return (
     <DocumentHistory
-      documents={filteredDocuments}
+      documents={allDocuments}
       templateFilter={templateFilter}
       categoryFilter={categoryFilter}
       templateOptions={templateOptions}
@@ -70,6 +87,8 @@ export default function DocumentList() {
       onDateFromChange={setDateFrom}
       onDateToChange={setDateTo}
       loading={documents.isPending && !documents.data}
+      loadingMore={documents.isFetchingNextPage}
+      loadMoreRef={loadMoreRef}
       q={q}
       sort={sort}
       onQueryChange={setQ}

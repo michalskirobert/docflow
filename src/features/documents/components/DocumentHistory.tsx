@@ -11,7 +11,7 @@ import {
 import { SelectField } from "@/components/shared/form";
 import { CategoryFilterField } from "@/features/categories/CategoryFilterField";
 import { FilterDateControl, ListToolbar } from "@/components/shared/list";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, type RefObject, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -25,6 +25,8 @@ import { DocumentPdfPreviewModal } from "./DocumentPdfPreviewModal";
 export function DocumentHistory({
   documents,
   loading = false,
+  loadingMore = false,
+  loadMoreRef,
   action,
   q,
   sort,
@@ -42,6 +44,8 @@ export function DocumentHistory({
 }: {
   documents: DocumentSummary[];
   loading?: boolean;
+  loadingMore?: boolean;
+  loadMoreRef?: RefObject<HTMLDivElement | null>;
   action?: ReactNode;
   q: string;
   sort: string;
@@ -232,6 +236,15 @@ export function DocumentHistory({
         </div>
       )}
 
+      {documents.length > 0 && loadMoreRef && (
+        <div
+          ref={loadMoreRef}
+          className="infinite-scroll-sentinel"
+          aria-hidden="true"
+        />
+      )}
+      {loadingMore && <ListSkeleton rows={3} />}
+
       {previewDocument && (
         <DocumentPdfPreviewModal
           title={previewDocument.name}
@@ -282,13 +295,7 @@ function DocumentRow({
       onActionPendingChange(true);
       try {
         await remove.mutateAsync(undefined);
-        queryClient.setQueriesData<DocumentSummary[]>(
-          { queryKey: ["documents"] },
-          (current) =>
-            Array.isArray(current)
-              ? current.filter((item) => item.id !== d.id)
-              : current,
-        );
+        await queryClient.invalidateQueries({ queryKey: ["documents"] });
         notify(t("deleteSuccess"), "success");
       } catch {
         notify(t("deleteError"), "error");
