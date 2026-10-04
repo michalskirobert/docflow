@@ -1356,3 +1356,79 @@
     border-radius: 14px;
   }
 }
+
+/* 2.4.5 renewal and categories UX QA */
+.settings-card .license-summary {
+  margin-bottom: 16px;
+  padding-bottom: 18px;
+}
+
+.settings-card .license-reminder {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  border: 1px solid var(--warning-border);
+  border-radius: 12px;
+  background: var(--warning-surface);
+  color: var(--text);
+}
+
+.settings-card .license-reminder-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--warning-text) 12%, transparent);
+  color: var(--warning-text);
+}
+
+.settings-card .license-reminder strong {
+  display: block;
+  margin: 0 0 3px;
+  color: var(--warning-text);
+}
+
+.settings-card .license-reminder p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.settings-category-add {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-raised) 72%, transparent);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.settings-category-add:hover:not(:disabled),
+.settings-category-add:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  color: var(--primary);
+}
+
+.categories-route-skeleton .dictionaries-page-heading > div {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 10px;
+}
+
+.categories-skeleton-chips {
+  margin-top: 16px;
+}
+
+.skeleton-category-chip {
+  width: 92px;
+  border-color: transparent;
+  background: var(--skeleton-base);
+}

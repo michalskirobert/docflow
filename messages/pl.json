@@ -158,7 +158,8 @@
     "licenseExpiredTitle": "Licencja wygasła",
     "licenseExpiryDescription": "Twoja licencja roczna wygasa za {count, plural, one {# dzień} few {# dni} other {# dni}}. Możesz przedłużyć ją już teraz bez utraty pozostałego czasu.",
     "licenseExpiredDescription": "Twoja licencja roczna wygasła. Odnów ją, aby ponownie korzystać z rocznego limitu dokumentów.",
-    "renewLicense": "Przedłuż licencję"
+    "renewLicense": "Przedłuż licencję",
+    "daysLeft": "Pozostało {count, plural, one {# dzień} few {# dni} other {# dni}}"
   },
   "templates": {
     "title": "Szablony",
@@ -415,6 +416,9 @@
     "validUntil": "Ważna do",
     "daysRemaining": "dni pozostało",
     "licenseReminder": "Licencja wkrótce wygaśnie. Odnów ją, aby zachować roczny limit dokumentów.",
+    "activeDaysLeft": "AKTYWNA · POZOSTAŁO {count} DNI",
+    "licenseReminderTitle": "Licencja wygaśnie za {count, plural, one {# dzień} few {# dni} other {# dni}}",
+    "licenseReminderDescription": "Odnów ją teraz. Pozostały czas obecnej licencji nie zostanie utracony.",
     "onlinePayment": "płatność online",
     "pending": "Oczekuje",
     "paymentMethod": "Metoda płatności",

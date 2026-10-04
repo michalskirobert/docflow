@@ -7,6 +7,7 @@ import {
   FileText,
   LoaderCircle,
   ShieldAlert,
+  TriangleAlert,
   Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -88,6 +89,10 @@ export default function SettingsPanel() {
     periodEndsAt !== null &&
     (billing.data?.renewalAvailable ??
       periodEndsAt - Date.now() <= 7 * 86400000);
+  const daysUntilExpiry =
+    periodEndsAt === null
+      ? null
+      : Math.max(0, Math.ceil((periodEndsAt - Date.now()) / 86400000));
   const paymentBusy = start.isPending || change.isPending;
 
   const payNow = async () => {
@@ -148,7 +153,16 @@ export default function SettingsPanel() {
                   )}
                 </div>
                 <StatusBadge
-                  status={billing.data?.subscription?.status ?? "ACTIVE"}
+                  status={
+                    isRenewalWindow
+                      ? "PENDING"
+                      : (billing.data?.subscription?.status ?? "ACTIVE")
+                  }
+                  label={
+                    isRenewalWindow && daysUntilExpiry !== null
+                      ? t("activeDaysLeft", { count: daysUntilExpiry })
+                      : undefined
+                  }
                 />
               </div>
 
@@ -158,7 +172,23 @@ export default function SettingsPanel() {
                 ).getTime() -
                   Date.now() <=
                   7 * 86400000 && (
-                  <div className="license-reminder">{t("licenseReminder")}</div>
+                  <div className="license-reminder" role="status">
+                    <span className="license-reminder-icon" aria-hidden="true">
+                      <TriangleAlert size={18} />
+                    </span>
+                    <div>
+                      <strong>
+                        {t("licenseReminderTitle", {
+                          count: daysUntilExpiry ?? 0,
+                        })}
+                      </strong>
+                      <p>
+                        {t("licenseReminderDescription", {
+                          count: daysUntilExpiry ?? 0,
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 )}
 
               {pending.map((payment) => (
