@@ -10,6 +10,7 @@ import {
   FilePlus2,
   Calculator,
   TriangleAlert,
+  ArrowRight,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
@@ -116,8 +117,9 @@ async function DashboardContent() {
                 : t("licenseExpiredDescription")}
             </p>
           </div>
-          <Link href="/account" className="btn secondary">
-            {t("renewLicense")}
+          <Link href="/account" className="dashboard-license-renew">
+            <span>{t("renewLicense")}</span>
+            <ArrowRight size={16} aria-hidden="true" />
           </Link>
         </div>
       )}
