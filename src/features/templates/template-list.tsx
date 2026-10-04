@@ -131,6 +131,7 @@ export default function TemplateList() {
                   ).data;
                   await create.mutateAsync({
                     name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                    category: full.category ?? "system:GENERAL",
                     description: full.description ?? "",
                     emailSubject: full.emailSubject ?? "",
                     content: full.content,

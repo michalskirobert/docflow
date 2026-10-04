@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { InputControl, SelectField } from "@/components/shared/form";
+import { Check, X } from "lucide-react";
+import { Button } from "@/components/shared/button";
+import { FormField, SelectField } from "@/components/shared/form";
 import { useGet, usePost } from "@/hooks/use-api";
 import { SYSTEM_CATEGORY_KEYS, systemCategoryValue } from "./definitions";
 import { useTranslations } from "next-intl";
@@ -23,6 +25,11 @@ export function CategoryField({
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
 
+  const cancel = () => {
+    setName("");
+    setAdding(false);
+  };
+
   const add = async () => {
     const trimmed = name.trim();
     if (trimmed.length < 2 || create.isPending) return;
@@ -31,6 +38,55 @@ export function CategoryField({
     setName("");
     setAdding(false);
   };
+
+  if (adding) {
+    return (
+      <div className="category-field">
+        <FormField
+          label={t("label")}
+          value={name}
+          maxLength={60}
+          autoFocus
+          placeholder={t("customPlaceholder")}
+          onChange={(event) => setName(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              void add();
+            }
+            if (event.key === "Escape") cancel();
+          }}
+          suffix={
+            <span className="category-field-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="category-field-action"
+                onClick={() => void add()}
+                disabled={name.trim().length < 2}
+                loading={create.isPending}
+                aria-label={t("save")}
+                title={t("save")}
+              >
+                <Check size={18} aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="category-field-action"
+                onClick={cancel}
+                disabled={create.isPending}
+                aria-label={t("cancel")}
+                title={t("cancel")}
+              >
+                <X size={18} aria-hidden="true" />
+              </Button>
+            </span>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="category-field">
@@ -57,40 +113,6 @@ export function CategoryField({
         ))}
         <option value="__add__">{t("addCustom")}</option>
       </SelectField>
-
-      {adding && (
-        <div className="category-custom-row">
-          <InputControl
-            value={name}
-            maxLength={60}
-            autoFocus
-            placeholder={t("customPlaceholder")}
-            onChange={(event) => setName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                void add();
-              }
-              if (event.key === "Escape") setAdding(false);
-            }}
-          />
-          <button
-            type="button"
-            className="btn secondary"
-            onClick={() => void add()}
-            disabled={name.trim().length < 2 || create.isPending}
-          >
-            {t("save")}
-          </button>
-          <button
-            type="button"
-            className="btn ghost"
-            onClick={() => setAdding(false)}
-          >
-            {t("cancel")}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

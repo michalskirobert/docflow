@@ -1699,6 +1699,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                       />
                     </label>
 
+                    <CategoryField value={category} onChange={setCategory} />
+
                     <label className="field">
                       <span>{t("emailSubject")}</span>
                       <InputControl
@@ -1707,9 +1709,11 @@ export function TemplateEditor({ template, onClose }: Props) {
                         onChange={(event) =>
                           setEmailSubject(event.target.value)
                         }
-                        placeholder={t("emailSubjectPlaceholder")}
+                        placeholder={`${t("emailSubjectPlaceholder")} {{variable}}`}
                       />
-                      <small>{t("emailSubjectHelp")}</small>
+                      <small>
+                        {t("emailSubjectHelp")} {"{{variable}}"}
+                      </small>
                     </label>
 
                     <div className="editor-header-meta-actions">
@@ -1782,15 +1786,19 @@ export function TemplateEditor({ template, onClose }: Props) {
                     />
                   </label>
 
+                  <CategoryField value={category} onChange={setCategory} />
+
                   <label className="field">
                     <span>{t("emailSubject")}</span>
                     <InputControl
                       maxLength={250}
                       value={emailSubject}
                       onChange={(event) => setEmailSubject(event.target.value)}
-                      placeholder={t("emailSubjectPlaceholder")}
+                      placeholder={`${t("emailSubjectPlaceholder")} {{variable}}`}
                     />
-                    <small>{t("emailSubjectHelp")}</small>
+                    <small>
+                      {t("emailSubjectHelp")} {"{{variable}}"}
+                    </small>
                   </label>
 
                   <div className="editor-header-meta-actions">

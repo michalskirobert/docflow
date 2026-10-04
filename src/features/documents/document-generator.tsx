@@ -543,6 +543,7 @@ export default function DocumentGenerator({
       await generateMutation.mutateAsync({
         templateId,
         name: trimmedDocumentName,
+        category,
         data: values,
       });
       navigationBypassRef.current = true;

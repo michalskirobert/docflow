@@ -105,19 +105,26 @@
   display: grid;
   gap: 10px;
 }
-.category-custom-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px;
-  align-items: center;
+
+.category-field-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  display: flex;
+  gap: 2px;
+  transform: translateY(-50%);
 }
-@media (max-width: 640px) {
-  .category-custom-row {
-    grid-template-columns: 1fr 1fr;
-  }
-  .category-custom-row > :first-child {
-    grid-column: 1 / -1;
-  }
+
+.category-field .field-control > input {
+  padding-right: 84px;
+}
+
+.category-field-action.btn {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
 }
 
 .query-error-state {

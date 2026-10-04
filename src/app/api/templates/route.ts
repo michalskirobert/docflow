@@ -157,6 +157,7 @@ export async function GET(req: Request) {
                   name: true,
                   description: true,
                   emailSubject: true,
+                  category: true,
                   variablesJson: true,
                   createdAt: true,
                 }
@@ -164,6 +165,7 @@ export async function GET(req: Request) {
                   id: true,
                   name: true,
                   description: true,
+                  category: true,
                   variablesJson: true,
                   isExample: true,
                   createdAt: true,
@@ -194,6 +196,7 @@ export async function GET(req: Request) {
                   name: template.name,
                   description: template.description,
                   emailSubject: template.emailSubject,
+                  category: template.category,
                   variablesJson: template.variablesJson,
                   createdAt: template.createdAt,
                 }
@@ -201,6 +204,7 @@ export async function GET(req: Request) {
                   id: template.id,
                   name: template.name,
                   description: template.description,
+                  category: template.category,
                   variablesJson: template.variablesJson,
                   isExample: true,
                   createdAt: template.createdAt,
