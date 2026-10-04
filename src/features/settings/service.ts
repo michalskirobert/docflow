@@ -1,6 +1,7 @@
 "use client";
 import { useDelete, useGet, usePatch, usePost } from "@/hooks/use-api";
 export type BillingOverview = {
+  renewalAvailable: boolean;
   subscription: {
     plan: string;
     status: string;

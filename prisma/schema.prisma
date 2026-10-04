@@ -65,6 +65,7 @@ model Organization {
   subscription   Subscription?
   templates        Template[]
   customCategories Category[]
+  licenseReminderDeliveries LicenseReminderDelivery[]
 
 }
 
@@ -111,6 +112,18 @@ model Subscription {
   updatedAt            DateTime           @updatedAt
   plan                 PlanCode           @default(FREE)
   organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model LicenseReminderDelivery {
+  id             String       @id @default(cuid())
+  organizationId String
+  periodEndsAt   DateTime
+  kind           String
+  sentAt         DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodEndsAt, kind])
+  @@index([periodEndsAt])
 }
 
 model Payment {

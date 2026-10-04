@@ -39,6 +39,17 @@ export async function POST(request: Request) {
         },
         data: { status: "CANCELED" },
       });
+      const currentSubscription = await tx.subscription.findUnique({
+        where: { organizationId: payment.organizationId },
+        select: { currentPeriodEndsAt: true },
+      });
+      const renewalBase =
+        currentSubscription?.currentPeriodEndsAt &&
+        currentSubscription.currentPeriodEndsAt.getTime() > Date.now()
+          ? currentSubscription.currentPeriodEndsAt
+          : new Date();
+      const renewedUntil = new Date(renewalBase);
+      renewedUntil.setFullYear(renewedUntil.getFullYear() + 1);
       await tx.subscription.update({
         where: { organizationId: payment.organizationId },
         data: {
@@ -48,10 +59,7 @@ export async function POST(request: Request) {
             payment.plan === "FREE"
               ? 10
               : Number(process.env.YEARLY_DOCUMENT_LIMIT ?? 100),
-          currentPeriodEndsAt:
-            payment.plan === "YEARLY"
-              ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-              : null,
+          currentPeriodEndsAt: payment.plan === "YEARLY" ? renewedUntil : null,
         },
       });
     }

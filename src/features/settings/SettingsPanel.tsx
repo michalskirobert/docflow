@@ -86,7 +86,8 @@ export default function SettingsPanel() {
   const isRenewalWindow =
     currentPlan === "YEARLY" &&
     periodEndsAt !== null &&
-    periodEndsAt - Date.now() <= 7 * 86400000;
+    (billing.data?.renewalAvailable ??
+      periodEndsAt - Date.now() <= 7 * 86400000);
   const paymentBusy = start.isPending || change.isPending;
 
   const payNow = async () => {
@@ -261,7 +262,7 @@ export default function SettingsPanel() {
                         {start.isPending && (
                           <LoaderCircle className="spinner" size={17} />
                         )}
-                        {t("payNow")}
+                        {currentPlan === "YEARLY" ? t("renewNow") : t("payNow")}
                       </button>
                     </div>
                   )}

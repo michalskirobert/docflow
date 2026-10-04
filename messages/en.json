@@ -153,7 +153,12 @@
     "newFeature": "NEW IN DOCFLOW",
     "calculatedVariablesTitle": "Calculated variables",
     "calculatedVariablesDescription": "Calculate values automatically from numbers and other document fields. Type a formula manually or use the helpers.",
-    "calculatedVariablesTutorial": "View tutorial"
+    "calculatedVariablesTutorial": "View tutorial",
+    "licenseExpiryTitle": "Your license expires soon",
+    "licenseExpiredTitle": "Your license has expired",
+    "licenseExpiryDescription": "Your annual license expires in {count, plural, one {# day} other {# days}}. You can renew now without losing the remaining time.",
+    "licenseExpiredDescription": "Your annual license has expired. Renew it to restore the annual document limit.",
+    "renewLicense": "Renew license"
   },
   "templates": {
     "title": "Templates",
@@ -505,7 +510,8 @@
     "manageDictionaries": "Manage dictionaries",
     "categories": "Categories",
     "categoriesHelp": "Manage categories used in documents and templates.",
-    "manageCategories": "Manage categories"
+    "manageCategories": "Manage categories",
+    "renewNow": "Renew now"
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

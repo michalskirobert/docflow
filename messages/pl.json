@@ -153,7 +153,12 @@
     "newFeature": "NOWOŚĆ W DOCFLOW",
     "calculatedVariablesTitle": "Zmienne obliczeniowe",
     "calculatedVariablesDescription": "Twórz wartości automatycznie z liczb i innych pól dokumentu. Formułę możesz wpisać ręcznie albo zbudować z podpowiedzi.",
-    "calculatedVariablesTutorial": "Zobacz samouczek"
+    "calculatedVariablesTutorial": "Zobacz samouczek",
+    "licenseExpiryTitle": "Licencja wkrótce wygaśnie",
+    "licenseExpiredTitle": "Licencja wygasła",
+    "licenseExpiryDescription": "Twoja licencja roczna wygasa za {count, plural, one {# dzień} few {# dni} other {# dni}}. Możesz przedłużyć ją już teraz bez utraty pozostałego czasu.",
+    "licenseExpiredDescription": "Twoja licencja roczna wygasła. Odnów ją, aby ponownie korzystać z rocznego limitu dokumentów.",
+    "renewLicense": "Przedłuż licencję"
   },
   "templates": {
     "title": "Szablony",
@@ -505,7 +510,8 @@
     "manageDictionaries": "Zarządzaj słownikami",
     "categories": "Kategorie",
     "categoriesHelp": "Zarządzaj kategoriami używanymi w dokumentach i szablonach.",
-    "manageCategories": "Zarządzaj kategoriami"
+    "manageCategories": "Zarządzaj kategoriami",
+    "renewNow": "Przedłuż teraz"
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",

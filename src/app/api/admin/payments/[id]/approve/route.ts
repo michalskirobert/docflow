@@ -22,7 +22,16 @@ export async function POST(
         { message: "Payment not found" },
         { status: 404 },
       );
-    const ends = new Date();
+    const currentSubscription = await prisma.subscription.findUnique({
+      where: { organizationId: payment.organizationId },
+      select: { currentPeriodEndsAt: true },
+    });
+    const renewalBase =
+      currentSubscription?.currentPeriodEndsAt &&
+      currentSubscription.currentPeriodEndsAt.getTime() > Date.now()
+        ? currentSubscription.currentPeriodEndsAt
+        : new Date();
+    const ends = new Date(renewalBase);
     ends.setFullYear(ends.getFullYear() + 1);
     await prisma.$transaction([
       prisma.payment.update({ where: { id }, data: { status: "COMPLETED" } }),
