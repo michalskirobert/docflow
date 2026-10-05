@@ -156,10 +156,13 @@
     "calculatedVariablesTutorial": "View tutorial",
     "licenseExpiryTitle": "Your license expires soon",
     "licenseExpiredTitle": "Your license has expired",
-    "licenseExpiryDescription": "Your annual license expires in {count, plural, one {# day} other {# days}}. You can renew now without losing the remaining time.",
-    "licenseExpiredDescription": "Your annual license has expired. Renew it to restore the annual document limit.",
+    "licenseExpiryDescription": "Your annual license expires in {count, plural, one {# day} other {# days}}. Your existing documents and templates will remain available; after expiry, only your monthly usage limit changes to the Free plan limit.",
+    "licenseExpiredDescription": "Your existing documents and templates are still available. Your account now uses the Free plan monthly limit.",
     "renewLicense": "Renew license",
-    "daysLeft": "{count, plural, one {# day left} other {# days left}}"
+    "daysLeft": "{count, plural, one {# day left} other {# days left}}",
+    "licenseExpiresTodayTitle": "Your license expires today",
+    "licenseExpiresTodayDescription": "Your existing documents and templates will remain available. After expiry, only your monthly usage limit changes to the Free plan limit.",
+    "expiresToday": "Expires today"
   },
   "templates": {
     "title": "Templates",
@@ -418,7 +421,7 @@
     "licenseReminder": "Your license expires soon. Renew it to keep the annual document limit.",
     "activeDaysLeft": "ACTIVE · {count} DAYS LEFT",
     "licenseReminderTitle": "Your license expires in {count, plural, one {# day} other {# days}}",
-    "licenseReminderDescription": "Renew now. Your remaining {count, plural, one {# day will} other {# days will}} not be lost.",
+    "licenseReminderDescription": "Renew when it suits you. Your existing documents and templates will remain available even if the license expires. After expiry, only your monthly usage limit will change to the Free plan limit.",
     "onlinePayment": "online payment",
     "pending": "Pending",
     "paymentMethod": "Payment method",
@@ -427,8 +430,8 @@
     "changePaymentMethod": "Change payment method",
     "renewLicense": "Pay / renew annual license",
     "transferTitle": "Transfer title",
-    "invoicesTransactions": "Invoices & transactions",
-    "invoicesTransactionsHelp": "Paid and pending transactions for your organization.",
+    "transactions": "Transactions",
+    "transactionsHelp": "Your license payment history.",
     "noTransactions": "No transactions yet.",
     "invoice": "Invoice",
     "downloadInvoice": "Download PDF",
@@ -515,7 +518,19 @@
     "categories": "Categories",
     "categoriesHelp": "Manage categories used in documents and templates.",
     "manageCategories": "Manage categories",
-    "renewNow": "Renew now"
+    "renewNow": "Renew now",
+    "expiresToday": "expires today",
+    "activeExpiresToday": "ACTIVE · EXPIRES TODAY",
+    "licenseExpiresTodayTitle": "Your license expires today",
+    "licenseExpiresTodayDescription": "Your existing documents and templates will remain available. After expiry, only your monthly usage limit will change to the Free plan limit.",
+    "cancelPayment": "Cancel payment",
+    "cancelPaymentTitle": "Cancel this payment?",
+    "cancelPaymentMessage": "This payment attempt will be canceled. You can then start a new payment and choose another payment method.",
+    "paymentCanceled": "Payment canceled. You can choose a payment method again.",
+    "paymentCancelError": "Could not cancel the payment. Please try again.",
+    "expired": "expired",
+    "licenseExpiredTitle": "Your license has expired",
+    "licenseExpiredDescription": "Your existing documents and templates are still available. Your account now uses the Free plan monthly limit."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -817,7 +832,9 @@
     "pendingDescription": "PayU has returned you to DocFlow, but the final confirmation has not arrived yet. You can safely continue using the application and check the status in My account.",
     "failedTitle": "Payment not completed",
     "failedDescription": "The payment was cancelled or failed. You can start it again from My account.",
-    "login": "Go to sign in",
+    "unavailableTitle": "We could not check the payment status",
+    "unavailableDescription": "The payment status is temporarily unavailable. This does not mean the payment failed. You can check its current status in My account.",
+    "goToAccount": "Go to My account",
     "checkAgain": "Check again"
   },
   "calculationHelp": {

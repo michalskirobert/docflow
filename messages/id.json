@@ -156,10 +156,13 @@
     "calculatedVariablesTutorial": "Lihat panduan",
     "licenseExpiryTitle": "Lisensi Anda akan segera berakhir",
     "licenseExpiredTitle": "Lisensi Anda telah berakhir",
-    "licenseExpiryDescription": "Lisensi tahunan Anda akan berakhir dalam {count} hari. Anda dapat memperpanjang sekarang tanpa kehilangan sisa waktu.",
-    "licenseExpiredDescription": "Lisensi tahunan Anda telah berakhir. Perpanjang untuk memulihkan batas dokumen tahunan.",
+    "licenseExpiryDescription": "Lisensi tahunan Anda akan berakhir dalam {count} hari. Dokumen dan template yang sudah ada akan tetap tersedia; setelah itu hanya batas bulanan yang berubah ke batas paket Free.",
+    "licenseExpiredDescription": "Dokumen dan template Anda tetap tersedia. Akun Anda sekarang menggunakan batas bulanan paket Free.",
     "renewLicense": "Perpanjang lisensi",
-    "daysLeft": "{count} hari tersisa"
+    "daysLeft": "{count} hari tersisa",
+    "licenseExpiresTodayTitle": "Lisensi Anda berakhir hari ini",
+    "licenseExpiresTodayDescription": "Dokumen dan template Anda akan tetap tersedia. Setelah itu hanya batas bulanan yang berubah ke batas paket Free.",
+    "expiresToday": "Berakhir hari ini"
   },
   "templates": {
     "title": "Templat",
@@ -418,7 +421,7 @@
     "licenseReminder": "Lisensi Anda akan segera berakhir. Perpanjang untuk mempertahankan batas dokumen tahunan.",
     "activeDaysLeft": "AKTIF · {count} HARI TERSISA",
     "licenseReminderTitle": "Lisensi Anda berakhir dalam {count} hari",
-    "licenseReminderDescription": "Perpanjang sekarang. Sisa waktu lisensi Anda tidak akan hilang.",
+    "licenseReminderDescription": "Perpanjang kapan pun Anda siap. Dokumen dan template Anda yang sudah ada akan tetap tersedia meskipun lisensi berakhir. Setelah itu, hanya batas penggunaan bulanan yang berubah ke batas paket Free.",
     "onlinePayment": "pembayaran online",
     "pending": "Tertunda",
     "paymentMethod": "Metode pembayaran",
@@ -427,8 +430,8 @@
     "changePaymentMethod": "Ubah metode pembayaran",
     "renewLicense": "Bayar / perpanjang lisensi tahunan",
     "transferTitle": "Judul transfer",
-    "invoicesTransactions": "Faktur & transaksi",
-    "invoicesTransactionsHelp": "Transaksi organisasi yang dibayar dan tertunda.",
+    "transactions": "Transaksi",
+    "transactionsHelp": "Riwayat pembayaran lisensi Anda.",
     "noTransactions": "Belum ada transaksi.",
     "invoice": "Faktur",
     "downloadInvoice": "Unduh PDF",
@@ -515,7 +518,19 @@
     "categories": "Kategori",
     "categoriesHelp": "Kelola kategori yang digunakan dalam dokumen dan templat.",
     "manageCategories": "Kelola kategori",
-    "renewNow": "Perpanjang sekarang"
+    "renewNow": "Perpanjang sekarang",
+    "expiresToday": "berakhir hari ini",
+    "activeExpiresToday": "AKTIF · BERAKHIR HARI INI",
+    "licenseExpiresTodayTitle": "Lisensi Anda berakhir hari ini",
+    "licenseExpiresTodayDescription": "Dokumen dan template Anda yang sudah ada akan tetap tersedia. Setelah lisensi berakhir, hanya batas penggunaan bulanan yang berubah ke batas paket Free.",
+    "cancelPayment": "Batalkan pembayaran",
+    "cancelPaymentTitle": "Batalkan pembayaran ini?",
+    "cancelPaymentMessage": "Percobaan pembayaran ini akan dibatalkan. Setelah itu Anda dapat memulai pembayaran baru dan memilih metode lain.",
+    "paymentCanceled": "Pembayaran dibatalkan. Anda dapat memilih metode pembayaran lagi.",
+    "paymentCancelError": "Pembayaran tidak dapat dibatalkan. Silakan coba lagi.",
+    "expired": "berakhir",
+    "licenseExpiredTitle": "Lisensi Anda telah berakhir",
+    "licenseExpiredDescription": "Dokumen dan templat Anda yang sudah ada tetap tersedia. Akun Anda sekarang menggunakan batas bulanan paket Free."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",
@@ -817,7 +832,9 @@
     "pendingDescription": "PayU telah mengembalikan Anda ke DocFlow, tetapi konfirmasi akhir belum diterima. Anda dapat tetap menggunakan aplikasi dan memeriksa status di Akun saya.",
     "failedTitle": "Pembayaran belum selesai",
     "failedDescription": "Pembayaran dibatalkan atau gagal. Anda dapat memulainya kembali dari Akun saya.",
-    "login": "Buka halaman masuk",
+    "unavailableTitle": "Status pembayaran tidak dapat diperiksa",
+    "unavailableDescription": "Status pembayaran untuk sementara tidak tersedia. Ini tidak berarti pembayaran gagal. Anda dapat memeriksa status terbarunya di Akun saya.",
+    "goToAccount": "Buka Akun saya",
     "checkAgain": "Periksa lagi"
   },
   "calculationHelp": {

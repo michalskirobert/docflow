@@ -77,10 +77,19 @@ async function DashboardContent() {
       }),
     ]);
 
-  const limit = subscription?.monthlyDocumentLimit ?? null;
+  const yearlyExpired = Boolean(
+    subscription?.plan === "YEARLY" &&
+    subscription.currentPeriodEndsAt &&
+    subscription.currentPeriodEndsAt.getTime() < Date.now(),
+  );
+  const limit = yearlyExpired
+    ? 10
+    : (subscription?.monthlyDocumentLimit ?? null);
   const remaining = limit == null ? null : Math.max(0, limit - usedThisMonth);
   const isAnnual =
-    subscription?.plan === "YEARLY" && subscription.status === "ACTIVE";
+    subscription?.plan === "YEARLY" &&
+    subscription.status === "ACTIVE" &&
+    !yearlyExpired;
   const daysUntilExpiry = subscription?.currentPeriodEndsAt
     ? Math.ceil(
         (subscription.currentPeriodEndsAt.getTime() - Date.now()) / 86400000,
@@ -107,14 +116,18 @@ async function DashboardContent() {
           <TriangleAlert size={21} />
           <div>
             <strong>
-              {daysUntilExpiry !== null && daysUntilExpiry > 0
-                ? t("licenseExpiryTitle")
-                : t("licenseExpiredTitle")}
+              {daysUntilExpiry === 0
+                ? t("licenseExpiresTodayTitle")
+                : daysUntilExpiry !== null && daysUntilExpiry > 0
+                  ? t("licenseExpiryTitle")
+                  : t("licenseExpiredTitle")}
             </strong>
             <p className="muted">
-              {daysUntilExpiry !== null && daysUntilExpiry > 0
-                ? t("licenseExpiryDescription", { count: daysUntilExpiry })
-                : t("licenseExpiredDescription")}
+              {daysUntilExpiry === 0
+                ? t("licenseExpiresTodayDescription")
+                : daysUntilExpiry !== null && daysUntilExpiry > 0
+                  ? t("licenseExpiryDescription", { count: daysUntilExpiry })
+                  : t("licenseExpiredDescription")}
             </p>
           </div>
           <Link href="/account" className="dashboard-license-renew">
@@ -152,13 +165,13 @@ async function DashboardContent() {
             <span
               className={`status-pill ${showExpiryAlert ? "warning" : "success"}`}
             >
-              {showExpiryAlert &&
-              daysUntilExpiry !== null &&
-              daysUntilExpiry > 0
-                ? t("daysLeft", { count: daysUntilExpiry })
+              {showExpiryAlert && daysUntilExpiry !== null
+                ? daysUntilExpiry === 0
+                  ? t("expiresToday")
+                  : t("daysLeft", { count: daysUntilExpiry })
                 : t("active")}
             </span>
-            {subscription?.currentPeriodEndsAt && (
+            {isAnnual && subscription?.currentPeriodEndsAt && (
               <div className="muted">
                 {t("validUntil", {
                   date: subscription.currentPeriodEndsAt.toLocaleDateString(),
