@@ -37,9 +37,10 @@ export async function createPayUOrder(input: {
 }) {
   const token = await accessToken();
   const posId = process.env.PAYU_POS_ID;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!posId || !appUrl)
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!posId || !configuredAppUrl)
     throw new Error("PAYU_POS_ID and NEXT_PUBLIC_APP_URL are required");
+  const appUrl = configuredAppUrl.replace(/\/$/, "");
   const response = await fetch(`${baseUrl()}/api/v2_1/orders`, {
     method: "POST",
     redirect: "manual",
@@ -80,6 +81,31 @@ export async function createPayUOrder(input: {
     throw new Error(`PayU order failed: ${JSON.stringify(data)}`);
   return data;
 }
+export async function getPayUOrder(orderId: string) {
+  const token = await accessToken();
+  const response = await fetch(
+    `${baseUrl()}/api/v2_1/orders/${encodeURIComponent(orderId)}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`PayU order status failed: ${response.status}`);
+  }
+  const data = (await response.json()) as {
+    orders?: Array<{
+      orderId?: string;
+      extOrderId?: string;
+      status?: string;
+    }>;
+  };
+  const order = data.orders?.[0];
+  if (!order) throw new Error("PayU order status response has no order");
+  return order;
+}
+
 export async function cancelPayUOrder(orderId: string) {
   const token = await accessToken();
   const response = await fetch(
