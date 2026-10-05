@@ -116,10 +116,16 @@ h3 {
   text-decoration: none;
 }
 
-.sidebar a:hover,
 .sidebar a.active {
   background: var(--sidebar-hover);
   color: white;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sidebar a:hover {
+    background: var(--sidebar-hover);
+    color: white;
+  }
 }
 
 .sidebar .logout {
