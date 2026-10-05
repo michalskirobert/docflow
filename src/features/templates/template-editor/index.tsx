@@ -8,6 +8,8 @@ import {
   type CSSProperties,
   type DragEvent,
   type MouseEvent as ReactMouseEvent,
+  type WheelEvent as ReactWheelEvent,
+  type MutableRefObject,
   useCallback,
   useEffect,
   useRef,
@@ -17,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
+import { useScrollLock } from "@/hooks/use-scroll-lock";
 import {
   ArrowLeft,
   Check,
@@ -31,7 +34,10 @@ import {
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
-import { A4_WIDTH_PX } from "@/utils/constants";
+import {
+  A4_WIDTH_PX,
+  normalizeTemplateEditorFontFamily,
+} from "@/utils/constants";
 import { VariableModal } from "./VariableModal";
 import { DataTableModal } from "./DataTableModal";
 import { dataTableHtml, ensureDataTableCaretHosts } from "../data-table";
@@ -101,12 +107,15 @@ type Props = {
 
 export function TemplateEditor({ template, onClose }: Props) {
   const t = useTranslations("templateEditor");
+  useScrollLock();
 
   const { notify, confirm } = useFeedback();
   const nameRef = useRef<HTMLInputElement>(null);
   const editor = useRef<HTMLDivElement>(null);
   const headerEditor = useRef<HTMLDivElement>(null);
   const footerEditor = useRef<HTMLDivElement>(null);
+  const lastValidHeaderHtml = useRef("");
+  const lastValidFooterHtml = useRef("");
   const fileRef = useRef<HTMLInputElement>(null);
   const savedRange = useRef<Range | null>(null);
 
@@ -120,6 +129,29 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const activeEditor = useRef<HTMLDivElement | null>(null);
   const draggedImage = useRef<HTMLImageElement | null>(null);
+
+  const handlePaperStageWheel = useCallback(
+    (event: ReactWheelEvent<HTMLDivElement>) => {
+      if (event.deltaY === 0 || event.shiftKey) return;
+
+      const paper = editor.current;
+      if (!paper) return;
+
+      const maxScrollTop = paper.scrollHeight - paper.clientHeight;
+      if (maxScrollTop <= 0) return;
+
+      const nextScrollTop = Math.min(
+        maxScrollTop,
+        Math.max(0, paper.scrollTop + event.deltaY),
+      );
+
+      if (nextScrollTop === paper.scrollTop) return;
+
+      event.preventDefault();
+      paper.scrollTop = nextScrollTop;
+    },
+    [],
+  );
 
   const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
@@ -276,16 +308,39 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     if (headerEditor.current) {
       headerEditor.current.innerHTML = template?.headerContent ?? "";
+      lastValidHeaderHtml.current = headerEditor.current.innerHTML;
       normalizeEditorVariableImages(headerEditor.current);
       ensureDataTableCaretHosts(headerEditor.current);
     }
 
     if (footerEditor.current) {
       footerEditor.current.innerHTML = template?.footerContent ?? "";
+      lastValidFooterHtml.current = footerEditor.current.innerHTML;
       normalizeEditorVariableImages(footerEditor.current);
       ensureDataTableCaretHosts(footerEditor.current);
     }
   }, [template, t]);
+
+  const keepRegionWithinA4 = (
+    region: HTMLDivElement | null,
+    lastValid: MutableRefObject<string>,
+  ) => {
+    if (!region) return;
+    // scrollHeight may differ by a pixel because of sub-pixel font metrics.
+    if (region.scrollHeight <= region.clientHeight + 1) {
+      lastValid.current = region.innerHTML;
+      return;
+    }
+
+    region.innerHTML = lastValid.current;
+    region.focus();
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(region);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
 
   useEffect(() => {
     if (!window.matchMedia("(max-width: 760px)").matches) return;
@@ -399,6 +454,15 @@ export function TemplateEditor({ template, onClose }: Props) {
     try {
       const token = explicitToken ?? selectedVariableElement;
       const tokenStyle = token ? getComputedStyle(token) : null;
+      const selection = window.getSelection();
+      const selectionNode = selection?.anchorNode ?? null;
+      const region =
+        [editor.current, headerEditor.current, footerEditor.current].find(
+          (candidate) =>
+            candidate && selectionNode && candidate.contains(selectionNode),
+        ) ??
+        activeEditor.current ??
+        editor.current;
       setToolbarState({
         bold: tokenStyle
           ? Number(tokenStyle.fontWeight) >= 600 ||
@@ -446,23 +510,116 @@ export function TemplateEditor({ template, onClose }: Props) {
             return px ? String(px) : "";
           }
           const selection = window.getSelection();
-          const element =
-            selection?.anchorNode instanceof Element
-              ? selection.anchorNode
-              : selection?.anchorNode?.parentElement;
+          const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+          let element: Element | null = null;
+
+          if (range) {
+            const start = range.startContainer;
+            if (start.nodeType === Node.TEXT_NODE) {
+              element = start.parentElement;
+            } else if (start instanceof Element) {
+              const child = start.childNodes.item(
+                Math.min(
+                  range.startOffset,
+                  Math.max(0, start.childNodes.length - 1),
+                ),
+              );
+              element =
+                child?.nodeType === Node.TEXT_NODE
+                  ? child.parentElement
+                  : child instanceof Element
+                    ? child
+                    : start;
+            }
+
+            // A selection that starts on the editor/block boundary can report the
+            // inherited 16px instead of the actual formatted text. Prefer the first
+            // text node inside the selected range in that case.
+            if (element === region || !range.collapsed) {
+              const walkerRoot = range.commonAncestorContainer;
+              const walker = document.createTreeWalker(
+                walkerRoot,
+                NodeFilter.SHOW_TEXT,
+                {
+                  acceptNode(node) {
+                    if (!node.textContent?.trim())
+                      return NodeFilter.FILTER_SKIP;
+                    try {
+                      return range.intersectsNode(node)
+                        ? NodeFilter.FILTER_ACCEPT
+                        : NodeFilter.FILTER_SKIP;
+                    } catch {
+                      return NodeFilter.FILTER_SKIP;
+                    }
+                  },
+                },
+              );
+              const textNode = walker.nextNode();
+              if (textNode?.parentElement) element = textNode.parentElement;
+            }
+          }
+
           const px = element
             ? Math.round(parseFloat(getComputedStyle(element).fontSize))
             : 0;
           return px ? String(px) : "";
         })(),
         fontFamily: (() => {
+          if (tokenStyle) {
+            return normalizeTemplateEditorFontFamily(tokenStyle.fontFamily);
+          }
+
           const selection = window.getSelection();
-          const element = tokenStyle
-            ? selectedVariableElement
-            : selection?.anchorNode instanceof Element
-              ? selection.anchorNode
-              : selection?.anchorNode?.parentElement;
-          return element ? getComputedStyle(element).fontFamily : "";
+          const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+          let element: Element | null = null;
+
+          if (range) {
+            const start = range.startContainer;
+            if (start.nodeType === Node.TEXT_NODE) {
+              element = start.parentElement;
+            } else if (start instanceof Element) {
+              const child = start.childNodes.item(
+                Math.min(
+                  range.startOffset,
+                  Math.max(0, start.childNodes.length - 1),
+                ),
+              );
+              element =
+                child?.nodeType === Node.TEXT_NODE
+                  ? child.parentElement
+                  : child instanceof Element
+                    ? child
+                    : start;
+            }
+
+            if (element === region || !range.collapsed) {
+              const walker = document.createTreeWalker(
+                range.commonAncestorContainer,
+                NodeFilter.SHOW_TEXT,
+                {
+                  acceptNode(node) {
+                    if (!node.textContent?.trim())
+                      return NodeFilter.FILTER_SKIP;
+                    try {
+                      return range.intersectsNode(node)
+                        ? NodeFilter.FILTER_ACCEPT
+                        : NodeFilter.FILTER_SKIP;
+                    } catch {
+                      return NodeFilter.FILTER_SKIP;
+                    }
+                  },
+                },
+              );
+              const textNode = walker.nextNode();
+              if (textNode?.parentElement) element = textNode.parentElement;
+            }
+          }
+
+          return element
+            ? normalizeTemplateEditorFontFamily(
+                getComputedStyle(element).fontFamily,
+              )
+            : "";
         })(),
         lineHeight: (() => {
           if (tokenStyle) {
@@ -505,8 +662,33 @@ export function TemplateEditor({ template, onClose }: Props) {
     ].find((element) => element?.contains(node));
 
     if (region) {
+      const range = selection.getRangeAt(0);
+
+      // A variable click creates an explicit variable selection. As soon as the
+      // user makes a normal text/range selection, do not let that stale token
+      // hijack toolbar commands (font size, family, bold, etc.).
+      if (selectedVariableElement) {
+        const tokenText = selectedVariableElement.textContent?.trim() ?? "";
+        const selectionText = selection.toString().trim();
+        let intersectsSelectedToken = false;
+        try {
+          intersectsSelectedToken = range.intersectsNode(
+            selectedVariableElement,
+          );
+        } catch {}
+
+        const isVariableOnlySelection =
+          intersectsSelectedToken && selectionText === tokenText;
+
+        if (!isVariableOnlySelection) {
+          selectedVariableElement.removeAttribute("data-variable-selected");
+          setSelectedVariableElement(null);
+          setSelectedVariableBox(null);
+        }
+      }
+
       activeEditor.current = region;
-      savedRange.current = selection.getRangeAt(0).cloneRange();
+      savedRange.current = range.cloneRange();
 
       syncToolbarState();
     }
@@ -1471,7 +1653,21 @@ export function TemplateEditor({ template, onClose }: Props) {
     event: DragEvent<HTMLDivElement>,
     region: HTMLDivElement | null,
   ) => {
-    const range = rangeAtPoint(event.clientX, event.clientY);
+    let range = rangeAtPoint(event.clientX, event.clientY);
+
+    // Header/footer are fixed-size regions. Depending on browser/zoom,
+    // caretRangeFromPoint can return a node outside an otherwise valid
+    // empty drop target. In that case, fall back to the end of the region
+    // instead of rejecting the drop completely.
+    if (region && (!range || !region.contains(range.startContainer))) {
+      const target = event.target as Node;
+      if (region === target || region.contains(target)) {
+        range = document.createRange();
+        range.selectNodeContents(region);
+        range.collapse(false);
+      }
+    }
+
     const draggedVariable = draggedVariableElement.current;
 
     if (draggedVariable && range && region?.contains(range.startContainer)) {
@@ -2062,13 +2258,11 @@ export function TemplateEditor({ template, onClose }: Props) {
               onMoveAfter={() => moveImage(1)}
               onRemove={() => {
                 removePlacedImage(selectedImage);
-
                 setSelectedImage(null);
                 setResizeBox(null);
               }}
             />
           )}
-
           <VariableShelf
             t={t}
             variables={variables}
@@ -2145,7 +2339,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
         </div>
 
-        <div className="paper-stage">
+        <div className="paper-stage" onWheel={handlePaperStageWheel}>
           <div
             className="paper-zoom"
             style={
@@ -2208,6 +2402,12 @@ export function TemplateEditor({ template, onClose }: Props) {
                     }
                   }}
                   onKeyUp={rememberSelection}
+                  onInput={() =>
+                    keepRegionWithinA4(
+                      headerEditor.current,
+                      lastValidHeaderHtml,
+                    )
+                  }
                   onMouseUp={rememberSelection}
                   data-placeholder={t("headerPlaceholder")}
                 />
@@ -2315,6 +2515,12 @@ export function TemplateEditor({ template, onClose }: Props) {
                     }
                   }}
                   onKeyUp={rememberSelection}
+                  onInput={() =>
+                    keepRegionWithinA4(
+                      footerEditor.current,
+                      lastValidFooterHtml,
+                    )
+                  }
                   onMouseUp={rememberSelection}
                   data-placeholder={t("footerPlaceholder")}
                 />

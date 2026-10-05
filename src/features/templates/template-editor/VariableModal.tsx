@@ -297,7 +297,7 @@ export function VariableModal({
         maxNumber: type === "number" ? optionalNumber(maxNumber) : undefined,
         decimalPlaces: ["number", "formula"].includes(type)
           ? numberFormat === "currency"
-            ? undefined
+            ? 2
             : numberFormat === "quantity"
               ? 0
               : optionalNumber(decimalPlaces)

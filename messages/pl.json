@@ -277,6 +277,7 @@
     "loadingDocument": "Ładowanie dokumentu…",
     "documentNotFound": "Nie znaleziono dokumentu.",
     "searchTemplates": "Szukaj szablonów…",
+    "chooseTemplate": "Wybierz szablon",
     "noDescription": "Brak opisu",
     "dropImage": "Upuść obraz tutaj lub kliknij, aby wybrać",
     "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · plik źródłowy do 20 MB · automatyczna optymalizacja",

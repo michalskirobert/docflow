@@ -113,3 +113,34 @@ export function formatTemplateNumber(
     return value.toFixed(places);
   }
 }
+
+/**
+ * Formats any persisted/input numeric value for document UI and renderers.
+ * This is the single display path for number/formula variables.
+ */
+export function formatTemplateNumberValue(
+  value: string | number,
+  variable: TemplateVariable,
+): string {
+  if (value === "") return "";
+  const parsed = parseTemplateNumber(value, variable);
+  return Number.isFinite(parsed)
+    ? formatTemplateNumber(parsed, variable)
+    : String(value ?? "");
+}
+
+/**
+ * Removes presentation-only suffixes/grouping while a numeric field is edited.
+ */
+export function formatTemplateNumberForEditing(
+  value: string | number,
+  variable: TemplateVariable,
+): string {
+  if (value === "") return "";
+  const parsed = parseTemplateNumber(value, variable);
+  if (!Number.isFinite(parsed)) return String(value ?? "");
+
+  const places = getTemplateNumberDecimalPlaces(variable);
+  const decimal = variable.decimalSeparator ?? ",";
+  return parsed.toFixed(places).replace(".", decimal);
+}

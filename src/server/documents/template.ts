@@ -1,6 +1,9 @@
 import type { TemplateVariable } from "@/features/templates/types";
 import { resolveCalculatedValues } from "./calculations";
-import { formatTemplateNumber } from "@/features/templates/number-format";
+import {
+  formatTemplateNumber,
+  formatTemplateNumberValue,
+} from "@/features/templates/number-format";
 import { parseTableRows } from "@/features/templates/data-table";
 
 export function extractVariables(content: string) {
@@ -65,7 +68,10 @@ function renderDataTableMarkup(
   variables: TemplateVariable[],
 ) {
   const defs = new Map(variables.map((variable) => [variable.name, variable]));
-  const columns = table.dataTable?.columns ?? [];
+  const columns = (table.dataTable?.columns ?? []).filter(
+    (column) =>
+      column.visibility !== "form-only" && column.visibleInPdf !== false,
+  );
   const rows = parseTableRows(String(data[table.name] ?? "[]"));
   const widths = columns.map((column) => Math.max(1, column.width ?? 230));
   const totalWidth = widths.reduce((sum, width) => sum + width, 0) || 1;
@@ -97,8 +103,8 @@ function renderDataTableMarkup(
           const def = defs.get(column.variableName);
           const raw = resolved[column.variableName] ?? "";
           const value =
-            def?.type === "formula" && typeof raw === "number"
-              ? formatTemplateNumber(raw, def)
+            def && ["number", "formula"].includes(def.type)
+              ? formatTemplateNumberValue(raw, def)
               : raw;
           return `<td style="padding:8px 10px;border:1px solid #d1d5db;background:#fff;color:#111827;vertical-align:top;white-space:normal;word-break:normal;overflow-wrap:anywhere">${escapeHtml(value)}</td>`;
         })
@@ -167,8 +173,13 @@ export function renderTemplate(
     const def = defs.get(key),
       value = resolvedData[key];
     if (def?.type === "image") return "";
-    if (def?.type === "formula" && typeof value === "number") {
-      return escapeHtml(formatTemplateNumber(value, def));
+    if (
+      def &&
+      ["number", "formula"].includes(def.type) &&
+      value !== undefined &&
+      value !== ""
+    ) {
+      return escapeHtml(formatTemplateNumberValue(value, def));
     }
     if (def && ["date", "datetime", "time"].includes(def.type) && value) {
       const raw = String(value);

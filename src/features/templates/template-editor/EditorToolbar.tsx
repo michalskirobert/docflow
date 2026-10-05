@@ -19,7 +19,10 @@ import {
   Undo2,
   Variable,
 } from "lucide-react";
-import { FONT_SIZES_PX } from "@/utils/constants";
+import {
+  FONT_SIZES_PX,
+  TEMPLATE_EDITOR_FONT_FAMILIES,
+} from "@/utils/constants";
 export type ToolbarState = {
   bold: boolean;
   italic: boolean;
@@ -111,13 +114,11 @@ export function EditorToolbar({
         title={t("fontFamily")}
       >
         <option value="">{t("fontFamily")}</option>
-        <option value="Arial, Helvetica, sans-serif">Arial</option>
-        <option value="'Times New Roman', Times, serif">Times New Roman</option>
-        <option value="Georgia, serif">Georgia</option>
-        <option value="Verdana, Geneva, sans-serif">Verdana</option>
-        <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
-        <option value="'Trebuchet MS', Arial, sans-serif">Trebuchet MS</option>
-        <option value="'Courier New', Courier, monospace">Courier New</option>
+        {TEMPLATE_EDITOR_FONT_FAMILIES.map((font) => (
+          <option key={font.value} value={font.value}>
+            {font.label}
+          </option>
+        ))}
       </SelectControl>
       <SelectControl
         className="editor-select editor-select-size"

@@ -63,6 +63,10 @@ const schema = z.object({
                 variableName: z.string().optional(),
                 staticText: z.string().max(500).optional(),
                 width: z.number().min(80).optional(),
+                visibility: z.enum(["document", "form-only"]).optional(),
+                // Keep accepting the short-lived 2.4.8 flag so templates
+                // saved by an intermediate build remain compatible.
+                visibleInPdf: z.boolean().optional(),
               }),
             ),
             minRows: z.number().int().nonnegative().optional(),
@@ -84,6 +88,12 @@ const schema = z.object({
         decimalPlaces: z.number().int().min(0).max(12).optional(),
         decimalSeparator: z.enum([".", ","]).optional(),
         thousandsSeparator: z.enum(["none", ".", ",", "space"]).optional(),
+        numberFormat: z
+          .enum(["number", "currency", "percentage", "measure", "quantity"])
+          .optional(),
+        numberLocale: z.string().max(35).optional(),
+        currency: z.string().length(3).optional(),
+        unit: z.string().max(20).optional(),
         fontSize: z.number().min(8).max(96).optional(),
         bold: z.boolean().optional(),
         italic: z.boolean().optional(),

@@ -277,6 +277,7 @@
     "loadingDocument": "Loading document…",
     "documentNotFound": "Document not found.",
     "searchTemplates": "Search templates…",
+    "chooseTemplate": "Choose a template",
     "noDescription": "No description",
     "dropImage": "Drop an image here or click to choose",
     "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · source up to 20 MB · optimized automatically",

@@ -100,6 +100,13 @@ export function DataTableField({
       </div>
       <div className="data-table-scroll" tabIndex={0}>
         <table className="document-data-table">
+          <colgroup>
+            {columns.map((column) => {
+              const width = Math.max(80, column.width ?? 150);
+              return <col key={column.id} style={{ width }} />;
+            })}
+            <col className="data-table-actions-col" />
+          </colgroup>
           <thead>
             <tr>
               {columns.map((column) => (
@@ -139,8 +146,13 @@ export function DataTableField({
                   ...row,
                 };
                 try {
+                  // A formula rendered inside a table row must be evaluated against
+                  // that row. Passing the dataTable definition here makes the resolver
+                  // interpret column dependencies as repeated arrays, which is correct
+                  // for aggregate formulas but wrong for row formulas such as
+                  // {{CenaNETTO}} * 1.23.
                   resolved = resolveCalculatedValues(
-                    variables,
+                    variables.filter((item) => item.type !== "dataTable"),
                     resolved,
                     columns
                       .flatMap((column) =>

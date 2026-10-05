@@ -7,7 +7,10 @@ import { useTranslations } from "next-intl";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import type { TemplateVariable } from "@/features/templates/types";
 import { parseFormattedNumber } from "@/features/documents/helpers";
-import { getTemplateNumberDecimalPlaces } from "@/features/templates/number-format";
+import {
+  formatTemplateNumberForEditing,
+  formatTemplateNumberValue,
+} from "@/features/templates/number-format";
 import {
   DateTimePicker,
   InputControl,
@@ -729,39 +732,36 @@ export function VariableField({
   }
 
   if (variableType === "formula") {
+    const displayValue = formatTemplateNumberValue(value, variable);
+
     return (
       <label className="field field-locked" htmlFor={id}>
         <Label />
-        <InputControl id={id} type="text" disabled value={value} readOnly />
+        <InputControl
+          id={id}
+          type="text"
+          disabled
+          value={displayValue}
+          readOnly
+        />
         {error && <small className="form-error">{error}</small>}
       </label>
     );
   }
 
   if (variableType === "number") {
-    const decimalPlaces = getTemplateNumberDecimalPlaces(variable);
+    const displayValue = variable.locked
+      ? formatTemplateNumberValue(value, variable)
+      : value;
 
     const formatNumberOnBlur = () => {
       if (!value.trim()) return;
-      const { number: parsedValue } = parseFormattedNumber(value, variable);
-      if (!Number.isFinite(parsedValue)) return;
+      onChange(formatTemplateNumberValue(value, variable));
+    };
 
-      const [integerPart, fractionPart] = Math.abs(parsedValue)
-        .toFixed(decimalPlaces)
-        .split(".");
-      const separator = variable.thousandsSeparator ?? "none";
-      const grouping =
-        separator === "space" ? " " : separator === "none" ? "" : separator;
-      const groupedInteger = grouping
-        ? integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, grouping)
-        : integerPart;
-      const sign = parsedValue < 0 ? "-" : "";
-      const decimal = variable.decimalSeparator ?? ",";
-      onChange(
-        decimalPlaces > 0
-          ? `${sign}${groupedInteger}${decimal}${fractionPart}`
-          : `${sign}${groupedInteger}`,
-      );
+    const normalizeNumberForEditing = () => {
+      if (!value.trim()) return;
+      onChange(formatTemplateNumberForEditing(value, variable));
     };
 
     return (
@@ -776,17 +776,17 @@ export function VariableField({
           type="text"
           inputMode="decimal"
           disabled={variable.locked}
-          value={value}
+          value={displayValue}
           placeholder={variable.placeholder}
           aria-invalid={Boolean(error)}
           onChange={(e) => {
             const nextValue = e.target.value;
 
-            // Keep typing permissive. Formatting happens only when the user leaves the field.
             if (/^-?[\d\s.,]*$/.test(nextValue)) {
               onChange(nextValue);
             }
           }}
+          onFocus={normalizeNumberForEditing}
           onBlur={formatNumberOnBlur}
         />
 
