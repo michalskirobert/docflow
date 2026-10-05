@@ -1818,3 +1818,17 @@ body {
     flex-basis: 24px;
   }
 }
+
+/* 2.4.7 tablet shell: preserve usable content width between desktop and mobile. */
+@media (min-width: 901px) and (max-width: 1200px) {
+  .sidebar {
+    width: 220px;
+    flex-basis: 220px;
+    padding-inline: 14px;
+  }
+
+  .main {
+    max-width: 100%;
+    padding: 28px 24px;
+  }
+}

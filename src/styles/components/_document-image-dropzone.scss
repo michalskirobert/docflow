@@ -1,0 +1,103 @@
+/*
+ * Shared document image upload control.
+ *
+ * VariableField is used by both the document generator/editor and the template
+ * editor. Keep these styles global/shared so the control does not depend on
+ * visiting /templates first (templates.scss is route-scoped in Next.js).
+ */
+.document-image-dropzone {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+  min-height: 150px;
+  padding: 22px;
+  border: 2px dashed #c7d2fe;
+  border-radius: 14px;
+  background: #f8faff;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.document-image-dropzone > svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  color: #6366f1;
+}
+
+.document-image-dropzone > strong,
+.document-image-dropzone > small {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.document-image-dropzone > strong {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.document-image-dropzone > small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .document-image-dropzone:hover:not([aria-disabled="true"]) {
+    border-color: #818cf8;
+    background: #f5f3ff;
+  }
+}
+
+.document-image-dropzone .variable-upload-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.variable-upload-current,
+.image-processing-state {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.image-processing-state .spinner {
+  width: 28px;
+  height: 28px;
+}
+
+.document-image-dropzone.has-image {
+  cursor: default;
+}
+
+.document-image-dropzone.is-processing {
+  cursor: not-allowed;
+  opacity: 0.72;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+@media (max-width: 760px) {
+  .document-image-dropzone {
+    min-height: 132px;
+    padding: 18px 14px;
+  }
+}

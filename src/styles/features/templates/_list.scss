@@ -684,3 +684,41 @@
   place-items: center;
   color: var(--muted);
 }
+
+/* 2.4.7 tablet layout: do not leave 761-1000px using the desktop toolbar. */
+@media (min-width: 761px) and (max-width: 1200px) {
+  .list-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 220px);
+    gap: 10px;
+  }
+
+  .list-toolbar-search {
+    grid-column: 1 / -1;
+  }
+
+  .list-toolbar > .shared-select,
+  .list-filter-trigger {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .list-toolbar .document-create-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 10px;
+  }
+
+  .list-toolbar .document-create-actions .btn {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .list-filter-panel {
+    width: min(620px, calc(100vw - 48px));
+  }
+}

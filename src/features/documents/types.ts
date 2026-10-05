@@ -2,6 +2,7 @@ export type DocumentSummary = {
   id: string;
   name: string;
   templateId?: string | null;
+  sourceTemplateId?: string | null;
   createdAt: string;
   category: string;
   template: { name: string } | null;

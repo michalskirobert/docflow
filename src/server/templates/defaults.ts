@@ -46,3 +46,32 @@ export const getDefaultTemplate = (id: string) =>
   DEFAULT_TEMPLATES.find((template) => template.id === id) ?? null;
 export const isDefaultTemplateId = (id: string) =>
   id.startsWith(DEFAULT_TEMPLATE_PREFIX);
+
+export const inferDefaultTemplateId = (payloadJson: string) => {
+  let payload: Record<string, unknown>;
+  try {
+    payload = JSON.parse(payloadJson) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const payloadKeys = new Set(Object.keys(payload));
+  if (!payloadKeys.size) return null;
+
+  let best: { id: string; score: number; matched: number } | null = null;
+  for (const template of DEFAULT_TEMPLATES) {
+    let variables: Array<{ name?: string }> = [];
+    try {
+      variables = JSON.parse(template.variablesJson) as Array<{
+        name?: string;
+      }>;
+    } catch {}
+    const names = variables
+      .map((variable) => variable.name)
+      .filter((name): name is string => Boolean(name));
+    if (!names.length) continue;
+    const matched = names.filter((name) => payloadKeys.has(name)).length;
+    const score = matched / Math.max(names.length, payloadKeys.size);
+    if (!best || score > best.score) best = { id: template.id, score, matched };
+  }
+  return best && best.matched >= 2 && best.score >= 0.6 ? best.id : null;
+};

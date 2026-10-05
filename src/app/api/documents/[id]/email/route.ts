@@ -6,6 +6,11 @@ import {
   renderTemplate,
   renderTextTemplate,
 } from "@/server/documents/template";
+import {
+  getDefaultTemplate,
+  inferDefaultTemplateId,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 
 const schema = z.object({
   subject: z.string().max(250).optional(),
@@ -61,24 +66,35 @@ export async function POST(
       savedData = JSON.parse(doc.payloadJson);
     } catch {}
     const data = parsed.data ? { ...savedData, ...parsed.data } : savedData;
+    const sourceTemplateId =
+      doc.sourceTemplateId ??
+      doc.templateId ??
+      inferDefaultTemplateId(doc.payloadJson);
+    const sourceTemplate =
+      doc.template ??
+      (sourceTemplateId && isDefaultTemplateId(sourceTemplateId)
+        ? getDefaultTemplate(sourceTemplateId)
+        : null);
     const subject = renderTextTemplate(
-      parsed.subject?.trim() || doc.template?.emailSubject?.trim() || doc.name,
+      parsed.subject?.trim() ||
+        sourceTemplate?.emailSubject?.trim() ||
+        doc.name,
       data,
     );
     let h = doc.renderedHeader ?? "",
       b = doc.renderedContent,
       f = doc.renderedFooter ?? "";
-    if (parsed.data && doc.template) {
+    if (parsed.data && sourceTemplate) {
       let variables = [];
       try {
-        variables = JSON.parse(doc.template.variablesJson);
+        variables = JSON.parse(sourceTemplate.variablesJson);
       } catch {}
-      b = renderTemplate(doc.template.content, data, variables);
-      h = doc.template.headerContent
-        ? renderTemplate(doc.template.headerContent, data, variables)
+      b = renderTemplate(sourceTemplate.content, data, variables);
+      h = sourceTemplate.headerContent
+        ? renderTemplate(sourceTemplate.headerContent, data, variables)
         : "";
-      f = doc.template.footerContent
-        ? renderTemplate(doc.template.footerContent, data, variables)
+      f = sourceTemplate.footerContent
+        ? renderTemplate(sourceTemplate.footerContent, data, variables)
         : "";
     }
     return NextResponse.json({
