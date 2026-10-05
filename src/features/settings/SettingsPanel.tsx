@@ -102,13 +102,14 @@ export default function SettingsPanel() {
     currentPlan === "YEARLY" &&
     periodEndsAt !== null &&
     (billing.data?.renewalAvailable ??
-      periodEndsAt - Date.now() <= 7 * 86400000);
+      periodEndsAt - Date.now() <= 30 * 86400000);
   const daysUntilExpiry =
     periodEndsAt === null
       ? null
       : Math.ceil((periodEndsAt - Date.now()) / 86400000);
   const paymentBusy =
     start.isPending || change.isPending || cancelPayment.isPending;
+  const showPurchaseControls = effectivePlan === "FREE" || isRenewalWindow;
 
   const payNow = async () => {
     if (currentPending) return;
@@ -166,9 +167,7 @@ export default function SettingsPanel() {
                   status={
                     isExpired
                       ? "EXPIRED"
-                      : isRenewalWindow
-                        ? "PENDING"
-                        : (billing.data?.subscription?.status ?? "ACTIVE")
+                      : (billing.data?.subscription?.status ?? "ACTIVE")
                   }
                   label={
                     isExpired
@@ -260,96 +259,105 @@ export default function SettingsPanel() {
                 </div>
               ))}
 
-              <div className="settings-plan-section">
-                <div className="settings-plan-heading">
-                  <strong>{t("choosePlan")}</strong>
-                  <small>{t("choosePlanHelp")}</small>
-                </div>
-
-                <div className="plan-grid settings-plan-grid">
-                  {plans.data?.map((plan) => (
-                    <button
-                      type="button"
-                      key={plan.code}
-                      className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
-                      disabled={
-                        !plan.available ||
-                        !plan.paymentAvailable ||
-                        effectivePlan === "YEARLY"
-                      }
-                      onClick={() => setSelectedPlan(plan.code)}
-                    >
-                      <div className="plan-visual" aria-hidden="true">
-                        <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
-                      </div>
-                      <div className="plan-check">✓</div>
-                      <strong className="plan-name">
-                        {plan.code === "FREE"
-                          ? t("freeLicense")
-                          : t("annualLicense")}
-                      </strong>
-                      <small className="plan-copy">
-                        {plan.code === "FREE"
-                          ? t("freeLicenseCopy")
-                          : t("annualLicenseCopy")}
-                      </small>
-                      <span className="settings-plan-price">
-                        {(plan.displayAmount / 100).toLocaleString(undefined, {
-                          style: "currency",
-                          currency: plan.currency,
-                        })}{" "}
-                        {plan.displayNet ? t("net") : t("gross")}
-                      </span>
-                      {plan.code !== "FREE" && (
-                        <small>
-                          {plan.displayNet
-                            ? `+ ${plan.vatRate}% VAT`
-                            : t("vatIncluded")}
-                        </small>
-                      )}
-                      <small>
-                        {plan.documentLimit} {t("documentsPerMonth")}
-                      </small>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {effectiveSelectedPlan === "YEARLY" && (
+              {showPurchaseControls && (
                 <>
-                  <label className="field">
-                    {t("paymentMethod")}
-                    <SelectControl
-                      value={method}
-                      disabled={paymentBusy || Boolean(currentPending)}
-                      onChange={(event) =>
-                        setMethod(
-                          event.target.value as "PAYU" | "BANK_TRANSFER",
-                        )
-                      }
-                    >
-                      <option value="PAYU">PayU</option>
-                      <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
-                    </SelectControl>
-                  </label>
-                  {!currentPending && (
-                    <div className="settings-payment-actions">
-                      <button
-                        className="btn"
-                        disabled={
-                          paymentBusy ||
-                          (effectivePlan === "YEARLY" && !isRenewalWindow)
-                        }
-                        onClick={payNow}
-                      >
-                        {start.isPending && (
-                          <LoaderCircle className="spinner" size={17} />
-                        )}
-                        {effectivePlan === "YEARLY"
-                          ? t("renewNow")
-                          : t("payNow")}
-                      </button>
+                  <div className="settings-plan-section">
+                    <div className="settings-plan-heading">
+                      <strong>{t("choosePlan")}</strong>
+                      <small>{t("choosePlanHelp")}</small>
                     </div>
+
+                    <div className="plan-grid settings-plan-grid">
+                      {plans.data?.map((plan) => (
+                        <button
+                          type="button"
+                          key={plan.code}
+                          className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
+                          disabled={
+                            !plan.available ||
+                            !plan.paymentAvailable ||
+                            (effectivePlan === "YEARLY" && plan.code === "FREE")
+                          }
+                          onClick={() => setSelectedPlan(plan.code)}
+                        >
+                          <div className="plan-visual" aria-hidden="true">
+                            <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+                          </div>
+                          <div className="plan-check">✓</div>
+                          <strong className="plan-name">
+                            {plan.code === "FREE"
+                              ? t("freeLicense")
+                              : t("annualLicense")}
+                          </strong>
+                          <small className="plan-copy">
+                            {plan.code === "FREE"
+                              ? t("freeLicenseCopy")
+                              : t("annualLicenseCopy")}
+                          </small>
+                          <span className="settings-plan-price">
+                            {(plan.displayAmount / 100).toLocaleString(
+                              undefined,
+                              {
+                                style: "currency",
+                                currency: plan.currency,
+                              },
+                            )}{" "}
+                            {plan.displayNet ? t("net") : t("gross")}
+                          </span>
+                          {plan.code !== "FREE" && (
+                            <small>
+                              {plan.displayNet
+                                ? `+ ${plan.vatRate}% VAT`
+                                : t("vatIncluded")}
+                            </small>
+                          )}
+                          <small>
+                            {plan.documentLimit} {t("documentsPerMonth")}
+                          </small>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {effectiveSelectedPlan === "YEARLY" && (
+                    <>
+                      <label className="field">
+                        {t("paymentMethod")}
+                        <SelectControl
+                          value={method}
+                          disabled={paymentBusy || Boolean(currentPending)}
+                          onChange={(event) =>
+                            setMethod(
+                              event.target.value as "PAYU" | "BANK_TRANSFER",
+                            )
+                          }
+                        >
+                          <option value="PAYU">PayU</option>
+                          <option value="BANK_TRANSFER">
+                            {t("bankTransfer")}
+                          </option>
+                        </SelectControl>
+                      </label>
+                      {!currentPending && (
+                        <div className="settings-payment-actions">
+                          <button
+                            className="btn"
+                            disabled={
+                              paymentBusy ||
+                              (effectivePlan === "YEARLY" && !isRenewalWindow)
+                            }
+                            onClick={payNow}
+                          >
+                            {start.isPending && (
+                              <LoaderCircle className="spinner" size={17} />
+                            )}
+                            {effectivePlan === "YEARLY"
+                              ? t("renewNow")
+                              : t("payNow")}
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
               )}

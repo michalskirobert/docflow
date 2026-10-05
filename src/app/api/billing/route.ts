@@ -41,7 +41,7 @@ export async function GET() {
       where: { organizationId: s.organizationId },
       select: { plan: true, status: true, currentPeriodEndsAt: true },
     });
-    const renewalWindowStartsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    const renewalWindowStartsAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
     if (
       currentSubscription?.plan === "YEARLY" &&
       currentSubscription.status === "ACTIVE" &&
@@ -187,7 +187,7 @@ export async function POST(request: Request) {
       where: { organizationId: s.organizationId },
       select: { plan: true, status: true, currentPeriodEndsAt: true },
     });
-    const renewalWindowStartsAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    const renewalWindowStartsAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
     if (
       currentSubscription?.plan === "YEARLY" &&
       currentSubscription.status === "ACTIVE" &&
@@ -195,7 +195,7 @@ export async function POST(request: Request) {
       currentSubscription.currentPeriodEndsAt.getTime() > renewalWindowStartsAt
     ) {
       return NextResponse.json(
-        { message: "License can be renewed up to 7 days before expiry" },
+        { message: "License can be renewed up to 30 days before expiry" },
         { status: 409 },
       );
     }
