@@ -62,6 +62,7 @@ export function Sidebar() {
             }`.trim()}
             href={href}
             key={href}
+            onClick={() => setProfileOpen(false)}
           >
             <Icon size={19} />
             <span>{t(key)}</span>
