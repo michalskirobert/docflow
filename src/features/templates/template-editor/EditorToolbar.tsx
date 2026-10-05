@@ -6,6 +6,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  CopyPlus,
   ImagePlus,
   Italic,
   Link2,
@@ -47,6 +48,8 @@ type Props = {
   openLink: () => void;
   openVariable: () => void;
   openDataTable: () => void;
+  duplicateSelected: () => void;
+  canDuplicate: boolean;
   state: ToolbarState;
 };
 export function EditorToolbar({
@@ -61,6 +64,8 @@ export function EditorToolbar({
   openLink,
   openVariable,
   openDataTable,
+  duplicateSelected,
+  canDuplicate,
   state,
 }: Props) {
   const [tableMenuOpen, setTableMenuOpen] = useState(false);
@@ -309,6 +314,17 @@ export function EditorToolbar({
       >
         <Variable />
         {t("variable")}
+      </button>
+      <button
+        type="button"
+        className="duplicate-btn"
+        onMouseDown={rememberSelection}
+        onClick={duplicateSelected}
+        disabled={!canDuplicate}
+        aria-label={t("duplicateVariable")}
+        title={t("duplicateVariable")}
+      >
+        <CopyPlus />
       </button>
     </div>
   );

@@ -416,6 +416,7 @@ function VariableSelect({
   invalid,
   onChange,
   placeholder,
+  clearLabel,
 }: {
   id: string;
   value: string;
@@ -427,20 +428,33 @@ function VariableSelect({
   clearLabel: string;
 }) {
   return (
-    <SelectControl
-      id={id}
-      value={value}
-      disabled={disabled}
-      aria-invalid={invalid || undefined}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      <option value="">{placeholder?.trim() || "—"}</option>
-      {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </SelectControl>
+    <div className="variable-clearable-control variable-select-clearable">
+      <SelectControl
+        id={id}
+        value={value}
+        disabled={disabled}
+        aria-invalid={invalid || undefined}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">{placeholder?.trim() || "—"}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </SelectControl>
+      {value && !disabled && (
+        <button
+          type="button"
+          className="variable-clear-button variable-select-clear-button"
+          aria-label={clearLabel}
+          title={clearLabel}
+          onClick={() => onChange("")}
+        >
+          <X size={16} />
+        </button>
+      )}
+    </div>
   );
 }
 

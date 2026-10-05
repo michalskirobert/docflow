@@ -527,6 +527,7 @@
 }
 
 .selected-variable-edit,
+.selected-variable-duplicate,
 .selected-variable-delete,
 .selected-variable-drag {
   display: grid;
@@ -545,7 +546,9 @@
 }
 
 .selected-variable-edit:hover,
-.selected-variable-edit:focus-visible {
+.selected-variable-edit:focus-visible,
+.selected-variable-duplicate:hover,
+.selected-variable-duplicate:focus-visible {
   background: rgb(99 102 241 / 22%);
   color: #a5b4fc;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pencil, Plus, Save, Table2, Trash2, X } from "lucide-react";
+import { CopyPlus, Pencil, Plus, Save, Table2, Trash2, X } from "lucide-react";
 import {
   ChoiceField,
   InputControl,
@@ -35,6 +35,7 @@ export function DataTableModal({
   onClose,
   onCreateVariable,
   onEditVariable,
+  onDuplicateVariable,
   onDeleteVariable,
   onSave,
 }: {
@@ -43,6 +44,7 @@ export function DataTableModal({
   onClose: () => void;
   onCreateVariable: (onCreated: (variable: TemplateVariable) => void) => void;
   onEditVariable: (variable: TemplateVariable) => void;
+  onDuplicateVariable: (variable: TemplateVariable) => TemplateVariable;
   onDeleteVariable: (variable: TemplateVariable) => void;
   onSave: (variable: TemplateVariable) => void;
 }) {
@@ -127,6 +129,82 @@ export function DataTableModal({
   const canAddColumn =
     columns.length === 0 ||
     canvasWidth >= (columns.length + 1) * MIN_COLUMN_WIDTH;
+
+  const startColumnResize = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    columnId: string,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const columnIndex = columns.findIndex((column) => column.id === columnId);
+    if (columnIndex < 0) return;
+
+    const startWidths = columns.map((column) =>
+      Math.max(MIN_COLUMN_WIDTH, column.width ?? DEFAULT_COLUMN_WIDTH),
+    );
+    const startWidth = startWidths[columnIndex];
+    const nextColumnStartWidth = startWidths[columnIndex + 1];
+
+    document.body.classList.add("data-table-is-resizing");
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const requestedDelta = Math.round(moveEvent.clientX - startX);
+
+      setColumns((current) => {
+        // A resize handle represents the separator between two columns.
+        // Moving it must not increase the total table width beyond the canvas.
+        if (columnIndex < current.length - 1 && nextColumnStartWidth != null) {
+          const minDelta = MIN_COLUMN_WIDTH - startWidth;
+          const maxDelta = nextColumnStartWidth - MIN_COLUMN_WIDTH;
+          const delta = Math.max(minDelta, Math.min(maxDelta, requestedDelta));
+
+          return current.map((column, index) => {
+            if (index === columnIndex) {
+              return { ...column, width: Math.round(startWidth + delta) };
+            }
+            if (index === columnIndex + 1) {
+              return {
+                ...column,
+                width: Math.round(nextColumnStartWidth - delta),
+              };
+            }
+            return column;
+          });
+        }
+
+        // The last edge may grow only into free canvas space.
+        const otherWidth = startWidths.reduce(
+          (sum, width, index) => sum + (index === columnIndex ? 0 : width),
+          0,
+        );
+        const maxWidth = Math.max(MIN_COLUMN_WIDTH, canvasWidth - otherWidth);
+        const nextWidth = Math.max(
+          MIN_COLUMN_WIDTH,
+          Math.min(maxWidth, startWidth + requestedDelta),
+        );
+
+        return current.map((column, index) =>
+          index === columnIndex
+            ? { ...column, width: Math.round(nextWidth) }
+            : column,
+        );
+      });
+    };
+
+    const finish = () => {
+      document.body.classList.remove("data-table-is-resizing");
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", finish);
+      window.removeEventListener("pointercancel", finish);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", finish, { once: true });
+    window.addEventListener("pointercancel", finish, { once: true });
+  };
 
   const addColumn = () => {
     setColumns((current) => {
@@ -384,6 +462,15 @@ export function DataTableModal({
                                   <Trash2 size={15} />
                                 </button>
                               </div>
+                              <button
+                                type="button"
+                                className="data-table-column-resizer"
+                                aria-label={`Resize ${column.label || `Column ${index + 1}`}`}
+                                title="Drag to resize column"
+                                onPointerDown={(event) =>
+                                  startColumnResize(event, column.id)
+                                }
+                              />
                             </th>
                           );
                         })}
@@ -391,7 +478,7 @@ export function DataTableModal({
                     </thead>
                     <tbody>
                       <tr>
-                        {columns.map((column) => {
+                        {columns.map((column, columnIndex) => {
                           const definition = column.variableName
                             ? definitions.get(column.variableName)
                             : undefined;
@@ -502,6 +589,31 @@ export function DataTableModal({
                                           aria-label={`Edit ${definition.label || definition.name}`}
                                         >
                                           <Pencil size={16} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="data-table-variable-duplicate"
+                                          onClick={() => {
+                                            if (!canAddColumn) return;
+                                            const copy =
+                                              onDuplicateVariable(definition);
+                                            setColumns((current) => {
+                                              const next = [...current];
+                                              next.splice(columnIndex + 1, 0, {
+                                                ...column,
+                                                id: crypto.randomUUID(),
+                                                label: copy.label || copy.name,
+                                                variableName: copy.name,
+                                                staticText: undefined,
+                                              });
+                                              return next;
+                                            });
+                                          }}
+                                          disabled={!canAddColumn}
+                                          title="Duplicate variable and column"
+                                          aria-label={`Duplicate ${definition.label || definition.name}`}
+                                        >
+                                          <CopyPlus size={16} />
                                         </button>
                                         <button
                                           type="button"

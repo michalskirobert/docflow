@@ -756,7 +756,11 @@
     "unitPlaceholder": "e.g. kg, m², kWh",
     "numberFormatQuantity": "Quantity / pieces",
     "numberLocale": "Formatting region",
-    "fontFamily": "Font"
+    "fontFamily": "Font",
+    "duplicateVariable": "Duplicate variable",
+    "duplicateTable": "Duplicate table",
+    "editTable": "Edit table",
+    "copy": "copy"
   },
   "help": {
     "title": "Help",

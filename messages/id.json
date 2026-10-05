@@ -756,7 +756,11 @@
     "unitPlaceholder": "mis. kg, m², kWh",
     "numberFormatQuantity": "Jumlah / satuan",
     "numberLocale": "Wilayah pemformatan",
-    "fontFamily": "Font"
+    "fontFamily": "Font",
+    "duplicateVariable": "Duplikat variabel",
+    "duplicateTable": "Duplikat tabel",
+    "editTable": "Edit tabel",
+    "copy": "salinan"
   },
   "help": {
     "title": "Bantuan",

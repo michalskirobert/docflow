@@ -20,6 +20,7 @@ import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import {
   ArrowLeft,
   Check,
+  CopyPlus,
   LoaderCircle,
   GripVertical,
   Pencil,
@@ -867,6 +868,50 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
+  const nextDuplicateName = (sourceName: string) => {
+    const existing = new Set(variables.map((item) => item.name));
+    const base = `${sourceName}Copy`;
+    if (!existing.has(base)) return base;
+    let suffix = 2;
+    while (existing.has(`${base}${suffix}`)) suffix += 1;
+    return `${base}${suffix}`;
+  };
+
+  const duplicateVariableDefinition = (source: TemplateVariable) => {
+    const copy: TemplateVariable = {
+      ...structuredClone(source),
+      name: nextDuplicateName(source.name),
+      label: source.label ? `${source.label} (${t("copy")})` : undefined,
+    };
+    setVariables((current) => [...current, copy]);
+    setDirty(true);
+    return copy;
+  };
+
+  const duplicatePlacedVariable = (
+    source: TemplateVariable,
+    element: HTMLElement,
+  ) => {
+    const copy = duplicateVariableDefinition(source);
+    if (source.type === "dataTable") {
+      const nextVariables = [...variables, copy];
+      element.insertAdjacentHTML(
+        "afterend",
+        dataTableHtml(copy, nextVariables),
+      );
+      const region = activeEditor.current ?? editor.current;
+      if (region) ensureDataTableCaretHosts(region);
+    } else {
+      element.insertAdjacentHTML("afterend", variableHtml(copy));
+      const region = activeEditor.current ?? editor.current;
+      if (copy.type === "image" && region)
+        normalizeEditorVariableImages(region);
+    }
+    setSelectedVariableElement(null);
+    setSelectedVariableBox(null);
+    rememberSelection();
+  };
+
   const saveVariableDefinition = (
     variable: TemplateVariable,
     insertIntoWorkspace = true,
@@ -1607,6 +1652,16 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
+  const selectedDataTableElement =
+    selectedTableCell?.closest<HTMLElement>("[data-data-table-name]") ?? null;
+  const selectedDataTableDefinition = selectedDataTableElement
+    ? variables.find(
+        (item) =>
+          item.type === "dataTable" &&
+          item.name === selectedDataTableElement.dataset.dataTableName,
+      )
+    : undefined;
+
   const pending = create.isPending || update.isPending;
 
   return (
@@ -1874,21 +1929,38 @@ export function TemplateEditor({ template, onClose }: Props) {
               setEditingDataTable(undefined);
               setDataTableOpen(true);
             }}
+            canDuplicate={Boolean(
+              (selectedVariableElement &&
+                variables.some(
+                  (item) =>
+                    item.name === selectedVariableElement.dataset.variableName,
+                )) ||
+              (selectedDataTableElement && selectedDataTableDefinition),
+            )}
+            duplicateSelected={() => {
+              if (selectedVariableElement) {
+                const variable = variables.find(
+                  (item) =>
+                    item.name === selectedVariableElement.dataset.variableName,
+                );
+                if (variable)
+                  duplicatePlacedVariable(variable, selectedVariableElement);
+                return;
+              }
+              if (selectedDataTableElement && selectedDataTableDefinition) {
+                duplicatePlacedVariable(
+                  selectedDataTableDefinition,
+                  selectedDataTableElement,
+                );
+              }
+            }}
             state={toolbarState}
           />
 
           {selectedTableCell &&
             (() => {
-              const dataTableElement = selectedTableCell.closest<HTMLElement>(
-                "[data-data-table-name]",
-              );
-              const dataTableDefinition = dataTableElement
-                ? variables.find(
-                    (item) =>
-                      item.type === "dataTable" &&
-                      item.name === dataTableElement.dataset.dataTableName,
-                  )
-                : undefined;
+              const dataTableElement = selectedDataTableElement;
+              const dataTableDefinition = selectedDataTableDefinition;
               return (
                 <div
                   className="table-context-bar"
@@ -1904,7 +1976,20 @@ export function TemplateEditor({ template, onClose }: Props) {
                           setDataTableOpen(true);
                         }}
                       >
-                        <Pencil size={15} /> Edit table
+                        <Pencil size={15} /> {t("editTable")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (dataTableElement) {
+                            duplicatePlacedVariable(
+                              dataTableDefinition,
+                              dataTableElement,
+                            );
+                          }
+                        }}
+                      >
+                        <CopyPlus size={15} /> {t("duplicateTable")}
                       </button>
                       <button
                         type="button"
@@ -2013,6 +2098,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               setEditingVariable(variable);
               setVariableOpen(true);
             }}
+            duplicateVariable={duplicateVariableDefinition}
             removeVariable={(variableName) =>
               setVariables((current) =>
                 current.filter((variable) => variable.name !== variableName),
@@ -2247,7 +2333,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               );
               if (!variable) return null;
 
-              const actionsWidth = 74;
+              const actionsWidth = 98;
               const actionsHeight = 30;
               const gap = 6;
               const viewportPadding = 8;
@@ -2287,6 +2373,17 @@ export function TemplateEditor({ template, onClose }: Props) {
                     }}
                   >
                     <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="selected-variable-duplicate"
+                    aria-label={t("duplicateVariable")}
+                    title={t("duplicateVariable")}
+                    onClick={() =>
+                      duplicatePlacedVariable(variable, selectedVariableElement)
+                    }
+                  >
+                    <CopyPlus size={14} />
                   </button>
                   <button
                     type="button"
@@ -2429,6 +2526,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               setEditingVariable(variable);
               setVariableOpen(true);
             }}
+            onDuplicateVariable={duplicateVariableDefinition}
             onDeleteVariable={(variable) => {
               setVariables((current) =>
                 current.filter((item) => item.name !== variable.name),

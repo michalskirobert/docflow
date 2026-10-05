@@ -14,7 +14,15 @@ import {
   parseToCanonicalValue,
   userMaskToIMask,
 } from "@/features/documents/components/VariableField";
-import { Bold, Italic, Plus, Trash2, Underline, Variable } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Plus,
+  Trash2,
+  Underline,
+  Variable,
+  X,
+} from "lucide-react";
 import type {
   CalculationOperation,
   TemplateVariable,
@@ -339,17 +347,30 @@ export function VariableModal({
   };
   const defaultControl =
     type === "select" ? (
-      <SelectControl
-        value={defaultValue}
-        onChange={(e) => setDefaultValue(e.target.value)}
-      >
-        <option value="">—</option>
-        {cleanOptions.map((x) => (
-          <option key={x} value={x}>
-            {x}
-          </option>
-        ))}
-      </SelectControl>
+      <div className="variable-clearable-control variable-select-clearable">
+        <SelectControl
+          value={defaultValue}
+          onChange={(e) => setDefaultValue(e.target.value)}
+        >
+          <option value="">—</option>
+          {cleanOptions.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </SelectControl>
+        {defaultValue && (
+          <button
+            type="button"
+            className="variable-clear-button variable-select-clear-button"
+            aria-label={t("clearValue")}
+            title={t("clearValue")}
+            onClick={() => setDefaultValue("")}
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
     ) : type === "number" ? (
       <InputControl
         type="number"
@@ -371,7 +392,7 @@ export function VariableModal({
           dateType,
         );
         return (
-          <div className="native-date-control">
+          <div className="native-date-control variable-clearable-control">
             <IMaskInput
               className="native-date-input"
               value={formatted}
@@ -398,6 +419,17 @@ export function VariableModal({
               label={t("defaultValue")}
               onChange={setDefaultValue}
             />
+            {defaultValue && (
+              <button
+                type="button"
+                className="variable-clear-button"
+                aria-label={t("clearValue")}
+                title={t("clearValue")}
+                onClick={() => setDefaultValue("")}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         );
       })()

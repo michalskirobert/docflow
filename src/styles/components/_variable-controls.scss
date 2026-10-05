@@ -293,3 +293,10 @@
     padding: 20mm !important;
   }
 }
+
+.variable-select-clearable > select {
+  padding-right: 64px !important;
+}
+.variable-select-clear-button {
+  right: 30px;
+}
