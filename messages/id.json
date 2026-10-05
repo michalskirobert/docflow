@@ -277,6 +277,7 @@
     "loadingDocument": "Memuat dokumen…",
     "documentNotFound": "Dokumen tidak ditemukan.",
     "searchTemplates": "Cari templat…",
+    "chooseTemplate": "Pilih template",
     "noDescription": "Tanpa deskripsi",
     "dropImage": "Letakkan gambar di sini atau klik untuk memilih",
     "imageTypes": "JPG, PNG, WEBP, GIF, HEIC, HEIF, JXL · sumber hingga 20 MB · dioptimalkan otomatis",

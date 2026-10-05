@@ -66,7 +66,7 @@ export function TemplatePicker({
   }, [open, hasMore, loadingMore, onLoadMore]);
 
   return (
-    <div className="template-combobox" ref={rootRef}>
+    <div className={`template-combobox${open ? " is-open" : ""}`} ref={rootRef}>
       <button
         type="button"
         className="template-combobox-trigger"
@@ -75,7 +75,7 @@ export function TemplatePicker({
         aria-expanded={open}
       >
         <span className="template-combobox-value">
-          <strong>{selected?.name ?? t("searchTemplates")}</strong>
+          <strong>{selected?.name ?? t("chooseTemplate")}</strong>
           {selected && (
             <small>{selected.description || t("noDescription")}</small>
           )}
@@ -118,7 +118,7 @@ export function TemplatePicker({
               placeholder={t("searchTemplates")}
             />
           </label>
-          <div className="template-combobox-filter">
+          <div className="template-combobox-filter template-combobox-filter--compact">
             <CategoryFilterField value={category} onChange={onCategoryChange} />
           </div>
           <div className="template-combobox-options">

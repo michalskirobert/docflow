@@ -42,7 +42,10 @@ export function dataTableHtml(
   variable: TemplateVariable,
   variables: TemplateVariable[],
 ) {
-  const columns = variable.dataTable?.columns ?? [];
+  const columns = (variable.dataTable?.columns ?? []).filter(
+    (column) =>
+      column.visibility !== "form-only" && column.visibleInPdf !== false,
+  );
   const defs = new Map(variables.map((item) => [item.name, item]));
   const name = variable.name.replace(/[^A-Za-z0-9_-]/g, "");
   const widths = columns.map((column) => Math.max(1, column.width ?? 230));

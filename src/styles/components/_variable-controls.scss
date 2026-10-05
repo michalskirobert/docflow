@@ -268,13 +268,37 @@
   margin-right: 0 !important;
 }
 .a4-page-shell > .a4-paper {
-  min-height: 257mm !important;
+  min-height: 0 !important;
+  height: auto !important;
+  flex: 1 1 0 !important;
+  /* Header/footer already reserve their own physical A4 regions. Do not apply
+     the generic 20 mm A4 top/bottom padding again inside the body. */
+  padding: 8mm 20mm !important;
+}
+.a4-page-shell > .page-header-editor {
+  flex: 0 0 32mm !important;
+  height: 32mm !important;
+  min-height: 32mm !important;
+  max-height: 32mm !important;
+}
+.a4-page-shell > .page-footer-editor {
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+  padding-bottom: 10mm !important;
 }
 .a4-page-shell > .page-header-editor,
 .a4-page-shell > .page-footer-editor {
   overflow: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
+  background: #f8fafc !important;
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+.a4-page-shell > .page-header-editor:focus,
+.a4-page-shell > .page-footer-editor:focus {
+  box-shadow: inset 0 0 0 1px #94a3b8;
 }
 .a4-page-shell > .page-header-editor > *,
 .a4-page-shell > .page-footer-editor > * {
@@ -289,8 +313,10 @@
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
-    min-height: 257mm !important;
-    padding: 20mm !important;
+    min-height: 0 !important;
+    height: auto !important;
+    flex: 1 1 0 !important;
+    padding: 8mm 20mm !important;
   }
 }
 
@@ -299,4 +325,69 @@
 }
 .variable-select-clear-button {
   right: 30px;
+}
+
+/* 2.4.8 critical: clearable SelectControl must reserve its own action space.
+   Keep the selected value inside the control instead of allowing the clear
+   button to overlap it. */
+.variable-select-clearable .shared-select-trigger {
+  min-width: 0;
+  padding-right: 64px;
+  overflow: hidden;
+}
+
+.variable-select-clearable .shared-select-trigger > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.variable-select-clearable .shared-select-chevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.variable-select-clearable .shared-select.is-open .shared-select-chevron {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.variable-select-clearable .variable-select-clear-button {
+  right: 35px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .variable-select-clearable .variable-select-clear-button:hover {
+    background: color-mix(in srgb, var(--text) 8%, transparent);
+    color: var(--text);
+  }
+
+  .variable-select-clearable .shared-select-trigger:hover {
+    background: color-mix(
+      in srgb,
+      var(--control-bg, var(--surface-muted)) 94%,
+      var(--text) 6%
+    );
+    border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+  }
+}
+
+/* v2.4.8 A4 editor pagination parity
+   The body stays inside one visible A4 sheet but scrolls instead of being clipped.
+   PDF export paginates this body into as many physical A4 pages as required. */
+.a4-page-shell > .a4-paper {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.a4-page-shell > .page-footer-editor {
+  padding: 3mm 20mm 10mm !important;
 }

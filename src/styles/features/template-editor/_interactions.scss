@@ -303,6 +303,7 @@
 .page-header-editor img,
 .page-footer-editor img {
   max-width: 100%;
+  max-height: 100%;
   cursor: grab;
 }
 .page-header-editor img[data-selected="true"],
@@ -393,7 +394,7 @@
 .selected-image-edit,
 .selected-image-delete {
   position: fixed;
-  z-index: 35;
+  z-index: 160;
   display: grid;
   place-items: center;
   width: 30px;
@@ -634,4 +635,17 @@
 .page-footer-editor [data-variable-selected="true"] {
   background: rgb(99 102 241 / 16%);
   box-shadow: 0 0 0 2px rgb(99 102 241 / 52%);
+}
+
+/* v2.4.8: images must never grow the fixed header/footer regions. */
+.a4-page-shell > .page-header-editor,
+.a4-page-shell > .page-footer-editor {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.a4-page-shell > .page-header-editor img {
+  max-height: 26mm !important;
+}
+.a4-page-shell > .page-footer-editor img {
+  max-height: 15mm !important;
 }

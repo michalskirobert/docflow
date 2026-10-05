@@ -14,6 +14,9 @@ export type DataTableColumn = {
   variableName?: string;
   staticText?: string;
   width?: number;
+  visibility?: "document" | "form-only";
+  /** Legacy 2.4.8 compatibility; false is treated as form-only. */
+  visibleInPdf?: boolean;
 };
 export type DataTableDefinition = {
   columns: DataTableColumn[];

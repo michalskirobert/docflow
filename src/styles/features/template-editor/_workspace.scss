@@ -80,10 +80,6 @@
   min-height: 297mm !important;
   max-height: 297mm !important;
 }
-.a4-page-shell > .page-header-editor,
-.a4-page-shell > .page-footer-editor {
-  flex: 0 0 auto !important;
-}
 .a4-page-shell > .a4-paper {
   flex: 1 1 0 !important;
   min-height: 0 !important;
@@ -2270,14 +2266,16 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 3px;
+  max-width: 100%;
 }
 .data-table-variable-edit,
 .data-table-variable-duplicate,
 .data-table-variable-detach {
-  width: 34px !important;
-  min-width: 34px !important;
-  height: 34px !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
   padding: 0 !important;
   display: inline-grid !important;
   place-items: center;
@@ -2549,7 +2547,7 @@ body.data-table-is-resizing * {
   width: auto;
   max-width: 100%;
   float: none;
-  clear: both;
+  clear: none;
 }
 
 .a4-paper > [data-layout="between"],
@@ -2715,4 +2713,90 @@ body.data-table-is-resizing * {
     width: 100%;
     min-height: 38px;
   }
+}
+
+/* v2.4.8 — stable data-table column header.
+   Actions live in their own row above the name, so toggling visibility never
+   changes the header grid or pushes controls around. */
+.data-table-designer-table .data-table-column-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  width: 100%;
+  min-width: 0;
+}
+
+.data-table-designer-table .data-table-column-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: 100%;
+  min-height: 28px;
+}
+
+.data-table-designer-table .data-table-column-name.input-control {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-drag-handle,
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-pdf-visibility,
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-delete {
+  box-sizing: border-box !important;
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+}
+
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-pdf-visibility:hover,
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-drag-handle:hover {
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--text) 7%, transparent) !important;
+}
+
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-pdf-visibility.is-hidden {
+  color: var(--primary) !important;
+  opacity: 1;
+  background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
+
+.data-table-designer-table
+  .data-table-column-actions
+  .data-table-column-delete:hover {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 9%, transparent) !important;
+}
+
+.data-table-designer-table .data-table-column-actions {
+  justify-content: flex-start !important;
+}
+
+.data-table-designer-table .data-table-column-actions-spacer {
+  flex: 1 1 auto;
+  min-width: 8px;
 }

@@ -272,6 +272,13 @@
     background 0.15s ease,
     box-shadow 0.15s ease;
 }
+.shared-select-trigger > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .shared-select-trigger:hover {
   border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
   background: var(--hover, var(--surface-muted));

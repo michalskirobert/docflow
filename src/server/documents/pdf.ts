@@ -8,6 +8,83 @@ type PdfInput = {
   pageNumbers?: boolean;
 };
 
+const PAGE_SIDE_MARGIN_MM = 20;
+const HEADER_REGION_MM = 32;
+const FOOTER_REGION_MM = 28;
+const PAGE_NUMBER_LANE_MM = 10;
+const BODY_REGION_GAP_MM = 8;
+
+const documentCss = `
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:Arial,sans-serif;color:#111;line-height:1.55}
+  img{max-width:100%}
+  .docflow-rendered-data-table{max-width:100%;overflow:hidden}
+  .docflow-rendered-data-table table,table{width:100%;border-collapse:collapse}
+  td,th{border:1px solid #aeb5c2;padding:8px;white-space:normal;word-break:normal;overflow-wrap:anywhere}
+  p{margin:.45em 0}
+  h1{margin:.65em 0 .35em;font-size:32px}
+  h2{font-size:26px}h3{font-size:21px}h4{font-size:18px}h5{font-size:16px}
+  a{color:#4f46e5}
+`;
+
+const chromeRegionCss = `
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:#111827;background:transparent}
+  body{font-family:Arial,sans-serif;font-size:11px;line-height:1.55}
+  img{max-width:100%}
+  table{width:100%;border-collapse:collapse}
+  p{margin:.45em 0}
+`;
+
+async function optimizeRasterImages(
+  page: Awaited<
+    ReturnType<Awaited<ReturnType<typeof puppeteer.launch>>["newPage"]>
+  >,
+) {
+  await page.evaluate(async () => {
+    const images = Array.from(document.images);
+    await Promise.all(
+      images.map(async (image) => {
+        if (!image.src || image.src.startsWith("data:image/svg+xml")) return;
+        if (!image.complete)
+          await new Promise<void>((resolve) => {
+            image.addEventListener("load", () => resolve(), { once: true });
+            image.addEventListener("error", () => resolve(), { once: true });
+          });
+        if (!image.naturalWidth || !image.naturalHeight) return;
+
+        const scale = Math.min(
+          1,
+          1280 / image.naturalWidth,
+          800 / image.naturalHeight,
+        );
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+
+        const approximateBytes = (value: string) =>
+          Math.ceil((value.length - value.indexOf(",") - 1) * 0.75);
+        let quality = 0.68;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+        while (approximateBytes(dataUrl) > 160 * 1024 && quality > 0.38) {
+          quality = Math.max(0.38, quality - 0.06);
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+        image.src = dataUrl;
+        await image.decode().catch(() => undefined);
+      }),
+    );
+  });
+}
+
 export async function createDocumentPdf({
   content,
   header,
@@ -30,69 +107,41 @@ export async function createDocumentPdf({
   try {
     const page = await browser.newPage();
     await page.setContent(
-      `<!doctype html><html><head><meta charset="utf-8"><style>
-      @page{size:A4;margin:20mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#111;line-height:1.55}
-      img{max-width:100%}.docflow-rendered-data-table{max-width:100%;overflow:hidden}.docflow-rendered-data-table table,table{width:100%;border-collapse:collapse}td,th{border:1px solid #aeb5c2;padding:8px;white-space:normal;word-break:normal;overflow-wrap:anywhere}
-      p{margin:.45em 0}h1{margin:.65em 0 .35em;font-size:32px}h2{font-size:26px}h3{font-size:21px}h4{font-size:18px}h5{font-size:16px}a{color:#4f46e5}
-    </style></head><body>${content}</body></html>`,
+      `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4}${documentCss}</style></head><body>${content}</body></html>`,
       { waitUntil: "load" },
     );
 
-    await page.evaluate(async () => {
-      const images = Array.from(document.images);
-      await Promise.all(
-        images.map(async (image) => {
-          if (!image.src || image.src.startsWith("data:image/svg+xml")) return;
-          if (!image.complete)
-            await new Promise<void>((resolve) => {
-              image.addEventListener("load", () => resolve(), { once: true });
-              image.addEventListener("error", () => resolve(), { once: true });
-            });
-          if (!image.naturalWidth || !image.naturalHeight) return;
-          const scale = Math.min(
-            1,
-            1280 / image.naturalWidth,
-            800 / image.naturalHeight,
-          );
-          const width = Math.max(1, Math.round(image.naturalWidth * scale));
-          const height = Math.max(1, Math.round(image.naturalHeight * scale));
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const context = canvas.getContext("2d");
-          if (!context) return;
-          context.fillStyle = "#ffffff";
-          context.fillRect(0, 0, width, height);
-          context.drawImage(image, 0, 0, width, height);
-          const approximateBytes = (value: string) =>
-            Math.ceil((value.length - value.indexOf(",") - 1) * 0.75);
-          let quality = 0.68;
-          let dataUrl = canvas.toDataURL("image/jpeg", quality);
-          while (approximateBytes(dataUrl) > 160 * 1024 && quality > 0.38) {
-            quality = Math.max(0.38, quality - 0.06);
-            dataUrl = canvas.toDataURL("image/jpeg", quality);
-          }
-          image.src = dataUrl;
-          await image.decode().catch(() => undefined);
-        }),
-      );
-    });
+    await optimizeRasterImages(page);
 
-    const showHeaderFooter = Boolean(header || footer || pageNumbers);
+    // Header/footer are fixed A4 regions. Keep only a small safety gap between
+    // those regions and the body; the old 20 mm value effectively applied a
+    // second top/bottom page margin and made the editor/PDF waste a large area.
+    // Only the body paginates; Chrome repeats header/footer on each generated page.
+    const hasHeader = Boolean(header?.trim());
+    const hasFooter = Boolean(footer?.trim());
+    const showHeaderFooter = hasHeader || hasFooter || Boolean(pageNumbers);
+
     const pageNumber = pageNumbers
       ? '<span class="pageNumber"></span> / <span class="totalPages"></span>'
       : "";
+
+    const headerTemplate = `<style>${chromeRegionCss}</style><div style="width:100%;height:${HEADER_REGION_MM}mm;padding:6mm ${PAGE_SIDE_MARGIN_MM}mm 3mm;overflow:hidden">${header ?? ""}</div>`;
+    const footerTemplate = `<style>${chromeRegionCss}</style><div style="position:relative;width:100%;height:${FOOTER_REGION_MM}mm;padding:3mm ${PAGE_SIDE_MARGIN_MM}mm ${PAGE_NUMBER_LANE_MM}mm;overflow:hidden"><div style="max-height:${FOOTER_REGION_MM - PAGE_NUMBER_LANE_MM - 3}mm;overflow:hidden">${footer ?? ""}</div>${pageNumbers ? `<div style="position:absolute;right:${PAGE_SIDE_MARGIN_MM}mm;bottom:4mm;font-size:10px;line-height:1">${pageNumber}</div>` : ""}</div>`;
+
     return Buffer.from(
       await page.pdf({
         format: "A4",
         printBackground: true,
         preferCSSPageSize: true,
         displayHeaderFooter: showHeaderFooter,
-        headerTemplate: `<div style="font-size:9px;width:100%;padding:0 20mm;color:#64748b">${header ?? ""}</div>`,
-        footerTemplate: `<div style="font-size:9px;width:100%;padding:0 20mm;color:#64748b;display:flex;justify-content:space-between"><span>${footer ?? ""}</span><span>${pageNumber}</span></div>`,
-        margin: showHeaderFooter
-          ? { top: "24mm", bottom: "24mm", left: "20mm", right: "20mm" }
-          : undefined,
+        headerTemplate,
+        footerTemplate,
+        margin: {
+          top: `${HEADER_REGION_MM + BODY_REGION_GAP_MM}mm`,
+          bottom: `${FOOTER_REGION_MM + BODY_REGION_GAP_MM}mm`,
+          left: `${PAGE_SIDE_MARGIN_MM}mm`,
+          right: `${PAGE_SIDE_MARGIN_MM}mm`,
+        },
       }),
     );
   } finally {

@@ -722,3 +722,105 @@
     width: min(620px, calc(100vw - 48px));
   }
 }
+
+/* 2.4.8 critical: filter dialog owns its layout. Do not let generic modal/button
+   rules stretch it or paint the close action as a filled square. */
+.list-filter-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(72dvh, 640px);
+  overflow: hidden;
+}
+
+.list-filter-panel-heading,
+.list-filter-panel-actions {
+  flex: 0 0 auto;
+}
+
+.list-filter-panel-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.list-filter-panel-heading .icon-button {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent !important;
+  color: var(--muted);
+  box-shadow: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .list-filter-panel-heading .icon-button:hover {
+    border-color: var(--border);
+    background: var(--hover, var(--surface-muted)) !important;
+    color: var(--text);
+  }
+}
+
+@media (max-width: 760px) {
+  .list-filter-panel {
+    top: max(12px, env(safe-area-inset-top)) !important;
+    bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+    max-height: none !important;
+  }
+
+  .list-filter-panel-heading {
+    padding: 12px 14px;
+  }
+
+  .list-filter-panel-body {
+    padding: 14px;
+  }
+
+  .list-filter-panel-actions {
+    padding: 12px 14px;
+  }
+}
+
+/* 2.4.8 critical: shared sort/select controls must never resize the mobile toolbar. */
+@media (max-width: 760px) {
+  .list-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .list-toolbar > .shared-select,
+  .list-toolbar > .list-filter-trigger {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .list-toolbar > .shared-select .shared-select-trigger {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .list-filter-panel .list-filter-panel-heading .icon-button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-muted);
+    color: var(--text);
+  }
+}
+
+/* Keep the filter dialog close action compact on desktop as well. */
+.list-filter-panel .list-filter-panel-heading .icon-button {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
