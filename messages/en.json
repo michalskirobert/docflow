@@ -376,7 +376,9 @@
     "categoryDesc": "Category Z–A",
     "loadingTemplate": "Loading template…",
     "documentLoadError": "The document could not be loaded. Try again.",
-    "documentTemplateLoadError": "The template used by this document could not be loaded. It may have been deleted or is unavailable."
+    "documentTemplateLoadError": "The template used by this document could not be loaded. It may have been deleted or is unavailable.",
+    "documentLoadTitle": "Document unavailable",
+    "documentTemplateLoadTitle": "Template unavailable"
   },
   "settings": {
     "title": "Settings",

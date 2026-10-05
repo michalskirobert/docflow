@@ -376,7 +376,9 @@
     "categoryDesc": "Kategori Z–A",
     "loadingTemplate": "Memuat templat…",
     "documentLoadError": "Dokumen tidak dapat dimuat. Coba lagi.",
-    "documentTemplateLoadError": "Template yang digunakan oleh dokumen ini tidak dapat dimuat. Template mungkin telah dihapus atau tidak tersedia."
+    "documentTemplateLoadError": "Template yang digunakan oleh dokumen ini tidak dapat dimuat. Template mungkin telah dihapus atau tidak tersedia.",
+    "documentLoadTitle": "Dokumen tidak tersedia",
+    "documentTemplateLoadTitle": "Templat tidak tersedia"
   },
   "settings": {
     "title": "Pengaturan",

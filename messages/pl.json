@@ -376,7 +376,9 @@
     "categoryDesc": "Kategoria Z–A",
     "loadingTemplate": "Ładowanie szablonu…",
     "documentLoadError": "Nie udało się wczytać dokumentu. Spróbuj ponownie.",
-    "documentTemplateLoadError": "Nie udało się wczytać szablonu użytego przez ten dokument. Szablon mógł zostać usunięty lub jest niedostępny."
+    "documentTemplateLoadError": "Nie udało się wczytać szablonu użytego przez ten dokument. Szablon mógł zostać usunięty lub jest niedostępny.",
+    "documentLoadTitle": "Dokument niedostępny",
+    "documentTemplateLoadTitle": "Szablon niedostępny"
   },
   "settings": {
     "title": "Ustawienia",

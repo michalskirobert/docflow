@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
 import { renderDocument } from "@/server/documents/renderer";
 import { renderTemplate } from "@/server/documents/template";
+import {
+  getDefaultTemplate,
+  inferDefaultTemplateId,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 
 const updateSchema = z.object({
   name: z.string().trim().min(2).max(250),
@@ -31,7 +36,11 @@ export async function GET(
         { status: 404 },
       );
     }
-    return NextResponse.json(document);
+    const sourceTemplateId =
+      document.sourceTemplateId ??
+      document.templateId ??
+      inferDefaultTemplateId(document.payloadJson);
+    return NextResponse.json({ ...document, sourceTemplateId });
   } catch {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
@@ -52,18 +61,24 @@ export async function PUT(
       );
     }
     const payload = updateSchema.parse(await req.json());
-    if (!existing.templateId) {
+    const sourceTemplateId =
+      existing.sourceTemplateId ??
+      existing.templateId ??
+      inferDefaultTemplateId(existing.payloadJson);
+    if (!sourceTemplateId) {
       return NextResponse.json(
         { message: "Template not found" },
         { status: 404 },
       );
     }
-    const template = await prisma.template.findFirst({
-      where: {
-        id: existing.templateId,
-        organizationId: session.organizationId,
-      },
-    });
+    const template = isDefaultTemplateId(sourceTemplateId)
+      ? getDefaultTemplate(sourceTemplateId)
+      : await prisma.template.findFirst({
+          where: {
+            id: sourceTemplateId,
+            organizationId: session.organizationId,
+          },
+        });
     if (!template) {
       return NextResponse.json(
         { message: "Template not found" },

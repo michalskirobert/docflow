@@ -195,6 +195,7 @@ export async function POST(req: Request) {
           data: {
             organizationId: s.organizationId,
             templateId: isDefaultTemplateId(p.templateId) ? null : t.id,
+            sourceTemplateId: p.templateId,
             name: p.name,
             category: p.category ?? t.category ?? "system:GENERAL",
             payloadJson: JSON.stringify(p.data),
