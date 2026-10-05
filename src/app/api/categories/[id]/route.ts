@@ -13,7 +13,10 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   });
 
   if (!category) {
-    return NextResponse.json({ message: "Category not found" }, { status: 404 });
+    return NextResponse.json(
+      { message: "Category not found" },
+      { status: 404 },
+    );
   }
 
   const value = `custom:${id}`;

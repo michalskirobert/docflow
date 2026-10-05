@@ -95,7 +95,9 @@ export default function SettingsPanel() {
     billing.data?.payments.filter((payment) => payment.status === "PENDING") ??
     [];
   const currentPending = pending[0];
-  const cancelPayment = useCancelLicensePayment(currentPending?.id ?? "missing");
+  const cancelPayment = useCancelLicensePayment(
+    currentPending?.id ?? "missing",
+  );
   const isRenewalWindow =
     currentPlan === "YEARLY" &&
     periodEndsAt !== null &&
@@ -105,7 +107,8 @@ export default function SettingsPanel() {
     periodEndsAt === null
       ? null
       : Math.ceil((periodEndsAt - Date.now()) / 86400000);
-  const paymentBusy = start.isPending || change.isPending || cancelPayment.isPending;
+  const paymentBusy =
+    start.isPending || change.isPending || cancelPayment.isPending;
   const showPurchaseControls = effectivePlan === "FREE" || isRenewalWindow;
 
   const payNow = async () => {
@@ -144,30 +147,37 @@ export default function SettingsPanel() {
               <div className="license-summary">
                 <div>
                   <strong>{effectivePlan}</strong>
-                  {!isExpired && billing.data?.subscription?.currentPeriodEndsAt && (
-                    <small className="license-expiry">
-                      {t("validUntil")}{" "}
-                      {new Date(
-                        billing.data.subscription.currentPeriodEndsAt,
-                      ).toLocaleDateString()}{" "}
-                      ·{" "}
-                      {isExpired
-                        ? t("expired")
-                        : daysUntilExpiry === 0
-                          ? t("expiresToday")
-                          : `${daysUntilExpiry ?? 0} ${t("daysRemaining")}`}
-                    </small>
-                  )}
+                  {!isExpired &&
+                    billing.data?.subscription?.currentPeriodEndsAt && (
+                      <small className="license-expiry">
+                        {t("validUntil")}{" "}
+                        {new Date(
+                          billing.data.subscription.currentPeriodEndsAt,
+                        ).toLocaleDateString()}{" "}
+                        ·{" "}
+                        {isExpired
+                          ? t("expired")
+                          : daysUntilExpiry === 0
+                            ? t("expiresToday")
+                            : `${daysUntilExpiry ?? 0} ${t("daysRemaining")}`}
+                      </small>
+                    )}
                 </div>
                 <StatusBadge
-                  status={isExpired ? "EXPIRED" : (billing.data?.subscription?.status ?? "ACTIVE")}
-                  label={isExpired
-                    ? t("expired")
-                    : isRenewalWindow && daysUntilExpiry !== null
-                      ? daysUntilExpiry === 0
-                        ? t("activeExpiresToday")
-                        : t("activeDaysLeft", { count: daysUntilExpiry })
-                      : undefined}
+                  status={
+                    isExpired
+                      ? "EXPIRED"
+                      : (billing.data?.subscription?.status ?? "ACTIVE")
+                  }
+                  label={
+                    isExpired
+                      ? t("expired")
+                      : isRenewalWindow && daysUntilExpiry !== null
+                        ? daysUntilExpiry === 0
+                          ? t("activeExpiresToday")
+                          : t("activeDaysLeft", { count: daysUntilExpiry })
+                        : undefined
+                  }
                 />
               </div>
 
@@ -182,8 +192,24 @@ export default function SettingsPanel() {
                       <TriangleAlert size={18} />
                     </span>
                     <div>
-                      <strong>{isExpired ? t("licenseExpiredTitle") : daysUntilExpiry === 0 ? t("licenseExpiresTodayTitle") : t("licenseReminderTitle", { count: daysUntilExpiry ?? 0 })}</strong>
-                      <p>{isExpired ? t("licenseExpiredDescription") : daysUntilExpiry === 0 ? t("licenseExpiresTodayDescription") : t("licenseReminderDescription", { count: daysUntilExpiry ?? 0 })}</p>
+                      <strong>
+                        {isExpired
+                          ? t("licenseExpiredTitle")
+                          : daysUntilExpiry === 0
+                            ? t("licenseExpiresTodayTitle")
+                            : t("licenseReminderTitle", {
+                                count: daysUntilExpiry ?? 0,
+                              })}
+                      </strong>
+                      <p>
+                        {isExpired
+                          ? t("licenseExpiredDescription")
+                          : daysUntilExpiry === 0
+                            ? t("licenseExpiresTodayDescription")
+                            : t("licenseReminderDescription", {
+                                count: daysUntilExpiry ?? 0,
+                              })}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -207,12 +233,15 @@ export default function SettingsPanel() {
                       className="btn secondary compact"
                       disabled={paymentBusy}
                       onClick={async () => {
-                        if (!(await confirm({
-                          title: t("cancelPaymentTitle"),
-                          message: t("cancelPaymentMessage"),
-                          confirmLabel: t("cancelPayment"),
-                          kind: "danger",
-                        }))) return;
+                        if (
+                          !(await confirm({
+                            title: t("cancelPaymentTitle"),
+                            message: t("cancelPaymentMessage"),
+                            confirmLabel: t("cancelPayment"),
+                            kind: "danger",
+                          }))
+                        )
+                          return;
                         try {
                           await cancelPayment.mutateAsync(undefined);
                           notify(t("paymentCanceled"), "success");
@@ -233,97 +262,103 @@ export default function SettingsPanel() {
               {showPurchaseControls && (
                 <>
                   <div className="settings-plan-section">
-                <div className="settings-plan-heading">
-                  <strong>{t("choosePlan")}</strong>
-                  <small>{t("choosePlanHelp")}</small>
-                </div>
-
-                <div className="plan-grid settings-plan-grid">
-                  {plans.data?.map((plan) => (
-                    <button
-                      type="button"
-                      key={plan.code}
-                      className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
-                      disabled={
-                        !plan.available ||
-                        !plan.paymentAvailable ||
-                        (effectivePlan === "YEARLY" && plan.code === "FREE")
-                      }
-                      onClick={() => setSelectedPlan(plan.code)}
-                    >
-                      <div className="plan-visual" aria-hidden="true">
-                        <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
-                      </div>
-                      <div className="plan-check">✓</div>
-                      <strong className="plan-name">
-                        {plan.code === "FREE"
-                          ? t("freeLicense")
-                          : t("annualLicense")}
-                      </strong>
-                      <small className="plan-copy">
-                        {plan.code === "FREE"
-                          ? t("freeLicenseCopy")
-                          : t("annualLicenseCopy")}
-                      </small>
-                      <span className="settings-plan-price">
-                        {(plan.displayAmount / 100).toLocaleString(undefined, {
-                          style: "currency",
-                          currency: plan.currency,
-                        })}{" "}
-                        {plan.displayNet ? t("net") : t("gross")}
-                      </span>
-                      {plan.code !== "FREE" && (
-                        <small>
-                          {plan.displayNet
-                            ? `+ ${plan.vatRate}% VAT`
-                            : t("vatIncluded")}
-                        </small>
-                      )}
-                      <small>
-                        {plan.documentLimit} {t("documentsPerMonth")}
-                      </small>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {effectiveSelectedPlan === "YEARLY" && (
-                <>
-                  <label className="field">
-                    {t("paymentMethod")}
-                    <SelectControl
-                      value={method}
-                      disabled={paymentBusy || Boolean(currentPending)}
-                      onChange={(event) =>
-                        setMethod(
-                          event.target.value as "PAYU" | "BANK_TRANSFER",
-                        )
-                      }
-                    >
-                      <option value="PAYU">PayU</option>
-                      <option value="BANK_TRANSFER">{t("bankTransfer")}</option>
-                    </SelectControl>
-                  </label>
-                  {!currentPending && (
-                    <div className="settings-payment-actions">
-                      <button
-                        className="btn"
-                        disabled={
-                          paymentBusy ||
-                          (effectivePlan === "YEARLY" && !isRenewalWindow)
-                        }
-                        onClick={payNow}
-                      >
-                        {start.isPending && (
-                          <LoaderCircle className="spinner" size={17} />
-                        )}
-                        {effectivePlan === "YEARLY" ? t("renewNow") : t("payNow")}
-                      </button>
+                    <div className="settings-plan-heading">
+                      <strong>{t("choosePlan")}</strong>
+                      <small>{t("choosePlanHelp")}</small>
                     </div>
-                  )}
-                </>
-              )}
 
+                    <div className="plan-grid settings-plan-grid">
+                      {plans.data?.map((plan) => (
+                        <button
+                          type="button"
+                          key={plan.code}
+                          className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
+                          disabled={
+                            !plan.available ||
+                            !plan.paymentAvailable ||
+                            (effectivePlan === "YEARLY" && plan.code === "FREE")
+                          }
+                          onClick={() => setSelectedPlan(plan.code)}
+                        >
+                          <div className="plan-visual" aria-hidden="true">
+                            <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+                          </div>
+                          <div className="plan-check">✓</div>
+                          <strong className="plan-name">
+                            {plan.code === "FREE"
+                              ? t("freeLicense")
+                              : t("annualLicense")}
+                          </strong>
+                          <small className="plan-copy">
+                            {plan.code === "FREE"
+                              ? t("freeLicenseCopy")
+                              : t("annualLicenseCopy")}
+                          </small>
+                          <span className="settings-plan-price">
+                            {(plan.displayAmount / 100).toLocaleString(
+                              undefined,
+                              {
+                                style: "currency",
+                                currency: plan.currency,
+                              },
+                            )}{" "}
+                            {plan.displayNet ? t("net") : t("gross")}
+                          </span>
+                          {plan.code !== "FREE" && (
+                            <small>
+                              {plan.displayNet
+                                ? `+ ${plan.vatRate}% VAT`
+                                : t("vatIncluded")}
+                            </small>
+                          )}
+                          <small>
+                            {plan.documentLimit} {t("documentsPerMonth")}
+                          </small>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {effectiveSelectedPlan === "YEARLY" && (
+                    <>
+                      <label className="field">
+                        {t("paymentMethod")}
+                        <SelectControl
+                          value={method}
+                          disabled={paymentBusy || Boolean(currentPending)}
+                          onChange={(event) =>
+                            setMethod(
+                              event.target.value as "PAYU" | "BANK_TRANSFER",
+                            )
+                          }
+                        >
+                          <option value="PAYU">PayU</option>
+                          <option value="BANK_TRANSFER">
+                            {t("bankTransfer")}
+                          </option>
+                        </SelectControl>
+                      </label>
+                      {!currentPending && (
+                        <div className="settings-payment-actions">
+                          <button
+                            className="btn"
+                            disabled={
+                              paymentBusy ||
+                              (effectivePlan === "YEARLY" && !isRenewalWindow)
+                            }
+                            onClick={payNow}
+                          >
+                            {start.isPending && (
+                              <LoaderCircle className="spinner" size={17} />
+                            )}
+                            {effectivePlan === "YEARLY"
+                              ? t("renewNow")
+                              : t("payNow")}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </>
               )}
 
@@ -404,7 +439,7 @@ export default function SettingsPanel() {
                           <strong>
                             {document.type === "RECEIPT"
                               ? t("receipt")
-                              : t("invoice")} {" "}
+                              : t("invoice")}{" "}
                             {document.number || document.id.slice(-6)}
                           </strong>
                           <small>

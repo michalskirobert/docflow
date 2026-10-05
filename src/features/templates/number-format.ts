@@ -144,4 +144,3 @@ export function formatTemplateNumberForEditing(
   const decimal = variable.decimalSeparator ?? ",";
   return parsed.toFixed(places).replace(".", decimal);
 }
-

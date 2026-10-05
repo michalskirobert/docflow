@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { Check, LoaderCircle, X } from "lucide-react";
-import { FormField, InputAction, InputActions, SelectField } from "@/components/shared/form";
+import {
+  FormField,
+  InputAction,
+  InputActions,
+  SelectField,
+} from "@/components/shared/form";
 import { useGet, usePost } from "@/hooks/use-api";
 import { SYSTEM_CATEGORY_KEYS, systemCategoryValue } from "./definitions";
 import { useTranslations } from "next-intl";
@@ -64,14 +69,26 @@ export function CategoryField({
           }}
           suffix={
             <InputActions>
-              <InputAction label={t("save")} onClick={() => void add()} disabled={name.trim().length < 2 || create.isPending}>
+              <InputAction
+                label={t("save")}
+                onClick={() => void add()}
+                disabled={name.trim().length < 2 || create.isPending}
+              >
                 {create.isPending ? (
-                  <LoaderCircle className="spinner" size={18} aria-hidden="true" />
+                  <LoaderCircle
+                    className="spinner"
+                    size={18}
+                    aria-hidden="true"
+                  />
                 ) : (
                   <Check size={18} aria-hidden="true" />
                 )}
               </InputAction>
-              <InputAction label={t("cancel")} onClick={cancel} disabled={create.isPending}>
+              <InputAction
+                label={t("cancel")}
+                onClick={cancel}
+                disabled={create.isPending}
+              >
                 <X size={18} aria-hidden="true" />
               </InputAction>
             </InputActions>

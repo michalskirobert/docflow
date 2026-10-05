@@ -6,7 +6,11 @@ import {
   renderTemplate,
   renderTextTemplate,
 } from "@/server/documents/template";
-import { getDefaultTemplate, inferDefaultTemplateId, isDefaultTemplateId } from "@/server/templates/defaults";
+import {
+  getDefaultTemplate,
+  inferDefaultTemplateId,
+  isDefaultTemplateId,
+} from "@/server/templates/defaults";
 
 const schema = z.object({
   subject: z.string().max(250).optional(),
@@ -62,12 +66,19 @@ export async function POST(
       savedData = JSON.parse(doc.payloadJson);
     } catch {}
     const data = parsed.data ? { ...savedData, ...parsed.data } : savedData;
-    const sourceTemplateId = doc.sourceTemplateId ?? doc.templateId ?? inferDefaultTemplateId(doc.payloadJson);
-    const sourceTemplate = doc.template ?? (sourceTemplateId && isDefaultTemplateId(sourceTemplateId)
-      ? getDefaultTemplate(sourceTemplateId)
-      : null);
+    const sourceTemplateId =
+      doc.sourceTemplateId ??
+      doc.templateId ??
+      inferDefaultTemplateId(doc.payloadJson);
+    const sourceTemplate =
+      doc.template ??
+      (sourceTemplateId && isDefaultTemplateId(sourceTemplateId)
+        ? getDefaultTemplate(sourceTemplateId)
+        : null);
     const subject = renderTextTemplate(
-      parsed.subject?.trim() || sourceTemplate?.emailSubject?.trim() || doc.name,
+      parsed.subject?.trim() ||
+        sourceTemplate?.emailSubject?.trim() ||
+        doc.name,
       data,
     );
     let h = doc.renderedHeader ?? "",

@@ -30,7 +30,10 @@ export async function GET(req: Request) {
     const dateTo = searchParams.get("dateTo")?.trim() ?? "";
     const view = searchParams.get("view");
     const offset = Math.max(0, Number(searchParams.get("offset") ?? "0") || 0);
-    const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit") ?? "20") || 20));
+    const limit = Math.min(
+      100,
+      Math.max(1, Number(searchParams.get("limit") ?? "20") || 20),
+    );
 
     if (view === "filters") {
       const templates = await prisma.document.findMany({
@@ -101,7 +104,8 @@ export async function GET(req: Request) {
       prisma.document.count({ where }),
     ]);
 
-    const nextOffset = offset + items.length < total ? offset + items.length : null;
+    const nextOffset =
+      offset + items.length < total ? offset + items.length : null;
     return NextResponse.json({ items, nextOffset, total });
   } catch (error) {
     console.error("GET /api/documents failed", error);
@@ -160,7 +164,11 @@ export async function POST(req: Request) {
       async (tx) => {
         const subscription = await tx.subscription.findUnique({
           where: { organizationId: s.organizationId },
-          select: { plan: true, currentPeriodEndsAt: true, monthlyDocumentLimit: true },
+          select: {
+            plan: true,
+            currentPeriodEndsAt: true,
+            monthlyDocumentLimit: true,
+          },
         });
         const yearlyExpired =
           subscription?.plan === "YEARLY" &&

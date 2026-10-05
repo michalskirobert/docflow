@@ -33,7 +33,10 @@ export default function DocumentList() {
     [documents.data],
   );
   const templateOptions = useMemo(
-    () => (templateFilters.data ?? []).map((item) => [item.id, item.name] as [string, string]),
+    () =>
+      (templateFilters.data ?? []).map(
+        (item) => [item.id, item.name] as [string, string],
+      ),
     [templateFilters.data],
   );
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -51,7 +54,11 @@ export default function DocumentList() {
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [documents.hasNextPage, documents.isFetchingNextPage, documents.fetchNextPage]);
+  }, [
+    documents.hasNextPage,
+    documents.isFetchingNextPage,
+    documents.fetchNextPage,
+  ]);
 
   if (documents.isError && !documents.data) {
     return (

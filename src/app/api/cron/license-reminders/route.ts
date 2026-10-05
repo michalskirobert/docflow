@@ -65,7 +65,8 @@ async function run(request: Request) {
     });
     if (alreadySent) continue;
 
-    const locale = user.locale === "pl" ? "pl" : user.locale === "id" ? "id" : "en";
+    const locale =
+      user.locale === "pl" ? "pl" : user.locale === "id" ? "id" : "en";
     const expired = kind === "EXPIRED";
     const subject = expired
       ? locale === "pl"
@@ -101,7 +102,11 @@ async function run(request: Request) {
         title: subject,
         intro,
         actionLabel:
-          locale === "pl" ? "Przedłuż licencję" : locale === "id" ? "Perpanjang lisensi" : "Renew license",
+          locale === "pl"
+            ? "Przedłuż licencję"
+            : locale === "id"
+              ? "Perpanjang lisensi"
+              : "Renew license",
         actionUrl: `${base}/${locale}/account`,
       }),
     });

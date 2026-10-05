@@ -366,7 +366,8 @@
 .dashboard-license-alert {
   border-color: var(--warning-border);
   background: var(--warning-surface);
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--warning-border) 10%, transparent);
+  box-shadow: 0 8px 28px
+    color-mix(in srgb, var(--warning-border) 10%, transparent);
 }
 
 .dashboard-license-alert > svg {
@@ -392,7 +393,10 @@
   font-weight: 700;
   line-height: 1;
   text-decoration: none;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
 .dashboard-license-renew:hover {

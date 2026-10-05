@@ -370,11 +370,14 @@
   }
 
   .variable-select-clearable .shared-select-trigger:hover {
-    background: color-mix(in srgb, var(--control-bg, var(--surface-muted)) 94%, var(--text) 6%);
+    background: color-mix(
+      in srgb,
+      var(--control-bg, var(--surface-muted)) 94%,
+      var(--text) 6%
+    );
     border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
   }
 }
-
 
 /* v2.4.8 A4 editor pagination parity
    The body stays inside one visible A4 sheet but scrolls instead of being clipped.

@@ -64,8 +64,10 @@ export function DocumentHistory({
   const t = useTranslations("documents");
   const { notify } = useFeedback();
   const [actionPending, setActionPending] = useState(false);
-  const [draftTemplateFilter, setDraftTemplateFilter] = useState(templateFilter);
-  const [draftCategoryFilter, setDraftCategoryFilter] = useState(categoryFilter);
+  const [draftTemplateFilter, setDraftTemplateFilter] =
+    useState(templateFilter);
+  const [draftCategoryFilter, setDraftCategoryFilter] =
+    useState(categoryFilter);
   const [draftDateFrom, setDraftDateFrom] = useState(dateFrom);
   const [draftDateTo, setDraftDateTo] = useState(dateTo);
   const [previewDocument, setPreviewDocument] =
@@ -195,7 +197,10 @@ export function DocumentHistory({
         filters={
           <div className="list-filter-grid">
             {onCategoryFilterChange && (
-              <CategoryFilterField value={draftCategoryFilter} onChange={setDraftCategoryFilter} />
+              <CategoryFilterField
+                value={draftCategoryFilter}
+                onChange={setDraftCategoryFilter}
+              />
             )}
             {onTemplateFilterChange && (
               <SelectField
@@ -250,7 +255,11 @@ export function DocumentHistory({
       )}
 
       {documents.length > 0 && loadMoreRef && (
-        <div ref={loadMoreRef} className="infinite-scroll-sentinel" aria-hidden="true" />
+        <div
+          ref={loadMoreRef}
+          className="infinite-scroll-sentinel"
+          aria-hidden="true"
+        />
       )}
       {loadingMore && <ListSkeleton rows={20} />}
 

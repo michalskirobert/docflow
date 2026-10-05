@@ -76,9 +76,9 @@ export async function GET() {
       ]);
     const renewalAvailable = Boolean(
       subscription?.plan === "YEARLY" &&
-        subscription.status === "ACTIVE" &&
-        subscription.currentPeriodEndsAt &&
-        subscription.currentPeriodEndsAt.getTime() <= renewalWindowStartsAt,
+      subscription.status === "ACTIVE" &&
+      subscription.currentPeriodEndsAt &&
+      subscription.currentPeriodEndsAt.getTime() <= renewalWindowStartsAt,
     );
     return NextResponse.json({
       subscription,

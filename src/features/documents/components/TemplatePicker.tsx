@@ -76,7 +76,9 @@ export function TemplatePicker({
       >
         <span className="template-combobox-value">
           <strong>{selected?.name ?? t("chooseTemplate")}</strong>
-          {selected && <small>{selected.description || t("noDescription")}</small>}
+          {selected && (
+            <small>{selected.description || t("noDescription")}</small>
+          )}
         </span>
         <span className="template-combobox-icons">
           {selected && !disabled && (
@@ -141,7 +143,11 @@ export function TemplatePicker({
                 </button>
               ))
             )}
-            <div ref={sentinelRef} className="template-picker-sentinel" aria-hidden="true" />
+            <div
+              ref={sentinelRef}
+              className="template-picker-sentinel"
+              aria-hidden="true"
+            />
             {loadingMore && (
               <div className="template-picker-loading-more" aria-busy="true">
                 <ListSkeleton rows={20} />

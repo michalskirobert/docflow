@@ -16,11 +16,14 @@ async function accessToken() {
     client_id: clientId,
     client_secret: secret,
   });
-  const response = await fetch(`${baseUrl()}/pl/standard/user/oauth/authorize`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
+  const response = await fetch(
+    `${baseUrl()}/pl/standard/user/oauth/authorize`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    },
+  );
   if (!response.ok) throw new Error(`PayU OAuth failed: ${response.status}`);
   return ((await response.json()) as { access_token: string }).access_token;
 }
@@ -134,7 +137,12 @@ export async function cancelPayUOrder(orderId: string) {
 
 export type PayUSignatureVerification = {
   valid: boolean;
-  reason?: "missing-second-key" | "missing-header" | "missing-signature" | "unsupported-algorithm" | "mismatch";
+  reason?:
+    | "missing-second-key"
+    | "missing-header"
+    | "missing-signature"
+    | "unsupported-algorithm"
+    | "mismatch";
 };
 
 export function verifyPayUSignature(
