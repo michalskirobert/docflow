@@ -2802,18 +2802,13 @@ body.data-table-is-resizing * {
 }
 
 /* 2.4.8 mobile A4 end clearance.
-   Keep the existing paper-stage scrolling behavior; this wrapper only makes
-   room after the scaled sheet so its footer can rest above fixed bottom nav. */
-.paper-stage-content {
-  width: max-content;
-  min-width: 100%;
-}
-
+   Add trailing scrollable space without changing paper-stage scroll ownership. */
 @media (max-width: 760px) {
-  .paper-stage-content {
-    width: max-content;
-    min-width: 100%;
-    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
-    box-sizing: content-box;
+  .paper-stage::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: calc(112px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
   }
 }
