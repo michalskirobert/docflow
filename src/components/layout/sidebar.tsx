@@ -117,14 +117,7 @@ export function Sidebar() {
         )}
 
         <button
-          className={`mobile-profile-trigger ${
-            profileOpen ||
-            pathname === "/settings" ||
-            pathname === "/account" ||
-            pathname === "/help"
-              ? "active"
-              : ""
-          }`}
+          className={`mobile-profile-trigger ${profileOpen ? "active" : ""}`}
           type="button"
           aria-label={t("settings")}
           title={t("settings")}
