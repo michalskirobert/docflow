@@ -374,7 +374,9 @@
     "retry": "Try again",
     "categoryAsc": "Category A–Z",
     "categoryDesc": "Category Z–A",
-    "loadingTemplate": "Loading template…"
+    "loadingTemplate": "Loading template…",
+    "documentLoadError": "The document could not be loaded. Try again.",
+    "documentTemplateLoadError": "The template used by this document could not be loaded. It may have been deleted or is unavailable."
   },
   "settings": {
     "title": "Settings",

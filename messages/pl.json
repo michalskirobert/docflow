@@ -374,7 +374,9 @@
     "retry": "Spróbuj ponownie",
     "categoryAsc": "Kategoria A–Z",
     "categoryDesc": "Kategoria Z–A",
-    "loadingTemplate": "Ładowanie szablonu…"
+    "loadingTemplate": "Ładowanie szablonu…",
+    "documentLoadError": "Nie udało się wczytać dokumentu. Spróbuj ponownie.",
+    "documentTemplateLoadError": "Nie udało się wczytać szablonu użytego przez ten dokument. Szablon mógł zostać usunięty lub jest niedostępny."
   },
   "settings": {
     "title": "Ustawienia",

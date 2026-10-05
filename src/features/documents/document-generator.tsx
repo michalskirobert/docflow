@@ -588,29 +588,40 @@ export default function DocumentGenerator({
     }
   };
 
-  if (
+  const sourceDocumentLoading =
     isEmailMode &&
-    sourceDocumentId &&
-    (sourceDocumentQuery.isFetching ||
-      sourceTemplateQuery.isFetching ||
-      (!initialized &&
-        !sourceDocumentQuery.isError &&
-        !sourceTemplateQuery.isError))
-  ) {
-    return (
-      <div
-        className="document-generator-shell pending-form email-generator-loading"
-        aria-busy="true"
-      >
-        <div className="form-actions document-sticky-actions">
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={() => router.push("/documents")}
-          >
-            <ArrowLeft size={17} />
-            {t("backToDocuments")}
-          </button>
+    Boolean(sourceDocumentId) &&
+    (sourceDocumentQuery.isPending ||
+      sourceDocumentQuery.isFetching ||
+      (!initialized && !sourceDocumentQuery.isError) ||
+      (initialized &&
+        Boolean(sourceDocumentQuery.data?.templateId) &&
+        (sourceTemplateQuery.isPending || sourceTemplateQuery.isFetching)));
+
+  const editingDocumentLoading =
+    isEditing &&
+    (documentQuery.isPending ||
+      documentQuery.isFetching ||
+      (!initialized && !documentQuery.isError) ||
+      (initialized &&
+        Boolean(documentQuery.data?.templateId) &&
+        (selectedTemplateQuery.isPending || selectedTemplateQuery.isFetching)));
+
+  const renderLoadingState = (email = false) => (
+    <div
+      className={`document-generator-shell pending-form ${email ? "email-generator-loading" : ""}`}
+      aria-busy="true"
+    >
+      <div className="form-actions document-sticky-actions">
+        <button
+          className="btn secondary"
+          type="button"
+          onClick={() => router.push("/documents")}
+        >
+          <ArrowLeft size={17} />
+          {t("backToDocuments")}
+        </button>
+        {email ? (
           <div className="email-header-actions">
             <button className="btn secondary" type="button" disabled>
               <Eye size={17} />
@@ -625,23 +636,34 @@ export default function DocumentGenerator({
               {t("sendEmail")}
             </button>
           </div>
+        ) : (
+          <div className="document-primary-actions">
+            <button className="btn secondary" type="button" disabled>
+              <Eye size={17} />
+              {t("preview")}
+            </button>
+            <button className="btn" type="button" disabled>
+              <Save size={17} />
+              {t("saveDocument")}
+            </button>
+          </div>
+        )}
+      </div>
+      <section
+        className={`card document-form-card ${email ? "email-form-skeleton" : "document-data-loading document-edit-form-skeleton"}`}
+      >
+        <div className="document-loading-heading">
+          <span className="skeleton-icon" />
+          <div>
+            <span className="skeleton-line wide" />
+            <span className="skeleton-line" />
+          </div>
         </div>
-        <section className="card document-form-card email-form-skeleton">
-          <div className="document-loading-heading">
-            <span className="skeleton-icon" />
-            <div>
-              <span className="skeleton-line wide" />
-              <span className="skeleton-line" />
-            </div>
-          </div>
-          <div className="document-field-skeleton">
-            <span className="skeleton-line short" />
-            <span className="skeleton-input" />
-          </div>
-          <div className="document-field-skeleton">
-            <span className="skeleton-line short" />
-            <span className="skeleton-input" />
-          </div>
+        <div className="document-field-skeleton">
+          <span className="skeleton-line short" />
+          <span className="skeleton-input" />
+        </div>
+        {email && (
           <div className="email-source-note-skeleton">
             <span className="skeleton-icon" />
             <div>
@@ -649,72 +671,111 @@ export default function DocumentGenerator({
               <span className="skeleton-line" />
             </div>
           </div>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div className="document-field-skeleton" key={index}>
-              <span className="skeleton-line short" />
-              <span className="skeleton-input" />
-            </div>
-          ))}
-        </section>
-      </div>
-    );
-  }
-
-  if (
-    isEditing &&
-    (documentQuery.isFetching || (!initialized && !documentQuery.isError))
-  ) {
-    return (
-      <div className="document-generator-shell pending-form" aria-busy="true">
-        <div className="form-actions document-sticky-actions">
-          <button
-            className="btn secondary"
-            type="button"
-            onClick={() => router.push("/documents")}
-          >
-            <ArrowLeft />
-            {t("backToDocuments")}
-          </button>
-          <div className="document-primary-actions">
-            <button className="btn secondary" type="button" disabled>
-              <Eye size={17} />
-              {t("preview")}
-            </button>
-            <button className="btn" type="button" disabled>
-              <Save />
-              {t("saveDocument")}
-            </button>
-          </div>
-        </div>
-        <section className="card document-form-card document-data-loading document-edit-form-skeleton">
-          <div className="document-loading-heading">
-            <span className="skeleton-icon" />
-            <div>
-              <span className="skeleton-line wide" />
-              <span className="skeleton-line" />
-            </div>
-          </div>
-          <div className="document-field-skeleton">
+        )}
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div className="document-field-skeleton" key={index}>
             <span className="skeleton-line short" />
             <span className="skeleton-input" />
           </div>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div className="document-field-skeleton" key={index}>
-              <span className="skeleton-line short" />
-              <span className="skeleton-input" />
-            </div>
-          ))}
-        </section>
-      </div>
-    );
+        ))}
+      </section>
+    </div>
+  );
+
+  if (sourceDocumentLoading) return renderLoadingState(true);
+  if (editingDocumentLoading) return renderLoadingState(false);
+
+  if (isEmailMode && sourceDocumentId) {
+    const sourceUnavailable =
+      sourceDocumentQuery.isError || !sourceDocumentQuery.data;
+    const templateUnavailable =
+      !sourceUnavailable &&
+      (!sourceDocumentQuery.data?.templateId ||
+        sourceTemplateQuery.isError ||
+        !sourceTemplateQuery.data);
+
+    if (sourceUnavailable || templateUnavailable) {
+      return (
+        <div className="document-generator-shell">
+          <div className="form-actions document-sticky-actions">
+            <button
+              className="btn secondary"
+              type="button"
+              onClick={() => router.push("/documents")}
+            >
+              <ArrowLeft size={17} />
+              {t("backToDocuments")}
+            </button>
+          </div>
+          <div className="empty-state">
+            <p>
+              {sourceUnavailable
+                ? t("documentLoadError")
+                : t("documentTemplateLoadError")}
+            </p>
+            <button
+              className="btn secondary"
+              type="button"
+              onClick={() => {
+                if (sourceUnavailable) {
+                  void sourceDocumentQuery.refetch();
+                } else {
+                  void sourceTemplateQuery.refetch();
+                }
+              }}
+            >
+              {t("retry")}
+            </button>
+          </div>
+        </div>
+      );
+    }
   }
 
-  if (isEditing && !documentQuery.data) {
-    return (
-      <div className="empty-state">
-        <p>{t("documentNotFound")}</p>
-      </div>
-    );
+  if (isEditing) {
+    const documentUnavailable = documentQuery.isError || !documentQuery.data;
+    const templateUnavailable =
+      !documentUnavailable &&
+      (!documentQuery.data?.templateId ||
+        selectedTemplateQuery.isError ||
+        !selectedTemplateQuery.data);
+
+    if (documentUnavailable || templateUnavailable) {
+      return (
+        <div className="document-generator-shell">
+          <div className="form-actions document-sticky-actions">
+            <button
+              className="btn secondary"
+              type="button"
+              onClick={() => router.push("/documents")}
+            >
+              <ArrowLeft size={17} />
+              {t("backToDocuments")}
+            </button>
+          </div>
+          <div className="empty-state">
+            <p>
+              {documentUnavailable
+                ? t("documentLoadError")
+                : t("documentTemplateLoadError")}
+            </p>
+            <button
+              className="btn secondary"
+              type="button"
+              onClick={() => {
+                if (documentUnavailable) {
+                  void documentQuery.refetch();
+                } else {
+                  void selectedTemplateQuery.refetch();
+                }
+              }}
+            >
+              {t("retry")}
+            </button>
+          </div>
+        </div>
+      );
+    }
   }
 
   const documentPending =
