@@ -153,51 +153,6 @@ export function TemplateEditor({ template, onClose }: Props) {
     [],
   );
 
-  const keepMobileCaretVisible = useCallback(() => {
-    if (typeof window === "undefined" || window.innerWidth > 760) return;
-
-    const paper = editor.current;
-    const selection = window.getSelection();
-    if (!paper || !selection?.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const container =
-      range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-        ? (range.commonAncestorContainer as Element)
-        : range.commonAncestorContainer.parentElement;
-
-    if (!container || !paper.contains(container)) return;
-
-    window.requestAnimationFrame(() => {
-      const currentSelection = window.getSelection();
-      if (!currentSelection?.rangeCount) return;
-
-      const currentRange = currentSelection.getRangeAt(0);
-      const caretRect =
-        currentRange.getClientRects()[0] ??
-        currentRange.getBoundingClientRect();
-      if (!caretRect || (!caretRect.width && !caretRect.height)) return;
-
-      const visualViewport = window.visualViewport;
-      const viewportTop = visualViewport?.offsetTop ?? 0;
-      const viewportBottom =
-        viewportTop + (visualViewport?.height ?? window.innerHeight);
-      const safeTop = viewportTop + 16;
-      const safeBottom = viewportBottom - 24;
-
-      let delta = 0;
-      if (caretRect.bottom > safeBottom) {
-        delta = caretRect.bottom - safeBottom;
-      } else if (caretRect.top < safeTop) {
-        delta = caretRect.top - safeTop;
-      }
-
-      if (Math.abs(delta) > 1) {
-        paper.scrollTop += delta;
-      }
-    });
-  }, []);
-
   const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
   const [category, setCategory] = useState(
@@ -2384,88 +2339,27 @@ export function TemplateEditor({ template, onClose }: Props) {
           <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
         </div>
 
-        <div className="paper-stage" onWheel={handlePaperStageWheel}>
-          <div className="paper-stage-content">
+        <div className="paper-stage" onWheelCapture={handlePaperStageWheel}>
+          <div
+            className="paper-zoom"
+            style={
+              {
+                "--editor-zoom": zoom / 100,
+                "--scaled-a4-width": `${A4_WIDTH_PX * (zoom / 100)}px`,
+                "--scaled-a4-height": `${Math.round(A4_WIDTH_PX * (297 / 210) * (zoom / 100))}px`,
+              } as CSSProperties
+            }
+          >
             <div
-              className="paper-zoom"
-              style={
-                {
-                  "--editor-zoom": zoom / 100,
-                  "--scaled-a4-width": `${A4_WIDTH_PX * (zoom / 100)}px`,
-                  "--scaled-a4-height": `${Math.round(A4_WIDTH_PX * (297 / 210) * (zoom / 100))}px`,
-                } as CSSProperties
-              }
+              className="a4-page-shell"
+              data-header-enabled={headerEnabled}
+              data-footer-enabled={footerEnabled}
             >
-              <div
-                className="a4-page-shell"
-                data-header-enabled={headerEnabled}
-                data-footer-enabled={footerEnabled}
-              >
-                {headerEnabled && (
-                  <div
-                    ref={headerEditor}
-                    className="page-header-editor"
-                    contentEditable
-                    onDoubleClick={(event) => {
-                      const table = (
-                        event.target as HTMLElement
-                      ).closest<HTMLElement>("[data-data-table-name]");
-                      if (!table) return;
-                      const definition = variables.find(
-                        (item) =>
-                          item.type === "dataTable" &&
-                          item.name === table.dataset.dataTableName,
-                      );
-                      if (definition) {
-                        setEditingDataTable(definition);
-                        setDataTableOpen(true);
-                      }
-                    }}
-                    suppressContentEditableWarning
-                    onFocus={() => {
-                      activeEditor.current = headerEditor.current;
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) =>
-                      dropIntoRegion(event, headerEditor.current)
-                    }
-                    onDragStart={(event) => {
-                      const target = event.target as HTMLElement;
-
-                      if (target.tagName === "IMG") {
-                        draggedImage.current = target as HTMLImageElement;
-
-                        event.dataTransfer.effectAllowed = "move";
-                      }
-                    }}
-                    onClick={(event) => {
-                      const target = event.target as HTMLElement;
-                      selectTableCell(target);
-                      if (selectVariableElement(target)) return;
-
-                      if (target.tagName === "IMG") {
-                        selectImage(target as HTMLImageElement);
-                      }
-                    }}
-                    onKeyUp={rememberSelection}
-                    onInput={() =>
-                      keepRegionWithinA4(
-                        headerEditor.current,
-                        lastValidHeaderHtml,
-                      )
-                    }
-                    onMouseUp={rememberSelection}
-                    data-placeholder={t("headerPlaceholder")}
-                  />
-                )}
-
+              {headerEnabled && (
                 <div
-                  ref={editor}
-                  className="a4-paper"
+                  ref={headerEditor}
+                  className="page-header-editor"
                   contentEditable
-                  onSelect={keepMobileCaretVisible}
-                  onPointerUp={keepMobileCaretVisible}
-                  suppressContentEditableWarning
                   onDoubleClick={(event) => {
                     const table = (
                       event.target as HTMLElement
@@ -2481,7 +2375,14 @@ export function TemplateEditor({ template, onClose }: Props) {
                       setDataTableOpen(true);
                     }
                   }}
+                  suppressContentEditableWarning
+                  onFocus={() => {
+                    activeEditor.current = headerEditor.current;
+                  }}
                   onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) =>
+                    dropIntoRegion(event, headerEditor.current)
+                  }
                   onDragStart={(event) => {
                     const target = event.target as HTMLElement;
 
@@ -2491,16 +2392,6 @@ export function TemplateEditor({ template, onClose }: Props) {
                       event.dataTransfer.effectAllowed = "move";
                     }
                   }}
-                  onDrop={dropIntoEditor}
-                  onFocus={() => {
-                    activeEditor.current = editor.current;
-                    keepMobileCaretVisible();
-                  }}
-                  onKeyUp={() => {
-                    rememberSelection();
-                    keepMobileCaretVisible();
-                  }}
-                  onMouseUp={rememberSelection}
                   onClick={(event) => {
                     const target = event.target as HTMLElement;
                     selectTableCell(target);
@@ -2508,269 +2399,320 @@ export function TemplateEditor({ template, onClose }: Props) {
 
                     if (target.tagName === "IMG") {
                       selectImage(target as HTMLImageElement);
-
-                      return;
                     }
-
-                    editor.current
-                      ?.querySelectorAll("img[data-selected=true]")
-                      .forEach((node) => node.removeAttribute("data-selected"));
-
-                    setSelectedImage(null);
                   }}
+                  onKeyUp={rememberSelection}
+                  onInput={() =>
+                    keepRegionWithinA4(
+                      headerEditor.current,
+                      lastValidHeaderHtml,
+                    )
+                  }
+                  onMouseUp={rememberSelection}
+                  data-placeholder={t("headerPlaceholder")}
                 />
+              )}
 
-                {footerEnabled && (
-                  <div
-                    ref={footerEditor}
-                    className="page-footer-editor"
-                    contentEditable
-                    onDoubleClick={(event) => {
-                      const table = (
-                        event.target as HTMLElement
-                      ).closest<HTMLElement>("[data-data-table-name]");
-                      if (!table) return;
-                      const definition = variables.find(
-                        (item) =>
-                          item.type === "dataTable" &&
-                          item.name === table.dataset.dataTableName,
-                      );
-                      if (definition) {
-                        setEditingDataTable(definition);
-                        setDataTableOpen(true);
-                      }
-                    }}
-                    suppressContentEditableWarning
-                    onFocus={() => {
-                      activeEditor.current = footerEditor.current;
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) =>
-                      dropIntoRegion(event, footerEditor.current)
-                    }
-                    onDragStart={(event) => {
-                      const target = event.target as HTMLElement;
+              <div
+                ref={editor}
+                className="a4-paper"
+                contentEditable
+                suppressContentEditableWarning
+                onDoubleClick={(event) => {
+                  const table = (
+                    event.target as HTMLElement
+                  ).closest<HTMLElement>("[data-data-table-name]");
+                  if (!table) return;
+                  const definition = variables.find(
+                    (item) =>
+                      item.type === "dataTable" &&
+                      item.name === table.dataset.dataTableName,
+                  );
+                  if (definition) {
+                    setEditingDataTable(definition);
+                    setDataTableOpen(true);
+                  }
+                }}
+                onDragOver={(event) => event.preventDefault()}
+                onDragStart={(event) => {
+                  const target = event.target as HTMLElement;
 
-                      if (target.tagName === "IMG") {
-                        draggedImage.current = target as HTMLImageElement;
+                  if (target.tagName === "IMG") {
+                    draggedImage.current = target as HTMLImageElement;
 
-                        event.dataTransfer.effectAllowed = "move";
-                      }
-                    }}
-                    onClick={(event) => {
-                      const target = event.target as HTMLElement;
-                      selectTableCell(target);
-                      if (selectVariableElement(target)) return;
+                    event.dataTransfer.effectAllowed = "move";
+                  }
+                }}
+                onDrop={dropIntoEditor}
+                onFocus={() => {
+                  activeEditor.current = editor.current;
+                }}
+                onKeyUp={rememberSelection}
+                onMouseUp={rememberSelection}
+                onClick={(event) => {
+                  const target = event.target as HTMLElement;
+                  selectTableCell(target);
+                  if (selectVariableElement(target)) return;
 
-                      if (target.tagName === "IMG") {
-                        selectImage(target as HTMLImageElement);
-                      }
-                    }}
-                    onKeyUp={rememberSelection}
-                    onInput={() =>
-                      keepRegionWithinA4(
-                        footerEditor.current,
-                        lastValidFooterHtml,
-                      )
-                    }
-                    onMouseUp={rememberSelection}
-                    data-placeholder={t("footerPlaceholder")}
-                  />
-                )}
+                  if (target.tagName === "IMG") {
+                    selectImage(target as HTMLImageElement);
 
-                {pageNumbers && (
-                  <div className="page-number-preview">1 / 1</div>
-                )}
-              </div>
-            </div>
-            {selectedVariableElement &&
-              selectedVariableBox &&
-              (() => {
-                const variableName =
-                  selectedVariableElement.dataset.variableName;
-                const variable = variables.find(
-                  (item) => item.name === variableName,
-                );
-                if (!variable) return null;
+                    return;
+                  }
 
-                const actionsWidth = 98;
-                const actionsHeight = 30;
-                const gap = 6;
-                const viewportPadding = 8;
-                const canPlaceRight =
-                  selectedVariableBox.right + gap + actionsWidth <=
-                  window.innerWidth - viewportPadding;
-                const left = canPlaceRight
-                  ? selectedVariableBox.right + gap
-                  : Math.max(
-                      viewportPadding,
-                      selectedVariableBox.left - actionsWidth - gap,
+                  editor.current
+                    ?.querySelectorAll("img[data-selected=true]")
+                    .forEach((node) => node.removeAttribute("data-selected"));
+
+                  setSelectedImage(null);
+                }}
+              />
+
+              {footerEnabled && (
+                <div
+                  ref={footerEditor}
+                  className="page-footer-editor"
+                  contentEditable
+                  onDoubleClick={(event) => {
+                    const table = (
+                      event.target as HTMLElement
+                    ).closest<HTMLElement>("[data-data-table-name]");
+                    if (!table) return;
+                    const definition = variables.find(
+                      (item) =>
+                        item.type === "dataTable" &&
+                        item.name === table.dataset.dataTableName,
                     );
-                const top = Math.min(
-                  window.innerHeight - actionsHeight - viewportPadding,
-                  Math.max(
-                    viewportPadding,
-                    selectedVariableBox.top +
-                      selectedVariableBox.height / 2 -
-                      actionsHeight / 2,
-                  ),
-                );
-
-                return (
-                  <div
-                    className="selected-variable-actions"
-                    style={{ left, top }}
-                    onMouseDown={(event) => event.preventDefault()}
-                  >
-                    <button
-                      type="button"
-                      className="selected-variable-edit"
-                      aria-label={t("editVariable")}
-                      title={t("editVariable")}
-                      onClick={() => {
-                        setEditingVariable(variable);
-                        setVariableOpen(true);
-                      }}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="selected-variable-duplicate"
-                      aria-label={t("duplicateVariable")}
-                      title={t("duplicateVariable")}
-                      onClick={() =>
-                        duplicatePlacedVariable(
-                          variable,
-                          selectedVariableElement,
-                        )
-                      }
-                    >
-                      <CopyPlus size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="selected-variable-delete"
-                      aria-label={t("removeVariable")}
-                      title={t("removeVariable")}
-                      onClick={() => {
-                        setVariableRemoval({
-                          element: selectedVariableElement,
-                          variable,
-                        });
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      draggable
-                      className="selected-variable-drag"
-                      aria-label="Move variable"
-                      title="Move variable"
-                      onMouseDown={(event) => event.stopPropagation()}
-                      onDragStart={(event) => {
-                        draggedVariableElement.current =
-                          selectedVariableElement;
-                        event.dataTransfer.effectAllowed = "move";
-                        event.dataTransfer.setData(
-                          "text/docflow-variable-instance",
-                          variable.name,
-                        );
-                      }}
-                      onDragEnd={() => {
-                        draggedVariableElement.current = null;
-                      }}
-                    >
-                      <GripVertical size={14} />
-                    </button>
-                  </div>
-                );
-              })()}
-            {selectedImage && resizeBox && (
-              <>
-                <button
-                  type="button"
-                  className="image-resize-handle"
-                  aria-label={t("resizeImage")}
-                  title={t("resizeImage")}
-                  onMouseDown={(event) => startResize(event, "both")}
-                  style={{
-                    left: resizeBox.right - 10,
-                    top: resizeBox.bottom - 10,
+                    if (definition) {
+                      setEditingDataTable(definition);
+                      setDataTableOpen(true);
+                    }
                   }}
+                  suppressContentEditableWarning
+                  onFocus={() => {
+                    activeEditor.current = footerEditor.current;
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) =>
+                    dropIntoRegion(event, footerEditor.current)
+                  }
+                  onDragStart={(event) => {
+                    const target = event.target as HTMLElement;
+
+                    if (target.tagName === "IMG") {
+                      draggedImage.current = target as HTMLImageElement;
+
+                      event.dataTransfer.effectAllowed = "move";
+                    }
+                  }}
+                  onClick={(event) => {
+                    const target = event.target as HTMLElement;
+                    selectTableCell(target);
+                    if (selectVariableElement(target)) return;
+
+                    if (target.tagName === "IMG") {
+                      selectImage(target as HTMLImageElement);
+                    }
+                  }}
+                  onKeyUp={rememberSelection}
+                  onInput={() =>
+                    keepRegionWithinA4(
+                      footerEditor.current,
+                      lastValidFooterHtml,
+                    )
+                  }
+                  onMouseUp={rememberSelection}
+                  data-placeholder={t("footerPlaceholder")}
                 />
+              )}
 
-                <button
-                  type="button"
-                  className="image-resize-handle image-resize-width"
-                  aria-label={t("resizeImageWidth")}
-                  onMouseDown={(event) => startResize(event, "width")}
-                  style={{
-                    left: resizeBox.right - 10,
-                    top: resizeBox.top + resizeBox.height / 2 - 10,
-                  }}
-                />
-
-                <button
-                  type="button"
-                  className="image-resize-handle image-resize-height"
-                  aria-label={t("resizeImageHeight")}
-                  onMouseDown={(event) => startResize(event, "height")}
-                  style={{
-                    left: resizeBox.left + resizeBox.width / 2 - 10,
-                    top: resizeBox.bottom - 10,
-                  }}
-                />
-
-                {selectedImage.dataset.variableType === "image" &&
-                  selectedImage.dataset.variableName && (
-                    <button
-                      type="button"
-                      className="selected-image-edit"
-                      aria-label={t("edit")}
-                      title={t("edit")}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        const variable = variables.find(
-                          (item) =>
-                            item.name === selectedImage.dataset.variableName,
-                        );
-                        if (!variable) return;
-                        setEditingVariable(variable);
-                        setVariableOpen(true);
-                      }}
-                      style={{
-                        left: resizeBox.right - 52,
-                        top: resizeBox.top - 16,
-                      }}
-                    >
-                      <Pencil size={15} />
-                    </button>
-                  )}
-
-                <button
-                  type="button"
-                  className="selected-image-delete"
-                  aria-label={t("remove")}
-                  title={t("remove")}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => {
-                    removePlacedImage(selectedImage);
-
-                    setSelectedImage(null);
-                    setResizeBox(null);
-                  }}
-                  style={{
-                    left: resizeBox.right - 16,
-                    top: resizeBox.top - 16,
-                  }}
-                >
-                  <Trash2 size={15} />
-                </button>
-              </>
-            )}{" "}
+              {pageNumbers && <div className="page-number-preview">1 / 1</div>}
+            </div>
           </div>
+
+          {selectedVariableElement &&
+            selectedVariableBox &&
+            (() => {
+              const variableName = selectedVariableElement.dataset.variableName;
+              const variable = variables.find(
+                (item) => item.name === variableName,
+              );
+              if (!variable) return null;
+
+              const actionsWidth = 98;
+              const actionsHeight = 30;
+              const gap = 6;
+              const viewportPadding = 8;
+              const canPlaceRight =
+                selectedVariableBox.right + gap + actionsWidth <=
+                window.innerWidth - viewportPadding;
+              const left = canPlaceRight
+                ? selectedVariableBox.right + gap
+                : Math.max(
+                    viewportPadding,
+                    selectedVariableBox.left - actionsWidth - gap,
+                  );
+              const top = Math.min(
+                window.innerHeight - actionsHeight - viewportPadding,
+                Math.max(
+                  viewportPadding,
+                  selectedVariableBox.top +
+                    selectedVariableBox.height / 2 -
+                    actionsHeight / 2,
+                ),
+              );
+
+              return (
+                <div
+                  className="selected-variable-actions"
+                  style={{ left, top }}
+                  onMouseDown={(event) => event.preventDefault()}
+                >
+                  <button
+                    type="button"
+                    className="selected-variable-edit"
+                    aria-label={t("editVariable")}
+                    title={t("editVariable")}
+                    onClick={() => {
+                      setEditingVariable(variable);
+                      setVariableOpen(true);
+                    }}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="selected-variable-duplicate"
+                    aria-label={t("duplicateVariable")}
+                    title={t("duplicateVariable")}
+                    onClick={() =>
+                      duplicatePlacedVariable(variable, selectedVariableElement)
+                    }
+                  >
+                    <CopyPlus size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="selected-variable-delete"
+                    aria-label={t("removeVariable")}
+                    title={t("removeVariable")}
+                    onClick={() => {
+                      setVariableRemoval({
+                        element: selectedVariableElement,
+                        variable,
+                      });
+                    }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    draggable
+                    className="selected-variable-drag"
+                    aria-label="Move variable"
+                    title="Move variable"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onDragStart={(event) => {
+                      draggedVariableElement.current = selectedVariableElement;
+                      event.dataTransfer.effectAllowed = "move";
+                      event.dataTransfer.setData(
+                        "text/docflow-variable-instance",
+                        variable.name,
+                      );
+                    }}
+                    onDragEnd={() => {
+                      draggedVariableElement.current = null;
+                    }}
+                  >
+                    <GripVertical size={14} />
+                  </button>
+                </div>
+              );
+            })()}
+
+          {selectedImage && resizeBox && (
+            <>
+              <button
+                type="button"
+                className="image-resize-handle"
+                aria-label={t("resizeImage")}
+                title={t("resizeImage")}
+                onMouseDown={(event) => startResize(event, "both")}
+                style={{
+                  left: resizeBox.right - 10,
+                  top: resizeBox.bottom - 10,
+                }}
+              />
+
+              <button
+                type="button"
+                className="image-resize-handle image-resize-width"
+                aria-label={t("resizeImageWidth")}
+                onMouseDown={(event) => startResize(event, "width")}
+                style={{
+                  left: resizeBox.right - 10,
+                  top: resizeBox.top + resizeBox.height / 2 - 10,
+                }}
+              />
+
+              <button
+                type="button"
+                className="image-resize-handle image-resize-height"
+                aria-label={t("resizeImageHeight")}
+                onMouseDown={(event) => startResize(event, "height")}
+                style={{
+                  left: resizeBox.left + resizeBox.width / 2 - 10,
+                  top: resizeBox.bottom - 10,
+                }}
+              />
+
+              {selectedImage.dataset.variableType === "image" &&
+                selectedImage.dataset.variableName && (
+                  <button
+                    type="button"
+                    className="selected-image-edit"
+                    aria-label={t("edit")}
+                    title={t("edit")}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      const variable = variables.find(
+                        (item) =>
+                          item.name === selectedImage.dataset.variableName,
+                      );
+                      if (!variable) return;
+                      setEditingVariable(variable);
+                      setVariableOpen(true);
+                    }}
+                    style={{
+                      left: resizeBox.right - 52,
+                      top: resizeBox.top - 16,
+                    }}
+                  >
+                    <Pencil size={15} />
+                  </button>
+                )}
+
+              <button
+                type="button"
+                className="selected-image-delete"
+                aria-label={t("remove")}
+                title={t("remove")}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  removePlacedImage(selectedImage);
+
+                  setSelectedImage(null);
+                  setResizeBox(null);
+                }}
+                style={{
+                  left: resizeBox.right - 16,
+                  top: resizeBox.top - 16,
+                }}
+              >
+                <Trash2 size={15} />
+              </button>
+            </>
+          )}
         </div>
 
         {dataTableOpen && (
