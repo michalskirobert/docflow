@@ -418,7 +418,7 @@
 .editor-header-name-button:hover,
 .editor-header-name-button:focus-visible {
   border-bottom-color: var(--accent, #4f46e5);
-  background: #eef2ff;
+  background: var(--hover, #eef2ff);
   border-radius: 7px 7px 2px 2px;
   outline: none;
 }
