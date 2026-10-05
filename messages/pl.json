@@ -156,10 +156,13 @@
     "calculatedVariablesTutorial": "Zobacz samouczek",
     "licenseExpiryTitle": "Licencja wkrótce wygaśnie",
     "licenseExpiredTitle": "Licencja wygasła",
-    "licenseExpiryDescription": "Twoja licencja roczna wygasa za {count, plural, one {# dzień} few {# dni} other {# dni}}. Możesz przedłużyć ją już teraz bez utraty pozostałego czasu.",
-    "licenseExpiredDescription": "Twoja licencja roczna wygasła. Odnów ją, aby ponownie korzystać z rocznego limitu dokumentów.",
+    "licenseExpiryDescription": "Twoja licencja roczna wygasa za {count, plural, one {# dzień} few {# dni} other {# dni}}. Twoje obecne dokumenty i szablony pozostaną dostępne; po wygaśnięciu zmieni się tylko miesięczny limit na limit planu Free.",
+    "licenseExpiredDescription": "Twoje obecne dokumenty i szablony nadal są dostępne. Konto korzysta teraz z miesięcznego limitu planu Free.",
     "renewLicense": "Przedłuż licencję",
-    "daysLeft": "Pozostało {count, plural, one {# dzień} few {# dni} other {# dni}}"
+    "daysLeft": "Pozostało {count, plural, one {# dzień} few {# dni} other {# dni}}",
+    "licenseExpiresTodayTitle": "Twoja licencja wygasa dzisiaj",
+    "licenseExpiresTodayDescription": "Twoje obecne dokumenty i szablony pozostaną dostępne. Po wygaśnięciu zmieni się tylko miesięczny limit na limit planu Free.",
+    "expiresToday": "Wygasa dzisiaj"
   },
   "templates": {
     "title": "Szablony",
@@ -418,7 +421,7 @@
     "licenseReminder": "Licencja wkrótce wygaśnie. Odnów ją, aby zachować roczny limit dokumentów.",
     "activeDaysLeft": "AKTYWNA · POZOSTAŁO {count} DNI",
     "licenseReminderTitle": "Licencja wygaśnie za {count, plural, one {# dzień} few {# dni} other {# dni}}",
-    "licenseReminderDescription": "Odnów ją teraz. Pozostały czas obecnej licencji nie zostanie utracony.",
+    "licenseReminderDescription": "Odnów licencję, kiedy Ci odpowiada. Twoje obecne dokumenty i szablony pozostaną dostępne także po jej wygaśnięciu. Po wygaśnięciu zmieni się tylko miesięczny limit użycia na limit planu Free.",
     "onlinePayment": "płatność online",
     "pending": "Oczekuje",
     "paymentMethod": "Metoda płatności",
@@ -427,8 +430,8 @@
     "changePaymentMethod": "Zmień metodę płatności",
     "renewLicense": "Zapłać / odnów licencję roczną",
     "transferTitle": "Tytuł przelewu",
-    "invoicesTransactions": "Faktury i transakcje",
-    "invoicesTransactionsHelp": "Opłacone i oczekujące transakcje organizacji.",
+    "transactions": "Transakcje",
+    "transactionsHelp": "Historia płatności za licencję.",
     "noTransactions": "Brak transakcji.",
     "invoice": "Faktura",
     "downloadInvoice": "Pobierz PDF",
@@ -515,7 +518,19 @@
     "categories": "Kategorie",
     "categoriesHelp": "Zarządzaj kategoriami używanymi w dokumentach i szablonach.",
     "manageCategories": "Zarządzaj kategoriami",
-    "renewNow": "Przedłuż teraz"
+    "renewNow": "Przedłuż teraz",
+    "expiresToday": "wygasa dzisiaj",
+    "activeExpiresToday": "AKTYWNA · WYGASA DZISIAJ",
+    "licenseExpiresTodayTitle": "Twoja licencja wygasa dzisiaj",
+    "licenseExpiresTodayDescription": "Twoje obecne dokumenty i szablony pozostaną dostępne. Po wygaśnięciu zmieni się tylko miesięczny limit użycia na limit planu Free.",
+    "cancelPayment": "Anuluj płatność",
+    "cancelPaymentTitle": "Anulować tę płatność?",
+    "cancelPaymentMessage": "Ta próba płatności zostanie anulowana. Następnie możesz rozpocząć nową płatność i wybrać inną metodę.",
+    "paymentCanceled": "Płatność anulowana. Możesz ponownie wybrać metodę płatności.",
+    "paymentCancelError": "Nie udało się anulować płatności. Spróbuj ponownie.",
+    "expired": "wygasła",
+    "licenseExpiredTitle": "Twoja licencja wygasła",
+    "licenseExpiredDescription": "Twoje istniejące dokumenty i szablony nadal są dostępne. Twoje konto korzysta teraz z miesięcznego limitu planu Free."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",
@@ -817,7 +832,9 @@
     "pendingDescription": "PayU przekierował Cię do DocFlow, ale końcowe potwierdzenie jeszcze nie dotarło. Możesz bezpiecznie korzystać z aplikacji i sprawdzić status w Moim koncie.",
     "failedTitle": "Płatność nie została zakończona",
     "failedDescription": "Płatność została anulowana lub zakończyła się błędem. Możesz rozpocząć ją ponownie w Moim koncie.",
-    "login": "Przejdź do logowania",
+    "unavailableTitle": "Nie udało się sprawdzić statusu płatności",
+    "unavailableDescription": "Status płatności jest chwilowo niedostępny. Nie oznacza to, że płatność się nie powiodła. Jej aktualny status możesz sprawdzić w Moim koncie.",
+    "goToAccount": "Przejdź do Mojego konta",
     "checkAgain": "Sprawdź ponownie"
   },
   "calculationHelp": {

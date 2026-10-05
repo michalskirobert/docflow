@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { SessionUser } from "@/types/auth";
 import type { SubscriptionAccess } from "@/types/subscription";
+import { FREE_MONTHLY_DOCUMENT_LIMIT } from "@/utils/constants";
 
 function monthStart() {
   const date = new Date();
@@ -36,7 +37,13 @@ export async function getSubscriptionAccess(
     };
   }
 
-  const limit = sub.monthlyDocumentLimit;
+  const yearlyExpired =
+    sub.plan === "YEARLY" &&
+    sub.currentPeriodEndsAt !== null &&
+    sub.currentPeriodEndsAt.getTime() < Date.now();
+  const limit = yearlyExpired
+    ? FREE_MONTHLY_DOCUMENT_LIMIT
+    : sub.monthlyDocumentLimit;
   if (limit > 0) {
     const usedThisMonth = await prisma.document.count({
       where: {

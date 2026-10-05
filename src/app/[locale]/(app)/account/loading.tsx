@@ -105,6 +105,15 @@ export default function AccountLoading() {
         <div className="settings-column">
           <LicenseSkeleton />
           <TransactionsSkeleton />
+          <section className="card settings-card account-billing-skeleton">
+            <SectionHeaderSkeleton icon />
+            <div className="billing-invoices-empty">
+              <div>
+                <span className="skeleton-line short" />
+                <span className="skeleton-line wide" />
+              </div>
+            </div>
+          </section>
           <DangerSkeleton />
         </div>
       </div>

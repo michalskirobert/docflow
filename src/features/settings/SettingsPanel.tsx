@@ -20,6 +20,7 @@ import {
   useAccountDetails,
   useBillingOverview,
   usePublicPlans,
+  useCancelLicensePayment,
   useChangePaymentMethod,
   useDeleteAccount,
   useStartLicensePayment,
@@ -52,16 +53,29 @@ export default function SettingsPanel() {
   const change = useChangePaymentMethod();
   const { confirm, notify } = useFeedback();
   const [method, setMethod] = useState<"PAYU" | "BANK_TRANSFER">("PAYU");
-  const currentPlan = billing.data?.subscription?.plan ?? "FREE";
+  const currentPlan: "FREE" | "YEARLY" =
+    billing.data?.subscription?.plan === "YEARLY" ? "YEARLY" : "FREE";
+  const periodEndsAt = billing.data?.subscription?.currentPeriodEndsAt
+    ? new Date(billing.data.subscription.currentPeriodEndsAt).getTime()
+    : null;
+  const isExpired =
+    currentPlan === "YEARLY" &&
+    periodEndsAt !== null &&
+    periodEndsAt < Date.now();
+  const effectivePlan: "FREE" | "YEARLY" = isExpired ? "FREE" : currentPlan;
   const [selectedPlan, setSelectedPlan] = useState<"FREE" | "YEARLY">("FREE");
   const effectiveSelectedPlan =
-    currentPlan === "YEARLY" ? "YEARLY" : selectedPlan;
+    effectivePlan === "YEARLY" ? "YEARLY" : selectedPlan;
 
   useEffect(() => {
-    if (account.data?.customerType === "BUSINESS" && currentPlan === "FREE") {
+    if (isExpired) {
+      setSelectedPlan("FREE");
+      return;
+    }
+    if (account.data?.customerType === "BUSINESS" && effectivePlan === "FREE") {
       setSelectedPlan("YEARLY");
     }
-  }, [account.data?.customerType, currentPlan]);
+  }, [account.data?.customerType, effectivePlan, isExpired]);
 
   const deleteAccount = async () => {
     if (
@@ -81,9 +95,9 @@ export default function SettingsPanel() {
     billing.data?.payments.filter((payment) => payment.status === "PENDING") ??
     [];
   const currentPending = pending[0];
-  const periodEndsAt = billing.data?.subscription?.currentPeriodEndsAt
-    ? new Date(billing.data.subscription.currentPeriodEndsAt).getTime()
-    : null;
+  const cancelPayment = useCancelLicensePayment(
+    currentPending?.id ?? "missing",
+  );
   const isRenewalWindow =
     currentPlan === "YEARLY" &&
     periodEndsAt !== null &&
@@ -92,12 +106,13 @@ export default function SettingsPanel() {
   const daysUntilExpiry =
     periodEndsAt === null
       ? null
-      : Math.max(0, Math.ceil((periodEndsAt - Date.now()) / 86400000));
-  const paymentBusy = start.isPending || change.isPending;
+      : Math.ceil((periodEndsAt - Date.now()) / 86400000);
+  const paymentBusy =
+    start.isPending || change.isPending || cancelPayment.isPending;
 
   const payNow = async () => {
     if (currentPending) return;
-    if (currentPlan === "YEARLY" && !isRenewalWindow) return;
+    if (effectivePlan === "YEARLY" && !isRenewalWindow) return;
     try {
       const result = await start.mutateAsync({ paymentMethod: method });
       if (result.redirectUri) window.location.assign(result.redirectUri);
@@ -130,38 +145,39 @@ export default function SettingsPanel() {
 
               <div className="license-summary">
                 <div>
-                  <strong>{billing.data?.subscription?.plan ?? "FREE"}</strong>
-                  {billing.data?.subscription?.currentPeriodEndsAt && (
-                    <small className="license-expiry">
-                      {t("validUntil")}{" "}
-                      {new Date(
-                        billing.data.subscription.currentPeriodEndsAt,
-                      ).toLocaleDateString()}{" "}
-                      ·{" "}
-                      {Math.max(
-                        0,
-                        Math.ceil(
-                          (new Date(
-                            billing.data.subscription.currentPeriodEndsAt,
-                          ).getTime() -
-                            Date.now()) /
-                            86400000,
-                        ),
-                      )}{" "}
-                      {t("daysRemaining")}
-                    </small>
-                  )}
+                  <strong>{effectivePlan}</strong>
+                  {!isExpired &&
+                    billing.data?.subscription?.currentPeriodEndsAt && (
+                      <small className="license-expiry">
+                        {t("validUntil")}{" "}
+                        {new Date(
+                          billing.data.subscription.currentPeriodEndsAt,
+                        ).toLocaleDateString()}{" "}
+                        ·{" "}
+                        {isExpired
+                          ? t("expired")
+                          : daysUntilExpiry === 0
+                            ? t("expiresToday")
+                            : `${daysUntilExpiry ?? 0} ${t("daysRemaining")}`}
+                      </small>
+                    )}
                 </div>
                 <StatusBadge
                   status={
-                    isRenewalWindow
-                      ? "PENDING"
-                      : (billing.data?.subscription?.status ?? "ACTIVE")
+                    isExpired
+                      ? "EXPIRED"
+                      : isRenewalWindow
+                        ? "PENDING"
+                        : (billing.data?.subscription?.status ?? "ACTIVE")
                   }
                   label={
-                    isRenewalWindow && daysUntilExpiry !== null
-                      ? t("activeDaysLeft", { count: daysUntilExpiry })
-                      : undefined
+                    isExpired
+                      ? t("expired")
+                      : isRenewalWindow && daysUntilExpiry !== null
+                        ? daysUntilExpiry === 0
+                          ? t("activeExpiresToday")
+                          : t("activeDaysLeft", { count: daysUntilExpiry })
+                        : undefined
                   }
                 />
               </div>
@@ -178,14 +194,22 @@ export default function SettingsPanel() {
                     </span>
                     <div>
                       <strong>
-                        {t("licenseReminderTitle", {
-                          count: daysUntilExpiry ?? 0,
-                        })}
+                        {isExpired
+                          ? t("licenseExpiredTitle")
+                          : daysUntilExpiry === 0
+                            ? t("licenseExpiresTodayTitle")
+                            : t("licenseReminderTitle", {
+                                count: daysUntilExpiry ?? 0,
+                              })}
                       </strong>
                       <p>
-                        {t("licenseReminderDescription", {
-                          count: daysUntilExpiry ?? 0,
-                        })}
+                        {isExpired
+                          ? t("licenseExpiredDescription")
+                          : daysUntilExpiry === 0
+                            ? t("licenseExpiresTodayDescription")
+                            : t("licenseReminderDescription", {
+                                count: daysUntilExpiry ?? 0,
+                              })}
                       </p>
                     </div>
                   </div>
@@ -203,7 +227,36 @@ export default function SettingsPanel() {
                       {payment.transferReference || t("onlinePayment")}
                     </small>
                   </div>
-                  <StatusBadge status="PENDING" label={t("pending")} />
+                  <div className="payment-row-actions">
+                    <StatusBadge status="PENDING" label={t("pending")} />
+                    <button
+                      type="button"
+                      className="btn secondary compact"
+                      disabled={paymentBusy}
+                      onClick={async () => {
+                        if (
+                          !(await confirm({
+                            title: t("cancelPaymentTitle"),
+                            message: t("cancelPaymentMessage"),
+                            confirmLabel: t("cancelPayment"),
+                            kind: "danger",
+                          }))
+                        )
+                          return;
+                        try {
+                          await cancelPayment.mutateAsync(undefined);
+                          notify(t("paymentCanceled"), "success");
+                        } catch {
+                          notify(t("paymentCancelError"), "error");
+                        }
+                      }}
+                    >
+                      {cancelPayment.isPending && (
+                        <LoaderCircle className="spinner" size={15} />
+                      )}
+                      {t("cancelPayment")}
+                    </button>
+                  </div>
                 </div>
               ))}
 
@@ -222,7 +275,7 @@ export default function SettingsPanel() {
                       disabled={
                         !plan.available ||
                         !plan.paymentAvailable ||
-                        currentPlan === "YEARLY"
+                        effectivePlan === "YEARLY"
                       }
                       onClick={() => setSelectedPlan(plan.code)}
                     >
@@ -285,14 +338,16 @@ export default function SettingsPanel() {
                         className="btn"
                         disabled={
                           paymentBusy ||
-                          (currentPlan === "YEARLY" && !isRenewalWindow)
+                          (effectivePlan === "YEARLY" && !isRenewalWindow)
                         }
                         onClick={payNow}
                       >
                         {start.isPending && (
                           <LoaderCircle className="spinner" size={17} />
                         )}
-                        {currentPlan === "YEARLY" ? t("renewNow") : t("payNow")}
+                        {effectivePlan === "YEARLY"
+                          ? t("renewNow")
+                          : t("payNow")}
                       </button>
                     </div>
                   )}
@@ -319,111 +374,95 @@ export default function SettingsPanel() {
           ) : (
             <>
               <div className="section-heading">
-                <FileText />
+                <CreditCard />
                 <div>
-                  <h2>{t("invoicesTransactions")}</h2>
-                  <p>{t("invoicesTransactionsHelp")}</p>
+                  <h2>{t("transactions")}</h2>
+                  <p>{t("transactionsHelp")}</p>
                 </div>
               </div>
 
               {billing.data?.payments.length ? (
-                billing.data.payments.map((payment) => (
-                  <div className="payment-row" key={payment.id}>
-                    <div>
-                      <strong>
-                        {(payment.grossAmount / 100).toFixed(2)}{" "}
-                        {payment.currency}
-                      </strong>
-                      <small>
-                        {new Date(payment.createdAt).toLocaleDateString()} ·{" "}
-                        {payment.provider}
-                      </small>
+                <div className="transactions-list">
+                  {billing.data.payments.map((payment) => (
+                    <div className="payment-row" key={payment.id}>
+                      <div>
+                        <strong>
+                          {(payment.grossAmount / 100).toFixed(2)}{" "}
+                          {payment.currency}
+                        </strong>
+                        <small>
+                          {new Date(payment.createdAt).toLocaleDateString()} ·{" "}
+                          {payment.provider}
+                        </small>
+                      </div>
+                      <div className="payment-row-actions">
+                        <StatusBadge status={payment.status} />
+                      </div>
                     </div>
-                    <div className="payment-row-actions">
-                      <StatusBadge status={payment.status} />
-                      {payment.status === "CANCELED" && (
-                        <button
-                          type="button"
-                          className="btn secondary compact"
-                          disabled={start.isPending}
-                          onClick={async () => {
-                            try {
-                              const paymentMethod =
-                                payment.provider === "BANK_TRANSFER"
-                                  ? "BANK_TRANSFER"
-                                  : "PAYU";
-                              const result = await start.mutateAsync({
-                                paymentMethod,
-                                paymentId: payment.id,
-                              });
-                              if (result.redirectUri) {
-                                window.location.assign(result.redirectUri);
-                              }
-                            } catch {
-                              notify(t("paymentStartError"), "error");
-                            }
-                          }}
-                        >
-                          {t("payAgain")}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               ) : (
                 <p className="muted">{t("noTransactions")}</p>
               )}
+            </>
+          )}
+        </section>
 
-              <div className="billing-invoices-section">
-                <div className="billing-invoices-heading">
-                  <strong>{t("billingInvoices")}</strong>
-                  <small>{t("billingInvoicesHelp")}</small>
+        <section className="card settings-card">
+          {billing.isPending && !billing.data ? (
+            <SettingsCardSkeleton rows={2} />
+          ) : (
+            <>
+              <div className="section-heading">
+                <FileText />
+                <div>
+                  <h2>{t("billingInvoices")}</h2>
+                  <p>{t("billingInvoicesHelp")}</p>
                 </div>
-                {billing.data?.salesDocuments.length ? (
-                  <div className="billing-invoice-list">
-                    {billing.data.salesDocuments.map((document) => (
-                      <div className="invoice-row" key={document.id}>
-                        <div className="invoice-row-label">
-                          <FileText size={16} />
-                          <div>
-                            <strong>
-                              {document.type === "RECEIPT"
-                                ? t("receipt")
-                                : t("invoice")}{" "}
-                              {document.number || document.id.slice(-6)}
-                            </strong>
-                            <small>
-                              {new Date(
-                                document.createdAt,
-                              ).toLocaleDateString()}
-                            </small>
-                          </div>
-                        </div>
-                        {document.fileUrl ? (
-                          <a
-                            className="btn secondary compact"
-                            href={`/api/billing/invoices/${document.id}/download`}
-                          >
-                            {t("downloadInvoice")}
-                          </a>
-                        ) : (
-                          <span className="muted billing-invoice-pending">
-                            {t("invoiceFilePending")}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="billing-invoices-empty">
-                    <FileText size={22} />
-                    <div>
-                      <strong>{t("noBillingInvoices")}</strong>
-                      <small>{t("noBillingInvoicesHelp")}</small>
-                    </div>
-                  </div>
-                )}
               </div>
+
+              {billing.data?.salesDocuments.length ? (
+                <div className="billing-invoice-list">
+                  {billing.data.salesDocuments.map((document) => (
+                    <div className="invoice-row" key={document.id}>
+                      <div className="invoice-row-label">
+                        <FileText size={16} />
+                        <div>
+                          <strong>
+                            {document.type === "RECEIPT"
+                              ? t("receipt")
+                              : t("invoice")}{" "}
+                            {document.number || document.id.slice(-6)}
+                          </strong>
+                          <small>
+                            {new Date(document.createdAt).toLocaleDateString()}
+                          </small>
+                        </div>
+                      </div>
+                      {document.fileUrl ? (
+                        <a
+                          className="btn secondary compact"
+                          href={`/api/billing/invoices/${document.id}/download`}
+                        >
+                          {t("downloadInvoice")}
+                        </a>
+                      ) : (
+                        <span className="muted billing-invoice-pending">
+                          {t("invoiceFilePending")}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="billing-invoices-empty">
+                  <FileText size={22} />
+                  <div>
+                    <strong>{t("noBillingInvoices")}</strong>
+                    <small>{t("noBillingInvoicesHelp")}</small>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </section>

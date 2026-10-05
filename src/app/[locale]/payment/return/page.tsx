@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/axios";
 
-type State = "checking" | "completed" | "pending" | "failed";
+type State = "checking" | "completed" | "pending" | "failed" | "unavailable";
 type PaymentStatusResponse = {
   status: "PENDING" | "COMPLETED" | "CANCELED" | "FAILED";
 };
@@ -55,7 +55,7 @@ export default function PaymentReturnPage() {
         }
         timer = setTimeout(check, 1500);
       } catch {
-        if (!cancelled) setState("failed");
+        if (!cancelled) setState("unavailable");
       }
     };
 
@@ -92,8 +92,8 @@ export default function PaymentReturnPage() {
                 {t("checkAgain")}
               </button>
             )}
-            <Link className="btn" href="/login">
-              {t("login")}
+            <Link className="btn" href="/account">
+              {t("goToAccount")}
             </Link>
           </div>
         )}

@@ -80,6 +80,20 @@ export async function createPayUOrder(input: {
     throw new Error(`PayU order failed: ${JSON.stringify(data)}`);
   return data;
 }
+export async function cancelPayUOrder(orderId: string) {
+  const token = await accessToken();
+  const response = await fetch(
+    `${baseUrl()}/api/v2_1/orders/${encodeURIComponent(orderId)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`PayU cancellation failed: ${response.status}`);
+  }
+}
+
 export function verifyPayUSignature(rawBody: string, header: string | null) {
   const secondKey = process.env.PAYU_SECOND_KEY;
   if (!secondKey || !header) return false;

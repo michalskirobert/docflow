@@ -164,9 +164,19 @@ export async function POST(req: Request) {
       async (tx) => {
         const subscription = await tx.subscription.findUnique({
           where: { organizationId: s.organizationId },
-          select: { monthlyDocumentLimit: true },
+          select: {
+            plan: true,
+            currentPeriodEndsAt: true,
+            monthlyDocumentLimit: true,
+          },
         });
-        const limit = subscription?.monthlyDocumentLimit ?? 0;
+        const yearlyExpired =
+          subscription?.plan === "YEARLY" &&
+          subscription.currentPeriodEndsAt !== null &&
+          subscription.currentPeriodEndsAt.getTime() < Date.now();
+        const limit = yearlyExpired
+          ? 10
+          : (subscription?.monthlyDocumentLimit ?? 0);
 
         if (!s.subscriptionExempt && limit > 0) {
           const start = new Date();

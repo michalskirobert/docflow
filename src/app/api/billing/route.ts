@@ -31,7 +31,6 @@ async function keepOnlyLatestPendingPayment(organizationId: string) {
 
 const paymentSchema = z.object({
   paymentMethod: z.enum(["PAYU", "BANK_TRANSFER"]),
-  paymentId: z.string().optional(),
 });
 export async function GET() {
   try {
@@ -183,53 +182,6 @@ export async function POST(request: Request) {
     const body = paymentSchema.parse(await request.json());
     await expirePendingPayments(prisma, s.organizationId);
     await keepOnlyLatestPendingPayment(s.organizationId);
-    if (body.paymentId) {
-      const activePending = await prisma.payment.findFirst({
-        where: {
-          organizationId: s.organizationId,
-          status: "PENDING",
-          plan: "YEARLY",
-        },
-        orderBy: { createdAt: "desc" },
-      });
-      if (activePending) {
-        return NextResponse.json(
-          { message: "A payment is already pending" },
-          { status: 409 },
-        );
-      }
-      const previous = await prisma.payment.findFirst({
-        where: {
-          id: body.paymentId,
-          organizationId: s.organizationId,
-          status: "CANCELED",
-          plan: "YEARLY",
-        },
-      });
-      if (!previous) {
-        return NextResponse.json(
-          { message: "Payment cannot be retried" },
-          { status: 409 },
-        );
-      }
-      const retryPayment = await prisma.payment.create({
-        data: {
-          organizationId: s.organizationId,
-          plan: "YEARLY",
-          provider: body.paymentMethod,
-          extOrderId: randomUUID(),
-          netAmount: previous.netAmount,
-          vatAmount: previous.vatAmount,
-          grossAmount: previous.grossAmount,
-          vatRate: previous.vatRate,
-          currency: previous.currency,
-        },
-      });
-      return NextResponse.json(
-        await configurePayment(request, retryPayment.id, body.paymentMethod),
-        { status: 201 },
-      );
-    }
 
     const currentSubscription = await prisma.subscription.findUnique({
       where: { organizationId: s.organizationId },
