@@ -1,6 +1,7 @@
 import {
   ChevronLeft,
   ChevronRight,
+  CopyPlus,
   GripVertical,
   Pencil,
   X,
@@ -14,6 +15,7 @@ type Props = {
   rememberSelection: () => void;
   insertVariable: (v: TemplateVariable) => void;
   editVariable: (v: TemplateVariable) => void;
+  duplicateVariable: (v: TemplateVariable) => void;
   removeVariable: (name: string) => void;
   reorderVariable: (from: number, to: number) => void;
   dropVariableAtPoint: (
@@ -34,6 +36,7 @@ export function VariableShelf({
   rememberSelection,
   insertVariable,
   editVariable,
+  duplicateVariable,
   removeVariable,
   reorderVariable,
   dropVariableAtPoint,
@@ -298,6 +301,15 @@ export function VariableShelf({
                 onClick={() => editVariable(variable)}
               >
                 <Pencil />
+              </button>
+
+              <button
+                type="button"
+                aria-label={t("duplicateVariable")}
+                title={t("duplicateVariable")}
+                onClick={() => duplicateVariable(variable)}
+              >
+                <CopyPlus />
               </button>
 
               <button

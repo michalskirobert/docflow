@@ -756,7 +756,11 @@
     "unitPlaceholder": "np. kg, m², kWh",
     "numberFormatQuantity": "Ilość / sztuki",
     "numberLocale": "Region formatowania",
-    "fontFamily": "Czcionka"
+    "fontFamily": "Czcionka",
+    "duplicateVariable": "Duplikuj zmienną",
+    "duplicateTable": "Duplikuj tabelę",
+    "editTable": "Edytuj tabelę",
+    "copy": "kopia"
   },
   "help": {
     "title": "Pomoc",
