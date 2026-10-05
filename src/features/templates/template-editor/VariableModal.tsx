@@ -14,15 +14,7 @@ import {
   parseToCanonicalValue,
   userMaskToIMask,
 } from "@/features/documents/components/VariableField";
-import {
-  Bold,
-  Italic,
-  Plus,
-  Trash2,
-  Underline,
-  Variable,
-  X,
-} from "lucide-react";
+import { Bold, Italic, Plus, Trash2, Underline, Variable, X } from "lucide-react";
 import type {
   CalculationOperation,
   TemplateVariable,

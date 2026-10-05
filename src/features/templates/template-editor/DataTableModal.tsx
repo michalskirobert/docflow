@@ -197,7 +197,10 @@ export function DataTableModal({
           (sum, width, index) => sum + (index === columnIndex ? 0 : width),
           0,
         );
-        const maxWidth = Math.max(MIN_COLUMN_WIDTH, canvasWidth - otherWidth);
+        const maxWidth = Math.max(
+          MIN_COLUMN_WIDTH,
+          canvasWidth - otherWidth,
+        );
         const nextWidth = Math.max(
           MIN_COLUMN_WIDTH,
           Math.min(maxWidth, startWidth + requestedDelta),
@@ -242,11 +245,8 @@ export function DataTableModal({
 
       const next = [...current];
       const [dragged] = next.splice(from, 1);
-      const targetAfterRemoval = next.findIndex(
-        (column) => column.id === targetId,
-      );
-      const insertAt =
-        side === "after" ? targetAfterRemoval + 1 : targetAfterRemoval;
+      const targetAfterRemoval = next.findIndex((column) => column.id === targetId);
+      const insertAt = side === "after" ? targetAfterRemoval + 1 : targetAfterRemoval;
       next.splice(insertAt, 0, dragged);
       return next;
     });
@@ -472,47 +472,27 @@ export function DataTableModal({
                             <th
                               key={column.id}
                               className={[
-                                draggedColumnId === column.id
-                                  ? "is-column-dragging"
-                                  : "",
+                                draggedColumnId === column.id ? "is-column-dragging" : "",
                                 columnDropTarget?.id === column.id
                                   ? `is-column-drop-${columnDropTarget.side}`
                                   : "",
-                              ]
-                                .filter(Boolean)
-                                .join(" ")}
+                              ].filter(Boolean).join(" ")}
                               onDragOver={(event) => {
-                                if (
-                                  !draggedColumnId ||
-                                  draggedColumnId === column.id
-                                )
-                                  return;
+                                if (!draggedColumnId || draggedColumnId === column.id) return;
                                 event.preventDefault();
                                 event.dataTransfer.dropEffect = "move";
-                                const rect =
-                                  event.currentTarget.getBoundingClientRect();
+                                const rect = event.currentTarget.getBoundingClientRect();
                                 setColumnDropTarget({
                                   id: column.id,
-                                  side:
-                                    event.clientX < rect.left + rect.width / 2
-                                      ? "before"
-                                      : "after",
+                                  side: event.clientX < rect.left + rect.width / 2 ? "before" : "after",
                                 });
                               }}
                               onDrop={(event) => {
                                 event.preventDefault();
                                 const draggedId =
-                                  draggedColumnId ||
-                                  event.dataTransfer.getData("text/plain");
-                                if (
-                                  draggedId &&
-                                  columnDropTarget?.id === column.id
-                                ) {
-                                  reorderColumn(
-                                    draggedId,
-                                    column.id,
-                                    columnDropTarget.side,
-                                  );
+                                  draggedColumnId || event.dataTransfer.getData("text/plain");
+                                if (draggedId && columnDropTarget?.id === column.id) {
+                                  reorderColumn(draggedId, column.id, columnDropTarget.side);
                                 }
                                 setDraggedColumnId(null);
                                 setColumnDropTarget(null);
@@ -525,84 +505,63 @@ export function DataTableModal({
                             >
                               <div className="data-table-column-header">
                                 <div className="data-table-column-actions">
-                                  <button
-                                    type="button"
-                                    className={`data-table-column-pdf-visibility ${column.visibility === "form-only" ? "is-hidden" : ""}`}
-                                    title={
-                                      column.visibility === "form-only"
-                                        ? "Show in document"
-                                        : "Use only in form"
-                                    }
-                                    aria-label={
-                                      column.visibility === "form-only"
-                                        ? "Show in document"
-                                        : "Use only in form"
-                                    }
-                                    aria-pressed={
-                                      column.visibility === "form-only"
-                                    }
-                                    onClick={() =>
-                                      setColumns((current) =>
-                                        current.map((item) =>
-                                          item.id === column.id
-                                            ? {
-                                                ...item,
-                                                visibility:
-                                                  item.visibility ===
-                                                  "form-only"
-                                                    ? "document"
-                                                    : "form-only",
-                                              }
-                                            : item,
-                                        ),
-                                      )
-                                    }
-                                  >
-                                    {column.visibility === "form-only" ? (
-                                      <EyeOff size={15} />
-                                    ) : (
-                                      <Eye size={15} />
-                                    )}
-                                  </button>
-                                  <span
-                                    className="data-table-column-actions-spacer"
-                                    aria-hidden="true"
-                                  />
-                                  <button
-                                    type="button"
-                                    className="data-table-column-delete"
-                                    title="Remove column"
-                                    onClick={() =>
-                                      setColumns((current) =>
-                                        current.filter(
-                                          (item) => item.id !== column.id,
-                                        ),
-                                      )
-                                    }
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="data-table-column-drag-handle"
-                                    draggable
-                                    title="Drag to reorder column"
-                                    aria-label={`Drag ${column.label || `Column ${index + 1}`} to reorder`}
-                                    onDragStart={(event) => {
-                                      setDraggedColumnId(column.id);
-                                      event.dataTransfer.effectAllowed = "move";
-                                      event.dataTransfer.setData(
-                                        "text/plain",
-                                        column.id,
-                                      );
-                                    }}
-                                    onDragEnd={() => {
-                                      setDraggedColumnId(null);
-                                      setColumnDropTarget(null);
-                                    }}
-                                  >
-                                    <GripVertical size={16} />
-                                  </button>
+                                <button
+                                  type="button"
+                                  className={`data-table-column-pdf-visibility ${column.visibility === "form-only" ? "is-hidden" : ""}`}
+                                  title={column.visibility === "form-only" ? "Show in document" : "Use only in form"}
+                                  aria-label={column.visibility === "form-only" ? "Show in document" : "Use only in form"}
+                                  aria-pressed={column.visibility === "form-only"}
+                                  onClick={() =>
+                                    setColumns((current) =>
+                                      current.map((item) =>
+                                        item.id === column.id
+                                          ? {
+                                              ...item,
+                                              visibility:
+                                                item.visibility === "form-only"
+                                                  ? "document"
+                                                  : "form-only",
+                                            }
+                                          : item,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  {column.visibility === "form-only" ? <EyeOff size={15} /> : <Eye size={15} />}
+                                </button>
+                                  <span className="data-table-column-actions-spacer" aria-hidden="true" />
+                                <button
+                                  type="button"
+                                  className="data-table-column-delete"
+                                  title="Remove column"
+                                  onClick={() =>
+                                    setColumns((current) =>
+                                      current.filter(
+                                        (item) => item.id !== column.id,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="data-table-column-drag-handle"
+                                  draggable
+                                  title="Drag to reorder column"
+                                  aria-label={`Drag ${column.label || `Column ${index + 1}`} to reorder`}
+                                  onDragStart={(event) => {
+                                    setDraggedColumnId(column.id);
+                                    event.dataTransfer.effectAllowed = "move";
+                                    event.dataTransfer.setData("text/plain", column.id);
+                                  }}
+                                  onDragEnd={() => {
+                                    setDraggedColumnId(null);
+                                    setColumnDropTarget(null);
+                                  }}
+                                >
+                                  <GripVertical size={16} />
+                                </button>
                                 </div>
                                 <InputControl
                                   className="data-table-column-name"
@@ -755,8 +714,7 @@ export function DataTableModal({
                                           className="data-table-variable-duplicate"
                                           onClick={() => {
                                             if (!canAddColumn) return;
-                                            const copy =
-                                              onDuplicateVariable(definition);
+                                            const copy = onDuplicateVariable(definition);
                                             setColumns((current) => {
                                               const next = [...current];
                                               next.splice(columnIndex + 1, 0, {

@@ -33,14 +33,7 @@ export default function TemplateList() {
   const [draftDateFrom, setDraftDateFrom] = useState("");
   const [draftDateTo, setDraftDateTo] = useState("");
   const [cardActionPending, setCardActionPending] = useState(false);
-  const query = useTemplatesService(
-    q,
-    sort,
-    source,
-    dateFrom,
-    dateTo,
-    categoryFilter,
-  );
+  const query = useTemplatesService(q, sort, source, dateFrom, dateTo, categoryFilter);
   const templates = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
     [query.data],
@@ -61,10 +54,7 @@ export default function TemplateList() {
     return () => observer.disconnect();
   }, [query.hasNextPage, query.isFetchingNextPage, query.fetchNextPage]);
   const activeFilterCount =
-    (source !== "all" ? 1 : 0) +
-    (categoryFilter !== "all" ? 1 : 0) +
-    (dateFrom ? 1 : 0) +
-    (dateTo ? 1 : 0);
+    (source !== "all" ? 1 : 0) + (categoryFilter !== "all" ? 1 : 0) + (dateFrom ? 1 : 0) + (dateTo ? 1 : 0);
 
   if (query.isError && !query.data) {
     return (
@@ -131,10 +121,7 @@ export default function TemplateList() {
               <option value="default">{t("sourceDefault")}</option>
               <option value="own">{t("sourceOwn")}</option>
             </SelectField>
-            <CategoryFilterField
-              value={draftCategoryFilter}
-              onChange={setDraftCategoryFilter}
-            />
+            <CategoryFilterField value={draftCategoryFilter} onChange={setDraftCategoryFilter} />
             <FilterDateControl
               label={t("dateFrom")}
               value={draftDateFrom}
@@ -162,54 +149,50 @@ export default function TemplateList() {
         </div>
       ) : templates.length > 0 ? (
         <>
-          <div className="template-grid">
-            {templates.map((item) => (
-              <TemplateCard
-                key={item.id}
-                template={item}
-                actionsDisabled={cardActionPending}
-                onActionPendingChange={setCardActionPending}
-                onEdit={async () => {
-                  setCardActionPending(true);
-                  try {
-                    const full = (
-                      await api.get<Template>(`/templates/${item.id}`)
-                    ).data;
-                    setEditing(full);
-                  } finally {
-                    setCardActionPending(false);
-                  }
-                }}
-                onDuplicate={async () => {
-                  setCardActionPending(true);
-                  try {
-                    const full = (
-                      await api.get<Template>(`/templates/${item.id}`)
-                    ).data;
-                    await create.mutateAsync({
-                      name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
-                      category: full.category ?? "system:GENERAL",
-                      description: full.description ?? "",
-                      emailSubject: full.emailSubject ?? "",
-                      content: full.content,
-                      headerContent: full.headerContent ?? "",
-                      footerContent: full.footerContent ?? "",
-                      pageNumbers: full.pageNumbers,
-                      variables: parseTemplateVariables(full.variablesJson),
-                    });
-                  } finally {
-                    setCardActionPending(false);
-                  }
-                }}
-              />
-            ))}
-          </div>
-          <div
-            ref={loadMoreRef}
-            className="infinite-scroll-sentinel"
-            aria-hidden="true"
-          />
-          {query.isFetchingNextPage && <ListSkeleton rows={20} cards />}
+        <div className="template-grid">
+          {templates.map((item) => (
+            <TemplateCard
+              key={item.id}
+              template={item}
+              actionsDisabled={cardActionPending}
+              onActionPendingChange={setCardActionPending}
+              onEdit={async () => {
+                setCardActionPending(true);
+                try {
+                  const full = (
+                    await api.get<Template>(`/templates/${item.id}`)
+                  ).data;
+                  setEditing(full);
+                } finally {
+                  setCardActionPending(false);
+                }
+              }}
+              onDuplicate={async () => {
+                setCardActionPending(true);
+                try {
+                  const full = (
+                    await api.get<Template>(`/templates/${item.id}`)
+                  ).data;
+                  await create.mutateAsync({
+                    name: `${full.name.replace(/(?: copy)+$/i, "")} ${t("duplicateSuffix")}`,
+                    category: full.category ?? "system:GENERAL",
+                    description: full.description ?? "",
+                    emailSubject: full.emailSubject ?? "",
+                    content: full.content,
+                    headerContent: full.headerContent ?? "",
+                    footerContent: full.footerContent ?? "",
+                    pageNumbers: full.pageNumbers,
+                    variables: parseTemplateVariables(full.variablesJson),
+                  });
+                } finally {
+                  setCardActionPending(false);
+                }
+              }}
+            />
+          ))}
+        </div>
+        <div ref={loadMoreRef} className="infinite-scroll-sentinel" aria-hidden="true" />
+        {query.isFetchingNextPage && <ListSkeleton rows={20} cards />}
         </>
       ) : (
         <div className="empty-state">

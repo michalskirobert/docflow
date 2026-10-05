@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -32,12 +32,30 @@ export default function LoginForm() {
     register,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "", rememberMe: false },
   });
+  const formRef = useRef<HTMLFormElement>(null);
   const tr = (k?: string) => (k ? t(`validation.${k}`) : "");
+
+  const syncAutofillValues = () => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const email = form.elements.namedItem("email");
+    const password = form.elements.namedItem("password");
+
+    if (email instanceof HTMLInputElement && email.value) {
+      setValue("email", email.value, { shouldDirty: true });
+    }
+    if (password instanceof HTMLInputElement && password.value) {
+      setValue("password", password.value, { shouldDirty: true });
+    }
+  };
+
   const submit = handleSubmit(async (values) => {
     try {
       const user = await mutation.mutateAsync(values);
@@ -61,6 +79,8 @@ export default function LoginForm() {
 
   return (
     <form
+      ref={formRef}
+      onSubmitCapture={syncAutofillValues}
       onSubmit={submit}
       className="auth-form pending-form"
       noValidate

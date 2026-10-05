@@ -34,8 +34,7 @@ import {
 import type { Template, TemplateVariable } from "../types";
 import { parseTemplateVariables } from "../types";
 import { useCreateTemplateService, useUpdateTemplateService } from "../service";
-import {
-  A4_WIDTH_PX,
+import { A4_WIDTH_PX,
   normalizeTemplateEditorFontFamily,
 } from "@/utils/constants";
 import { VariableModal } from "./VariableModal";
@@ -152,6 +151,51 @@ export function TemplateEditor({ template, onClose }: Props) {
     },
     [],
   );
+
+  const keepMobileCaretVisible = useCallback(() => {
+    if (typeof window === "undefined" || window.innerWidth > 760) return;
+
+    const paper = editor.current;
+    const selection = window.getSelection();
+    if (!paper || !selection?.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const container =
+      range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+        ? (range.commonAncestorContainer as Element)
+        : range.commonAncestorContainer.parentElement;
+
+    if (!container || !paper.contains(container)) return;
+
+    window.requestAnimationFrame(() => {
+      const currentSelection = window.getSelection();
+      if (!currentSelection?.rangeCount) return;
+
+      const currentRange = currentSelection.getRangeAt(0);
+      const caretRect =
+        currentRange.getClientRects()[0] ?? currentRange.getBoundingClientRect();
+      if (!caretRect || (!caretRect.width && !caretRect.height)) return;
+
+      const visualViewport = window.visualViewport;
+      const viewportTop = visualViewport?.offsetTop ?? 0;
+      const viewportBottom =
+        viewportTop + (visualViewport?.height ?? window.innerHeight);
+      const safeTop = viewportTop + 16;
+      const safeBottom = viewportBottom - 24;
+
+      let delta = 0;
+      if (caretRect.bottom > safeBottom) {
+        delta = caretRect.bottom - safeBottom;
+      } else if (caretRect.top < safeTop) {
+        delta = caretRect.top - safeTop;
+      }
+
+      if (Math.abs(delta) > 1) {
+        paper.scrollTop += delta;
+      }
+    });
+  }, []);
+
 
   const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
@@ -456,13 +500,9 @@ export function TemplateEditor({ template, onClose }: Props) {
       const tokenStyle = token ? getComputedStyle(token) : null;
       const selection = window.getSelection();
       const selectionNode = selection?.anchorNode ?? null;
-      const region =
-        [editor.current, headerEditor.current, footerEditor.current].find(
-          (candidate) =>
-            candidate && selectionNode && candidate.contains(selectionNode),
-        ) ??
-        activeEditor.current ??
-        editor.current;
+      const region = [editor.current, headerEditor.current, footerEditor.current].find(
+        (candidate) => candidate && selectionNode && candidate.contains(selectionNode),
+      ) ?? activeEditor.current ?? editor.current;
       setToolbarState({
         bold: tokenStyle
           ? Number(tokenStyle.fontWeight) >= 600 ||
@@ -519,10 +559,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               element = start.parentElement;
             } else if (start instanceof Element) {
               const child = start.childNodes.item(
-                Math.min(
-                  range.startOffset,
-                  Math.max(0, start.childNodes.length - 1),
-                ),
+                Math.min(range.startOffset, Math.max(0, start.childNodes.length - 1)),
               );
               element =
                 child?.nodeType === Node.TEXT_NODE
@@ -542,8 +579,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                 NodeFilter.SHOW_TEXT,
                 {
                   acceptNode(node) {
-                    if (!node.textContent?.trim())
-                      return NodeFilter.FILTER_SKIP;
+                    if (!node.textContent?.trim()) return NodeFilter.FILTER_SKIP;
                     try {
                       return range.intersectsNode(node)
                         ? NodeFilter.FILTER_ACCEPT
@@ -579,10 +615,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               element = start.parentElement;
             } else if (start instanceof Element) {
               const child = start.childNodes.item(
-                Math.min(
-                  range.startOffset,
-                  Math.max(0, start.childNodes.length - 1),
-                ),
+                Math.min(range.startOffset, Math.max(0, start.childNodes.length - 1)),
               );
               element =
                 child?.nodeType === Node.TEXT_NODE
@@ -598,8 +631,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                 NodeFilter.SHOW_TEXT,
                 {
                   acceptNode(node) {
-                    if (!node.textContent?.trim())
-                      return NodeFilter.FILTER_SKIP;
+                    if (!node.textContent?.trim()) return NodeFilter.FILTER_SKIP;
                     try {
                       return range.intersectsNode(node)
                         ? NodeFilter.FILTER_ACCEPT
@@ -616,9 +648,7 @@ export function TemplateEditor({ template, onClose }: Props) {
           }
 
           return element
-            ? normalizeTemplateEditorFontFamily(
-                getComputedStyle(element).fontFamily,
-              )
+            ? normalizeTemplateEditorFontFamily(getComputedStyle(element).fontFamily)
             : "";
         })(),
         lineHeight: (() => {
@@ -672,9 +702,7 @@ export function TemplateEditor({ template, onClose }: Props) {
         const selectionText = selection.toString().trim();
         let intersectsSelectedToken = false;
         try {
-          intersectsSelectedToken = range.intersectsNode(
-            selectedVariableElement,
-          );
+          intersectsSelectedToken = range.intersectsNode(selectedVariableElement);
         } catch {}
 
         const isVariableOnlySelection =
@@ -1077,17 +1105,13 @@ export function TemplateEditor({ template, onClose }: Props) {
     const copy = duplicateVariableDefinition(source);
     if (source.type === "dataTable") {
       const nextVariables = [...variables, copy];
-      element.insertAdjacentHTML(
-        "afterend",
-        dataTableHtml(copy, nextVariables),
-      );
+      element.insertAdjacentHTML("afterend", dataTableHtml(copy, nextVariables));
       const region = activeEditor.current ?? editor.current;
       if (region) ensureDataTableCaretHosts(region);
     } else {
       element.insertAdjacentHTML("afterend", variableHtml(copy));
       const region = activeEditor.current ?? editor.current;
-      if (copy.type === "image" && region)
-        normalizeEditorVariableImages(region);
+      if (copy.type === "image" && region) normalizeEditorVariableImages(region);
     }
     setSelectedVariableElement(null);
     setSelectedVariableBox(null);
@@ -1848,8 +1872,9 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
   };
 
-  const selectedDataTableElement =
-    selectedTableCell?.closest<HTMLElement>("[data-data-table-name]") ?? null;
+  const selectedDataTableElement = selectedTableCell?.closest<HTMLElement>(
+    "[data-data-table-name]",
+  ) ?? null;
   const selectedDataTableDefinition = selectedDataTableElement
     ? variables.find(
         (item) =>
@@ -1964,9 +1989,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                         }
                         placeholder={`${t("emailSubjectPlaceholder")} {{variable}}`}
                       />
-                      <small>
-                        {t("emailSubjectHelp")} {"{{variable}}"}
-                      </small>
+                      <small>{t("emailSubjectHelp")} {"{{variable}}"}</small>
                     </label>
 
                     <div className="editor-header-meta-actions">
@@ -2049,9 +2072,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                       onChange={(event) => setEmailSubject(event.target.value)}
                       placeholder={`${t("emailSubjectPlaceholder")} {{variable}}`}
                     />
-                    <small>
-                      {t("emailSubjectHelp")} {"{{variable}}"}
-                    </small>
+                    <small>{t("emailSubjectHelp")} {"{{variable}}"}</small>
                   </label>
 
                   <div className="editor-header-meta-actions">
@@ -2128,19 +2149,16 @@ export function TemplateEditor({ template, onClose }: Props) {
             canDuplicate={Boolean(
               (selectedVariableElement &&
                 variables.some(
-                  (item) =>
-                    item.name === selectedVariableElement.dataset.variableName,
+                  (item) => item.name === selectedVariableElement.dataset.variableName,
                 )) ||
-              (selectedDataTableElement && selectedDataTableDefinition),
+                (selectedDataTableElement && selectedDataTableDefinition),
             )}
             duplicateSelected={() => {
               if (selectedVariableElement) {
                 const variable = variables.find(
-                  (item) =>
-                    item.name === selectedVariableElement.dataset.variableName,
+                  (item) => item.name === selectedVariableElement.dataset.variableName,
                 );
-                if (variable)
-                  duplicatePlacedVariable(variable, selectedVariableElement);
+                if (variable) duplicatePlacedVariable(variable, selectedVariableElement);
                 return;
               }
               if (selectedDataTableElement && selectedDataTableDefinition) {
@@ -2246,6 +2264,7 @@ export function TemplateEditor({ template, onClose }: Props) {
               );
             })()}
 
+
           {selectedImage && (
             <ImageContextBar
               t={t}
@@ -2340,9 +2359,10 @@ export function TemplateEditor({ template, onClose }: Props) {
         </div>
 
         <div className="paper-stage" onWheel={handlePaperStageWheel}>
-          <div
-            className="paper-zoom"
-            style={
+          <div className="paper-stage-content">
+            <div
+              className="paper-zoom"
+              style={
               {
                 "--editor-zoom": zoom / 100,
                 "--scaled-a4-width": `${A4_WIDTH_PX * (zoom / 100)}px`,
@@ -2403,10 +2423,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onKeyUp={rememberSelection}
                   onInput={() =>
-                    keepRegionWithinA4(
-                      headerEditor.current,
-                      lastValidHeaderHtml,
-                    )
+                    keepRegionWithinA4(headerEditor.current, lastValidHeaderHtml)
                   }
                   onMouseUp={rememberSelection}
                   data-placeholder={t("headerPlaceholder")}
@@ -2417,6 +2434,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                 ref={editor}
                 className="a4-paper"
                 contentEditable
+                onSelect={keepMobileCaretVisible}
+                onPointerUp={keepMobileCaretVisible}
                 suppressContentEditableWarning
                 onDoubleClick={(event) => {
                   const table = (
@@ -2446,8 +2465,12 @@ export function TemplateEditor({ template, onClose }: Props) {
                 onDrop={dropIntoEditor}
                 onFocus={() => {
                   activeEditor.current = editor.current;
+                  keepMobileCaretVisible();
                 }}
-                onKeyUp={rememberSelection}
+                onKeyUp={() => {
+                  rememberSelection();
+                  keepMobileCaretVisible();
+                }}
                 onMouseUp={rememberSelection}
                 onClick={(event) => {
                   const target = event.target as HTMLElement;
@@ -2516,10 +2539,7 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }}
                   onKeyUp={rememberSelection}
                   onInput={() =>
-                    keepRegionWithinA4(
-                      footerEditor.current,
-                      lastValidFooterHtml,
-                    )
+                    keepRegionWithinA4(footerEditor.current, lastValidFooterHtml)
                   }
                   onMouseUp={rememberSelection}
                   data-placeholder={t("footerPlaceholder")}
@@ -2712,7 +2732,8 @@ export function TemplateEditor({ template, onClose }: Props) {
                 <Trash2 size={15} />
               </button>
             </>
-          )}
+          )}          </div>
+
         </div>
 
         {dataTableOpen && (

@@ -103,10 +103,7 @@ export default function DocumentGenerator({
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [templateCategory, setTemplateCategory] = useState("all");
   useEffect(() => {
-    const timeout = window.setTimeout(
-      () => setTemplateSearchQuery(templateSearch.trim()),
-      250,
-    );
+    const timeout = window.setTimeout(() => setTemplateSearchQuery(templateSearch.trim()), 250);
     return () => window.clearTimeout(timeout);
   }, [templateSearch]);
   const templates = useDocumentTemplatesService(
@@ -142,9 +139,7 @@ export default function DocumentGenerator({
   );
   const sourceDocumentQuery = useDocumentService(sourceDocumentId ?? "");
   const sourceTemplateQuery = useDocumentTemplateService(
-    sourceDocumentQuery.data?.sourceTemplateId ??
-      sourceDocumentQuery.data?.templateId ??
-      "",
+    (sourceDocumentQuery.data?.sourceTemplateId ?? sourceDocumentQuery.data?.templateId) ?? "",
   );
   const selectedTemplateQuery = useDocumentTemplateService(
     sourceDocumentId ? "" : templateId,
@@ -220,11 +215,7 @@ export default function DocumentGenerator({
   useEffect(() => {
     if (!isEditing || initialized || !documentQuery.data) return;
 
-    setTemplateId(
-      documentQuery.data.sourceTemplateId ??
-        documentQuery.data.templateId ??
-        "",
-    );
+    setTemplateId(documentQuery.data.sourceTemplateId ?? documentQuery.data.templateId ?? "");
     setDocumentName(documentQuery.data.name ?? "");
 
     try {
@@ -602,10 +593,7 @@ export default function DocumentGenerator({
       sourceDocumentQuery.isFetching ||
       (!initialized && !sourceDocumentQuery.isError) ||
       (initialized &&
-        Boolean(
-          sourceDocumentQuery.data?.sourceTemplateId ??
-          sourceDocumentQuery.data?.templateId,
-        ) &&
+        Boolean(sourceDocumentQuery.data?.sourceTemplateId ?? sourceDocumentQuery.data?.templateId) &&
         (sourceTemplateQuery.isPending || sourceTemplateQuery.isFetching)));
 
   const editingDocumentLoading =
@@ -614,10 +602,7 @@ export default function DocumentGenerator({
       documentQuery.isFetching ||
       (!initialized && !documentQuery.isError) ||
       (initialized &&
-        Boolean(
-          documentQuery.data?.sourceTemplateId ??
-          documentQuery.data?.templateId,
-        ) &&
+        Boolean(documentQuery.data?.sourceTemplateId ?? documentQuery.data?.templateId) &&
         (selectedTemplateQuery.isPending || selectedTemplateQuery.isFetching)));
 
   const renderLoadingState = (email = false) => (
@@ -703,10 +688,7 @@ export default function DocumentGenerator({
       sourceDocumentQuery.isError || !sourceDocumentQuery.data;
     const templateUnavailable =
       !sourceUnavailable &&
-      (!(
-        sourceDocumentQuery.data?.sourceTemplateId ??
-        sourceDocumentQuery.data?.templateId
-      ) ||
+      (!(sourceDocumentQuery.data?.sourceTemplateId ?? sourceDocumentQuery.data?.templateId) ||
         sourceTemplateQuery.isError ||
         !sourceTemplateQuery.data);
 
@@ -724,20 +706,10 @@ export default function DocumentGenerator({
             </button>
           </div>
           <QueryErrorState
-            title={
-              sourceUnavailable
-                ? t("documentLoadTitle")
-                : t("documentTemplateLoadTitle")
-            }
-            message={
-              sourceUnavailable
-                ? t("documentLoadError")
-                : t("documentTemplateLoadError")
-            }
+            title={sourceUnavailable ? t("documentLoadTitle") : t("documentTemplateLoadTitle")}
+            message={sourceUnavailable ? t("documentLoadError") : t("documentTemplateLoadError")}
             retryLabel={t("retry")}
-            retrying={
-              sourceDocumentQuery.isFetching || sourceTemplateQuery.isFetching
-            }
+            retrying={sourceDocumentQuery.isFetching || sourceTemplateQuery.isFetching}
             onRetry={() => {
               if (sourceUnavailable) void sourceDocumentQuery.refetch();
               else void sourceTemplateQuery.refetch();
@@ -752,9 +724,7 @@ export default function DocumentGenerator({
     const documentUnavailable = documentQuery.isError || !documentQuery.data;
     const templateUnavailable =
       !documentUnavailable &&
-      (!(
-        documentQuery.data?.sourceTemplateId ?? documentQuery.data?.templateId
-      ) ||
+      (!(documentQuery.data?.sourceTemplateId ?? documentQuery.data?.templateId) ||
         selectedTemplateQuery.isError ||
         !selectedTemplateQuery.data);
 
@@ -772,20 +742,10 @@ export default function DocumentGenerator({
             </button>
           </div>
           <QueryErrorState
-            title={
-              documentUnavailable
-                ? t("documentLoadTitle")
-                : t("documentTemplateLoadTitle")
-            }
-            message={
-              documentUnavailable
-                ? t("documentLoadError")
-                : t("documentTemplateLoadError")
-            }
+            title={documentUnavailable ? t("documentLoadTitle") : t("documentTemplateLoadTitle")}
+            message={documentUnavailable ? t("documentLoadError") : t("documentTemplateLoadError")}
             retryLabel={t("retry")}
-            retrying={
-              documentQuery.isFetching || selectedTemplateQuery.isFetching
-            }
+            retrying={documentQuery.isFetching || selectedTemplateQuery.isFetching}
             onRetry={() => {
               if (documentUnavailable) void documentQuery.refetch();
               else void selectedTemplateQuery.refetch();

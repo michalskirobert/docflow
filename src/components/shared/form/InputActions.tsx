@@ -5,20 +5,9 @@ type InputActionProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
-export function InputAction({
-  label,
-  children,
-  className,
-  ...props
-}: InputActionProps) {
+export function InputAction({ label, children, className, ...props }: InputActionProps) {
   return (
-    <button
-      {...props}
-      type="button"
-      className={`field-input-action${className ? ` ${className}` : ""}`}
-      aria-label={label}
-      title={label}
-    >
+    <button {...props} type="button" className={`field-input-action${className ? ` ${className}` : ""}`} aria-label={label} title={label}>
       {children}
     </button>
   );

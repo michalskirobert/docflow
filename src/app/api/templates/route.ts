@@ -123,17 +123,8 @@ export async function GET(req: Request) {
     const dateTo = searchParams.get("dateTo") ?? "";
     const category = searchParams.get("category") ?? "all";
     const picker = searchParams.get("view") === "picker";
-    const offset = Math.max(
-      0,
-      Number.parseInt(searchParams.get("offset") ?? "0", 10) || 0,
-    );
-    const limit = Math.min(
-      50,
-      Math.max(
-        10,
-        Number.parseInt(searchParams.get("limit") ?? "20", 10) || 20,
-      ),
-    );
+    const offset = Math.max(0, Number.parseInt(searchParams.get("offset") ?? "0", 10) || 0);
+    const limit = Math.min(50, Math.max(10, Number.parseInt(searchParams.get("limit") ?? "20", 10) || 20));
 
     const orderBy =
       sort === "oldest"
@@ -143,17 +134,9 @@ export async function GET(req: Request) {
           : sort === "nameDesc"
             ? [{ name: "desc" as const }, { id: "asc" as const }]
             : sort === "categoryAsc"
-              ? [
-                  { category: "asc" as const },
-                  { name: "asc" as const },
-                  { id: "asc" as const },
-                ]
+              ? [{ category: "asc" as const }, { name: "asc" as const }, { id: "asc" as const }]
               : sort === "categoryDesc"
-                ? [
-                    { category: "desc" as const },
-                    { name: "asc" as const },
-                    { id: "asc" as const },
-                  ]
+                ? [{ category: "desc" as const }, { name: "asc" as const }, { id: "asc" as const }]
                 : sort === "typeDefaultFirst" || sort === "typeOwnFirst"
                   ? [{ name: "asc" as const }, { id: "asc" as const }]
                   : [{ createdAt: "desc" as const }, { id: "asc" as const }];
@@ -163,9 +146,7 @@ export async function GET(req: Request) {
       ...(dateFrom || dateTo
         ? {
             createdAt: {
-              ...(dateFrom
-                ? { gte: new Date(`${dateFrom}T00:00:00.000Z`) }
-                : {}),
+              ...(dateFrom ? { gte: new Date(`${dateFrom}T00:00:00.000Z`) } : {}),
               ...(dateTo ? { lte: new Date(`${dateTo}T23:59:59.999Z`) } : {}),
             },
           }
@@ -187,16 +168,9 @@ export async function GET(req: Request) {
         : DEFAULT_TEMPLATES.filter(
             (template) =>
               (category === "all" || template.category === category) &&
-              (!dateFrom ||
-                new Date(template.createdAt) >=
-                  new Date(`${dateFrom}T00:00:00.000Z`)) &&
-              (!dateTo ||
-                new Date(template.createdAt) <=
-                  new Date(`${dateTo}T23:59:59.999Z`)) &&
-              (!q ||
-                `${template.name} ${template.description}`
-                  .toLocaleLowerCase()
-                  .includes(q.toLocaleLowerCase())),
+              (!dateFrom || new Date(template.createdAt) >= new Date(`${dateFrom}T00:00:00.000Z`)) &&
+              (!dateTo || new Date(template.createdAt) <= new Date(`${dateTo}T23:59:59.999Z`)) &&
+              (!q || `${template.name} ${template.description}`.toLocaleLowerCase().includes(q.toLocaleLowerCase())),
           );
 
     const overriddenNames =
@@ -206,9 +180,7 @@ export async function GET(req: Request) {
               await prisma.template.findMany({
                 where: {
                   organizationId: s.organizationId,
-                  name: {
-                    in: defaultsCandidate.map((template) => template.name),
-                  },
+                  name: { in: defaultsCandidate.map((template) => template.name) },
                 },
                 select: { name: true },
               })
@@ -240,79 +212,41 @@ export async function GET(req: Request) {
             },
       );
 
-    const savedCount =
-      source === "default" ? 0 : await prisma.template.count({ where });
+    const savedCount = source === "default" ? 0 : await prisma.template.count({ where });
     const savedTemplates =
       source === "default"
         ? []
         : await prisma.template.findMany({
             where,
             select: picker
-              ? {
-                  id: true,
-                  name: true,
-                  description: true,
-                  emailSubject: true,
-                  category: true,
-                  variablesJson: true,
-                  createdAt: true,
-                }
-              : {
-                  id: true,
-                  name: true,
-                  description: true,
-                  category: true,
-                  variablesJson: true,
-                  isExample: true,
-                  createdAt: true,
-                },
+              ? { id: true, name: true, description: true, emailSubject: true, category: true, variablesJson: true, createdAt: true }
+              : { id: true, name: true, description: true, category: true, variablesJson: true, isExample: true, createdAt: true },
             orderBy,
             take: Math.min(savedCount, offset + limit + defaults.length),
           });
 
     const result = [...defaults, ...savedTemplates].sort((a, b) => {
-      if (sort === "nameAsc")
-        return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
-      if (sort === "nameDesc")
-        return b.name.localeCompare(a.name) || a.id.localeCompare(b.id);
-      if (sort === "categoryAsc")
-        return (
-          a.category.localeCompare(b.category) ||
-          a.name.localeCompare(b.name) ||
-          a.id.localeCompare(b.id)
-        );
-      if (sort === "categoryDesc")
-        return (
-          b.category.localeCompare(a.category) ||
-          a.name.localeCompare(b.name) ||
-          a.id.localeCompare(b.id)
-        );
+      if (sort === "nameAsc") return a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+      if (sort === "nameDesc") return b.name.localeCompare(a.name) || a.id.localeCompare(b.id);
+      if (sort === "categoryAsc") return a.category.localeCompare(b.category) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+      if (sort === "categoryDesc") return b.category.localeCompare(a.category) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
       if (sort === "typeDefaultFirst" || sort === "typeOwnFirst") {
         const aDefault = a.id.startsWith("default:") ? 0 : 1;
         const bDefault = b.id.startsWith("default:") ? 0 : 1;
         const delta = aDefault - bDefault;
-        return (
-          (sort === "typeDefaultFirst" ? delta : -delta) ||
-          a.name.localeCompare(b.name) ||
-          a.id.localeCompare(b.id)
-        );
+        return (sort === "typeDefaultFirst" ? delta : -delta) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
       }
-      const delta =
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      const delta = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       return (sort === "oldest" ? delta : -delta) || a.id.localeCompare(b.id);
     });
 
     const total = defaults.length + savedCount;
     const items = result.slice(offset, offset + limit);
-    const nextOffset =
-      offset + items.length < total ? offset + items.length : null;
+    const nextOffset = offset + items.length < total ? offset + items.length : null;
     return NextResponse.json({ items, nextOffset, total });
   } catch (error) {
     console.error("GET /api/templates failed", error);
-    return NextResponse.json(
-      { message: "Could not load templates" },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: "Could not load templates" }, { status: 500 });
   }
 }
 export async function POST(req: Request) {

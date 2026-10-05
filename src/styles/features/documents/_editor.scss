@@ -937,9 +937,7 @@
   z-index: 1;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox:has(.template-combobox-menu) {
+.document-generator-shell .document-form-card .template-combobox:has(.template-combobox-menu) {
   z-index: 90;
 }
 
@@ -1940,17 +1938,11 @@ thead .data-table-actions-column {
 /* 2.4.8 critical: the document template picker has one visual surface at a time.
    When expanded, the search/filter/results panel replaces the large placeholder trigger
    instead of looking like a second control glued underneath it. */
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  > .template-combobox-trigger {
+.document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-trigger {
   display: none;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  > .template-combobox-menu {
+.document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-menu {
   position: relative;
   z-index: 1;
   top: auto;
@@ -1962,32 +1954,20 @@ thead .data-table-actions-column {
   box-shadow: none;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-search {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-search {
   margin-bottom: 12px;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-filter {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-filter {
   margin-bottom: 10px;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-options {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options {
   max-height: 320px;
 }
 
 @media (max-width: 760px) {
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    > .template-combobox-menu {
+  .document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-menu {
     position: relative;
     top: auto;
     right: auto;
@@ -1996,19 +1976,13 @@ thead .data-table-actions-column {
     max-height: none;
   }
 
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    .template-combobox-options {
+  .document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options {
     max-height: min(46dvh, 360px);
   }
 }
 
 /* 2.4.8 critical: visually separate template discovery controls from results. */
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  > .template-combobox-menu {
+.document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-menu {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(240px, 0.85fr);
   gap: 12px 14px;
@@ -2017,37 +1991,21 @@ thead .data-table-actions-column {
   background: var(--surface, #fff);
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-search,
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-filter {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-search,
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-filter {
   min-width: 0;
   margin: 0;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-search {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-search {
   align-self: end;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-filter
-  .field {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-filter .field {
   margin: 0;
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-options {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options {
   grid-column: 1 / -1;
   gap: 6px;
   max-height: 330px;
@@ -2056,11 +2014,7 @@ thead .data-table-actions-column {
   border-top: 1px solid var(--border);
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-options
-  button {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options button {
   min-height: 58px;
   padding: 10px 12px;
   border: 1px solid transparent;
@@ -2068,37 +2022,23 @@ thead .data-table-actions-column {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    .template-combobox-options
-    button:hover {
+  .document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options button:hover {
     border-color: var(--border);
     background: var(--hover, #f8fafc);
   }
 }
 
-.document-generator-shell
-  .document-form-card
-  .template-combobox.is-open
-  .template-combobox-options
-  button.selected {
+.document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options button.selected {
   border-color: var(--accent, #6366f1);
   background: color-mix(in srgb, var(--accent, #6366f1) 12%, transparent);
 }
 
 @media (max-width: 900px) {
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    > .template-combobox-menu {
+  .document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-menu {
     grid-template-columns: 1fr;
   }
 
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    .template-combobox-options {
+  .document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options {
     grid-column: 1;
   }
 }
@@ -2122,24 +2062,19 @@ thead .data-table-actions-column {
 }
 
 @media (max-width: 760px) {
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    > .template-combobox-menu {
+  .document-generator-shell .document-form-card .template-combobox.is-open > .template-combobox-menu {
     max-height: calc(100dvh - 170px) !important;
     overflow: hidden;
   }
 
-  .document-generator-shell
-    .document-form-card
-    .template-combobox.is-open
-    .template-combobox-options {
+  .document-generator-shell .document-form-card .template-combobox.is-open .template-combobox-options {
     min-height: 0;
     max-height: calc(100dvh - 300px) !important;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 }
+
 
 /* 2.4.8 critical mobile generator shell: keep one continuous surface above bottom nav. */
 @media (max-width: 900px) {

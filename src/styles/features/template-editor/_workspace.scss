@@ -1076,7 +1076,7 @@
 .data-table-row-limits {
   display: grid;
   grid-template-columns: auto auto;
-  justify-content: end;
+    justify-content: end;
   gap: 10px;
 }
 .data-table-required-row {
@@ -2683,11 +2683,7 @@ body.data-table-is-resizing * {
   min-height: 36px;
   padding: 7px 11px;
   border-radius: 9px;
-  transition:
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
 .editor-header-meta-actions .editor-header-meta-cancel {
   border: 1px solid var(--border);
@@ -2741,15 +2737,9 @@ body.data-table-is-resizing * {
   min-width: 0 !important;
 }
 
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-drag-handle,
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-pdf-visibility,
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-delete {
+.data-table-designer-table .data-table-column-actions .data-table-column-drag-handle,
+.data-table-designer-table .data-table-column-actions .data-table-column-pdf-visibility,
+.data-table-designer-table .data-table-column-actions .data-table-column-delete {
   box-sizing: border-box !important;
   flex: 0 0 28px !important;
   width: 28px !important;
@@ -2767,27 +2757,19 @@ body.data-table-is-resizing * {
   color: var(--text-muted) !important;
 }
 
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-pdf-visibility:hover,
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-drag-handle:hover {
+.data-table-designer-table .data-table-column-actions .data-table-column-pdf-visibility:hover,
+.data-table-designer-table .data-table-column-actions .data-table-column-drag-handle:hover {
   color: var(--text) !important;
   background: color-mix(in srgb, var(--text) 7%, transparent) !important;
 }
 
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-pdf-visibility.is-hidden {
+.data-table-designer-table .data-table-column-actions .data-table-column-pdf-visibility.is-hidden {
   color: var(--primary) !important;
   opacity: 1;
   background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
 }
 
-.data-table-designer-table
-  .data-table-column-actions
-  .data-table-column-delete:hover {
+.data-table-designer-table .data-table-column-actions .data-table-column-delete:hover {
   color: var(--danger) !important;
   background: color-mix(in srgb, var(--danger) 9%, transparent) !important;
 }
@@ -2799,4 +2781,21 @@ body.data-table-is-resizing * {
 .data-table-designer-table .data-table-column-actions-spacer {
   flex: 1 1 auto;
   min-width: 8px;
+}
+
+/* 2.4.8 mobile A4 end clearance.
+   Keep the existing paper-stage scrolling behavior; this wrapper only makes
+   room after the scaled sheet so its footer can rest above fixed bottom nav. */
+.paper-stage-content {
+  width: max-content;
+  min-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .paper-stage-content {
+    width: max-content;
+    min-width: 100%;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    box-sizing: content-box;
+  }
 }

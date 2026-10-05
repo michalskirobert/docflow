@@ -79,12 +79,10 @@ async function DashboardContent() {
 
   const yearlyExpired = Boolean(
     subscription?.plan === "YEARLY" &&
-    subscription.currentPeriodEndsAt &&
-    subscription.currentPeriodEndsAt.getTime() < Date.now(),
+      subscription.currentPeriodEndsAt &&
+      subscription.currentPeriodEndsAt.getTime() < Date.now(),
   );
-  const limit = yearlyExpired
-    ? 10
-    : (subscription?.monthlyDocumentLimit ?? null);
+  const limit = yearlyExpired ? 10 : (subscription?.monthlyDocumentLimit ?? null);
   const remaining = limit == null ? null : Math.max(0, limit - usedThisMonth);
   const isAnnual =
     subscription?.plan === "YEARLY" &&
@@ -162,9 +160,7 @@ async function DashboardContent() {
           <div>
             <b>{t("license")}</b>
             <h2>{isAnnual ? t("annualLicense") : t("freeLicense")}</h2>
-            <span
-              className={`status-pill ${showExpiryAlert ? "warning" : "success"}`}
-            >
+            <span className={`status-pill ${showExpiryAlert ? "warning" : "success"}`}>
               {showExpiryAlert && daysUntilExpiry !== null
                 ? daysUntilExpiry === 0
                   ? t("expiresToday")

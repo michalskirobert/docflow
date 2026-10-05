@@ -989,10 +989,7 @@
   color: var(--text);
   font-weight: 700;
   text-decoration: none;
-  transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    transform 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .settings-link-row:hover,
@@ -1200,9 +1197,7 @@
   color: var(--muted);
   font-weight: 650;
   text-decoration: none;
-  transition:
-    color 0.15s ease,
-    background 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .dictionaries-back:hover,

@@ -21,10 +21,7 @@ export async function POST(
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { message: "Payment not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ message: "Payment not found" }, { status: 404 });
     }
 
     if (payment.provider === "PAYU" && payment.providerOrderId) {

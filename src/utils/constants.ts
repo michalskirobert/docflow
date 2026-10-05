@@ -3,33 +3,13 @@ export const FREE_MONTHLY_DOCUMENT_LIMIT = 10;
 export const ANNUAL_MONTHLY_DOCUMENT_LIMIT = 100;
 export const A4_WIDTH_PX = 794;
 export const TEMPLATE_EDITOR_FONT_FAMILIES = [
-  {
-    label: "Arial",
-    value: "Arial, Helvetica, sans-serif",
-    aliases: ["Arial", "Helvetica"],
-  },
-  {
-    label: "Times New Roman",
-    value: "\'Times New Roman\', Times, serif",
-    aliases: ["Times New Roman", "Times"],
-  },
+  { label: "Arial", value: "Arial, Helvetica, sans-serif", aliases: ["Arial", "Helvetica"] },
+  { label: "Times New Roman", value: "\'Times New Roman\', Times, serif", aliases: ["Times New Roman", "Times"] },
   { label: "Georgia", value: "Georgia, serif", aliases: ["Georgia"] },
-  {
-    label: "Verdana",
-    value: "Verdana, Geneva, sans-serif",
-    aliases: ["Verdana", "Geneva"],
-  },
+  { label: "Verdana", value: "Verdana, Geneva, sans-serif", aliases: ["Verdana", "Geneva"] },
   { label: "Tahoma", value: "Tahoma, Geneva, sans-serif", aliases: ["Tahoma"] },
-  {
-    label: "Trebuchet MS",
-    value: "\'Trebuchet MS\', Arial, sans-serif",
-    aliases: ["Trebuchet MS"],
-  },
-  {
-    label: "Courier New",
-    value: "\'Courier New\', Courier, monospace",
-    aliases: ["Courier New", "Courier"],
-  },
+  { label: "Trebuchet MS", value: "\'Trebuchet MS\', Arial, sans-serif", aliases: ["Trebuchet MS"] },
+  { label: "Courier New", value: "\'Courier New\', Courier, monospace", aliases: ["Courier New", "Courier"] },
 ] as const;
 
 export const normalizeTemplateEditorFontFamily = (fontFamily: string) => {

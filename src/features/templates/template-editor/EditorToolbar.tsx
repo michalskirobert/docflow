@@ -19,10 +19,7 @@ import {
   Undo2,
   Variable,
 } from "lucide-react";
-import {
-  FONT_SIZES_PX,
-  TEMPLATE_EDITOR_FONT_FAMILIES,
-} from "@/utils/constants";
+import { FONT_SIZES_PX, TEMPLATE_EDITOR_FONT_FAMILIES } from "@/utils/constants";
 export type ToolbarState = {
   bold: boolean;
   italic: boolean;

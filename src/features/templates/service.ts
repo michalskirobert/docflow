@@ -1,11 +1,5 @@
 "use client";
-import {
-  useDelete,
-  useGet,
-  useInfiniteGet,
-  usePost,
-  usePut,
-} from "@/hooks/use-api";
+import { useDelete, useGet, useInfiniteGet, usePost, usePut } from "@/hooks/use-api";
 import type { Template, TemplateSummary, TemplateVariable } from "./types";
 export type TemplateInput = {
   name: string;

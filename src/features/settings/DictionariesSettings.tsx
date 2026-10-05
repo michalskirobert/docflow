@@ -21,9 +21,7 @@ export function DictionariesSettings() {
   const t = useTranslations("categories");
   const { confirm, notify } = useFeedback();
   const categories = useGet<CustomCategory[]>(["categories"], "/categories");
-  const create = usePost<CustomCategory, { name: string }>("/categories", [
-    ["categories"],
-  ]);
+  const create = usePost<CustomCategory, { name: string }>("/categories", [["categories"]]);
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -79,9 +77,7 @@ export function DictionariesSettings() {
         </div>
         <div className="dictionary-system-chips">
           {SYSTEM_CATEGORY_KEYS.map((key) => (
-            <span className="dictionary-system-chip" key={key}>
-              {t(`system.${key}`)}
-            </span>
+            <span className="dictionary-system-chip" key={key}>{t(`system.${key}`)}</span>
           ))}
         </div>
       </div>
@@ -93,12 +89,7 @@ export function DictionariesSettings() {
             <p>{t("customCategoriesHelp")}</p>
           </div>
           {!adding && (
-            <Button
-              type="button"
-              variant="ghost"
-              className="settings-category-add"
-              onClick={() => setAdding(true)}
-            >
+            <Button type="button" variant="ghost" className="settings-category-add" onClick={() => setAdding(true)}>
               <Plus size={17} />
               {t("addCustom")}
             </Button>
@@ -126,25 +117,10 @@ export function DictionariesSettings() {
               }}
               suffix={
                 <InputActions>
-                  <InputAction
-                    label={t("save")}
-                    onClick={() => void add()}
-                    disabled={name.trim().length < 2 || create.isPending}
-                  >
-                    {create.isPending ? (
-                      <LoaderCircle className="spinner" size={18} />
-                    ) : (
-                      <Check size={18} />
-                    )}
+                  <InputAction label={t("save")} onClick={() => void add()} disabled={name.trim().length < 2 || create.isPending}>
+                    {create.isPending ? <LoaderCircle className="spinner" size={18} /> : <Check size={18} />}
                   </InputAction>
-                  <InputAction
-                    label={t("cancel")}
-                    onClick={() => {
-                      setAdding(false);
-                      setName("");
-                    }}
-                    disabled={create.isPending}
-                  >
+                  <InputAction label={t("cancel")} onClick={() => { setAdding(false); setName(""); }} disabled={create.isPending}>
                     <X size={18} />
                   </InputAction>
                 </InputActions>
@@ -154,16 +130,12 @@ export function DictionariesSettings() {
         )}
 
         {categories.isPending && !categories.data && (
-          <div className="dictionary-loading">
-            <LoaderCircle className="spinner" size={20} /> {t("loading")}
-          </div>
+          <div className="dictionary-loading"><LoaderCircle className="spinner" size={20} /> {t("loading")}</div>
         )}
 
-        {!categories.isPending &&
-          (categories.data ?? []).length === 0 &&
-          !adding && (
-            <p className="dictionary-empty">{t("customCategoriesEmpty")}</p>
-          )}
+        {!categories.isPending && (categories.data ?? []).length === 0 && !adding && (
+          <p className="dictionary-empty">{t("customCategoriesEmpty")}</p>
+        )}
 
         {(categories.data ?? []).length > 0 && (
           <div className="dictionary-custom-list">
@@ -171,12 +143,7 @@ export function DictionariesSettings() {
               <div className="dictionary-custom-row" key={category.id}>
                 <div className="dictionary-category-copy">
                   <strong>{category.name}</strong>
-                  <small>
-                    {t("usage", {
-                      templates: category.templatesCount,
-                      documents: category.documentsCount,
-                    })}
-                  </small>
+                  <small>{t("usage", { templates: category.templatesCount, documents: category.documentsCount })}</small>
                 </div>
                 <Button
                   type="button"

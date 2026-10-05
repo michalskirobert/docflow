@@ -38,9 +38,7 @@ const chromeRegionCss = `
 `;
 
 async function optimizeRasterImages(
-  page: Awaited<
-    ReturnType<Awaited<ReturnType<typeof puppeteer.launch>>["newPage"]>
-  >,
+  page: Awaited<ReturnType<Awaited<ReturnType<typeof puppeteer.launch>>["newPage"]>>,
 ) {
   await page.evaluate(async () => {
     const images = Array.from(document.images);
@@ -54,11 +52,7 @@ async function optimizeRasterImages(
           });
         if (!image.naturalWidth || !image.naturalHeight) return;
 
-        const scale = Math.min(
-          1,
-          1280 / image.naturalWidth,
-          800 / image.naturalHeight,
-        );
+        const scale = Math.min(1, 1280 / image.naturalWidth, 800 / image.naturalHeight);
         const width = Math.max(1, Math.round(image.naturalWidth * scale));
         const height = Math.max(1, Math.round(image.naturalHeight * scale));
         const canvas = document.createElement("canvas");
@@ -85,23 +79,15 @@ async function optimizeRasterImages(
   });
 }
 
-export async function createDocumentPdf({
-  content,
-  header,
-  footer,
-  pageNumbers,
-}: PdfInput) {
+export async function createDocumentPdf({ content, header, footer, pageNumbers }: PdfInput) {
   const isVercel = Boolean(process.env.VERCEL);
   const localExecutablePath = process.env.CHROME_EXECUTABLE_PATH;
   const browser = await puppeteer.launch({
     headless: true,
-    args: isVercel
-      ? chromium.args
-      : ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: isVercel ? chromium.args : ["--no-sandbox", "--disable-setuid-sandbox"],
     executablePath: isVercel
       ? await chromium.executablePath()
-      : localExecutablePath ||
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      : localExecutablePath || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   });
 
   try {
