@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/server/auth/require-session";
-import { cancelPayUOrder } from "@/server/payu/client";
+import { cancelPayUOrder, getPayUOrder } from "@/server/payu/client";
+import { syncPayUPayment } from "@/server/payu/payment-sync";
 
 export async function POST(
   _request: Request,
@@ -27,6 +28,27 @@ export async function POST(
     }
 
     if (payment.provider === "PAYU" && payment.providerOrderId) {
+      const payuOrder = await getPayUOrder(payment.providerOrderId);
+      const synchronized = await syncPayUPayment({
+        orderId: payuOrder.orderId ?? payment.providerOrderId,
+        extOrderId: payuOrder.extOrderId ?? payment.extOrderId,
+        status: payuOrder.status,
+      });
+
+      if (synchronized?.status === "COMPLETED") {
+        return NextResponse.json(
+          {
+            message: "Payment is already completed",
+            status: "COMPLETED",
+          },
+          { status: 409 },
+        );
+      }
+
+      if (synchronized?.status === "CANCELED") {
+        return NextResponse.json({ ok: true, status: "CANCELED" });
+      }
+
       await cancelPayUOrder(payment.providerOrderId);
     }
 
@@ -35,7 +57,7 @@ export async function POST(
       data: { status: "CANCELED" },
     });
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, status: "CANCELED" });
   } catch (error) {
     console.error("[POST /api/billing/[id]/cancel]", error);
     return NextResponse.json(
