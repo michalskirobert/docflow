@@ -13,6 +13,7 @@ export const copy = {
       "Wpisz dokładnie ten identyfikator w tytule przelewu. Dzięki niemu przypiszemy wpłatę do Twojego konta.",
     recipient: "Odbiorca",
     account: "Numer rachunku",
+    copyReference: "Kopiuj tytuł przelewu",
   },
   en: {
     step: "ONE LAST STEP",
@@ -28,6 +29,7 @@ export const copy = {
       "Use this exact identifier as the bank transfer title so we can match the payment to your account.",
     recipient: "Recipient",
     account: "Bank account",
+    copyReference: "Copy transfer title",
   },
   id: {
     step: "LANGKAH TERAKHIR",
@@ -43,5 +45,6 @@ export const copy = {
       "Gunakan identitas ini persis sebagai judul transfer agar pembayaran dapat dicocokkan dengan akun Anda.",
     recipient: "Penerima",
     account: "Rekening bank",
+    copyReference: "Salin judul transfer",
   },
 };

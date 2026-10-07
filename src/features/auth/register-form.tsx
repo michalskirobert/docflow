@@ -17,6 +17,7 @@ import {
 import { PendingOverlay } from "@/components/ui/pending-overlay";
 import {
   Building2,
+  Search,
   CalendarDays,
   CreditCard,
   Gift,
@@ -495,6 +496,11 @@ export default function RegisterForm() {
                 onClick={lookupCompany}
                 disabled={companyLoading}
               >
+                {companyLoading ? (
+                  <LoaderCircle className="company-lookup-spinner" size={17} />
+                ) : (
+                  <Search size={17} />
+                )}
                 {companyLoading ? t("companyLoading") : t("fetchCompany")}
               </button>
             </div>

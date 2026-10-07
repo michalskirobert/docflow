@@ -4,8 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { getSession } from "@/server/auth/session";
 import { prisma } from "@/lib/prisma";
-import LanguageSwitcher from "@/features/language/language-switcher";
 import { DocFlowLogo } from "@/components/brand/docflow-logo";
+import { AuthFooter } from "@/features/auth/auth-footer";
 import { isLocale, type Locale } from "@/i18n/config";
 import { publicPageMetadata } from "@/lib/seo";
 import { ArrowLeft } from "lucide-react";
@@ -46,21 +46,23 @@ export default async function RegisterPage({
   const t = await getTranslations("auth");
   return (
     <main className="login-page">
-      <section className="login-card wide">
-        <div className="auth-topbar">
-          <Link href="/login" className="auth-back">
-            <ArrowLeft size={16} /> {t("backToLogin")}
-          </Link>
-          <LanguageSwitcher compact />
-        </div>
-        <DocFlowLogo className="login-brand-logo" showByline />
-        <h1>{t("registerTitle")}</h1>
-        <p className="muted">{t("registerDescription")}</p>
-        <RegisterForm />
-        <p className="auth-switch auth-switch-page">
-          {t("alreadyAccount")} <Link href="/login">{t("signIn")}</Link>
-        </p>
-      </section>
+      <div className="auth-shell auth-shell-wide">
+        <section className="login-card wide">
+          <div className="auth-topbar">
+            <Link href="/login" className="auth-back">
+              <ArrowLeft size={16} /> {t("backToLogin")}
+            </Link>
+          </div>
+          <DocFlowLogo className="login-brand-logo" showByline />
+          <h1>{t("registerTitle")}</h1>
+          <p className="muted">{t("registerDescription")}</p>
+          <RegisterForm />
+          <p className="auth-switch auth-switch-page">
+            {t("alreadyAccount")} <Link href="/login">{t("signIn")}</Link>
+          </p>
+        </section>
+        <AuthFooter />
+      </div>
     </main>
   );
 }

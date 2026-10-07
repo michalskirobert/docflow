@@ -35,7 +35,6 @@ export default function LanguageSwitcher({
       {
         onSettled: () => {
           router.replace(pathname, { locale: nextLocale });
-          router.refresh();
         },
       },
     );

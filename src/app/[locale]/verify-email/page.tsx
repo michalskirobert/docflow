@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/axios";
 import { Link, useRouter } from "@/i18n/navigation";
-import LanguageSwitcher from "@/features/language/language-switcher";
 
 type VerificationResult = {
   authenticated: boolean;
@@ -81,28 +80,25 @@ function VerifyEmailContent() {
 
   return (
     <main className="auth-page modern-auth">
-      <section className="auth-card status-card">
-        <div className="auth-language">
-          <LanguageSwitcher />
-        </div>
-
-        <div className={`status-icon ${state}`}>
-          <Icon />
-        </div>
-
-        <span className="eyebrow">
+      <section className="auth-card status-card verify-email-card">
+        <span className="eyebrow verify-email-eyebrow">
           <ShieldCheck size={14} /> ACCOUNT SECURITY
         </span>
 
-        <h1>
-          {state === "loading"
-            ? "Verifying your email…"
-            : state === "ok"
-              ? "Email verified"
-              : "Verification failed"}
-        </h1>
+        <div className="verify-email-heading">
+          <span className={`verify-email-icon ${state}`} aria-hidden="true">
+            <Icon />
+          </span>
+          <h1 className="verify-email-title">
+            {state === "loading"
+              ? "Verifying your email…"
+              : state === "ok"
+                ? "Email verified"
+                : "Verification failed"}
+          </h1>
+        </div>
 
-        <p>
+        <p className="verify-email-copy">
           {state === "ok"
             ? result?.paymentRequired
               ? "Your account is verified. Your annual plan payment is waiting for you."
@@ -147,13 +143,15 @@ function VerifyEmailContent() {
         )}
 
         {state === "ok" && !result?.paymentRequired && (
-          <Link className="btn full" href="/login">
+          <Link className="btn full verify-email-primary" href="/login">
+            <LogIn size={18} />
             Continue to sign in
           </Link>
         )}
 
         {state === "error" && (
-          <Link className="btn full" href="/login">
+          <Link className="btn full verify-email-primary" href="/login">
+            <LogIn size={18} />
             Back to sign in
           </Link>
         )}
@@ -165,15 +163,17 @@ function VerifyEmailContent() {
 function VerifyEmailFallback() {
   return (
     <main className="auth-page modern-auth">
-      <section className="auth-card status-card">
-        <div className="status-icon loading">
-          <LoaderCircle />
-        </div>
-        <span className="eyebrow">
+      <section className="auth-card status-card verify-email-card">
+        <span className="eyebrow verify-email-eyebrow">
           <ShieldCheck size={14} /> ACCOUNT SECURITY
         </span>
-        <h1>Verifying your email…</h1>
-        <p>This will only take a moment.</p>
+        <div className="verify-email-heading">
+          <span className="verify-email-icon loading" aria-hidden="true">
+            <LoaderCircle />
+          </span>
+          <h1 className="verify-email-title">Verifying your email…</h1>
+        </div>
+        <p className="verify-email-copy">This will only take a moment.</p>
       </section>
     </main>
   );

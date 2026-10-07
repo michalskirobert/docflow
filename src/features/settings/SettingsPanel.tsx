@@ -12,6 +12,7 @@ import {
   ShieldAlert,
   TriangleAlert,
   Trash2,
+  XCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFeedback } from "@/components/ui/feedback-provider";
@@ -112,6 +113,16 @@ export default function SettingsPanel() {
     billing.data?.payments.filter((payment) => payment.status === "PENDING") ??
     [];
   const currentPending = pending[0];
+
+  useEffect(() => {
+    if (
+      currentPending?.provider === "PAYU" ||
+      currentPending?.provider === "BANK_TRANSFER"
+    ) {
+      setMethod(currentPending.provider);
+    }
+  }, [currentPending?.provider]);
+
   const cancelPayment = useCancelLicensePayment(
     currentPending?.id ?? "missing",
   );
@@ -247,7 +258,7 @@ export default function SettingsPanel() {
                     <StatusBadge status="PENDING" label={t("pending")} />
                     <button
                       type="button"
-                      className="btn secondary compact"
+                      className="btn secondary compact payment-cancel-button"
                       disabled={paymentBusy}
                       onClick={async () => {
                         if (
@@ -267,8 +278,10 @@ export default function SettingsPanel() {
                         }
                       }}
                     >
-                      {cancelPayment.isPending && (
+                      {cancelPayment.isPending ? (
                         <LoaderCircle className="spinner" size={15} />
+                      ) : (
+                        <XCircle size={16} aria-hidden="true" />
                       )}
                       {t("cancelPayment")}
                     </button>
@@ -357,7 +370,7 @@ export default function SettingsPanel() {
 
                   {effectiveSelectedPlan === "YEARLY" && (
                     <>
-                      <div className="field">
+                      <div className="field settings-payment-method-field">
                         <span>{t("paymentMethod")}</span>
                         <div
                           className="payment-method-grid"
