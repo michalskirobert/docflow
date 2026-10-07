@@ -1929,3 +1929,214 @@
     margin-top: 7px;
   }
 }
+
+/* 2.4.9 auth CTA normalization.
+   Auth navigation may be implemented with <Link>, but these controls are
+   visually buttons and must never inherit anchor underlines. */
+.auth-form .btn,
+.auth-form .btn:link,
+.auth-form .btn:visited,
+.auth-form .btn:hover,
+.auth-form .btn:focus,
+.auth-form .btn:focus-visible,
+.auth-form .btn:active,
+.auth-status-card .btn,
+.auth-status-card .btn:link,
+.auth-status-card .btn:visited,
+.auth-status-card .btn:hover,
+.auth-status-card .btn:focus,
+.auth-status-card .btn:focus-visible,
+.auth-status-card .btn:active,
+.auth-status-action,
+.auth-status-action:link,
+.auth-status-action:visited,
+.auth-status-action:hover,
+.auth-status-action:focus,
+.auth-status-action:focus-visible,
+.auth-status-action:active,
+.auth-success-actions a,
+.auth-success-actions a:link,
+.auth-success-actions a:visited,
+.auth-success-actions a:hover,
+.auth-success-actions a:focus,
+.auth-success-actions a:focus-visible,
+.auth-success-actions a:active {
+  text-decoration: none !important;
+}
+
+.auth-status-card .btn,
+.auth-status-action,
+.auth-success-actions a.btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  line-height: 1.2;
+}
+
+.auth-status-card .btn svg,
+.auth-status-action svg,
+.auth-success-actions a.btn svg {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+.auth-success-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.auth-success-actions .btn {
+  width: auto !important;
+  min-width: 190px;
+  min-height: 44px;
+  padding: 11px 18px !important;
+}
+
+.auth-success-actions .btn.secondary {
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 520px) {
+  .auth-success-actions {
+    align-items: stretch;
+  }
+
+  .auth-success-actions .btn {
+    width: 100% !important;
+    min-width: 0;
+  }
+}
+
+/* 2.4.9 final auth action cleanup — actual registration/verify selectors. */
+.registration-success-action,
+.registration-success-action:link,
+.registration-success-action:visited,
+.registration-success-action:hover,
+.registration-success-action:focus,
+.registration-success-action:focus-visible,
+.registration-success-action:active,
+.verify-email-card a.btn,
+.verify-email-card a.btn:link,
+.verify-email-card a.btn:visited,
+.verify-email-card a.btn:hover,
+.verify-email-card a.btn:focus,
+.verify-email-card a.btn:focus-visible,
+.verify-email-card a.btn:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+.registration-success-action *,
+.verify-email-card a.btn * {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+.registration-success-card {
+  width: min(100%, 560px);
+  max-width: 560px;
+  padding: 32px 34px;
+  overflow: visible;
+}
+
+.registration-success-card .registration-success-eyebrow {
+  margin-bottom: 14px;
+}
+
+.registration-success-card .registration-success-heading {
+  gap: 10px;
+}
+
+.registration-success-card .registration-success-heading h1 {
+  font-size: clamp(28px, 3vw, 34px);
+}
+
+.registration-success-card .registration-payment-panel {
+  margin-top: 20px;
+}
+
+.registration-success-card .registration-success-note {
+  margin-top: 18px;
+}
+
+.registration-success-card .registration-success-action {
+  width: auto !important;
+  min-width: 0;
+  min-height: 42px;
+  margin-top: 20px;
+  padding: 0 17px !important;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.registration-success-card .registration-success-action svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+.verify-email-card .auth-status-actions a.btn,
+.verify-email-card .verify-email-primary {
+  text-decoration: none !important;
+}
+
+@media (max-width: 620px) {
+  .registration-success-card {
+    width: 100%;
+    padding: 26px 22px;
+  }
+
+  .registration-success-card .registration-success-action {
+    width: 100% !important;
+    white-space: normal;
+  }
+}
+
+.verify-email-card .auth-status-actions {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: auto !important;
+  max-width: none !important;
+}
+
+.verify-email-card .auth-status-actions .verify-payment-action,
+.verify-email-card .auth-status-actions .verify-signin-action {
+  width: auto !important;
+  min-width: 190px;
+  min-height: 42px;
+  padding: 0 17px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  text-decoration: none !important;
+}
+
+.verify-email-card .auth-status-actions .verify-signin-action {
+  min-width: 0;
+  background: transparent !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 560px) {
+  .verify-email-card .auth-status-actions {
+    align-items: stretch;
+  }
+  .verify-email-card .auth-status-actions .verify-payment-action,
+  .verify-email-card .auth-status-actions .verify-signin-action {
+    width: 100% !important;
+  }
+}

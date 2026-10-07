@@ -112,7 +112,7 @@ function VerifyEmailContent() {
           <div className="auth-status-actions">
             {result.paymentMethod === "PAYU" && !result.paymentStarted ? (
               <button
-                className="btn full"
+                className="btn verify-payment-action"
                 type="button"
                 disabled={paymentLoading}
                 onClick={continueToPayment}
@@ -125,7 +125,7 @@ function VerifyEmailContent() {
                 {paymentLoading ? "Opening PayU…" : "Continue to payment"}
               </button>
             ) : (
-              <Link className="btn full" href="/login">
+              <Link className="btn verify-payment-action" href="/login">
                 <CreditCard size={17} />
                 Continue
               </Link>
@@ -135,7 +135,7 @@ function VerifyEmailContent() {
                 Payment could not be started. Please try again.
               </p>
             )}
-            <Link className="btn secondary full" href="/login">
+            <Link className="btn secondary verify-signin-action" href="/login">
               <LogIn size={17} />
               Sign in instead
             </Link>
