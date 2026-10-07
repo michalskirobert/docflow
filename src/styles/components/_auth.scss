@@ -562,3 +562,775 @@
 .plan-meta small {
   font-size: 12px;
 }
+
+/* 2.4.9 registration plan cards + details. Scoped to auth plan UI only. */
+.plan-card .plan-name,
+.plan-card .plan-copy,
+.plan-card .plan-meta {
+  min-width: 0;
+}
+.plan-card .plan-copy {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.plan-card .plan-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.plan-details-button {
+  grid-column: 2 / -1;
+  justify-self: start;
+  margin-top: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #818cf8;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.plan-details-modal {
+  width: min(620px, 100%);
+}
+.plan-details-content {
+  display: grid;
+  gap: 20px;
+}
+.plan-details-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-muted);
+}
+.plan-details-price strong {
+  font-size: 24px;
+}
+.plan-details-price span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.plan-details-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.plan-details-list > div {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.7fr) minmax(0, 1.3fr);
+  gap: 18px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.plan-details-list > div:first-child {
+  padding-top: 0;
+}
+.plan-details-list > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.plan-details-list dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.plan-details-list dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  .plan-details-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* 2.4.9 registration plan mobile layout.
+   Registration-only override: keep copy away from the radio/check column. */
+@media (max-width: 760px) {
+  .auth-form .plan-card {
+    grid-template-columns: 48px minmax(0, 1fr) 28px;
+    grid-template-areas:
+      "visual name check"
+      "copy copy copy"
+      "price price price"
+      "meta meta meta"
+      "details details details";
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: start;
+  }
+
+  .auth-form .plan-card .plan-visual {
+    width: 48px;
+    height: 48px;
+  }
+
+  .auth-form .plan-card .plan-name {
+    align-self: center;
+    padding-right: 4px;
+  }
+
+  .auth-form .plan-card .plan-check {
+    justify-self: end;
+    align-self: center;
+  }
+
+  .auth-form .plan-card .plan-copy {
+    grid-area: copy;
+    width: 100%;
+    padding-right: 0;
+    line-height: 1.45;
+  }
+
+  .auth-form .plan-card > span:not(.plan-check) {
+    grid-area: price;
+    margin-top: 2px;
+  }
+
+  .auth-form .plan-card .plan-meta {
+    grid-area: meta;
+  }
+
+  .auth-form .plan-card .plan-details-button {
+    grid-area: details;
+    margin-top: 2px;
+  }
+}
+
+/* 2.4.9 mobile registration polish.
+   Scoped to auth form so account/settings plan cards are not affected. */
+@media (max-width: 760px) {
+  .auth-form .plan-grid {
+    gap: 10px;
+  }
+
+  .auth-form .plan-card {
+    grid-template-columns: 46px minmax(0, 1fr) 24px;
+    grid-template-areas:
+      "visual name check"
+      "copy copy copy"
+      "price price price"
+      "meta meta meta"
+      "details details details";
+    column-gap: 11px;
+    row-gap: 7px;
+    padding: 14px !important;
+  }
+
+  .auth-form .plan-card.selected {
+    padding: 13px !important;
+  }
+
+  .auth-form .plan-card .plan-visual {
+    width: 46px;
+    height: 46px;
+  }
+
+  .auth-form .plan-card .plan-name {
+    align-self: center;
+    padding: 0;
+    line-height: 1.2;
+  }
+
+  .auth-form .plan-card .plan-check {
+    justify-self: end;
+    align-self: center;
+  }
+
+  .auth-form .plan-card .plan-copy {
+    grid-area: copy;
+    width: 100%;
+    margin-top: 2px;
+    padding: 0;
+    line-height: 1.45;
+  }
+
+  .auth-form .plan-card > span:not(.plan-check) {
+    grid-area: price;
+    margin-top: 2px;
+  }
+
+  .auth-form .plan-card .plan-meta {
+    grid-area: meta;
+  }
+
+  .auth-form .plan-card .plan-details-button {
+    grid-area: details;
+    grid-column: auto;
+    margin-top: 1px;
+  }
+
+  .auth-form .legal-backdrop:has(.plan-details-modal) {
+    place-items: end center;
+    padding: 10px 10px max(10px, env(safe-area-inset-bottom, 0px));
+    overscroll-behavior: contain;
+  }
+
+  .auth-form .plan-details-modal {
+    width: 100%;
+    height: auto;
+    max-height: min(82dvh, 720px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+
+  .auth-form .plan-details-modal > header {
+    padding: 16px 16px 13px;
+  }
+
+  .auth-form .plan-details-modal > header p {
+    margin-top: 5px;
+    line-height: 1.4;
+  }
+
+  .auth-form .plan-details-content {
+    gap: 14px;
+    padding: 15px 16px;
+  }
+
+  .auth-form .plan-details-price {
+    padding: 12px 14px;
+  }
+
+  .auth-form .plan-details-price strong {
+    font-size: 22px;
+  }
+
+  .auth-form .plan-details-list > div {
+    grid-template-columns: minmax(108px, 0.75fr) minmax(0, 1.25fr);
+    gap: 12px;
+    padding: 10px 0;
+  }
+
+  .auth-form .plan-details-modal > footer {
+    padding: 12px 16px;
+  }
+
+  .auth-form .plan-details-modal > footer .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-form .plan-details-list > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+}
+
+.auth-route-skeleton {
+  display: grid;
+  gap: 14px;
+}
+.auth-route-skeleton .auth-language {
+  min-height: 38px;
+}
+.auth-route-skeleton .auth-language .skeleton-action {
+  width: 120px;
+  justify-self: end;
+}
+.auth-brand-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.auth-brand-skeleton .skeleton-icon {
+  width: 46px;
+  height: 46px;
+}
+.auth-brand-skeleton .skeleton-line {
+  width: 130px;
+}
+.auth-route-skeleton .auth-form {
+  display: grid;
+  gap: 14px;
+}
+.auth-submit-skeleton {
+  width: 100%;
+  height: 42px;
+}
+
+/* 2.4.9 plan selection regression fix:
+   selected card highlight is the visual state; native radio remains accessible. */
+.auth-form .plan-card .plan-check {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .auth-form .plan-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-areas:
+      "visual name"
+      "copy copy"
+      "price price"
+      "meta meta"
+      "details details";
+  }
+
+  .auth-form .plan-card .plan-details-button {
+    grid-area: details;
+    display: inline-flex;
+    width: max-content;
+    max-width: 100%;
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+    justify-self: start;
+  }
+}
+
+/* Registration loading keeps approximately the same footprint as the real form. */
+.register-route-skeleton {
+  width: min(100%, 760px);
+}
+
+.register-title-skeleton {
+  width: min(260px, 58%);
+  height: 28px;
+}
+
+.register-copy-skeleton {
+  width: min(460px, 82%);
+}
+
+.register-fields-skeleton {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.register-section-skeleton {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.register-section-title-skeleton {
+  width: 150px;
+  height: 22px;
+}
+
+.register-plan-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.register-plan-skeleton {
+  min-height: 176px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.register-plan-skeleton > div {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.plan-title-skeleton {
+  width: 55%;
+  height: 20px;
+}
+.plan-price-skeleton {
+  width: 48%;
+  height: 20px;
+}
+.plan-details-skeleton {
+  width: 86px;
+}
+
+@media (max-width: 760px) {
+  .register-route-skeleton {
+    width: 100%;
+  }
+
+  .register-fields-skeleton,
+  .register-plan-skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .register-plan-skeleton {
+    min-height: 190px;
+  }
+}
+
+/* 2.4.9 unified selection standard — registration.
+   Selection is communicated by the whole card, never by a visible radio/check. */
+.auth-form .plan-card {
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+.auth-form .plan-card.selected {
+  border: 2px solid #6366f1 !important;
+  background: rgb(99 102 241 / 8%) !important;
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 10%) !important;
+}
+.auth-form .plan-card .plan-check {
+  display: none !important;
+}
+.auth-form .payment-option > .choice-field,
+.auth-form .payment-option > label,
+.auth-form .payment-option .choice-indicator {
+  display: none !important;
+}
+.auth-form .payment-option {
+  border: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+.auth-form .payment-option.selected {
+  border: 2px solid #6366f1 !important;
+  background: rgb(99 102 241 / 8%) !important;
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 10%) !important;
+}
+
+.auth-form .payment-option > .choice-field {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: inset(50%) !important;
+}
+
+/* 2.4.9 plan/payment visual polish. */
+.auth-form .payment-option {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px !important;
+}
+.auth-form .payment-option.selected {
+  padding: 15px 17px !important;
+}
+.auth-form .payment-option-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgb(99 102 241 / 12%);
+  color: #818cf8;
+}
+.auth-form .payment-option-copy {
+  min-width: 0;
+}
+.auth-form .payment-option-copy strong {
+  font-size: 16px;
+}
+.auth-form .payment-option-copy small {
+  line-height: 1.45;
+}
+.auth-form .payment-methods + .hint {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+.auth-form .payment-methods + .hint + .legal-consents,
+.auth-form .hint + .legal-consents {
+  margin-top: 24px;
+}
+
+/* Stable Plan details modal: FREE/YEARLY keep the same shell height.
+   Only content area scrolls if a locale needs more room. */
+.plan-details-modal {
+  height: min(680px, calc(100dvh - 48px));
+  min-height: min(680px, calc(100dvh - 48px));
+  max-height: min(680px, calc(100dvh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  transform-origin: center;
+  animation: planModalIn 180ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.plan-details-modal .plan-details-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.legal-backdrop:has(.plan-details-modal) {
+  animation: planBackdropIn 160ms ease-out both;
+}
+.plan-details-modal > header > div,
+.plan-details-modal .plan-details-list,
+.plan-details-modal .plan-details-price {
+  animation: planContentIn 220ms 45ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes planBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes planModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes planContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .legal-backdrop:has(.plan-details-modal),
+  .plan-details-modal,
+  .plan-details-modal > header > div,
+  .plan-details-modal .plan-details-list,
+  .plan-details-modal .plan-details-price {
+    animation: none !important;
+  }
+}
+@media (max-width: 760px) {
+  .auth-form .payment-option {
+    min-height: 96px;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px !important;
+  }
+  .auth-form .payment-option.selected {
+    padding: 13px !important;
+  }
+  .auth-form .payment-option-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .auth-form .plan-details-modal,
+  .plan-details-modal {
+    height: min(620px, calc(100dvh - 20px));
+    min-height: min(620px, calc(100dvh - 20px));
+    max-height: min(620px, calc(100dvh - 20px));
+  }
+}
+
+/* 2.4.9 payment cards use the same visual composition as plan cards:
+   icon + title in the header row, description aligned below the title. */
+.auth-form .payment-option {
+  grid-template-columns: 46px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "payment-icon payment-copy"
+    "payment-icon payment-copy";
+  align-items: center;
+}
+.auth-form .payment-option-icon {
+  grid-area: payment-icon;
+  align-self: center;
+}
+.auth-form .payment-option-copy {
+  grid-area: payment-copy;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+.auth-form .payment-option-copy strong,
+.auth-form .payment-option-copy small {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .auth-form .payment-option {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    min-height: 112px;
+    gap: 14px;
+    padding: 15px 16px !important;
+  }
+  .auth-form .payment-option.selected {
+    padding: 14px 15px !important;
+  }
+  .auth-form .payment-option-icon {
+    width: 46px;
+    height: 46px;
+  }
+}
+
+/* Keep the payment fallback note visually attached to payment methods,
+   without consuming a large vertical gap before consents. */
+.auth-form .payment-methods + .hint {
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
+}
+.auth-form .payment-methods + .hint + .legal-consents {
+  margin-top: 14px !important;
+}
+@media (max-width: 760px) {
+  .auth-form .payment-methods + .hint {
+    margin-top: 8px !important;
+    line-height: 1.4;
+  }
+  .auth-form .payment-methods + .hint + .legal-consents {
+    margin-top: 14px !important;
+  }
+}
+
+/* 2.4.9 payment cards mirror Choose plan composition exactly:
+   icon + title on row one, copy starts under the title. */
+.auth-form .payment-option,
+.auth-form .payment-option.selected {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  grid-template-areas:
+    "payment-icon payment-title"
+    "payment-icon payment-description" !important;
+  align-items: start !important;
+  column-gap: 14px !important;
+  row-gap: 5px !important;
+  padding: 16px 18px !important;
+}
+.auth-form .payment-option.selected {
+  padding: 15px 17px !important;
+}
+.auth-form .payment-option-icon {
+  grid-area: payment-icon !important;
+  align-self: start !important;
+  width: 46px !important;
+  height: 46px !important;
+}
+.auth-form .payment-option-title {
+  grid-area: payment-title !important;
+  align-self: end !important;
+  margin: 2px 0 0 !important;
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+}
+.auth-form .payment-option-description {
+  grid-area: payment-description !important;
+  display: block !important;
+  margin: 0 !important;
+  color: var(--muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+@media (max-width: 760px) {
+  .auth-form .payment-option,
+  .auth-form .payment-option.selected {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+    padding: 14px !important;
+  }
+  .auth-form .payment-option.selected {
+    padding: 13px !important;
+  }
+}
+
+/* 2.4.9 billing type follows the same selectable-card standard as plans/payment. */
+.auth-form .billing-type-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.auth-form .billing-type-card {
+  position: relative;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: none;
+}
+.auth-form .billing-type-card.selected {
+  padding: 13px 15px;
+  border: 2px solid #6366f1;
+  background: rgb(99 102 241 / 8%);
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 10%);
+}
+.auth-form .billing-type-radio {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: inset(50%) !important;
+}
+.auth-form .billing-type-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgb(99 102 241 / 12%);
+  color: #818cf8;
+}
+.auth-form .billing-type-card strong {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.auth-form .billing-type-card:focus-within {
+  outline: 2px solid color-mix(in srgb, #6366f1 70%, transparent);
+  outline-offset: 2px;
+}
+@media (max-width: 520px) {
+  .auth-form .billing-type-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 2.4.9 billing selection contrast — explicit light/dark states. */
+:root .auth-form .billing-type-card.selected {
+  border-color: #6366f1 !important;
+  background: color-mix(in srgb, #6366f1 9%, #ffffff) !important;
+  box-shadow:
+    0 0 0 4px rgb(99 102 241 / 13%),
+    0 10px 24px rgb(79 70 229 / 8%) !important;
+}
+:root .auth-form .billing-type-card.selected .billing-type-icon {
+  background: color-mix(in srgb, #6366f1 17%, #ffffff);
+  color: #4f46e5;
+}
+:root[data-theme="dark"] .auth-form .billing-type-card.selected {
+  border-color: #818cf8 !important;
+  background: color-mix(in srgb, #6366f1 17%, var(--surface)) !important;
+  box-shadow:
+    0 0 0 4px rgb(129 140 248 / 18%),
+    0 12px 28px rgb(2 6 23 / 28%) !important;
+}
+:root[data-theme="dark"]
+  .auth-form
+  .billing-type-card.selected
+  .billing-type-icon {
+  background: rgb(99 102 241 / 24%);
+  color: #a5b4fc;
+}

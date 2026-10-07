@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import {
+  CalendarDays,
   CreditCard,
   Download,
+  Gift,
+  Landmark,
   FileText,
   LoaderCircle,
   ShieldAlert,
@@ -11,7 +14,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { SelectControl } from "@/components/shared/form";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AccountSettings } from "./AccountSettings";
@@ -25,6 +27,7 @@ import {
   useDeleteAccount,
   useStartLicensePayment,
 } from "./service";
+import type { PublicPlan } from "./service";
 
 function SettingsCardSkeleton({ rows = 3 }: { rows?: number }) {
   return (
@@ -42,6 +45,7 @@ function SettingsCardSkeleton({ rows = 3 }: { rows?: number }) {
 
 export default function SettingsPanel() {
   const t = useTranslations("settings");
+  const tAuth = useTranslations("auth");
   const billing = useBillingOverview();
   const account = useAccountDetails();
   const plans = usePublicPlans(
@@ -53,6 +57,7 @@ export default function SettingsPanel() {
   const change = useChangePaymentMethod();
   const { confirm, notify } = useFeedback();
   const [method, setMethod] = useState<"PAYU" | "BANK_TRANSFER">("PAYU");
+  const [planDetails, setPlanDetails] = useState<PublicPlan | null>(null);
   const currentPlan: "FREE" | "YEARLY" =
     billing.data?.subscription?.plan === "YEARLY" ? "YEARLY" : "FREE";
   const periodEndsAt = billing.data?.subscription?.currentPeriodEndsAt
@@ -66,6 +71,18 @@ export default function SettingsPanel() {
   const [selectedPlan, setSelectedPlan] = useState<"FREE" | "YEARLY">("FREE");
   const effectiveSelectedPlan =
     effectivePlan === "YEARLY" ? "YEARLY" : selectedPlan;
+
+  useEffect(() => {
+    if (!planDetails) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [planDetails]);
 
   useEffect(() => {
     if (isExpired) {
@@ -268,76 +285,119 @@ export default function SettingsPanel() {
                     </div>
 
                     <div className="plan-grid settings-plan-grid">
-                      {plans.data?.map((plan) => (
-                        <button
-                          type="button"
-                          key={plan.code}
-                          className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""}`}
-                          disabled={
-                            !plan.available ||
-                            !plan.paymentAvailable ||
-                            (effectivePlan === "YEARLY" && plan.code === "FREE")
-                          }
-                          onClick={() => setSelectedPlan(plan.code)}
-                        >
-                          <div className="plan-visual" aria-hidden="true">
-                            <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+                      {plans.data?.map((plan) => {
+                        const disabled =
+                          !plan.available ||
+                          !plan.paymentAvailable ||
+                          (effectivePlan === "YEARLY" && plan.code === "FREE");
+
+                        return (
+                          <div
+                            key={plan.code}
+                            className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""} ${disabled ? "disabled" : ""}`}
+                          >
+                            <button
+                              type="button"
+                              className="settings-plan-select"
+                              disabled={disabled}
+                              onClick={() => setSelectedPlan(plan.code)}
+                            >
+                              <div className="plan-visual" aria-hidden="true">
+                                {plan.code === "FREE" ? (
+                                  <Gift size={22} />
+                                ) : (
+                                  <CalendarDays size={22} />
+                                )}
+                              </div>
+                              <strong className="plan-name">
+                                {plan.code === "FREE"
+                                  ? t("freeLicense")
+                                  : t("annualLicense")}
+                              </strong>
+                              <small className="plan-copy">
+                                {plan.code === "FREE"
+                                  ? t("freeLicenseCopy")
+                                  : t("annualLicenseCopy")}
+                              </small>
+                              <span className="settings-plan-price">
+                                {(plan.displayAmount / 100).toLocaleString(
+                                  undefined,
+                                  {
+                                    style: "currency",
+                                    currency: plan.currency,
+                                  },
+                                )}{" "}
+                                {plan.displayNet ? t("net") : t("gross")}
+                              </span>
+                              <div className="settings-plan-meta">
+                                {plan.code !== "FREE" && (
+                                  <small>
+                                    {plan.displayNet
+                                      ? `+ ${plan.vatRate}% VAT`
+                                      : t("vatIncluded")}
+                                  </small>
+                                )}
+                                <small>
+                                  {plan.documentLimit} {t("documentsPerMonth")}
+                                </small>
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              className="plan-details-button settings-plan-details"
+                              onClick={() => setPlanDetails(plan)}
+                            >
+                              {tAuth("planDetails")}
+                            </button>
                           </div>
-                          <div className="plan-check">✓</div>
-                          <strong className="plan-name">
-                            {plan.code === "FREE"
-                              ? t("freeLicense")
-                              : t("annualLicense")}
-                          </strong>
-                          <small className="plan-copy">
-                            {plan.code === "FREE"
-                              ? t("freeLicenseCopy")
-                              : t("annualLicenseCopy")}
-                          </small>
-                          <span className="settings-plan-price">
-                            {(plan.displayAmount / 100).toLocaleString(
-                              undefined,
-                              {
-                                style: "currency",
-                                currency: plan.currency,
-                              },
-                            )}{" "}
-                            {plan.displayNet ? t("net") : t("gross")}
-                          </span>
-                          {plan.code !== "FREE" && (
-                            <small>
-                              {plan.displayNet
-                                ? `+ ${plan.vatRate}% VAT`
-                                : t("vatIncluded")}
-                            </small>
-                          )}
-                          <small>
-                            {plan.documentLimit} {t("documentsPerMonth")}
-                          </small>
-                        </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
                   {effectiveSelectedPlan === "YEARLY" && (
                     <>
-                      <label className="field">
-                        {t("paymentMethod")}
-                        <SelectControl
-                          value={method}
-                          disabled={paymentBusy || Boolean(currentPending)}
-                          onChange={(event) =>
-                            setMethod(
-                              event.target.value as "PAYU" | "BANK_TRANSFER",
-                            )
-                          }
+                      <div className="field">
+                        <span>{t("paymentMethod")}</span>
+                        <div
+                          className="payment-method-grid"
+                          role="radiogroup"
+                          aria-label={t("paymentMethod")}
                         >
-                          <option value="PAYU">PayU</option>
-                          <option value="BANK_TRANSFER">
-                            {t("bankTransfer")}
-                          </option>
-                        </SelectControl>
-                      </label>
+                          <button
+                            type="button"
+                            role="radio"
+                            aria-checked={method === "PAYU"}
+                            className={`payment-method-card ${method === "PAYU" ? "selected" : ""}`}
+                            disabled={paymentBusy || Boolean(currentPending)}
+                            onClick={() => setMethod("PAYU")}
+                          >
+                            <span
+                              className="payment-method-icon"
+                              aria-hidden="true"
+                            >
+                              <CreditCard size={20} />
+                            </span>
+                            <strong>PayU</strong>
+                          </button>
+                          <button
+                            type="button"
+                            role="radio"
+                            aria-checked={method === "BANK_TRANSFER"}
+                            className={`payment-method-card ${method === "BANK_TRANSFER" ? "selected" : ""}`}
+                            disabled={paymentBusy || Boolean(currentPending)}
+                            onClick={() => setMethod("BANK_TRANSFER")}
+                          >
+                            <span
+                              className="payment-method-icon"
+                              aria-hidden="true"
+                            >
+                              <Landmark size={20} />
+                            </span>
+                            <strong>{t("bankTransfer")}</strong>
+                          </button>
+                        </div>
+                      </div>
                       {!currentPending && (
                         <div className="settings-payment-actions">
                           <button
@@ -492,6 +552,95 @@ export default function SettingsPanel() {
           </button>
         </section>
       </div>
+      {planDetails && (
+        <div
+          className="legal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setPlanDetails(null);
+          }}
+        >
+          <section
+            className="legal-modal plan-details-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settings-plan-details-title"
+          >
+            <header>
+              <div>
+                <h2 id="settings-plan-details-title">
+                  {planDetails.code === "FREE"
+                    ? t("freeLicense")
+                    : t("annualLicense")}
+                </h2>
+                <p>
+                  {planDetails.code === "FREE"
+                    ? t("freeLicenseCopy")
+                    : t("annualLicenseCopy")}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="legal-close"
+                aria-label={tAuth("closePlanDetails")}
+                onClick={() => setPlanDetails(null)}
+              >
+                ×
+              </button>
+            </header>
+            <div className="legal-content plan-details-content">
+              <div className="plan-details-price">
+                <strong>
+                  {(planDetails.displayAmount / 100).toLocaleString(undefined, {
+                    style: "currency",
+                    currency: planDetails.currency,
+                  })}
+                </strong>
+                <span>{planDetails.displayNet ? t("net") : t("gross")}</span>
+              </div>
+              <dl className="plan-details-list">
+                <div>
+                  <dt>{tAuth("planDocumentLimit")}</dt>
+                  <dd>
+                    {planDetails.documentLimit} {t("documentsPerMonth")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{tAuth("planAccess")}</dt>
+                  <dd>
+                    {planDetails.code === "FREE"
+                      ? tAuth("freePlanAccess")
+                      : tAuth("annualPlanAccess")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{tAuth("planPeriod")}</dt>
+                  <dd>
+                    {planDetails.code === "FREE"
+                      ? tAuth("freePlanPeriod")
+                      : tAuth("annualPlanPeriod")}
+                  </dd>
+                </div>
+                {planDetails.code === "YEARLY" && (
+                  <div>
+                    <dt>{tAuth("planPayment")}</dt>
+                    <dd>{tAuth("annualPlanPayment")}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+            <footer>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setPlanDetails(null)}
+              >
+                {tAuth("closePlanDetails")}
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

@@ -15,7 +15,16 @@ import {
   SearchableSelectField,
 } from "@/components/shared/form";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
-import { LoaderCircle } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  CreditCard,
+  Gift,
+  Landmark,
+  LoaderCircle,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { api } from "@/lib/axios";
 import {
@@ -59,6 +68,21 @@ export default function RegisterForm() {
   const [legalDocument, setLegalDocument] = useState<LegalDocument | null>(
     null,
   );
+  const [planDetails, setPlanDetails] = useState<PublicPlan | null>(null);
+
+  useEffect(() => {
+    if (!planDetails) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [planDetails]);
 
   const {
     register,
@@ -413,19 +437,40 @@ export default function RegisterForm() {
 
         <h2>{t("billing")}</h2>
 
-        <div className="segmented">
-          <ChoiceField
-            type="radio"
-            value="INDIVIDUAL"
-            label={t("privatePerson")}
-            {...register("customerType")}
-          />
-          <ChoiceField
-            type="radio"
-            value="BUSINESS"
-            label={t("business")}
-            {...register("customerType")}
-          />
+        <div
+          className="billing-type-cards"
+          role="radiogroup"
+          aria-label={t("billing")}
+        >
+          <label
+            className={`billing-type-card ${customerType === "INDIVIDUAL" ? "selected" : ""}`}
+          >
+            <InputControl
+              className="billing-type-radio"
+              type="radio"
+              value="INDIVIDUAL"
+              {...register("customerType")}
+            />
+            <span className="billing-type-icon" aria-hidden="true">
+              <UserRound size={21} />
+            </span>
+            <strong>{t("privatePerson")}</strong>
+          </label>
+
+          <label
+            className={`billing-type-card ${customerType === "BUSINESS" ? "selected" : ""}`}
+          >
+            <InputControl
+              className="billing-type-radio"
+              type="radio"
+              value="BUSINESS"
+              {...register("customerType")}
+            />
+            <span className="billing-type-icon" aria-hidden="true">
+              <Building2 size={21} />
+            </span>
+            <strong>{t("business")}</strong>
+          </label>
         </div>
 
         {customerType === "BUSINESS" && (
@@ -564,9 +609,12 @@ export default function RegisterForm() {
               />
 
               <div className="plan-visual" aria-hidden="true">
-                <span>{plan.code === "FREE" ? "✦" : "◆"}</span>
+                {plan.code === "FREE" ? (
+                  <Gift size={22} />
+                ) : (
+                  <CalendarDays size={22} />
+                )}
               </div>
-              <div className="plan-check">✓</div>
               <strong className="plan-name">
                 {plan.code === "FREE" ? t("freeLicense") : t("annualLicense")}
               </strong>
@@ -596,6 +644,18 @@ export default function RegisterForm() {
                   {plan.documentLimit} {t("documentsPerMonth")}
                 </small>
               </div>
+
+              <button
+                type="button"
+                className="plan-details-button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setPlanDetails(plan);
+                }}
+              >
+                {t("planDetails")}
+              </button>
             </label>
           ))}
         </div>
@@ -618,10 +678,13 @@ export default function RegisterForm() {
                   value="PAYU"
                   {...register("paymentMethod")}
                 />
-                <div>
-                  <strong>{t("payu")}</strong>
-                  <small>{t("payuCopy")}</small>
+                <div className="payment-option-icon" aria-hidden="true">
+                  <CreditCard size={21} />
                 </div>
+                <strong className="payment-option-title">{t("payu")}</strong>
+                <small className="payment-option-description">
+                  {t("payuCopy")}
+                </small>
               </label>
               <label
                 className={`payment-option ${paymentMethod === "BANK_TRANSFER" ? "selected" : ""}`}
@@ -631,10 +694,15 @@ export default function RegisterForm() {
                   value="BANK_TRANSFER"
                   {...register("paymentMethod")}
                 />
-                <div>
-                  <strong>{t("bankTransfer")}</strong>
-                  <small>{t("bankTransferCopy")}</small>
+                <div className="payment-option-icon" aria-hidden="true">
+                  <Landmark size={21} />
                 </div>
+                <strong className="payment-option-title">
+                  {t("bankTransfer")}
+                </strong>
+                <small className="payment-option-description">
+                  {t("bankTransferCopy")}
+                </small>
               </label>
             </div>
             <p className="hint">{t("freeWhilePaymentPending")}</p>
@@ -749,6 +817,105 @@ export default function RegisterForm() {
         document={legalDocument}
         onClose={() => setLegalDocument(null)}
       />
+      {planDetails && (
+        <div
+          className="legal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setPlanDetails(null);
+          }}
+        >
+          <section
+            className="legal-modal plan-details-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="plan-details-title"
+          >
+            <header>
+              <div>
+                <h2 id="plan-details-title">
+                  {planDetails.code === "FREE"
+                    ? t("freeLicense")
+                    : t("annualLicense")}
+                </h2>
+                <p>
+                  {planDetails.code === "FREE"
+                    ? t("freeLicenseCopy")
+                    : t("annualLicenseCopy")}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="legal-close"
+                aria-label={t("closePlanDetails")}
+                onClick={() => setPlanDetails(null)}
+              >
+                <X size={18} />
+              </button>
+            </header>
+            <div className="legal-content plan-details-content">
+              <div className="plan-details-price">
+                <strong>
+                  {(planDetails.displayAmount / 100).toLocaleString(locale, {
+                    style: "currency",
+                    currency: planDetails.currency,
+                  })}
+                </strong>
+                <span>{planDetails.displayNet ? t("net") : t("gross")}</span>
+              </div>
+              <dl className="plan-details-list">
+                <div>
+                  <dt>{t("planDocumentLimit")}</dt>
+                  <dd>
+                    {planDetails.documentLimit} {t("documentsPerMonth")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("planAccess")}</dt>
+                  <dd>
+                    {planDetails.code === "FREE"
+                      ? t("freePlanAccess")
+                      : t("annualPlanAccess")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("planPeriod")}</dt>
+                  <dd>
+                    {planDetails.code === "FREE"
+                      ? t("freePlanPeriod")
+                      : t("annualPlanPeriod")}
+                  </dd>
+                </div>
+                {planDetails.code === "YEARLY" && (
+                  <div>
+                    <dt>{t("planPayment")}</dt>
+                    <dd>{t("annualPlanPayment")}</dd>
+                  </div>
+                )}
+                {planDetails.code === "YEARLY" && (
+                  <div>
+                    <dt>{t("planTax")}</dt>
+                    <dd>
+                      {planDetails.displayNet
+                        ? `+ ${planDetails.vatRate}% VAT`
+                        : t("vatIncluded")}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+            <footer>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setPlanDetails(null)}
+              >
+                {t("closePlanDetails")}
+              </button>
+            </footer>
+          </section>
+        </div>
+      )}
     </form>
   );
 }
