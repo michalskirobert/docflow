@@ -2188,3 +2188,80 @@
     min-width: 0 !important;
   }
 }
+
+/* 2.4.9 FINAL auth CTA anchor reset.
+   Global anchor styles were winning on nested text. Reset the actual elements
+   and every descendant/pseudo-state used by payment + sign-in CTAs. */
+a.verify-payment-action,
+a.verify-payment-action:link,
+a.verify-payment-action:visited,
+a.verify-payment-action:hover,
+a.verify-payment-action:focus,
+a.verify-payment-action:focus-visible,
+a.verify-payment-action:active,
+a.verify-signin-action,
+a.verify-signin-action:link,
+a.verify-signin-action:visited,
+a.verify-signin-action:hover,
+a.verify-signin-action:focus,
+a.verify-signin-action:focus-visible,
+a.verify-signin-action:active,
+a.registration-success-action,
+a.registration-success-action:link,
+a.registration-success-action:visited,
+a.registration-success-action:hover,
+a.registration-success-action:focus,
+a.registration-success-action:focus-visible,
+a.registration-success-action:active {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+}
+
+a.verify-payment-action *,
+a.verify-signin-action *,
+a.registration-success-action * {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+.verify-bank-transfer-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, #f59e0b 42%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, #f59e0b 7%, var(--surface));
+  color: var(--text);
+}
+
+.verify-bank-transfer-status > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #f59e0b;
+}
+
+.verify-bank-transfer-status > div {
+  display: grid;
+  gap: 4px;
+}
+
+.verify-bank-transfer-status span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.verify-bank-transfer-status code {
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.verify-bank-transfer-status + .auth-status-actions {
+  margin-top: 16px;
+}

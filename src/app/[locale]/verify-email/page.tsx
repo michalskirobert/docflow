@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import {
   CheckCircle2,
   CreditCard,
+  Landmark,
   LoaderCircle,
   LogIn,
   ShieldCheck,
@@ -101,46 +102,82 @@ function VerifyEmailContent() {
         <p className="verify-email-copy">
           {state === "ok"
             ? result?.paymentRequired
-              ? "Your account is verified. Your annual plan payment is waiting for you."
+              ? result.paymentMethod === "BANK_TRANSFER"
+                ? "Your account is verified. Your bank transfer is waiting for confirmation."
+                : "Your account is verified. Your annual plan payment is waiting for you."
               : "Your account is ready. Sign in to start creating documents."
             : state === "error"
               ? "This verification link is invalid or has expired. Request a new link from the sign-in flow."
               : "This will only take a moment."}
         </p>
 
-        {state === "ok" && result?.paymentRequired && (
-          <div className="auth-status-actions">
-            {result.paymentMethod === "PAYU" && !result.paymentStarted ? (
-              <button
-                className="btn verify-payment-action"
-                type="button"
-                disabled={paymentLoading}
-                onClick={continueToPayment}
-              >
-                {paymentLoading ? (
-                  <LoaderCircle className="spin" size={17} />
-                ) : (
-                  <CreditCard size={17} />
-                )}
-                {paymentLoading ? "Opening PayU…" : "Continue to payment"}
-              </button>
-            ) : (
-              <Link className="btn verify-payment-action" href="/login">
-                <CreditCard size={17} />
-                Continue
-              </Link>
-            )}
-            {paymentError && (
-              <p className="field-error-message" role="alert">
-                Payment could not be started. Please try again.
-              </p>
-            )}
-            <Link className="btn secondary verify-signin-action" href="/login">
-              <LogIn size={17} />
-              Sign in instead
-            </Link>
-          </div>
-        )}
+        {state === "ok" &&
+          result?.paymentRequired &&
+          result.paymentMethod === "BANK_TRANSFER" && (
+            <>
+              <div className="verify-bank-transfer-status">
+                <Landmark size={18} aria-hidden="true" />
+                <div>
+                  <strong>Bank transfer pending</strong>
+                  {result.transferReference && (
+                    <span>
+                      Transfer title: <code>{result.transferReference}</code>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="auth-status-actions">
+                <Link className="btn verify-payment-action" href="/login">
+                  <LogIn size={17} />
+                  Continue to sign in
+                </Link>
+              </div>
+            </>
+          )}
+
+        {state === "ok" &&
+          result?.paymentRequired &&
+          result.paymentMethod === "PAYU" && (
+            <div className="auth-status-actions">
+              {!result.paymentStarted ? (
+                <button
+                  className="btn verify-payment-action"
+                  type="button"
+                  disabled={paymentLoading}
+                  onClick={continueToPayment}
+                >
+                  {paymentLoading ? (
+                    <LoaderCircle className="spin" size={17} />
+                  ) : (
+                    <CreditCard size={17} />
+                  )}
+                  {paymentLoading ? "Opening PayU…" : "Continue to payment"}
+                </button>
+              ) : (
+                <Link className="btn verify-payment-action" href="/login">
+                  <LogIn size={17} />
+                  Continue to sign in
+                </Link>
+              )}
+
+              {paymentError && (
+                <p className="field-error-message" role="alert">
+                  Payment could not be started. Please try again.
+                </p>
+              )}
+
+              {!result.paymentStarted && (
+                <Link
+                  className="btn secondary verify-signin-action"
+                  href="/login"
+                >
+                  <LogIn size={17} />
+                  Sign in instead
+                </Link>
+              )}
+            </div>
+          )}
 
         {state === "ok" && !result?.paymentRequired && (
           <Link className="btn full verify-email-primary" href="/login">
