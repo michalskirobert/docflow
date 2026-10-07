@@ -2140,3 +2140,51 @@
     width: 100% !important;
   }
 }
+
+/* 2.4.9 verify-email CTA layout:
+   desktop = one action row, mobile = stacked full-width actions. */
+.verify-email-card .auth-status-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.verify-email-card .auth-status-actions .verify-payment-action,
+.verify-email-card .auth-status-actions .verify-signin-action {
+  width: auto !important;
+  min-height: 44px;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+
+.verify-email-card .auth-status-actions .verify-payment-action {
+  min-width: 190px;
+}
+
+.verify-email-card .auth-status-actions .verify-signin-action {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .verify-email-card .auth-status-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .verify-email-card .auth-status-actions .verify-payment-action,
+  .verify-email-card .auth-status-actions .verify-signin-action {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
