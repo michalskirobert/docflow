@@ -15,6 +15,8 @@ const schema = z.object({
   content: z.string().min(1),
   headerContent: z.string().optional(),
   footerContent: z.string().optional(),
+  headerEnabled: z.boolean().optional(),
+  footerEnabled: z.boolean().optional(),
   pageNumbers: z.boolean().optional(),
   variables: z
     .array(

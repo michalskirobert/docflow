@@ -10,7 +10,7 @@ export default async function Page({
   const { documentId } = await searchParams;
   return (
     <>
-      <h1>{t("prepareEmail")}</h1>
+      <h1 className="document-editor-page-title">{t("prepareEmail")}</h1>
       <DocumentGenerator mode="email" sourceDocumentId={documentId} />
     </>
   );

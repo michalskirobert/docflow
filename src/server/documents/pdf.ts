@@ -35,6 +35,13 @@ const chromeRegionCss = `
   img{max-width:100%}
   table{width:100%;border-collapse:collapse}
   p{margin:.45em 0}
+  .document-header{font-size:16px}
+  .document-header > :is(p,h1,h2,h3,h4,h5,blockquote){margin-block:0}
+  .document-header h1{font-size:32px}
+  .document-header h2{font-size:24px}
+  .document-header h3{font-size:18.72px}
+  .document-header h4{font-size:16px}
+  .document-header h5{font-size:13.28px}
 `;
 
 async function optimizeRasterImages(
@@ -125,7 +132,7 @@ export async function createDocumentPdf({
       ? '<span class="pageNumber"></span> / <span class="totalPages"></span>'
       : "";
 
-    const headerTemplate = `<style>${chromeRegionCss}</style><div style="width:100%;height:${HEADER_REGION_MM}mm;padding:6mm ${PAGE_SIDE_MARGIN_MM}mm 3mm;overflow:hidden">${header ?? ""}</div>`;
+    const headerTemplate = `<style>${chromeRegionCss}</style><div class="document-header" style="width:100%;height:${HEADER_REGION_MM}mm;padding:6mm ${PAGE_SIDE_MARGIN_MM}mm 3mm;overflow:hidden">${header ?? ""}</div>`;
     const footerTemplate = `<style>${chromeRegionCss}</style><div style="position:relative;width:100%;height:${FOOTER_REGION_MM}mm;padding:3mm ${PAGE_SIDE_MARGIN_MM}mm ${PAGE_NUMBER_LANE_MM}mm;overflow:hidden"><div style="max-height:${FOOTER_REGION_MM - PAGE_NUMBER_LANE_MM - 3}mm;overflow:hidden">${footer ?? ""}</div>${pageNumbers ? `<div style="position:absolute;right:${PAGE_SIDE_MARGIN_MM}mm;bottom:4mm;font-size:10px;line-height:1">${pageNumber}</div>` : ""}</div>`;
 
     return Buffer.from(

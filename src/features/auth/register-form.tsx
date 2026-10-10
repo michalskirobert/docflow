@@ -36,6 +36,7 @@ import {
   isPostalNumeric,
 } from "@/lib/countries";
 import type { ApiError } from "@/types/api";
+import { isValidPolishNip } from "@/lib/tax-id";
 import type { AppLocale, CustomerType } from "@/types/auth";
 
 import { FormField } from "./form-field";
@@ -143,8 +144,8 @@ export default function RegisterForm() {
   const [companyMessage, setCompanyMessage] = useState("");
   const lookupCompany = async () => {
     const nip = (taxId ?? "").replace(/\D/g, "");
-    if (nip.length !== 10) {
-      setError("taxId", { type: "manual", message: "invalidNipLookup" });
+    if (!isValidPolishNip(nip)) {
+      setError("taxId", { type: "manual", message: "invalidTaxId" });
       return;
     }
     setCompanyLoading(true);

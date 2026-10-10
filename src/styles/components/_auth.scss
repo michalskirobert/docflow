@@ -2265,3 +2265,18 @@ a.registration-success-action * {
 .verify-bank-transfer-status + .auth-status-actions {
   margin-top: 16px;
 }
+
+/* Selected choices are stable; hover only previews another available choice. */
+.auth-form .plan-card:not(.selected):not(.disabled):hover,
+.auth-form .payment-option:not(.selected):not(:disabled):hover,
+.auth-form .billing-customer-type:not(.selected):not(:disabled):hover,
+.auth-form .customer-type-card:not(.selected):not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.auth-form .plan-card.selected:hover,
+.auth-form .payment-option.selected:hover,
+.auth-form .billing-customer-type.selected:hover,
+.auth-form .customer-type-card.selected:hover {
+  transform: none !important;
+}

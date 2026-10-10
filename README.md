@@ -357,3 +357,10 @@ The template editor now includes an experimental Data Table control. A Data Tabl
 - Default annual prices: 500 PLN, 599,000 IDR, 120 EUR; all are configurable in `.env`.
 - PayU order currency is no longer hard-coded to PLN. PLN/EUR are passed from the payment record.
 - Indonesian IDR checkout is intentionally disabled until an Indonesian payment provider is connected; PayU Europe does not provide standard IDR settlement.
+
+## 2.4.9 pagination v28
+
+- Keeps a blank trailing physical A4 while the caret is actually on that page, matching Pages/Word repeated-Enter behavior.
+- Fixes the create-then-delete-in-the-same-reflow bug that made a new A4 appear only after typing visible text.
+- Caret marker now participates in the current line box so an empty line at the BODY boundary has measurable geometry.
+- Once Backspace moves the caret back to the previous BODY, the inactive blank trailing A4 is removed on reflow.

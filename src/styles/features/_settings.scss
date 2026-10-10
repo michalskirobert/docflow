@@ -1808,3 +1808,73 @@
     margin-top: 18px !important;
   }
 }
+
+/* 2.4.9: pending payment locks plan/payment selection until cancel/confirm. */
+.settings-pending-selection-hint {
+  display: block;
+  margin-top: 7px;
+  color: #f59e0b !important;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-plan-grid.pending-locked .settings-plan-card {
+  cursor: not-allowed;
+}
+
+.settings-plan-grid.pending-locked .settings-plan-card:not(.selected) {
+  opacity: 0.52;
+}
+
+.settings-plan-grid.pending-locked .settings-plan-card.selected {
+  opacity: 1;
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 58%,
+    var(--border)
+  ) !important;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 9%, transparent) !important;
+}
+
+.settings-plan-grid.pending-locked .settings-plan-select:disabled {
+  cursor: not-allowed;
+}
+
+/* Plan details remains informational and available while the choice is locked. */
+.settings-plan-grid.pending-locked .plan-details-button {
+  cursor: pointer;
+}
+
+/* Selection interaction contract:
+   hover is only feedback for an available, NOT-YET-selected choice. */
+.settings-card .payment-method-card:not(.selected):not(:disabled):hover {
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 50%,
+    var(--border)
+  ) !important;
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface)) !important;
+  transform: translateY(-1px);
+}
+
+.settings-card .payment-method-card.selected:not(:disabled):hover,
+.settings-card .payment-method-card.selected:disabled:hover {
+  border-color: #818cf8 !important;
+  background: rgb(99 102 241 / 13%) !important;
+  box-shadow: 0 0 0 4px rgb(99 102 241 / 13%) !important;
+  transform: none !important;
+}
+
+.settings-card .settings-plan-card:not(.selected):not(:disabled):hover {
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 50%,
+    var(--border)
+  ) !important;
+  transform: translateY(-1px);
+}
+
+.settings-card .settings-plan-card.selected:hover {
+  transform: none !important;
+}

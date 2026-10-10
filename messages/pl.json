@@ -1,5 +1,7 @@
 {
   "common": {
+    "close": "Zamknij",
+    "moreActions": "Więcej opcji",
     "appName": "DocFlow",
     "dashboard": "Panel",
     "templates": "Szablony",
@@ -11,7 +13,9 @@
     "company": "NurByte",
     "companyTagline": "Produkt rozwijany przez NurByte.",
     "account": "Moje konto",
-    "help": "Pomoc"
+    "help": "Pomoc",
+    "back": "Powrót",
+    "save": "Zapisz"
   },
   "home": {
     "title": "Automatyzacja dokumentów dla firm",
@@ -69,7 +73,9 @@
       "max128": "Maksymalnie 128 znaków.",
       "termsRequired": "Akceptacja regulaminu jest wymagana",
       "privacyRequired": "Potwierdzenie zapoznania się z polityką prywatności jest wymagane",
-      "paidServiceRequired": "Ta zgoda jest wymagana dla planu płatnego"
+      "paidServiceRequired": "Ta zgoda jest wymagana dla planu płatnego",
+      "invalidTaxId": "Podaj prawidłowy NIP. Sprawdź 10 cyfr i sumę kontrolną.",
+      "invalidVatId": "Podaj prawidłowy VAT ID. Dla Polski użyj poprawnego NIP, opcjonalnie z prefiksem PL."
     },
     "firstName": "Imię",
     "lastName": "Nazwisko",
@@ -327,6 +333,7 @@
     "emailSubjectPlaceholder": "Np. Potwierdzenie zamówienia 123/2026",
     "emailSubjectOptional": "Opcjonalnie. Jeśli pozostawisz pole puste, użyta zostanie nazwa szablonu.",
     "preparingEmail": "Przygotowywanie…",
+    "sendEmailShort": "Wyślij",
     "sendEmail": "Wyślij e-mail",
     "sendEmailSetupRequired": "Najpierw skonfiguruj wysyłkę e-mail w Ustawieniach.",
     "sendEmailSetupHint": "Bezpośrednia wysyłka będzie dostępna po dobrowolnym skonfigurowaniu własnego konta e-mail w Ustawieniach. Kopiowanie wiadomości nie wymaga konfiguracji.",
@@ -547,7 +554,8 @@
     "paymentCancelError": "Nie udało się anulować płatności. Spróbuj ponownie.",
     "expired": "wygasła",
     "licenseExpiredTitle": "Twoja licencja wygasła",
-    "licenseExpiredDescription": "Twoje istniejące dokumenty i szablony nadal są dostępne. Twoje konto korzysta teraz z miesięcznego limitu planu Free."
+    "licenseExpiredDescription": "Twoje istniejące dokumenty i szablony nadal są dostępne. Twoje konto korzysta teraz z miesięcznego limitu planu Free.",
+    "pendingSelectionLocked": "Anuluj oczekującą płatność, aby zmienić plan lub metodę płatności."
   },
   "templateEditor": {
     "editTemplate": "EDYCJA SZABLONU",

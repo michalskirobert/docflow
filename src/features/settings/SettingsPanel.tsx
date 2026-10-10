@@ -295,11 +295,19 @@ export default function SettingsPanel() {
                     <div className="settings-plan-heading">
                       <strong>{t("choosePlan")}</strong>
                       <small>{t("choosePlanHelp")}</small>
+                      {currentPending && (
+                        <small className="settings-pending-selection-hint">
+                          {t("pendingSelectionLocked")}
+                        </small>
+                      )}
                     </div>
 
-                    <div className="plan-grid settings-plan-grid">
+                    <div
+                      className={`plan-grid settings-plan-grid ${currentPending ? "pending-locked" : ""}`}
+                    >
                       {plans.data?.map((plan) => {
                         const disabled =
+                          Boolean(currentPending) ||
                           !plan.available ||
                           !plan.paymentAvailable ||
                           (effectivePlan === "YEARLY" && plan.code === "FREE");
@@ -307,7 +315,7 @@ export default function SettingsPanel() {
                         return (
                           <div
                             key={plan.code}
-                            className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""} ${disabled ? "disabled" : ""}`}
+                            className={`plan-card settings-plan-card ${effectiveSelectedPlan === plan.code ? "selected" : ""} ${disabled ? "disabled" : ""} ${currentPending ? "pending-locked" : ""}`}
                           >
                             <button
                               type="button"

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isValidPostalCode } from "@/lib/countries";
+import { isValidTaxId, isValidVatId } from "@/lib/tax-id";
 
 const required = (min = 1) => z.string().trim().min(min, "required");
 
@@ -78,6 +79,18 @@ export const registerSchema = z
           code: "custom",
           message: "taxRequired",
           path: ["taxId"],
+        });
+      if (data.taxId?.trim() && !isValidTaxId(data.countryCode, data.taxId))
+        ctx.addIssue({
+          code: "custom",
+          message: "invalidTaxId",
+          path: ["taxId"],
+        });
+      if (data.vatId?.trim() && !isValidVatId(data.countryCode, data.vatId))
+        ctx.addIssue({
+          code: "custom",
+          message: "invalidVatId",
+          path: ["vatId"],
         });
     }
   });

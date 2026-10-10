@@ -92,6 +92,8 @@ export type Template = TemplateSummary & {
   content: string;
   headerContent?: string | null;
   footerContent?: string | null;
+  headerEnabled?: boolean;
+  footerEnabled?: boolean;
   pageNumbers?: boolean;
   createdAt: string;
 };

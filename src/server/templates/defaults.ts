@@ -9,7 +9,9 @@ export type DefaultTemplate = {
   description: string;
   emailSubject: string | null;
   content: string;
+  headerEnabled: false;
   headerContent: null;
+  footerEnabled: false;
   footerContent: null;
   pageNumbers: false;
   variablesJson: string;
@@ -28,7 +30,9 @@ export const DEFAULT_TEMPLATES: DefaultTemplate[] = EXAMPLE_TEMPLATES.map(
     description: template.description,
     emailSubject: "emailSubject" in template ? template.emailSubject : null,
     content: template.content,
+    headerEnabled: false,
     headerContent: null,
+    footerEnabled: false,
     footerContent: null,
     pageNumbers: false,
     variablesJson: JSON.stringify(template.variables),

@@ -18,6 +18,8 @@ const schema = z.object({
   content: z.string().min(1),
   headerContent: z.string().optional(),
   footerContent: z.string().optional(),
+  headerEnabled: z.boolean().optional(),
+  footerEnabled: z.boolean().optional(),
   pageNumbers: z.boolean().optional(),
   variables: z
     .array(
@@ -144,6 +146,8 @@ export async function PUT(
     content: sanitizeTemplateHtml(parsed.content),
     headerContent: sanitizeTemplateHtml(parsed.headerContent ?? ""),
     footerContent: sanitizeTemplateHtml(parsed.footerContent ?? ""),
+    headerEnabled: parsed.headerEnabled ?? false,
+    footerEnabled: parsed.footerEnabled ?? false,
   };
   const variableDefinitions =
     p.variables ??

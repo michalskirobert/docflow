@@ -28,7 +28,7 @@ export function ZoomBar({ t, zoom, setZoom }: Props) {
         onClick={() =>
           setZoom(() =>
             Math.max(
-              25,
+              window.matchMedia("(max-width: 760px)").matches ? 50 : 25,
               Math.floor(
                 (((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25,
               ) * 25,

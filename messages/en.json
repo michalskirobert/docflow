@@ -1,5 +1,7 @@
 {
   "common": {
+    "close": "Close",
+    "moreActions": "More actions",
     "appName": "DocFlow",
     "dashboard": "Dashboard",
     "templates": "Templates",
@@ -11,7 +13,9 @@
     "company": "NurByte",
     "companyTagline": "A product developed by NurByte.",
     "account": "My account",
-    "help": "Help"
+    "help": "Help",
+    "back": "Back",
+    "save": "Save"
   },
   "home": {
     "title": "Document automation for businesses",
@@ -69,7 +73,9 @@
       "max128": "Maximum 128 characters.",
       "termsRequired": "You must accept the terms",
       "privacyRequired": "You must confirm that you have read the privacy policy",
-      "paidServiceRequired": "This acknowledgement is required for the paid plan"
+      "paidServiceRequired": "This acknowledgement is required for the paid plan",
+      "invalidTaxId": "Enter a valid Polish Tax ID (NIP). Check all 10 digits and the checksum.",
+      "invalidVatId": "Enter a valid VAT ID. For Poland, use a valid NIP, optionally prefixed with PL."
     },
     "firstName": "First name",
     "lastName": "Last name",
@@ -327,6 +333,7 @@
     "emailSubjectPlaceholder": "E.g. Order confirmation 123/2026",
     "emailSubjectOptional": "Optional. If left empty, the template name will be used.",
     "preparingEmail": "Preparing…",
+    "sendEmailShort": "Send",
     "sendEmail": "Send email",
     "sendEmailSetupRequired": "Configure email sending in Settings first.",
     "sendEmailSetupHint": "Direct sending will be available after you voluntarily configure your own email account in Settings. Copying a message requires no configuration.",
@@ -547,7 +554,8 @@
     "paymentCancelError": "Could not cancel the payment. Please try again.",
     "expired": "expired",
     "licenseExpiredTitle": "Your license has expired",
-    "licenseExpiredDescription": "Your existing documents and templates are still available. Your account now uses the Free plan monthly limit."
+    "licenseExpiredDescription": "Your existing documents and templates are still available. Your account now uses the Free plan monthly limit.",
+    "pendingSelectionLocked": "Cancel the pending payment to change your plan or payment method."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

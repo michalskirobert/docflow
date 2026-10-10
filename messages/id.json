@@ -1,5 +1,7 @@
 {
   "common": {
+    "close": "Tutup",
+    "moreActions": "Tindakan lainnya",
     "appName": "DocFlow",
     "dashboard": "Dasbor",
     "templates": "Templat",
@@ -11,7 +13,9 @@
     "company": "NurByte",
     "companyTagline": "Produk yang dikembangkan oleh NurByte.",
     "account": "Akun saya",
-    "help": "Bantuan"
+    "help": "Bantuan",
+    "back": "Kembali",
+    "save": "Simpan"
   },
   "home": {
     "title": "Otomatisasi dokumen untuk bisnis",
@@ -69,7 +73,9 @@
       "max128": "Maksimal 128 karakter.",
       "termsRequired": "Anda harus menyetujui ketentuan",
       "privacyRequired": "Anda harus mengonfirmasi telah membaca kebijakan privasi",
-      "paidServiceRequired": "Persetujuan ini diperlukan untuk paket berbayar"
+      "paidServiceRequired": "Persetujuan ini diperlukan untuk paket berbayar",
+      "invalidTaxId": "Masukkan Tax ID Polandia (NIP) yang valid. Periksa 10 digit dan checksum.",
+      "invalidVatId": "Masukkan VAT ID yang valid. Untuk Polandia, gunakan NIP yang valid, opsional dengan awalan PL."
     },
     "firstName": "Nama depan",
     "lastName": "Nama belakang",
@@ -327,6 +333,7 @@
     "emailSubjectPlaceholder": "Contoh: Konfirmasi pesanan 123/2026",
     "emailSubjectOptional": "Opsional. Jika dikosongkan, nama templat akan digunakan.",
     "preparingEmail": "Menyiapkan…",
+    "sendEmailShort": "Kirim",
     "sendEmail": "Kirim email",
     "sendEmailSetupRequired": "Konfigurasikan pengiriman email di Pengaturan terlebih dahulu.",
     "sendEmailSetupHint": "Pengiriman langsung akan tersedia setelah Anda secara sukarela mengonfigurasi akun email Anda sendiri di Pengaturan. Menyalin pesan tidak memerlukan konfigurasi.",
@@ -547,7 +554,8 @@
     "paymentCancelError": "Pembayaran tidak dapat dibatalkan. Silakan coba lagi.",
     "expired": "berakhir",
     "licenseExpiredTitle": "Lisensi Anda telah berakhir",
-    "licenseExpiredDescription": "Dokumen dan templat Anda yang sudah ada tetap tersedia. Akun Anda sekarang menggunakan batas bulanan paket Free."
+    "licenseExpiredDescription": "Dokumen dan templat Anda yang sudah ada tetap tersedia. Akun Anda sekarang menggunakan batas bulanan paket Free.",
+    "pendingSelectionLocked": "Batalkan pembayaran yang tertunda untuk mengubah paket atau metode pembayaran."
   },
   "templateEditor": {
     "editTemplate": "EDIT TEMPLATE",

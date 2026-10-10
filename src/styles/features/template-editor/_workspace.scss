@@ -2812,3 +2812,1241 @@ body.data-table-is-resizing * {
     pointer-events: none;
   }
 }
+
+/* 2.4.9 mobile image/table editing.
+   Context actions are a viewport-bound bottom sheet instead of a wide floating
+   row between the editor toolbar and Variables. This never changes A4 layout. */
+@media (max-width: 760px) {
+  .editor-sticky-controls > .table-context-bar,
+  .editor-sticky-controls > .image-context-bar {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 180 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(38dvh, 320px) !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 14px !important;
+    background: color-mix(in srgb, var(--surface) 97%, transparent) !important;
+    box-shadow: 0 18px 46px rgb(15 23 42 / 30%) !important;
+    backdrop-filter: blur(14px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .editor-sticky-controls > .image-context-bar > strong {
+    flex: 1 0 100% !important;
+  }
+
+  .editor-sticky-controls > .image-context-bar label {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 138px !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(72px, 1fr) auto !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap;
+  }
+
+  .editor-sticky-controls > .image-context-bar input,
+  .editor-sticky-controls > .image-context-bar select {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .editor-sticky-controls > .image-context-bar button,
+  .editor-sticky-controls > .table-context-bar button {
+    flex: 1 1 auto !important;
+    min-height: 40px !important;
+    justify-content: center !important;
+    white-space: nowrap;
+  }
+
+  .editor-sticky-controls > .table-context-bar {
+    align-content: flex-start !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .editor-sticky-controls > .image-context-bar label {
+    flex-basis: 100% !important;
+  }
+}
+
+/* 2.4.9 MOBILE SINGLE-SCROLL CONTRACT
+   The workspace (.paper-stage) is the only vertical scroll owner.
+   Do not add vertical scrolling to .a4-paper/.paper-zoom on mobile. */
+@media (max-width: 760px) {
+  .paper-stage {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 250px) !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-x pan-y !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .paper-stage .paper-zoom {
+    overflow: visible !important;
+    touch-action: pan-y !important;
+  }
+
+  .paper-stage .a4-page-shell,
+  .paper-stage .a4-paper,
+  .paper-stage .page-header-editor,
+  .paper-stage .page-footer-editor {
+    overflow-y: visible !important;
+    overscroll-behavior-y: auto !important;
+    touch-action: pan-y !important;
+  }
+
+  /* The body remains clipped to its physical A4 region horizontally, but it
+     must not create a competing vertical scroll surface on touch devices. */
+  .paper-stage .a4-paper {
+    overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .editor-shell .editor-header {
+    display: none !important;
+  }
+
+  .editor-shell {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* 2.4.9 mobile editor chrome: the contextual bottom bar owns Back/name/Save,
+   so the former top header must reserve exactly zero space. */
+@media (max-width: 900px) {
+  .editor-shell > .editor-header {
+    display: none !important;
+    position: static !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .editor-shell {
+    gap: 0 !important;
+  }
+
+  .editor-shell > .editor-sticky-controls {
+    margin-top: 0 !important;
+    top: 0 !important;
+  }
+}
+
+/* 2.4.9 REAL PAGE BREAK MODEL — paper-stage is the only X/Y scroller. */
+.editor-overlay {
+  overflow: hidden !important;
+}
+
+.editor-overlay > .editor-shell {
+  height: 100dvh !important;
+  min-height: 0 !important;
+  max-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.editor-shell > .editor-header,
+.editor-shell > .editor-sticky-controls {
+  flex: 0 0 auto !important;
+}
+
+.editor-shell > .paper-stage {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.paper-stage > .paper-zoom {
+  overflow: visible !important;
+}
+
+.paper-stage .a4-page-shell {
+  position: relative;
+  height: auto !important;
+  min-height: 297mm !important;
+  max-height: none !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.paper-stage .a4-page-shell > .a4-paper {
+  --editor-page-body-height: 1122.52px;
+  --editor-page-gap-px: 45.35px;
+  position: relative;
+  z-index: 1;
+  height: auto !important;
+  min-height: 297mm !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overscroll-behavior: auto !important;
+  background: repeating-linear-gradient(
+    to bottom,
+    #fff 0,
+    #fff 297mm,
+    transparent 297mm,
+    transparent 309mm
+  ) !important;
+  box-shadow: none !important;
+}
+
+.paper-stage .a4-paper > .editor-page-break {
+  display: block !important;
+  width: calc(100% + 40mm) !important;
+  margin-left: -20mm !important;
+  margin-right: -20mm !important;
+  padding: 0 !important;
+  border: 0 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  background: var(--surface, #0f172a) !important;
+}
+
+.paper-stage .page-header-editor,
+.paper-stage .page-footer-editor {
+  overflow: hidden !important;
+}
+
+.paper-stage .page-number-preview {
+  --page-index: 0;
+  position: absolute !important;
+  z-index: 4;
+  right: 20mm !important;
+  bottom: auto !important;
+  top: calc((var(--page-index) * 309mm) + 283mm) !important;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .editor-overlay > .editor-shell {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .editor-shell > .paper-stage {
+    padding-bottom: 20px !important;
+  }
+}
+
+/* 2.4.9 header/footer designer */
+.document-region-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.region-edit-button {
+  border: 0;
+  border-radius: 7px;
+  padding: 3px 7px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+}
+.region-edit-button:hover {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.region-preview {
+  cursor: pointer;
+}
+
+.region-designer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(2 6 23 / 62%);
+  backdrop-filter: blur(5px);
+}
+.region-designer-modal {
+  width: min(760px, 96vw);
+  max-height: 90dvh;
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+.region-designer-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.region-designer-heading > button {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 28px;
+  cursor: pointer;
+}
+.region-designer-canvas {
+  width: 100%;
+  margin: 18px 0;
+  padding: 6mm 20mm;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #111827;
+  outline: none;
+}
+.region-designer-canvas.header {
+  min-height: 32mm;
+  max-height: 32mm;
+}
+.region-designer-canvas.footer {
+  min-height: 28mm;
+  max-height: 28mm;
+}
+.region-designer-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.region-designer-actions .primary {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* The page gap is never editable; the following content resumes on a white sheet. */
+.paper-stage .a4-paper > .editor-page-break {
+  pointer-events: none !important;
+  user-select: none !important;
+  caret-color: transparent !important;
+  background: var(--surface, #0f172a) !important;
+}
+
+/* 2.4.9 commercial pagination pass:
+   the technical break now contains the tail of the current sheet, repeated
+   footer, the physical gap and the repeated header of the next sheet. */
+.paper-stage .a4-paper > .editor-page-break {
+  width: 100% !important;
+  margin: 0 !important;
+  height: auto !important;
+  background: transparent !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.editor-page-tail {
+  position: relative;
+  height: calc(var(--page-tail-height) + var(--page-footer-height));
+  min-height: var(--page-tail-height);
+  background: #fff;
+}
+
+.editor-repeated-footer {
+  position: absolute;
+  left: -20mm;
+  right: -20mm;
+  bottom: 0;
+  height: var(--page-footer-height);
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 3mm 20mm 10mm;
+  background: #f8fafc;
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.editor-repeated-page-number {
+  position: absolute;
+  right: 0;
+  bottom: 4mm;
+  z-index: 2;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.editor-physical-page-gap {
+  width: calc(100% + 40mm);
+  height: var(--page-gap-height);
+  margin-left: -20mm;
+  background: var(--surface, #0f172a);
+}
+
+.editor-next-page-head {
+  position: relative;
+  min-height: var(--page-header-height);
+  background: #fff;
+}
+
+.editor-repeated-header {
+  position: absolute;
+  left: -20mm;
+  right: -20mm;
+  top: 0;
+  height: var(--page-header-height);
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 6mm 20mm 3mm;
+  background: #f8fafc;
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.region-designer-modal {
+  width: min(1080px, 96vw);
+}
+
+.region-designer-tools {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.region-designer-tools .editor-toolbar,
+.region-designer-tools .variable-shelf {
+  position: static !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+.region-designer-canvas {
+  box-sizing: border-box;
+  overflow: hidden !important;
+}
+
+.region-designer-actions .secondary {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 2.4.9 real-sheet correction:
+   content after a page break must visibly live on the next white A4 sheet. */
+.paper-stage .a4-paper {
+  background: #fff !important;
+}
+
+.paper-stage .editor-page-break + * {
+  position: relative;
+}
+
+/* The page break contains only the reserved tail/footer/gap/header.
+   No text can be painted inside the dark physical gap. */
+.editor-physical-page-gap {
+  position: relative;
+  z-index: 5;
+  background: var(--surface, #0f172a) !important;
+}
+
+.editor-next-page-head {
+  box-sizing: border-box;
+  background: #fff !important;
+}
+
+.editor-page-tail {
+  box-sizing: border-box;
+  background: #fff !important;
+}
+
+/* 2.4.9 WORD-LIKE PAGE MODEL
+   Every page permanently owns a footer zone. BODY never extends into it. */
+.document-footer-edit-button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.document-footer-edit-button:hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-raised));
+}
+
+.a4-page-shell > .page-footer-editor {
+  display: block !important;
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+}
+
+.editor-page-tail {
+  height: calc(var(--page-tail-height) + var(--page-footer-height)) !important;
+  background: #fff !important;
+}
+.editor-repeated-footer {
+  display: block !important;
+  height: var(--page-footer-height) !important;
+  background: #f8fafc !important;
+}
+.editor-physical-page-gap {
+  height: 12mm !important;
+  background: var(--surface, #0f172a) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Header is not a repeated global page region in this model. */
+.editor-next-page-head {
+  min-height: 0 !important;
+  height: 0 !important;
+}
+.editor-repeated-header {
+  display: none !important;
+}
+
+/* One scrolling owner: workspace. A4/body/footer never create nested scrolls. */
+.editor-shell > .paper-stage {
+  overflow: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-x pan-y !important;
+}
+.a4-page-shell,
+.a4-paper,
+.page-footer-editor {
+  overflow: hidden !important;
+}
+
+/* 2.4.9 REAL WORD PAGES — physical DOM pages, not painted page breaks. */
+.paper-stage .a4-page-shell {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+.paper-stage .a4-paper.editor-page-stack {
+  width: 210mm !important;
+  min-width: 210mm !important;
+  max-width: 210mm !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  background: transparent !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12mm !important;
+  outline: none !important;
+}
+.editor-a4-page {
+  position: relative;
+  flex: 0 0 297mm;
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  max-height: 297mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 20mm 20mm 0;
+  overflow: hidden;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 1px 4px rgb(15 23 42 / 20%);
+}
+.editor-a4-page-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: hidden !important;
+  outline: none;
+  cursor: text;
+}
+.editor-a4-page-footer {
+  position: relative;
+  flex: 0 0 28mm;
+  height: 28mm;
+  min-height: 28mm;
+  max-height: 28mm;
+  box-sizing: border-box;
+  margin: 0 -20mm;
+  padding: 3mm 20mm 10mm;
+  overflow: hidden;
+  background: #f8fafc;
+  box-shadow: inset 0 1px 0 #cbd5e1;
+}
+.editor-a4-page-number {
+  position: absolute;
+  right: 20mm;
+  bottom: 7mm;
+  z-index: 3;
+  pointer-events: none;
+  font-size: 10px;
+  color: #64748b;
+}
+.editor-header-source,
+.editor-footer-source {
+  display: none !important;
+}
+.editor-page-break,
+.editor-page-tail,
+.editor-physical-page-gap,
+.editor-next-page-head,
+.page-number-preview {
+  display: none !important;
+}
+.editor-shell > .paper-stage {
+  overflow: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-x pan-y !important;
+}
+@media (max-width: 900px) {
+  .paper-stage .a4-paper.editor-page-stack {
+    margin-inline: 12px !important;
+  }
+}
+
+/* 2.4.9 page controls: compact toolbar row, never a full-width panel. */
+.document-options {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 6px 10px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+.document-options .document-footer-edit-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.document-options > * {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+@media (max-width: 900px) {
+  .document-options {
+    gap: 8px !important;
+    padding: 5px 8px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+}
+
+/* 2.4.9 v4 — page options are a centered compact control group, not a left panel. */
+.document-options {
+  align-self: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  max-width: calc(100vw - 24px) !important;
+  margin: 4px auto 6px !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  border: 1px solid var(--border-color, #334155) !important;
+  border-radius: 10px !important;
+  background: color-mix(
+    in srgb,
+    var(--surface, #0f172a) 92%,
+    transparent
+  ) !important;
+}
+.document-options .document-footer-edit-button {
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 8px !important;
+  gap: 5px !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+}
+.document-options label {
+  min-height: 30px !important;
+  padding: 0 7px !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 900px) {
+  .document-options {
+    margin-inline: auto !important;
+    overflow: visible !important;
+  }
+}
+
+/* 2.4.9 v5 — BODY is a hard physical box.
+   297mm A4 - 20mm top page padding - 28mm reserved footer = 249mm.
+   It must never grow with content, otherwise overflow cannot create page #2. */
+.editor-a4-page-body {
+  flex: 0 0 249mm !important;
+  width: 100% !important;
+  height: 249mm !important;
+  min-height: 249mm !important;
+  max-height: 249mm !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.editor-a4-page-footer {
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+}
+
+/* Footer and zoom are one compact line. */
+.editor-view-controls {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 4px 10px 6px !important;
+}
+.editor-view-controls .document-options {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.editor-view-controls .document-footer-edit-button {
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 10px !important;
+}
+.editor-view-controls .zoom-bar {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+.footer-pagination-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.footer-pagination-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .editor-view-controls {
+    gap: 5px !important;
+    padding-inline: 6px !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+  }
+}
+
+/* 2.4.9 v6 — Pages.app-like sheets: BODY + directly editable shared footer. */
+.editor-a4-page {
+  padding: 20mm 20mm 0 !important;
+  background: #fff !important;
+}
+.editor-a4-page-body {
+  flex: 0 0 249mm !important;
+  height: 249mm !important;
+  min-height: 249mm !important;
+  max-height: 249mm !important;
+  overflow: hidden !important;
+}
+.editor-a4-page-footer {
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+  margin: 0 -20mm !important;
+  padding: 3mm 20mm 10mm !important;
+  background: #fff !important;
+  box-shadow: inset 0 1px 0 transparent !important;
+  outline: 0 !important;
+  cursor: text !important;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease !important;
+}
+.editor-a4-page-footer:hover {
+  background: color-mix(in srgb, #fff 97%, #64748b) !important;
+  box-shadow: inset 0 1px 0 #dbe3ee !important;
+}
+.editor-a4-page-footer:focus,
+.editor-a4-page-footer:focus-within {
+  background: color-mix(in srgb, #fff 95%, #6366f1) !important;
+  box-shadow: inset 0 0 0 1px #818cf8 !important;
+}
+.paper-stage .a4-paper.editor-page-stack {
+  gap: 12mm !important;
+}
+.editor-view-controls {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 4px 8px 6px !important;
+}
+.page-numbers-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 34px !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+.page-numbers-toggle input {
+  width: 17px !important;
+  height: 17px !important;
+  margin: 0 !important;
+}
+.editor-view-controls .zoom-bar {
+  margin: 0 !important;
+}
+@media (max-width: 760px) {
+  .editor-view-controls {
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+  }
+}
+
+/* 2.4.9 v7 — explicit Pages/Word sheet geometry. */
+.paper-stage .a4-paper.editor-page-stack {
+  gap: 12mm !important;
+  padding-block: 8mm !important;
+}
+.editor-a4-page {
+  flex: 0 0 297mm !important;
+  width: 210mm !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
+  max-height: 297mm !important;
+  padding: 20mm 20mm 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+.editor-a4-page-body {
+  flex: 0 0 249mm !important;
+  height: 249mm !important;
+  min-height: 249mm !important;
+  max-height: 249mm !important;
+  overflow: hidden !important;
+}
+.editor-a4-page-footer {
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+  overflow: hidden !important;
+}
+
+/* 2.4.9 v8 — mobile toolbar must not clip SelectControl popovers.
+   We keep the shared Select untouched and make the editor toolbar itself wrap. */
+@media (max-width: 760px) {
+  .editor-sticky-controls .editor-toolbar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+    row-gap: 5px !important;
+  }
+  .editor-sticky-controls .editor-toolbar:has(.shared-select.is-open) {
+    z-index: 140 !important;
+  }
+  .editor-sticky-controls .editor-toolbar .shared-select,
+  .editor-sticky-controls .editor-toolbar .shared-select-options {
+    overflow: visible !important;
+  }
+  .editor-sticky-controls .editor-toolbar .shared-select-options {
+    z-index: 2000 !important;
+  }
+}
+
+/* Physical pages are siblings. Nothing in the shell may clamp the stack to one A4. */
+.paper-stage .a4-page-shell,
+.paper-stage .a4-paper.editor-page-stack {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+.editor-a4-page {
+  overflow: hidden !important;
+}
+.editor-a4-page-body,
+.editor-a4-page-footer {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+/* 2.4.9 v9 — single scroll owner + compact one-line mobile toolbar. */
+.editor-shell > .paper-stage {
+  flex: 1 1 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+.paper-stage .paper-zoom,
+.paper-stage .a4-page-shell,
+.paper-stage .a4-paper.editor-page-stack,
+.paper-stage .editor-a4-page,
+.paper-stage .editor-a4-page-body,
+.paper-stage .editor-a4-page-footer {
+  overscroll-behavior: none !important;
+}
+.paper-stage .editor-a4-page-body,
+.paper-stage .editor-a4-page-footer {
+  overflow: hidden !important;
+  touch-action: pan-y !important;
+}
+
+@media (max-width: 760px) {
+  .editor-sticky-controls .editor-toolbar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 5px !important;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x !important;
+  }
+  .editor-sticky-controls .editor-toolbar > * {
+    flex: 0 0 auto !important;
+  }
+  /* Temporarily release clipping only while an editor Select is open. */
+  .editor-sticky-controls .editor-toolbar:has(.shared-select.is-open) {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 2200 !important;
+  }
+  .editor-sticky-controls .editor-toolbar .shared-select.is-open,
+  .editor-sticky-controls
+    .editor-toolbar
+    .shared-select.is-open
+    .shared-select-options {
+    z-index: 2300 !important;
+  }
+
+  .editor-shell > .paper-stage {
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    touch-action: pan-x pan-y !important;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* 2.4.9 v14 — Pages/Word document chrome: shared inline header + footer. */
+.editor-a4-page {
+  padding: 0 20mm !important;
+}
+.editor-a4-page-header {
+  flex: 0 0 20mm !important;
+  height: 20mm !important;
+  min-height: 20mm !important;
+  max-height: 20mm !important;
+  margin: 0 -20mm !important;
+  padding: 7mm 20mm 3mm !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  outline: 0 !important;
+  cursor: text !important;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease !important;
+  overscroll-behavior: none !important;
+  touch-action: pan-y !important;
+}
+.editor-a4-page-header:hover {
+  background: color-mix(in srgb, #fff 97%, #64748b) !important;
+  box-shadow: inset 0 -1px 0 #dbe3ee !important;
+}
+.editor-a4-page-header:focus,
+.editor-a4-page-header:focus-within {
+  background: color-mix(in srgb, #fff 95%, #6366f1) !important;
+  box-shadow: inset 0 0 0 1px #818cf8 !important;
+}
+.paper-stage .editor-a4-page-header {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+/* 2.4.9 v18 — final physical A4 contract.
+   Header (20mm) + BODY (249mm) + Footer (28mm) = 297mm.
+   BODY must never grow when another physical sheet already exists. */
+.paper-stage .a4-paper.editor-page-stack > .editor-a4-page {
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  width: 210mm !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
+  max-height: 297mm !important;
+  overflow: hidden !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-header {
+  flex: 0 0 20mm !important;
+  height: 20mm !important;
+  min-height: 20mm !important;
+  max-height: 20mm !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-body {
+  flex: 0 0 249mm !important;
+  height: 249mm !important;
+  min-height: 249mm !important;
+  max-height: 249mm !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-footer {
+  flex: 0 0 28mm !important;
+  height: 28mm !important;
+  min-height: 28mm !important;
+  max-height: 28mm !important;
+  overflow: hidden !important;
+}
+
+/* 2.4.9 v20 — a physical BODY is clipped, but must never become its own
+   programmatically scrollable box. `overflow:hidden` lets contentEditable
+   internally scroll to reveal the caret, which made the top of page #1 slide
+   under the clip. `clip` keeps the hard A4 boundary without creating a scroll
+   container; paper-stage remains the only scroll owner. */
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-body {
+  overflow: clip !important;
+  overflow-clip-margin: 0 !important;
+}
+
+/* 2.4.9 v22 — one physical 297mm coordinate system.
+   Older pagination iterations left a 20mm top padding on the page *in addition*
+   to the 20mm header. That made the children consume 317mm inside a 297mm A4
+   (20mm padding + 20mm header + 249mm body + 28mm footer), so the browser was
+   forced to clip/scroll the contentEditable and the caret could appear under
+   the footer. The header itself is the top 20mm region; there is no extra
+   vertical page padding. */
+.paper-stage .a4-paper.editor-page-stack > .editor-a4-page {
+  padding: 0 20mm !important;
+}
+
+/* 2.4.9 paginator engine: BODY remains a fixed physical editing viewport.
+   Chromium may internally advance a contentEditable's scrollTop to reveal the
+   caret; pagination observes that native overflow and moves DOM before the
+   footer instead of allowing a persistent nested scroll. */
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-body {
+  scrollbar-width: none !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-body::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 2.4.9 v38 — BODY is a fixed physical region, not a nested scroll container.
+   Overflow stays geometrically measurable for one reflow tick; the physical
+   A4 clips it and the paginator moves overflowing nodes to the next sheet. */
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-body {
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-footer {
+  position: relative !important;
+  z-index: 2 !important;
+  background: var(--surface, #fff);
+}
+
+/* 2.4.9 v40 — bounded Pages/Word header + footer.
+   Keep the v39 BODY pagination contract untouched. Header/footer may use their
+   complete physical region; only a small printable inset is reserved. */
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-header {
+  padding-top: 3mm !important;
+  padding-bottom: 3mm !important;
+  overflow: hidden !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-footer {
+  padding-top: 3mm !important;
+  padding-bottom: 3mm !important;
+  overflow: hidden !important;
+}
+
+/* 2.4.9 v41 — mobile editor interaction contract.
+   v39 BODY pagination is intentionally untouched. The scaled wrapper owns the
+   full multi-page layout height so paper-stage can be the only touch scroller. */
+@media (max-width: 760px) {
+  .editor-shell > .paper-stage {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    touch-action: pan-x pan-y !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .paper-stage > .paper-zoom {
+    width: var(--scaled-a4-width) !important;
+    min-width: var(--scaled-a4-width) !important;
+    height: var(--scaled-document-height) !important;
+    min-height: var(--scaled-document-height) !important;
+    max-height: none !important;
+    margin-inline: auto !important;
+    overflow: visible !important;
+    touch-action: pan-x pan-y !important;
+  }
+
+  .paper-stage > .paper-zoom > .a4-page-shell {
+    height: auto !important;
+    min-height: calc(297mm * var(--editor-page-count, 1)) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    touch-action: pan-x pan-y !important;
+  }
+
+  .paper-stage .a4-paper.editor-page-stack,
+  .paper-stage .editor-a4-page,
+  .paper-stage .editor-a4-page-header,
+  .paper-stage .editor-a4-page-body,
+  .paper-stage .editor-a4-page-footer {
+    touch-action: pan-x pan-y !important;
+  }
+
+  /* Touch devices have no useful hover state. Avoid the header focus/hover
+     chrome looking like stray horizontal lines on a scaled A4. */
+  .paper-stage .editor-a4-page-header,
+  .paper-stage .editor-a4-page-header:hover,
+  .paper-stage .editor-a4-page-header:focus,
+  .paper-stage .editor-a4-page-header:focus-within {
+    background: #fff !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+  }
+
+  /* Keep the toolbar one physical row. Opening a local editor Select may paint
+     above the row, but must not resize the sticky controls or paper-stage. */
+  .editor-sticky-controls .editor-toolbar,
+  .editor-sticky-controls .editor-toolbar:has(.shared-select.is-open) {
+    flex-wrap: nowrap !important;
+    min-height: 0 !important;
+  }
+}
+
+.paper-stage .editor-a4-page-header > :is(p, h1, h2, h3, h4, h5, blockquote) {
+  margin-block: 0;
+}
+
+@media (max-width: 760px) {
+  .paper-stage .paper-zoom,
+  .paper-stage .a4-page-shell,
+  .paper-stage .a4-paper.editor-page-stack,
+  .paper-stage .editor-a4-page,
+  .paper-stage .editor-a4-page-header,
+  .paper-stage .editor-a4-page-body,
+  .paper-stage .editor-a4-page-footer {
+    overscroll-behavior: auto !important;
+  }
+  .paper-stage .editor-a4-page-header {
+    border: 0 !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .paper-stage .a4-page-shell,
+  .paper-stage .a4-paper.editor-page-stack {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+}

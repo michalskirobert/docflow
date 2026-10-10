@@ -2,12 +2,13 @@
    so native/icon buttons do not get an unexpected square background. */
 :where(button, .btn, .icon-button, a.btn, [role="button"]) {
   transition:
-    background-color 0.5s ease,
-    border-color 0.5s ease,
-    color 0.5s ease,
-    box-shadow 0.5s ease,
-    opacity 0.5s ease,
-    filter 0.5s ease !important;
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease,
+    filter 160ms ease,
+    transform 160ms ease !important;
 }
 
 :where(button, .btn, .icon-button, a.btn, [role="button"]):not(:disabled):not(

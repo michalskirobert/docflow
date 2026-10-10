@@ -2152,3 +2152,70 @@ thead .data-table-actions-column {
     min-height: calc(100dvh - 190px - env(safe-area-inset-bottom));
   }
 }
+
+@media (max-width: 900px) {
+  .document-mobile-editor > .document-sticky-actions,
+  .document-mobile-editor .document-desktop-meta,
+  .document-editor-page-title {
+    display: none !important;
+  }
+}
+
+.document-generator-shell.document-mobile-editor .document-form-card {
+  min-height: max(320px, calc(100dvh - 240px));
+}
+.document-form-skeleton {
+  display: block;
+  position: relative;
+}
+.document-matched-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+.document-matched-field .skeleton-label {
+  height: 20px;
+  width: 140px;
+  margin: 0;
+}
+.document-matched-field .skeleton-control {
+  display: block;
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+}
+.document-matched-field .document-matched-help {
+  width: min(420px, 90%);
+  height: 16px;
+  margin: 4px 0 0;
+}
+.document-form-skeleton .skeleton-template-trigger {
+  height: 58px;
+}
+@media (max-width: 900px) {
+  .document-generator-shell.document-mobile-editor .document-form-card {
+    min-height: max(320px, calc(100dvh - 150px));
+  }
+}
+
+.document-form-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base),
+    var(--skeleton-highlight),
+    var(--skeleton-base)
+  );
+  background-size: 220% 100%;
+  animation: docflow-skeleton-shimmer 1.45s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .document-form-progress {
+    animation: none;
+  }
+}

@@ -1,43 +1,18 @@
-import { ChoiceField } from "@/components/shared/form";
-
 type Props = {
   t: (key: string) => string;
-  header: boolean;
-  footer: boolean;
   pageNumbers: boolean;
-  setHeader: (v: boolean) => void;
-  setFooter: (v: boolean) => void;
-  setPageNumbers: (v: boolean) => void;
+  setPageNumbers: (value: boolean) => void;
 };
-export function DocumentOptions({
-  t,
-  header,
-  footer,
-  pageNumbers,
-  setHeader,
-  setFooter,
-  setPageNumbers,
-}: Props) {
+
+export function DocumentOptions({ t, pageNumbers, setPageNumbers }: Props) {
   return (
-    <div className="document-regions">
-      <ChoiceField
-        type="checkbox"
-        checked={header}
-        onChange={(e) => setHeader(e.target.checked)}
-        label={t("header")}
-      />
-      <ChoiceField
-        type="checkbox"
-        checked={footer}
-        onChange={(e) => setFooter(e.target.checked)}
-        label={t("footer")}
-      />
-      <ChoiceField
+    <label className="page-numbers-toggle">
+      <input
         type="checkbox"
         checked={pageNumbers}
-        onChange={(e) => setPageNumbers(e.target.checked)}
-        label={t("pageNumbers")}
+        onChange={(event) => setPageNumbers(event.target.checked)}
       />
-    </div>
+      <span>{t("pageNumbers")}</span>
+    </label>
   );
 }

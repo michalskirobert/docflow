@@ -8,12 +8,30 @@ import {
   Settings,
   CircleHelp,
   UserRound,
+  Pencil,
+  ArrowLeft,
+  Save,
+  Sparkles,
+  LoaderCircle,
+  MoreVertical,
+  Send,
+  Clipboard,
+  Eye,
 } from "lucide-react";
+import { EditorBottomSheet } from "@/components/ui/editor-bottom-sheet";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { api } from "@/lib/axios";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { DocFlowLogo } from "@/components/brand/docflow-logo";
+import {
+  MOBILE_EDITOR_NAV_BACK,
+  MOBILE_EDITOR_NAV_SAVE,
+  MOBILE_EDITOR_NAV_STATE,
+  MOBILE_EDITOR_NAV_ACTION,
+  MOBILE_EDITOR_NAV_EDIT_META,
+  type MobileEditorNavDetail,
+} from "@/lib/mobile-editor-nav";
 
 import { version } from "../../../package.json";
 
@@ -32,11 +50,30 @@ export function Sidebar() {
   const t = useTranslations("common"),
     pathname = usePathname(),
     router = useRouter(),
-    [profileOpen, setProfileOpen] = useState(false);
+    [profileOpen, setProfileOpen] = useState(false),
+    [mobileEditor, setMobileEditor] = useState<MobileEditorNavDetail>({
+      active: false,
+    });
+
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  useEffect(() => {
+    setActionsOpen(false);
+  }, [mobileEditor.active, mobileEditor.kind, pathname]);
 
   useEffect(() => {
     links.forEach(({ href }) => router.prefetch(href));
   }, [router]);
+
+  useEffect(() => {
+    const syncEditorNav = (event: Event) => {
+      setMobileEditor((event as CustomEvent<MobileEditorNavDetail>).detail);
+      setProfileOpen(false);
+    };
+    window.addEventListener(MOBILE_EDITOR_NAV_STATE, syncEditorNav);
+    return () =>
+      window.removeEventListener(MOBILE_EDITOR_NAV_STATE, syncEditorNav);
+  }, []);
 
   async function logout() {
     await api.post("/auth/logout");
@@ -45,7 +82,120 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={`sidebar ${mobileEditor.active ? "mobile-editor-nav-active" : ""}`}
+    >
+      {mobileEditor.active && (
+        <div
+          className={`mobile-editor-nav${mobileEditor.actions?.length ? " mobile-editor-nav--with-menu" : ""}`}
+          aria-label={
+            mobileEditor.kind === "template"
+              ? "Template editor"
+              : mobileEditor.kind === "email"
+                ? "Email editor"
+                : "Document editor"
+          }
+        >
+          {Boolean(mobileEditor.actions?.length) && (
+            <button
+              type="button"
+              className="mobile-editor-nav-action more"
+              aria-label={t("moreActions")}
+              aria-haspopup="dialog"
+              aria-expanded={actionsOpen}
+              onClick={() => setActionsOpen(true)}
+            >
+              <MoreVertical size={22} />
+            </button>
+          )}
+          <button
+            type="button"
+            className="mobile-editor-nav-action secondary"
+            aria-label={mobileEditor.backLabel || t("back")}
+            title={mobileEditor.backLabel || t("back")}
+            onClick={() =>
+              window.dispatchEvent(new Event(MOBILE_EDITOR_NAV_BACK))
+            }
+          >
+            <ArrowLeft size={20} />
+            <span>{mobileEditor.backLabel || t("back")}</span>
+          </button>
+          <button
+            type="button"
+            className="mobile-editor-nav-name"
+            disabled={mobileEditor.metadataDisabled}
+            title={mobileEditor.name || ""}
+            onClick={() =>
+              window.dispatchEvent(new Event(MOBILE_EDITOR_NAV_EDIT_META))
+            }
+          >
+            <span>
+              {mobileEditor.name ||
+                (mobileEditor.kind === "template"
+                  ? t("templates")
+                  : t("documents"))}
+            </span>
+            <Pencil size={15} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="mobile-editor-nav-action save"
+            disabled={mobileEditor.primaryDisabled ?? mobileEditor.pending}
+            aria-label={mobileEditor.primaryLabel || t("save")}
+            title={
+              mobileEditor.primaryTitle ||
+              mobileEditor.primaryLabel ||
+              t("save")
+            }
+            onClick={() =>
+              window.dispatchEvent(new Event(MOBILE_EDITOR_NAV_SAVE))
+            }
+          >
+            {mobileEditor.pending ? (
+              <LoaderCircle className="spinner" size={20} />
+            ) : mobileEditor.primaryIcon === "send" ? (
+              <Send size={20} />
+            ) : mobileEditor.primaryIcon === "generate" ? (
+              <Sparkles size={20} />
+            ) : (
+              <Save size={20} />
+            )}
+            <span>{mobileEditor.primaryLabel || t("save")}</span>
+          </button>
+        </div>
+      )}
+      <EditorBottomSheet
+        open={actionsOpen}
+        title={t("moreActions")}
+        onClose={() => setActionsOpen(false)}
+      >
+        <div className="mobile-editor-action-list">
+          {mobileEditor.actions?.map((action) => (
+            <button
+              key={action.id}
+              type="button"
+              disabled={action.disabled}
+              onClick={() => {
+                setActionsOpen(false);
+                window.dispatchEvent(
+                  new CustomEvent(MOBILE_EDITOR_NAV_ACTION, {
+                    detail: action.id,
+                  }),
+                );
+              }}
+            >
+              {action.id === "preview" ? (
+                <Eye size={20} />
+              ) : action.id === "copy" ? (
+                <Clipboard size={20} />
+              ) : (
+                <Pencil size={20} />
+              )}
+              <span>{action.label}</span>
+            </button>
+          ))}
+        </div>
+      </EditorBottomSheet>
       <Link
         href="/dashboard"
         className="sidebar-brand"

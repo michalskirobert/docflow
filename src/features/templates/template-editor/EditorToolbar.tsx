@@ -91,8 +91,10 @@ export function EditorToolbar({
       </button>
       <span />
       <SelectControl
+        restoreTriggerFocus={false}
         className="editor-select editor-select-block"
         onPointerDown={rememberSelection}
+        onTouchStart={rememberSelection}
         onChange={(e) => cmd("formatBlock", e.target.value)}
         value={state.block}
         aria-label={t("paragraphStyle")}
@@ -106,9 +108,11 @@ export function EditorToolbar({
         <option value="blockquote">{t("quote")}</option>
       </SelectControl>
       <SelectControl
+        restoreTriggerFocus={false}
         className="editor-select editor-select-font"
         value={state.fontFamily}
         onPointerDown={rememberSelection}
+        onTouchStart={rememberSelection}
         onChange={(e) => setFontFamily(e.target.value)}
         aria-label={t("fontFamily")}
         title={t("fontFamily")}
@@ -121,9 +125,11 @@ export function EditorToolbar({
         ))}
       </SelectControl>
       <SelectControl
+        restoreTriggerFocus={false}
         className="editor-select editor-select-size"
         value={state.fontSize}
         onPointerDown={rememberSelection}
+        onTouchStart={rememberSelection}
         onChange={(e) => setPx(e.target.value)}
         aria-label={t("fontSize")}
       >
@@ -135,9 +141,11 @@ export function EditorToolbar({
         ))}
       </SelectControl>
       <SelectControl
+        restoreTriggerFocus={false}
         className="editor-select editor-select-line-height"
         value={state.lineHeight}
         onPointerDown={rememberSelection}
+        onTouchStart={rememberSelection}
         onChange={(e) => setLineHeight(e.target.value)}
         aria-label={t("lineHeight")}
         title={t("lineHeight")}
@@ -182,6 +190,7 @@ export function EditorToolbar({
           defaultValue="#111827"
           aria-label={t("textColor")}
           onPointerDown={rememberSelection}
+          onTouchStart={rememberSelection}
           onChange={(e) => cmd("foreColor", e.target.value)}
         />
       </label>

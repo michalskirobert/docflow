@@ -11,7 +11,7 @@ export default async function Page({
   const t = await getTranslations("documents");
   return (
     <>
-      <h1>{t("editDocument")}</h1>
+      <h1 className="document-editor-page-title">{t("editDocument")}</h1>
       <DocumentGenerator documentId={id} />
     </>
   );

@@ -824,3 +824,66 @@
   align-items: center;
   justify-content: center;
 }
+
+/* 2.4.9 template actions: visible semantic accents in both themes.
+   Explicit hover states prevent the generic dark card hover from flashing black. */
+.template-card .card-actions .template-action-edit,
+.template-card .card-actions .template-action-duplicate {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease !important;
+}
+
+.template-card .card-actions .template-action-edit:not(:disabled):hover {
+  border-color: color-mix(in srgb, #6366f1 68%, var(--border)) !important;
+  background: color-mix(in srgb, #6366f1 15%, var(--surface)) !important;
+  color: color-mix(in srgb, #818cf8 88%, var(--text)) !important;
+  box-shadow: 0 5px 14px rgb(99 102 241 / 14%) !important;
+  transform: none !important;
+}
+
+.template-card .card-actions .template-action-duplicate:not(:disabled):hover {
+  border-color: color-mix(in srgb, #0ea5e9 68%, var(--border)) !important;
+  background: color-mix(in srgb, #0ea5e9 14%, var(--surface)) !important;
+  color: color-mix(in srgb, #38bdf8 88%, var(--text)) !important;
+  box-shadow: 0 5px 14px rgb(14 165 233 / 14%) !important;
+  transform: none !important;
+}
+
+:root[data-theme="dark"] .template-card .card-actions .template-action-edit {
+  border-color: rgb(129 140 248 / 38%) !important;
+  background: rgb(99 102 241 / 11%) !important;
+  color: #a5b4fc !important;
+}
+
+:root[data-theme="dark"]
+  .template-card
+  .card-actions
+  .template-action-duplicate {
+  border-color: rgb(56 189 248 / 34%) !important;
+  background: rgb(14 165 233 / 10%) !important;
+  color: #7dd3fc !important;
+}
+
+:root[data-theme="dark"]
+  .template-card
+  .card-actions
+  .template-action-edit:not(:disabled):hover {
+  border-color: rgb(129 140 248 / 66%) !important;
+  background: rgb(99 102 241 / 20%) !important;
+  color: #c7d2fe !important;
+  box-shadow: 0 5px 16px rgb(99 102 241 / 18%) !important;
+}
+
+:root[data-theme="dark"]
+  .template-card
+  .card-actions
+  .template-action-duplicate:not(:disabled):hover {
+  border-color: rgb(56 189 248 / 62%) !important;
+  background: rgb(14 165 233 / 18%) !important;
+  color: #bae6fd !important;
+  box-shadow: 0 5px 16px rgb(14 165 233 / 16%) !important;
+}

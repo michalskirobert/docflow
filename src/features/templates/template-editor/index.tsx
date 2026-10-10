@@ -21,6 +21,12 @@ import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useScrollLock } from "@/hooks/use-scroll-lock";
 import {
+  MOBILE_EDITOR_NAV_BACK,
+  MOBILE_EDITOR_NAV_SAVE,
+  MOBILE_EDITOR_NAV_EDIT_META,
+  publishMobileEditorNav,
+} from "@/lib/mobile-editor-nav";
+import {
   ArrowLeft,
   Check,
   CopyPlus,
@@ -38,6 +44,7 @@ import {
   A4_WIDTH_PX,
   normalizeTemplateEditorFontFamily,
 } from "@/utils/constants";
+import { useSharedDocumentRegions } from "./useSharedDocumentRegions";
 import { VariableModal } from "./VariableModal";
 import { DataTableModal } from "./DataTableModal";
 import { dataTableHtml, ensureDataTableCaretHosts } from "../data-table";
@@ -114,10 +121,18 @@ export function TemplateEditor({ template, onClose }: Props) {
   const editor = useRef<HTMLDivElement>(null);
   const headerEditor = useRef<HTMLDivElement>(null);
   const footerEditor = useRef<HTMLDivElement>(null);
+  const sharedRegions = useSharedDocumentRegions(
+    editor,
+    headerEditor,
+    footerEditor,
+  );
   const lastValidHeaderHtml = useRef("");
   const lastValidFooterHtml = useRef("");
   const fileRef = useRef<HTMLInputElement>(null);
   const savedRange = useRef<Range | null>(null);
+  const formattingTransaction = useRef(false);
+  const lastBodyInputType = useRef<string>("");
+  const revealBodyCaret = useRef(false);
 
   const resizing = useRef<{
     x: number;
@@ -129,29 +144,6 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const activeEditor = useRef<HTMLDivElement | null>(null);
   const draggedImage = useRef<HTMLImageElement | null>(null);
-
-  const handlePaperStageWheel = useCallback(
-    (event: ReactWheelEvent<HTMLDivElement>) => {
-      if (event.deltaY === 0 || event.shiftKey) return;
-
-      const paper = editor.current;
-      if (!paper) return;
-
-      const maxScrollTop = paper.scrollHeight - paper.clientHeight;
-      if (maxScrollTop <= 0) return;
-
-      const nextScrollTop = Math.min(
-        maxScrollTop,
-        Math.max(0, paper.scrollTop + event.deltaY),
-      );
-
-      if (nextScrollTop === paper.scrollTop) return;
-
-      event.preventDefault();
-      paper.scrollTop = nextScrollTop;
-    },
-    [],
-  );
 
   const [name, setName] = useState(template?.name ?? t("defaultTemplateName"));
   const [description, setDescription] = useState(template?.description ?? "");
@@ -238,11 +230,11 @@ export function TemplateEditor({ template, onClose }: Props) {
   });
 
   const [headerEnabled, setHeaderEnabled] = useState(
-    Boolean(template?.headerContent),
+    template?.headerEnabled ?? Boolean(template?.headerContent),
   );
 
   const [footerEnabled, setFooterEnabled] = useState(
-    Boolean(template?.footerContent),
+    template?.footerEnabled ?? Boolean(template?.footerContent),
   );
 
   const [pageNumbers, setPageNumbers] = useState(
@@ -272,8 +264,12 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   const [resizeBox, setResizeBox] = useState<DOMRect | null>(null);
   const [zoom, setZoom] = useState(100);
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 760px)").matches) setZoom(50);
+  }, []);
   const [dirty, setDirty] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [editorPageCount, setEditorPageCount] = useState(1);
 
   const create = useCreateTemplateService();
   const update = useUpdateTemplateService(template?.id ?? "");
@@ -298,9 +294,19 @@ export function TemplateEditor({ template, onClose }: Props) {
 
   useEffect(() => {
     if (editor.current) {
-      editor.current.innerHTML =
+      const initialContent =
         template?.content ??
         `<h1>${t("documentTitle")}</h1><p>${t("startWriting")}</p>`;
+      editor.current.innerHTML = "";
+      const page = document.createElement("section");
+      page.className = "editor-a4-page";
+      page.contentEditable = "false";
+      const body = document.createElement("div");
+      body.className = "editor-a4-page-body";
+      body.contentEditable = "true";
+      body.innerHTML = initialContent;
+      page.appendChild(body);
+      editor.current.appendChild(page);
 
       normalizeEditorVariableImages(editor.current);
       ensureDataTableCaretHosts(editor.current);
@@ -319,6 +325,13 @@ export function TemplateEditor({ template, onClose }: Props) {
       normalizeEditorVariableImages(footerEditor.current);
       ensureDataTableCaretHosts(footerEditor.current);
     }
+
+    sharedRegions.reset();
+
+    // Build repeated page chrome only after both shared sources are hydrated.
+    // Previously the first pagination pass could race the hidden footer/header
+    // source and only a later UI toggle forced the correct content to appear.
+    requestAnimationFrame(() => requestAnimationFrame(paginateEditor));
   }, [template, t]);
 
   const keepRegionWithinA4 = (
@@ -326,32 +339,76 @@ export function TemplateEditor({ template, onClose }: Props) {
     lastValid: MutableRefObject<string>,
   ) => {
     if (!region) return;
-    // scrollHeight may differ by a pixel because of sub-pixel font metrics.
-    if (region.scrollHeight <= region.clientHeight + 1) {
+
+    // Header/footer are fixed physical regions, but their own contentEditable
+    // must be allowed to use the whole inner area. Chromium can internally
+    // scroll an overflow:hidden contentEditable to reveal the caret, so using
+    // live scrollHeight/clientHeight here rejects valid second/third lines and
+    // can also accept content that has already been visually shifted. Measure
+    // an unconstrained clone in the same A4/CSS context instead.
+    const page = region.closest<HTMLElement>(".editor-a4-page");
+    const computed = window.getComputedStyle(region);
+    const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
+    const paddingBottom = Number.parseFloat(computed.paddingBottom) || 0;
+    const availableContentHeight = Math.max(
+      0,
+      region.clientHeight - paddingTop - paddingBottom,
+    );
+
+    let contentHeight = region.scrollHeight - paddingTop - paddingBottom;
+    if (page) {
+      const probe = region.cloneNode(true) as HTMLDivElement;
+      probe.removeAttribute("id");
+      probe.contentEditable = "false";
+      probe.setAttribute("aria-hidden", "true");
+      probe.setAttribute("data-editor-region-probe", "true");
+      probe.style.setProperty("position", "absolute", "important");
+      probe.style.setProperty("left", `${region.offsetLeft}px`, "important");
+      probe.style.setProperty("top", "0", "important");
+      probe.style.setProperty("width", `${region.clientWidth}px`, "important");
+      probe.style.setProperty("height", "auto", "important");
+      probe.style.setProperty("min-height", "0", "important");
+      probe.style.setProperty("max-height", "none", "important");
+      probe.style.setProperty("flex", "none", "important");
+      probe.style.setProperty("overflow", "visible", "important");
+      probe.style.setProperty("visibility", "hidden", "important");
+      probe.style.setProperty("pointer-events", "none", "important");
+      probe.style.setProperty("z-index", "-1", "important");
+      page.appendChild(probe);
+      try {
+        contentHeight = Math.max(
+          0,
+          probe.scrollHeight - paddingTop - paddingBottom,
+        );
+      } finally {
+        probe.remove();
+      }
+    }
+
+    if (contentHeight <= availableContentHeight + 0.75) {
       lastValid.current = region.innerHTML;
       return;
     }
 
+    // Do not clip or silently shrink text. Reject only the edit that no longer
+    // fits and keep the caret at the end of the last valid header/footer value.
     region.innerHTML = lastValid.current;
-    region.focus();
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(region);
-    range.collapse(false);
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+    region.scrollTop = 0;
+    sharedRegions.restoreCurrentSelection(region);
   };
 
-  useEffect(() => {
-    if (!window.matchMedia("(max-width: 760px)").matches) return;
-    const initialFit = Math.max(
-      25,
-      Math.floor((((window.innerWidth - 24) / A4_WIDTH_PX) * 100) / 25) * 25,
-    );
-    setZoom(initialFit);
-    // Deliberately do not recompute on resize: mobile keyboards and browser chrome
-    // change the viewport and must not reset a zoom explicitly chosen by the user.
-  }, []);
+  const commitActiveBoundedRegion = (region = activeEditor.current) => {
+    if (!region) return;
+
+    const isHeader = region.classList.contains("editor-a4-page-header");
+    const isFooter = region.classList.contains("editor-a4-page-footer");
+    if (!isHeader && !isFooter) return;
+
+    const lastValid = isHeader ? lastValidHeaderHtml : lastValidFooterHtml;
+    keepRegionWithinA4(region as HTMLDivElement, lastValid);
+
+    sharedRegions.commit(region);
+  };
 
   useEffect(() => {
     const sync = () =>
@@ -655,11 +712,16 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     const node = selection.anchorNode;
 
-    const region = [
-      editor.current,
-      headerEditor.current,
-      footerEditor.current,
-    ].find((element) => element?.contains(node));
+    const selectionElement =
+      node instanceof Element ? node : (node?.parentElement ?? null);
+    const pageRegion = selectionElement?.closest<HTMLDivElement>(
+      ".editor-a4-page-header, .editor-a4-page-body, .editor-a4-page-footer",
+    );
+    const region =
+      pageRegion ??
+      [headerEditor.current, footerEditor.current, editor.current].find(
+        (element) => element?.contains(node),
+      );
 
     if (region) {
       const range = selection.getRangeAt(0);
@@ -688,21 +750,54 @@ export function TemplateEditor({ template, onClose }: Props) {
       }
 
       activeEditor.current = region;
-      savedRange.current = range.cloneRange();
+      commitActiveBoundedRegion(region);
+      savedRange.current = selection.rangeCount
+        ? selection.getRangeAt(0).cloneRange()
+        : range.cloneRange();
 
       syncToolbarState();
     }
   };
 
+  const getSavedRangeRegion = () => {
+    const range = savedRange.current;
+    if (!range) return null;
+    const node = range.startContainer;
+    const element = node instanceof Element ? node : node.parentElement;
+    const pageRegion = element?.closest<HTMLDivElement>(
+      ".editor-a4-page-header, .editor-a4-page-body, .editor-a4-page-footer",
+    );
+    if (pageRegion?.isConnected) return pageRegion;
+    return null;
+  };
+
   const restoreSelection = () => {
-    (activeEditor.current ?? editor.current)?.focus();
+    // The toolbar temporarily owns focus. Resolve the editor from the saved
+    // Range itself, not from activeEditor, because activeEditor can still point
+    // at BODY after a mobile focus hand-off. This was the remaining header-only
+    // failure: the Range belonged to HEADER while formatting was executed
+    // against the stale BODY editor.
+    const savedRegion = getSavedRangeRegion();
+    const target = savedRegion ?? activeEditor.current ?? editor.current;
+    if (savedRegion) activeEditor.current = savedRegion;
+    target?.focus({ preventScroll: true });
 
     const selection = window.getSelection();
 
     if (savedRange.current && selection) {
-      selection.removeAllRanges();
-      selection.addRange(savedRange.current);
+      try {
+        selection.removeAllRanges();
+        selection.addRange(savedRange.current);
+      } catch {
+        // A repeated page may have been rebuilt. Keep focus on the resolved
+        // region; the caller can create a fresh caret there.
+      }
     }
+  };
+
+  const restoreSelectionAfterToolbarPopup = () => {
+    restoreSelection();
+    syncToolbarState();
   };
 
   const expandCollapsedSelectionToCurrentBlock = () => {
@@ -720,12 +815,30 @@ export function TemplateEditor({ template, onClose }: Props) {
       "p,h1,h2,h3,h4,h5,blockquote,li,div",
     );
 
-    if (!block || block === region || !region.contains(block)) return;
+    // Header/footer often contain plain text directly in the region (for
+    // example `NurByteDev<br>`), without a wrapping <p>/<div>. In that case
+    // the old code left a collapsed caret and execCommand(fontSize/fontName)
+    // only changed the typing state. The visible header therefore stayed at
+    // 16px and the toolbar immediately read 16px back. Treat a collapsed
+    // caret in a bounded page region as editing that region's current value.
+    const boundedRegion =
+      region.classList.contains("editor-a4-page-header") ||
+      region.classList.contains("editor-a4-page-footer");
+
+    const target =
+      block && block !== region && region.contains(block)
+        ? block
+        : boundedRegion
+          ? region
+          : null;
+
+    if (!target) return;
 
     const blockRange = document.createRange();
-    blockRange.selectNodeContents(block);
+    blockRange.selectNodeContents(target);
     selection.removeAllRanges();
     selection.addRange(blockRange);
+    savedRange.current = blockRange.cloneRange();
   };
 
   const cmd = (command: string, value?: string) => {
@@ -736,6 +849,24 @@ export function TemplateEditor({ template, onClose }: Props) {
       selectedVariableElement && region?.contains(selectedVariableElement)
         ? selectedVariableElement
         : null;
+
+    if (
+      (command === "undo" || command === "redo") &&
+      region &&
+      sharedRegions.navigate(region, command === "undo" ? -1 : 1)
+    ) {
+      setSelectedImage(null);
+      setSelectedVariableElement(null);
+      setSelectedVariableBox(null);
+      const lastValid = region.classList.contains("editor-a4-page-header")
+        ? lastValidHeaderHtml
+        : lastValidFooterHtml;
+      lastValid.current = region.innerHTML;
+      rememberSelection();
+      syncToolbarState();
+      setDirty(true);
+      return;
+    }
 
     if (
       selectedToken &&
@@ -792,11 +923,18 @@ export function TemplateEditor({ template, onClose }: Props) {
       if (["bold", "italic", "underline", "foreColor"].includes(command)) {
         expandCollapsedSelectionToCurrentBlock();
       }
-      document.execCommand(command, false, value);
+      formattingTransaction.current = true;
+      try {
+        document.execCommand(command, false, value);
+      } finally {
+        formattingTransaction.current = false;
+      }
     }
 
+    commitActiveBoundedRegion();
     rememberSelection();
     syncToolbarState();
+    setDirty(true);
   };
 
   const normalizePlainVariableTokens = useCallback(() => {
@@ -1035,7 +1173,7 @@ export function TemplateEditor({ template, onClose }: Props) {
         savedRange.current = caret.cloneRange();
       }
     } else {
-      region?.focus();
+      region?.focus({ preventScroll: true });
       document.execCommand("insertHTML", false, variableHtml(variable));
     }
 
@@ -1401,8 +1539,23 @@ export function TemplateEditor({ template, onClose }: Props) {
 
     restoreSelection();
 
-    const region = activeEditor.current ?? editor.current;
     const selection = window.getSelection();
+    const selectionNode = selection?.rangeCount
+      ? selection.getRangeAt(0).startContainer
+      : null;
+    const selectionElement =
+      selectionNode instanceof Element
+        ? selectionNode
+        : (selectionNode?.parentElement ?? null);
+    const region =
+      selectionElement?.closest<HTMLDivElement>(
+        ".editor-a4-page-header, .editor-a4-page-body, .editor-a4-page-footer",
+      ) ??
+      getSavedRangeRegion() ??
+      activeEditor.current ??
+      editor.current;
+    if (region && region !== editor.current)
+      activeEditor.current = region as HTMLDivElement;
     const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
     const selectedToken =
       selectedVariableElement && region?.contains(selectedVariableElement)
@@ -1413,7 +1566,9 @@ export function TemplateEditor({ template, onClose }: Props) {
       selectedToken.style.fontSize = `${px}px`;
       setSelectedVariableBox(selectedToken.getBoundingClientRect());
       syncToolbarState(selectedToken);
+      commitActiveBoundedRegion();
       setDirty(true);
+      restoreSelectionAfterToolbarPopup();
       return;
     }
 
@@ -1438,13 +1593,18 @@ export function TemplateEditor({ template, onClose }: Props) {
           })
         : [];
 
-    document.execCommand("fontSize", false, "7");
+    formattingTransaction.current = true;
+    try {
+      document.execCommand("fontSize", false, "7");
 
-    region?.querySelectorAll('font[size="7"]').forEach((element) => {
-      const html = element as HTMLElement;
-      html.removeAttribute("size");
-      html.style.fontSize = `${px}px`;
-    });
+      region?.querySelectorAll('font[size="7"]').forEach((element) => {
+        const html = element as HTMLElement;
+        html.removeAttribute("size");
+        html.style.fontSize = `${px}px`;
+      });
+    } finally {
+      formattingTransaction.current = false;
+    }
 
     const variableTokens = new Set(tokensInSelection);
     if (selectedToken) {
@@ -1455,35 +1615,64 @@ export function TemplateEditor({ template, onClose }: Props) {
       token.style.fontSize = `${px}px`;
     });
 
-    region?.focus();
+    region?.focus({ preventScroll: true });
+    commitActiveBoundedRegion();
     rememberSelection();
     syncToolbarState();
     setDirty(true);
+    restoreSelectionAfterToolbarPopup();
   };
 
   const setFontFamily = (value: string) => {
     if (!value) return;
     restoreSelection();
-    const region = activeEditor.current ?? editor.current;
+    const region =
+      getSavedRangeRegion() ?? activeEditor.current ?? editor.current;
+    if (region && region !== editor.current)
+      activeEditor.current = region as HTMLDivElement;
+    const selectedToken =
+      selectedVariableElement && region?.contains(selectedVariableElement)
+        ? selectedVariableElement
+        : null;
+    if (selectedToken) {
+      selectedToken.style.fontFamily = value;
+      commitActiveBoundedRegion(region);
+      rememberSelection();
+      syncToolbarState(selectedToken);
+      setDirty(true);
+      return;
+    }
     const selection = window.getSelection();
+
     if (selection?.rangeCount && selection.getRangeAt(0).collapsed) {
       expandCollapsedSelectionToCurrentBlock();
     }
-    document.execCommand("fontName", false, value);
-    region?.querySelectorAll("font[face]").forEach((element) => {
-      const html = element as HTMLElement;
-      html.style.fontFamily = html.getAttribute("face") || value;
-      html.removeAttribute("face");
-    });
-    region?.focus();
+    formattingTransaction.current = true;
+    try {
+      document.execCommand("fontName", false, value);
+      region?.querySelectorAll("font[face]").forEach((element) => {
+        const html = element as HTMLElement;
+        html.style.fontFamily = html.getAttribute("face") || value;
+        html.removeAttribute("face");
+      });
+    } finally {
+      formattingTransaction.current = false;
+    }
+    region?.focus({ preventScroll: true });
+    commitActiveBoundedRegion();
     rememberSelection();
     syncToolbarState();
     setDirty(true);
+    restoreSelectionAfterToolbarPopup();
   };
 
   const setLineHeight = (value: string) => {
     if (!value) return;
-    const region = activeEditor.current ?? editor.current;
+    restoreSelection();
+    const region =
+      getSavedRangeRegion() ?? activeEditor.current ?? editor.current;
+    if (region && region !== editor.current)
+      activeEditor.current = region as HTMLDivElement;
     const selectedToken =
       selectedVariableElement && region?.contains(selectedVariableElement)
         ? selectedVariableElement
@@ -1492,24 +1681,46 @@ export function TemplateEditor({ template, onClose }: Props) {
       selectedToken.style.lineHeight = value;
       setSelectedVariableBox(selectedToken.getBoundingClientRect());
       syncToolbarState(selectedToken);
+      commitActiveBoundedRegion();
       setDirty(true);
+      restoreSelectionAfterToolbarPopup();
       return;
     }
-    restoreSelection();
     const selection = window.getSelection();
     if (!selection?.rangeCount) return;
     const range = selection.getRangeAt(0);
-    const node = range.commonAncestorContainer;
-    const element = (
-      node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement
-    ) as HTMLElement | null;
-    const block = element?.closest(
-      "p,h1,h2,h3,h4,h5,blockquote,li,div",
-    ) as HTMLElement | null;
-    if (block && (activeEditor.current ?? editor.current)?.contains(block))
-      block.style.lineHeight = value;
+
+    const blockSelector = "p,h1,h2,h3,h4,h5,blockquote,li,div";
+    const element =
+      range.startContainer instanceof Element
+        ? range.startContainer
+        : range.startContainer.parentElement;
+    const currentBlock = element?.closest<HTMLElement>(blockSelector);
+    if (!currentBlock || currentBlock === region) {
+      formattingTransaction.current = true;
+      try {
+        document.execCommand("formatBlock", false, "p");
+      } finally {
+        formattingTransaction.current = false;
+      }
+    }
+    const activeRange = selection.rangeCount ? selection.getRangeAt(0) : null;
+    if (region && activeRange) {
+      const blocks = Array.from(
+        region.querySelectorAll<HTMLElement>(blockSelector),
+      ).filter((block) => {
+        if (block.querySelector(blockSelector)) return false;
+        return activeRange.intersectsNode(block);
+      });
+      blocks.forEach((block) => {
+        block.style.lineHeight = value;
+      });
+      commitActiveBoundedRegion(region);
+      setDirty(true);
+    }
     rememberSelection();
     syncToolbarState();
+    restoreSelectionAfterToolbarPopup();
   };
 
   const updateSelectedImage = (
@@ -1528,6 +1739,12 @@ export function TemplateEditor({ template, onClose }: Props) {
       "style",
       imageStyle(width, align, height || undefined, fit),
     );
+
+    const region = selectedImage.closest<HTMLDivElement>(
+      ".editor-a4-page-header, .editor-a4-page-footer",
+    );
+    if (region) commitActiveBoundedRegion(region);
+    setDirty(true);
 
     setImageWidth(width);
     setImageHeight(height);
@@ -1783,9 +2000,1166 @@ export function TemplateEditor({ template, onClose }: Props) {
     };
   };
 
+  const paginateEditor = useCallback(() => {
+    const root = editor.current;
+    if (!root) return;
+
+    const stage = root.closest<HTMLElement>(".paper-stage");
+    const scrollTopBeforeReflow = stage?.scrollTop ?? 0;
+
+    // Keep the browser caret attached to the exact DOM node while that node is
+    // moved between physical A4 bodies. Recreating a Range from coordinates or
+    // focusing a wrapper after reflow is what caused focus to disappear.
+    const selection = window.getSelection();
+
+    // A collapsed native selection can be anchored on the BODY itself (for
+    // example directly after an empty paragraph created by Enter). Moving that
+    // paragraph to the next page then leaves the caret behind on the old page.
+    // A zero-size marker makes the caret part of the DOM flow, so it travels to
+    // the same physical A4 as the content around it.
+    let caretMarker: HTMLSpanElement | null = null;
+    let caretOwnerAfterReflow: HTMLElement | null = null;
+    let caretMovedToAnotherPage = false;
+    let caretRestoredFromMarker = false;
+    if (selection?.rangeCount) {
+      const liveRange = selection.getRangeAt(0);
+      if (liveRange.collapsed && root.contains(liveRange.startContainer)) {
+        try {
+          caretMarker = document.createElement("span");
+          caretMarker.dataset.editorCaretMarker = "true";
+          caretMarker.contentEditable = "false";
+          caretMarker.setAttribute("aria-hidden", "true");
+          caretMarker.style.cssText =
+            "display:inline-block;width:0;height:1em;overflow:hidden;line-height:inherit;vertical-align:baseline;padding:0;margin:0;border:0;opacity:0;pointer-events:none;";
+          const markerRange = liveRange.cloneRange();
+          markerRange.insertNode(caretMarker);
+          markerRange.setStartAfter(caretMarker);
+          markerRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(markerRange);
+        } catch {
+          caretMarker?.remove();
+          caretMarker = null;
+        }
+      }
+    }
+
+    const selectionSnapshot = (() => {
+      if (!selection?.rangeCount) return null;
+      const range = selection.getRangeAt(0);
+      if (
+        !root.contains(range.startContainer) ||
+        !root.contains(range.endContainer)
+      ) {
+        return null;
+      }
+      const anchorElement =
+        range.startContainer.nodeType === Node.ELEMENT_NODE
+          ? (range.startContainer as Element)
+          : range.startContainer.parentElement;
+      const owner = anchorElement?.closest<HTMLElement>(
+        ".editor-a4-page-header, .editor-a4-page-body, .editor-a4-page-footer",
+      );
+      const page = owner?.closest<HTMLElement>(".editor-a4-page");
+      const pageIndex = page
+        ? Array.from(root.querySelectorAll(":scope > .editor-a4-page")).indexOf(
+            page,
+          )
+        : -1;
+
+      return {
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+        endContainer: range.endContainer,
+        endOffset: range.endOffset,
+        collapsed: range.collapsed,
+        ownerKind: owner?.classList.contains("editor-a4-page-header")
+          ? "header"
+          : owner?.classList.contains("editor-a4-page-footer")
+            ? "footer"
+            : "body",
+        pageIndex,
+      };
+    })();
+
+    const headerHtml = headerEditor.current?.innerHTML ?? "";
+    const footerHtml = footerEditor.current?.innerHTML ?? "";
+
+    const makePage = () => {
+      const page = document.createElement("section");
+      page.className = "editor-a4-page";
+      page.contentEditable = "false";
+
+      const header = document.createElement("div");
+      header.className = "editor-a4-page-header";
+      header.contentEditable = "true";
+      header.setAttribute("data-editor-header", "true");
+      header.innerHTML = headerHtml;
+
+      const body = document.createElement("div");
+      body.className = "editor-a4-page-body";
+      body.contentEditable = "true";
+      body.setAttribute("data-editor-page-body", "true");
+
+      const footer = document.createElement("div");
+      footer.className = "editor-a4-page-footer";
+      footer.contentEditable = "true";
+      footer.setAttribute("data-editor-footer", "true");
+      footer.innerHTML = footerHtml;
+
+      page.append(header, body, footer);
+      return page;
+    };
+
+    let pages = Array.from(
+      root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+    );
+    if (!pages.length) {
+      const page = makePage();
+      root.appendChild(page);
+      pages = [page];
+    }
+
+    // Header and footer are shared document regions, like Pages/Word: edit
+    // either one on any sheet and mirror it to every physical A4.
+    pages.forEach((page) => {
+      let header = page.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-header",
+      );
+      if (!header) {
+        header = document.createElement("div");
+        header.className = "editor-a4-page-header";
+        header.contentEditable = "true";
+        header.setAttribute("data-editor-header", "true");
+        page.insertBefore(header, page.firstChild);
+      }
+      if (
+        document.activeElement !== header &&
+        !header.contains(savedRange.current?.startContainer ?? null) &&
+        header.innerHTML !== headerHtml
+      )
+        header.innerHTML = headerHtml;
+    });
+
+    // Refresh the shared footer on every physical sheet.
+    pages.forEach((page) => {
+      let footer = page.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-footer",
+      );
+      if (!footer) {
+        footer = document.createElement("div");
+        footer.className = "editor-a4-page-footer";
+        footer.contentEditable = "true";
+        footer.setAttribute("data-editor-footer", "true");
+        page.appendChild(footer);
+      }
+      if (
+        document.activeElement !== footer &&
+        !footer.contains(savedRange.current?.startContainer ?? null) &&
+        footer.innerHTML !== footerHtml
+      )
+        footer.innerHTML = footerHtml;
+    });
+
+    const measureBodyIntrinsicHeight = (body: HTMLElement) => {
+      // Measure in the SAME physical A4 page, not in document.body. A detached
+      // clone loses selectors such as `.paper-stage .a4-paper ... >
+      // .editor-a4-page-body` and descendant editor rules, so its line wrapping
+      // can differ from the live page. The probe is an absolutely-positioned
+      // direct child of the same page and therefore inherits the exact editor
+      // CSS/width while remaining outside normal layout.
+      const page = body.closest<HTMLElement>(".editor-a4-page");
+      if (!page) return body.scrollHeight;
+
+      const probe = body.cloneNode(true) as HTMLElement;
+      probe.removeAttribute("id");
+      probe.contentEditable = "false";
+      probe.setAttribute("aria-hidden", "true");
+      probe.setAttribute("data-editor-measure-probe", "true");
+      probe
+        .querySelectorAll("[data-editor-caret-marker]")
+        .forEach((marker) => marker.remove());
+
+      // Keep the exact direct-child selector context, but release only the
+      // physical BODY height. Inline !important is required because the live
+      // BODY contract itself is declared with !important.
+      probe.style.setProperty("position", "absolute", "important");
+      probe.style.setProperty("inset", "auto", "important");
+      probe.style.setProperty("left", "20mm", "important");
+      probe.style.setProperty("top", "0", "important");
+      probe.style.setProperty("width", `${body.clientWidth}px`, "important");
+      probe.style.setProperty("height", "auto", "important");
+      probe.style.setProperty("min-height", "0", "important");
+      probe.style.setProperty("max-height", "none", "important");
+      probe.style.setProperty("flex", "none", "important");
+      probe.style.setProperty("overflow", "visible", "important");
+      probe.style.setProperty("overflow-x", "visible", "important");
+      probe.style.setProperty("overflow-y", "visible", "important");
+      probe.style.setProperty("visibility", "hidden", "important");
+      probe.style.setProperty("pointer-events", "none", "important");
+      probe.style.setProperty("z-index", "-1", "important");
+
+      page.appendChild(probe);
+      try {
+        // scrollHeight on an unconstrained clone is the intrinsic content
+        // height. Also inspect rendered descendants so an empty Enter block
+        // (<div><br></div>) counts even when browser scrollHeight rounds it.
+        let intrinsic = probe.scrollHeight;
+        const probeRect = probe.getBoundingClientRect();
+        const scale =
+          probe.clientHeight > 0 && probeRect.height > 0
+            ? probeRect.height / probe.clientHeight
+            : 1;
+        let renderedBottom = probeRect.top;
+
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(probe);
+          for (const rect of Array.from(range.getClientRects())) {
+            renderedBottom = Math.max(renderedBottom, rect.bottom);
+          }
+        } catch {
+          // Atomic descendants are covered below.
+        }
+
+        for (const child of Array.from(
+          probe.querySelectorAll<HTMLElement>("*"),
+        )) {
+          const rect = child.getBoundingClientRect();
+          if (rect.height > 0)
+            renderedBottom = Math.max(renderedBottom, rect.bottom);
+        }
+
+        if (renderedBottom > probeRect.top) {
+          intrinsic = Math.max(
+            intrinsic,
+            (renderedBottom - probeRect.top) / (scale || 1),
+          );
+        }
+        return intrinsic;
+      } finally {
+        probe.remove();
+      }
+    };
+
+    const bodyOverflows = (body: HTMLElement) => {
+      // The footer is the physical end of editable BODY content. Do not derive
+      // this boundary from 249mm/clientHeight: header/footer padding, browser
+      // rounding and zoom can make that logical size differ from the actual A4
+      // boundary the user sees. Measure both values in the same viewport
+      // coordinate system and treat footer.top as the source of truth.
+      const page = body.closest<HTMLElement>(".editor-a4-page");
+      const footer = page?.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-footer",
+      );
+      if (!footer) return false;
+
+      const bodyRect = body.getBoundingClientRect();
+      const footerTop = footer.getBoundingClientRect().top;
+      const zoomScale =
+        body.clientHeight > 0 ? bodyRect.height / body.clientHeight : 1;
+      const availableLayoutHeight = Math.max(
+        0,
+        (footerTop - bodyRect.top) / (zoomScale || 1),
+      );
+      if (availableLayoutHeight <= 0) return false;
+
+      // contentEditable can silently scroll its own editing box to keep the
+      // caret visible even when CSS uses overflow:clip/hidden. In that state
+      // viewport rects look as if the last line still fits, while the logical
+      // content is already below the footer. scrollHeight is the reliable
+      // signal for non-empty content and scrollTop tells us that this native
+      // internal scroll has happened. Never reset scrollTop here: first reflow
+      // the DOM, then the browser naturally returns the BODY to its origin.
+      const nativeScrollableOverflow =
+        body.scrollHeight - availableLayoutHeight;
+      if (nativeScrollableOverflow > 0.75) return true;
+
+      // First use the live rendered content in the SAME viewport coordinate
+      // system as footer.top. This is the most direct answer to the only
+      // question pagination needs: has any rendered BODY line/node crossed into
+      // the reserved footer region? Range/element rects keep their geometric
+      // position even when the BODY itself clips the pixels.
+      let liveContentBottom = bodyRect.top;
+      try {
+        const liveRange = document.createRange();
+        liveRange.selectNodeContents(body);
+        for (const rect of Array.from(liveRange.getClientRects())) {
+          if (rect.height > 0 || rect.width > 0) {
+            liveContentBottom = Math.max(liveContentBottom, rect.bottom);
+          }
+        }
+      } catch {
+        // Descendant boxes below still cover atomic content.
+      }
+      for (const child of Array.from(body.querySelectorAll<HTMLElement>("*"))) {
+        if (child.hasAttribute("data-editor-measure-probe")) continue;
+        const rect = child.getBoundingClientRect();
+        if (rect.height > 0 || rect.width > 0) {
+          liveContentBottom = Math.max(liveContentBottom, rect.bottom);
+        }
+      }
+      if (liveContentBottom > footerTop + 0.25) return true;
+
+      const intrinsicHeight = measureBodyIntrinsicHeight(body);
+      return intrinsicHeight > availableLayoutHeight + 0.25;
+    };
+
+    const isSplittableTextBlock = (node: Node): node is HTMLElement => {
+      if (node.nodeType !== Node.ELEMENT_NODE) return false;
+      const element = node as HTMLElement;
+      if (!/^(P|DIV|LI|H[1-6]|BLOCKQUOTE)$/.test(element.tagName)) return false;
+      // Variables/images/tables are atomic. Never split through them.
+      return !element.querySelector(
+        "img, table, [data-variable-name], [contenteditable='false']:not([data-editor-caret-marker])",
+      );
+    };
+
+    const textBoundaryAt = (block: HTMLElement, offset: number) => {
+      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+      let remaining = Math.max(0, offset);
+      let node = walker.nextNode() as Text | null;
+      let last: Text | null = null;
+      while (node) {
+        last = node;
+        const length = node.data.length;
+        if (remaining <= length) return { node, offset: remaining };
+        remaining -= length;
+        node = walker.nextNode() as Text | null;
+      }
+      if (last) return { node: last, offset: last.data.length };
+      return null;
+    };
+
+    const textOffsetInBlock = (
+      block: HTMLElement,
+      container: Node,
+      offset: number,
+    ) => {
+      if (!block.contains(container) && block !== container) return null;
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(block);
+        range.setEnd(container, offset);
+        return range.toString().length;
+      } catch {
+        return null;
+      }
+    };
+
+    const splitOverflowingTextBlock = (
+      body: HTMLElement,
+      block: HTMLElement,
+      nextBody: HTMLElement,
+    ) => {
+      const textLength = block.textContent?.length ?? 0;
+      if (textLength < 2) return false;
+      const ownerPage = body.closest<HTMLElement>(".editor-a4-page");
+      const ownerFooter = ownerPage?.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-footer",
+      );
+      const bodyBottom =
+        (ownerFooter?.getBoundingClientRect().top ??
+          body.getBoundingClientRect().bottom) - 0.5;
+
+      const fitsThrough = (offset: number) => {
+        const boundary = textBoundaryAt(block, offset);
+        if (!boundary) return false;
+        const range = document.createRange();
+        range.setStart(block, 0);
+        range.setEnd(boundary.node, boundary.offset);
+        const rects = Array.from(range.getClientRects());
+        const bottom = rects.reduce(
+          (value, rect) => Math.max(value, rect.bottom),
+          -Infinity,
+        );
+        return Number.isFinite(bottom) && bottom <= bodyBottom;
+      };
+
+      if (fitsThrough(textLength)) return false;
+
+      let low = 1;
+      let high = textLength - 1;
+      let splitOffset = 0;
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        if (fitsThrough(mid)) {
+          splitOffset = mid;
+          low = mid + 1;
+        } else high = mid - 1;
+      }
+      if (splitOffset <= 0 || splitOffset >= textLength) return false;
+
+      // Prefer a natural whitespace boundary near the last fitting character.
+      const text = block.textContent ?? "";
+      const natural = text.lastIndexOf(" ", splitOffset);
+      if (natural > Math.max(0, splitOffset - 80) && natural + 1 <= splitOffset)
+        splitOffset = natural + 1;
+      if (splitOffset <= 0 || splitOffset >= textLength) return false;
+
+      const boundary = textBoundaryAt(block, splitOffset);
+      if (!boundary) return false;
+
+      const caretOffset = selectionSnapshot?.collapsed
+        ? textOffsetInBlock(
+            block,
+            selectionSnapshot.startContainer,
+            selectionSnapshot.startOffset,
+          )
+        : null;
+
+      const tailRange = document.createRange();
+      tailRange.setStart(boundary.node, boundary.offset);
+      tailRange.setEnd(block, block.childNodes.length);
+      const tail = tailRange.extractContents();
+      const continuation = block.cloneNode(false) as HTMLElement;
+      continuation.removeAttribute("id");
+      continuation.appendChild(tail);
+      nextBody.insertBefore(continuation, nextBody.firstChild);
+
+      // If the caret belonged to the extracted tail, immediately move it to the
+      // corresponding logical character in the continuation. This avoids the
+      // transient blur/jump caused by a Range pointing at the shortened block.
+      if (caretOffset !== null && caretOffset >= splitOffset) {
+        const nextBoundary = textBoundaryAt(
+          continuation,
+          caretOffset - splitOffset,
+        );
+        if (nextBoundary) {
+          const range = document.createRange();
+          range.setStart(nextBoundary.node, nextBoundary.offset);
+          range.collapse(true);
+          nextBody.focus({ preventScroll: true });
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          savedRange.current = range.cloneRange();
+          activeEditor.current = nextBody as HTMLDivElement;
+        }
+      }
+      return true;
+    };
+
+    // Word-like reflow: BODY has a hard physical boundary. Always resolve the
+    // current page/body from the live DOM before moving a node. Pagination can
+    // create/remove sheets during the same reflow, so cached nextBody references
+    // are unsafe (and were the source of the insertBefore(null) crash).
+    let pageIndex = 0;
+    let guard = 0;
+    while (guard++ < 500) {
+      const livePages = Array.from(
+        root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+      );
+      if (pageIndex >= livePages.length) break;
+
+      const page = livePages[pageIndex];
+      const body = page?.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-body",
+      );
+      if (!body?.isConnected) {
+        pageIndex += 1;
+        continue;
+      }
+
+      const getNextBody = () => {
+        let currentPages = Array.from(
+          root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+        );
+        let nextPage = currentPages[pageIndex + 1];
+        if (!nextPage?.isConnected) {
+          nextPage = makePage();
+          const currentPage = currentPages[pageIndex];
+          if (currentPage?.isConnected) currentPage.after(nextPage);
+          else root.appendChild(nextPage);
+          currentPages = Array.from(
+            root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+          );
+          nextPage = currentPages[pageIndex + 1];
+        }
+        const nextBody = nextPage?.querySelector<HTMLElement>(
+          ":scope > .editor-a4-page-body",
+        );
+        return nextBody?.isConnected ? nextBody : null;
+      };
+
+      let innerGuard = 0;
+      while (
+        body.isConnected &&
+        bodyOverflows(body) &&
+        body.lastChild &&
+        innerGuard++ < 200
+      ) {
+        let lastNode: ChildNode = body.lastChild;
+        const nextBody = getNextBody();
+        if (!nextBody) break;
+
+        // The zero-size caret marker may be a direct BODY child after a native
+        // empty Enter. Moving only the marker would leave the empty line on the
+        // previous page and make Enter appear to do nothing at the footer. Move
+        // the logical node immediately before it together with the marker.
+        if (
+          lastNode.nodeType === Node.ELEMENT_NODE &&
+          (lastNode as HTMLElement).hasAttribute("data-editor-caret-marker")
+        ) {
+          const markerNode = lastNode;
+          const logicalNode = markerNode.previousSibling;
+          if (logicalNode) {
+            nextBody.insertBefore(markerNode, nextBody.firstChild);
+            nextBody.insertBefore(logicalNode, markerNode);
+            continue;
+          }
+          nextBody.insertBefore(markerNode, nextBody.firstChild);
+          continue;
+        }
+
+        if (lastNode.nodeType === Node.TEXT_NODE) {
+          nextBody.insertBefore(lastNode, nextBody.firstChild);
+          continue;
+        }
+
+        if (isSplittableTextBlock(lastNode)) {
+          const split = splitOverflowingTextBlock(body, lastNode, nextBody);
+          if (split) continue;
+        }
+
+        // Re-resolve once more immediately before the destructive move. A focus/
+        // input callback can synchronously alter the page tree in WebKit.
+        const liveNextBody = getNextBody();
+        if (
+          !liveNextBody ||
+          !lastNode.isConnected ||
+          lastNode.parentNode !== body
+        )
+          break;
+        liveNextBody.insertBefore(lastNode, liveNextBody.firstChild);
+      }
+      pageIndex += 1;
+    }
+
+    // Pull content back after deletions. This also removes empty trailing pages.
+    pages = Array.from(
+      root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+    );
+    for (let i = 0; i < pages.length - 1; i += 1) {
+      const body = pages[i].querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-body",
+      );
+      const nextBody = pages[i + 1].querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-body",
+      );
+      if (!body || !nextBody) continue;
+      let attempts = 0;
+      while (nextBody.firstChild && attempts++ < 100) {
+        const candidate = nextBody.firstChild;
+        body.appendChild(candidate);
+        if (bodyOverflows(body)) {
+          nextBody.insertBefore(candidate, nextBody.firstChild);
+          break;
+        }
+      }
+    }
+
+    pages = Array.from(
+      root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+    );
+    for (let i = pages.length - 1; i > 0; i -= 1) {
+      const body = pages[i].querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-body",
+      );
+      if (!body) break;
+
+      // Pages/Word rule: page existence is geometric, never semantic. An empty
+      // paragraph (<div><br></div>) is real document layout and must keep the
+      // page when it cannot fit on the previous sheet. Conversely, reverse-flow
+      // above already moves every node (including empty paragraphs) back when
+      // it DOES fit. Therefore a trailing page is redundant only when reverse
+      // flow has physically drained its BODY. Do not inspect textContent and do
+      // not special-case delete/Enter here — those semantic heuristics caused
+      // the create/delete/recreate ghost-page loop.
+      const contentNodes = Array.from(body.childNodes).filter((node) => {
+        return !(
+          node.nodeType === Node.ELEMENT_NODE &&
+          (node as HTMLElement).hasAttribute("data-editor-caret-marker")
+        );
+      });
+
+      if (contentNodes.length === 0) {
+        const marker = body.querySelector<HTMLElement>(
+          "[data-editor-caret-marker]",
+        );
+        const previousBody = pages[i - 1]?.querySelector<HTMLElement>(
+          ":scope > .editor-a4-page-body",
+        );
+        if (marker && previousBody) previousBody.appendChild(marker);
+        pages[i].remove();
+        continue;
+      }
+      break;
+    }
+
+    pages = Array.from(
+      root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+    );
+    const total = Math.max(1, pages.length);
+    pages.forEach((page, index) => {
+      page.dataset.pageNumber = String(index + 1);
+      let number = page.querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-number",
+      );
+      if (pageNumbers) {
+        if (!number) {
+          number = document.createElement("div");
+          number.className = "editor-a4-page-number";
+          number.contentEditable = "false";
+          page.appendChild(number);
+        }
+        number.textContent = `${index + 1} / ${total}`;
+      } else number?.remove();
+    });
+    // Restore a collapsed caret from the marker after forward/backward flow.
+    // This is especially important for blank Enter lines crossing the BODY /
+    // footer boundary. Remove the marker immediately so it is never serialized.
+    if (caretMarker?.isConnected) {
+      const markerOwner = caretMarker.closest<HTMLElement>(
+        ".editor-a4-page-body",
+      );
+      if (markerOwner) {
+        const markerPage = markerOwner.closest<HTMLElement>(".editor-a4-page");
+        const markerPageIndex = markerPage
+          ? Array.from(
+              root.querySelectorAll(":scope > .editor-a4-page"),
+            ).indexOf(markerPage)
+          : -1;
+        caretOwnerAfterReflow = markerOwner;
+        caretMovedToAnotherPage =
+          selectionSnapshot?.ownerKind === "body" &&
+          selectionSnapshot.pageIndex >= 0 &&
+          markerPageIndex >= 0 &&
+          markerPageIndex !== selectionSnapshot.pageIndex;
+        try {
+          const markerRange = document.createRange();
+          markerRange.setStartBefore(caretMarker);
+          markerRange.collapse(true);
+          markerOwner.focus({ preventScroll: true });
+          selection?.removeAllRanges();
+          selection?.addRange(markerRange);
+          activeEditor.current = markerOwner as HTMLDivElement;
+          savedRange.current = markerRange.cloneRange();
+          caretRestoredFromMarker = true;
+        } catch {
+          // The normal snapshot fallback below can still recover focus.
+        }
+      }
+      caretMarker.remove();
+    }
+
+    // If the marker survived reflow it is the authoritative logical caret.
+    // Restoring the pre-reflow snapshot afterwards would move the caret back to
+    // page #1 even though its paragraph already flowed to page #2.
+    if (selectionSnapshot && !caretRestoredFromMarker) {
+      const {
+        startContainer,
+        startOffset,
+        endContainer,
+        endOffset,
+        collapsed,
+        ownerKind,
+        pageIndex: originalPageIndex,
+      } = selectionSnapshot;
+
+      const restoreRange = (range: Range, owner: HTMLElement) => {
+        // Focus the live contentEditable first. Safari/WebKit may otherwise
+        // replace a restored Range with its own caret during focus().
+        if (document.activeElement !== owner)
+          owner.focus({ preventScroll: true });
+        activeEditor.current = owner as HTMLDivElement;
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        savedRange.current = range.cloneRange();
+      };
+
+      if (
+        startContainer.isConnected &&
+        endContainer.isConnected &&
+        root.contains(startContainer) &&
+        root.contains(endContainer)
+      ) {
+        try {
+          const restored = document.createRange();
+          const safeStart = Math.min(
+            startOffset,
+            startContainer.nodeType === Node.TEXT_NODE
+              ? (startContainer.textContent?.length ?? 0)
+              : startContainer.childNodes.length,
+          );
+          const safeEnd = Math.min(
+            endOffset,
+            endContainer.nodeType === Node.TEXT_NODE
+              ? (endContainer.textContent?.length ?? 0)
+              : endContainer.childNodes.length,
+          );
+          restored.setStart(startContainer, safeStart);
+          if (collapsed) restored.collapse(true);
+          else restored.setEnd(endContainer, safeEnd);
+
+          const owner = (
+            startContainer.nodeType === Node.ELEMENT_NODE
+              ? (startContainer as Element)
+              : startContainer.parentElement
+          )?.closest<HTMLElement>(
+            ".editor-a4-page-header, .editor-a4-page-body, .editor-a4-page-footer",
+          );
+
+          if (owner) restoreRange(restored, owner);
+        } catch {
+          // Fallback below handles a page/body removed during backward reflow.
+        }
+      } else if (ownerKind === "body") {
+        // The active empty trailing page may have been removed after Backspace.
+        // Never leave focus pointing at that detached contentEditable. Move the
+        // caret to the end of the nearest surviving previous BODY instead.
+        const livePages = Array.from(
+          root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+        );
+        const targetIndex = Math.max(
+          0,
+          Math.min(originalPageIndex, livePages.length - 1),
+        );
+        const owner = livePages[targetIndex]?.querySelector<HTMLElement>(
+          ":scope > .editor-a4-page-body",
+        );
+        if (owner) {
+          const fallback = document.createRange();
+          fallback.selectNodeContents(owner);
+          fallback.collapse(false);
+          restoreRange(fallback, owner);
+        }
+      }
+    }
+
+    // Pages/Word do not jump to the next sheet. Keep the viewport stable and
+    // reveal only the insertion line when it actually leaves the visible stage.
+    if (stage) {
+      stage.scrollTop = scrollTopBeforeReflow;
+
+      const revealRequested = revealBodyCaret.current;
+      revealBodyCaret.current = false;
+      if (
+        (caretMovedToAnotherPage || revealRequested) &&
+        caretOwnerAfterReflow
+      ) {
+        requestAnimationFrame(() => {
+          if (!stage.isConnected || !caretOwnerAfterReflow?.isConnected) return;
+          const liveSelection = window.getSelection();
+          if (!liveSelection?.rangeCount) return;
+          const range = liveSelection.getRangeAt(0).cloneRange();
+          let caretRect = Array.from(range.getClientRects()).at(-1) ?? null;
+
+          // Empty paragraphs can expose no Range rect in WebKit. A temporary
+          // zero-size probe gives us the insertion line without scrolling/focus.
+          let probe: HTMLSpanElement | null = null;
+          if (!caretRect && range.collapsed) {
+            try {
+              probe = document.createElement("span");
+              probe.contentEditable = "false";
+              probe.setAttribute("aria-hidden", "true");
+              probe.style.cssText =
+                "display:inline-block;width:0;height:1em;padding:0;margin:0;border:0;";
+              range.insertNode(probe);
+              caretRect = probe.getBoundingClientRect();
+            } catch {
+              caretRect = null;
+            } finally {
+              probe?.remove();
+            }
+          }
+          if (!caretRect) return;
+
+          const stageRect = stage.getBoundingClientRect();
+          const margin = 24;
+          const visibleTop = stageRect.top + margin;
+          const visibleBottom = stageRect.bottom - margin;
+          if (caretRect.bottom > visibleBottom) {
+            stage.scrollTop += caretRect.bottom - visibleBottom;
+          } else if (caretRect.top < visibleTop) {
+            stage.scrollTop -= visibleTop - caretRect.top;
+          }
+        });
+      }
+    }
+
+    setEditorPageCount(total);
+  }, [pageNumbers]);
+
+  // pageNumbers changes must paginate with the callback created for the NEW
+  // state. Calling paginateEditor in the checkbox handler used the previous
+  // render's closure, which inverted the visible behaviour (checking did
+  // nothing, unchecking rendered the numbers).
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => paginateEditor());
+    return () => cancelAnimationFrame(frame);
+  }, [paginateEditor]);
+
+  useEffect(() => {
+    const root = editor.current;
+    if (!root) return;
+
+    let layoutFrame = 0;
+    let reflowFrame = 0;
+    let running = false;
+    let pending = false;
+
+    const run = () => {
+      if (running) {
+        pending = true;
+        return;
+      }
+      running = true;
+
+      // First RAF lets contentEditable commit the input. The second runs after
+      // the browser has recalculated line boxes. This removes the race where
+      // pagination only happened after several Enter presses or another state
+      // change such as toggling page numbers.
+      cancelAnimationFrame(layoutFrame);
+      cancelAnimationFrame(reflowFrame);
+      layoutFrame = requestAnimationFrame(() => {
+        reflowFrame = requestAnimationFrame(() => {
+          paginateEditor();
+          running = false;
+          if (pending) {
+            pending = false;
+            run();
+          }
+        });
+      });
+    };
+
+    const onInput = (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      // Footer is a fixed shared region; editing it must not run BODY pagination.
+      if (!target?.closest(".editor-a4-page-body")) return;
+      lastBodyInputType.current =
+        event instanceof InputEvent ? event.inputType : "";
+      run();
+    };
+
+    const handleBoundaryAction = (event: {
+      key: string;
+      defaultPrevented: boolean;
+      isComposing?: boolean;
+      altKey?: boolean;
+      ctrlKey?: boolean;
+      metaKey?: boolean;
+      shiftKey?: boolean;
+      preventDefault: () => void;
+    }) => {
+      if (
+        event.defaultPrevented ||
+        event.isComposing ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      )
+        return;
+      if (!["Backspace", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      const selection = window.getSelection();
+      if (!selection?.rangeCount || !selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const caretElement =
+        range.startContainer.nodeType === Node.ELEMENT_NODE
+          ? (range.startContainer as Element)
+          : range.startContainer.parentElement;
+      const caretBody = caretElement?.closest<HTMLElement>(
+        ".editor-a4-page-body",
+      );
+      if (!caretBody) return;
+      const liveBodies = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          ":scope > .editor-a4-page > .editor-a4-page-body",
+        ),
+      );
+      const bodyIndex = liveBodies.indexOf(caretBody);
+      const moveCaret = (owner: HTMLElement, node: Node, atEnd: boolean) => {
+        const destination = document.createRange();
+        destination.selectNodeContents(node);
+        destination.collapse(!atEnd);
+        owner.focus({ preventScroll: true });
+        selection.removeAllRanges();
+        selection.addRange(destination);
+        activeEditor.current = owner as HTMLDivElement;
+        savedRange.current = destination.cloneRange();
+        caretBody.scrollTop = 0;
+        owner.scrollTop = 0;
+        if (owner !== caretBody) {
+          revealBodyCaret.current = true;
+          run();
+        }
+      };
+      const cell = caretElement?.closest<HTMLTableCellElement>("td, th");
+      const table = cell?.closest<HTMLTableElement>("table");
+      if (cell && table && caretBody.contains(table)) {
+        const cellPart = document.createRange();
+        cellPart.selectNodeContents(cell);
+        const backwards = event.key !== "ArrowDown";
+        if (backwards) cellPart.setEnd(range.startContainer, range.startOffset);
+        else cellPart.setStart(range.startContainer, range.startOffset);
+        const cells = Array.from(table.querySelectorAll("td, th")).filter(
+          (item) => item.closest("table") === table,
+        );
+        const row = cell.closest("tr");
+        const atTableEdge =
+          event.key === "Backspace"
+            ? cell === cells[0]
+            : backwards
+              ? row === cells[0]?.closest("tr")
+              : row === cells[cells.length - 1]?.closest("tr");
+        // Native contentEditable keeps Backspace/arrow keys trapped in the first
+        // or last cell. Exit at that edge without deleting or splitting the table.
+        if (
+          atTableEdge &&
+          !cellPart.toString().length &&
+          !cellPart
+            .cloneContents()
+            .querySelector("img, table, [data-variable-name]")
+        ) {
+          event.preventDefault();
+          const block =
+            table.closest<HTMLElement>("[data-data-table-name]") ?? table;
+          let neighbour = backwards ? block.previousSibling : block.nextSibling;
+          if (!neighbour) {
+            const adjacentBody = liveBodies[bodyIndex + (backwards ? -1 : 1)];
+            if (adjacentBody?.childNodes.length) {
+              moveCaret(adjacentBody, adjacentBody, backwards);
+              return;
+            }
+            const paragraph = document.createElement("p");
+            paragraph.innerHTML = "<br>";
+            if (backwards) block.before(paragraph);
+            else block.after(paragraph);
+            neighbour = paragraph;
+            setDirty(true);
+          }
+          moveCaret(caretBody, neighbour, backwards);
+          run();
+          return;
+        }
+        return;
+      }
+      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+        const backwards = event.key === "ArrowUp";
+        const remaining = document.createRange();
+        remaining.selectNodeContents(caretBody);
+        if (backwards)
+          remaining.setEnd(range.startContainer, range.startOffset);
+        else remaining.setStart(range.startContainer, range.startOffset);
+        const adjacentBody = liveBodies[bodyIndex + (backwards ? -1 : 1)];
+        if (
+          adjacentBody &&
+          !remaining.toString().length &&
+          !remaining
+            .cloneContents()
+            .querySelector(
+              "img, table, [data-variable-name], [data-data-table-name]",
+            )
+        ) {
+          event.preventDefault();
+          moveCaret(adjacentBody, adjacentBody, backwards);
+        }
+        return;
+      }
+      const body = caretBody;
+      const page = body.closest<HTMLElement>(".editor-a4-page");
+      if (!page) return;
+      const pages = Array.from(
+        root.querySelectorAll<HTMLElement>(":scope > .editor-a4-page"),
+      );
+      const pageIndex = pages.indexOf(page);
+      if (pageIndex <= 0) return;
+
+      if (!body.contains(range.startContainer)) return;
+
+      // Separate contentEditable BODYs do not let the browser Backspace across
+      // an automatic page boundary. Detect the logical beginning of this BODY
+      // and bridge it to the previous physical A4 ourselves.
+      const prefix = document.createRange();
+      prefix.selectNodeContents(body);
+      try {
+        prefix.setEnd(range.startContainer, range.startOffset);
+      } catch {
+        return;
+      }
+      const beforeCaret = prefix.cloneContents();
+      // Indentation between HTML blocks is not a preceding editable character.
+      // Whitespace inside a paragraph still counts, so typed spaces delete normally.
+      const prefixText = document.createTreeWalker(
+        beforeCaret,
+        NodeFilter.SHOW_TEXT,
+      );
+      while (prefixText.nextNode()) {
+        const node = prefixText.currentNode;
+        if (!node.textContent?.length) continue;
+        if (
+          !node.textContent.trim() &&
+          /[\r\n\t]/.test(node.textContent) &&
+          node.parentNode === beforeCaret
+        )
+          continue;
+        if (node.textContent.replace(/[\u200B\uFEFF]/g, "").length) return;
+      }
+
+      const beforeCaretHasStructure = Boolean(
+        beforeCaret.querySelector(
+          "img, table, [data-variable-name], [data-data-table-name]",
+        ),
+      );
+      if (beforeCaretHasStructure) return;
+
+      event.preventDefault();
+
+      // If this sheet starts with the empty paragraph that automatic Enter
+      // pushed here, Backspace removes that paragraph just like Pages/Word.
+      const block = caretElement?.closest<HTMLElement>(
+        "p, div, li, blockquote, h1, h2, h3, h4, h5, h6",
+      );
+      if (
+        block &&
+        body.contains(block) &&
+        !block.textContent?.trim() &&
+        !block.querySelector("img, table, [data-variable-name]")
+      ) {
+        block.remove();
+      }
+
+      const previousBody = pages[pageIndex - 1].querySelector<HTMLElement>(
+        ":scope > .editor-a4-page-body",
+      );
+      if (!previousBody) return;
+
+      // This Backspace is the explicit cross-page merge operation. Do not leave
+      // an empty contentEditable sheet around and hope that the later generic
+      // cleanup recognises Chrome's placeholder DOM. That was the ghost-page
+      // cycle: #2 stayed mounted, then #1 internally scrolled under the footer.
+      // If the current BODY contains no real document content after removing
+      // its leading empty paragraph, remove the physical page synchronously.
+      const hasRealBodyContent = Array.from(body.childNodes).some((node) => {
+        if (node.nodeType === Node.TEXT_NODE)
+          return Boolean(node.textContent?.trim());
+        if (node.nodeType !== Node.ELEMENT_NODE) return false;
+        const element = node as HTMLElement;
+        if (element.hasAttribute("data-editor-caret-marker")) return false;
+        if (element.tagName === "BR") return false;
+        if (element.matches("img, table, [data-variable-name]")) return true;
+        if (element.textContent?.trim()) return true;
+        return Boolean(
+          element.querySelector("img, table, [data-variable-name]"),
+        );
+      });
+
+      const previousRange = document.createRange();
+      const lastBlock = previousBody.lastElementChild;
+      const caretTarget =
+        lastBlock?.matches("p, div, li, blockquote, h1, h2, h3, h4, h5, h6") &&
+        !lastBlock.querySelector(
+          "table, img, [data-variable-name], [data-data-table-name]",
+        )
+          ? lastBlock
+          : previousBody;
+      previousRange.selectNodeContents(caretTarget);
+      previousRange.collapse(false);
+      previousBody.focus({ preventScroll: true });
+      selection.removeAllRanges();
+      selection.addRange(previousRange);
+      activeEditor.current = previousBody as HTMLDivElement;
+      savedRange.current = previousRange.cloneRange();
+
+      // Crossing an automatic page boundary with Backspace is a destructive
+      // merge operation. Once the current BODY contains no real content, remove
+      // that physical sheet immediately. Leaving Chrome's empty placeholder
+      // mounted here poisons the next reverse-flow: the previous BODY can retain
+      // its old overflow/scroll geometry and the following Enter is then allowed
+      // to render underneath the footer instead of recreating page #2.
+      //
+      // This is intentionally different from normal reverse-flow. A page that
+      // still contains text/table/image remains geometry-driven; only a BODY
+      // that has just been emptied by this cross-page Backspace is removed.
+      if (!hasRealBodyContent && page.isConnected) {
+        page.remove();
+      }
+
+      // Normalize any stale contentEditable scroll state left by Chromium after
+      // the former overflow. The BODY itself is not a scroll owner; paper-stage
+      // is. Future input must therefore be measured from the physical top of the
+      // previous BODY and immediately paginate again when it reaches the footer.
+      previousBody.scrollTop = 0;
+      previousBody.scrollLeft = 0;
+
+      // Keep the previous insertion line visible after crossing the boundary.
+      // Merely moving focus with preventScroll leaves page two on screen.
+      revealBodyCaret.current = true;
+      run();
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => handleBoundaryAction(event);
+    const onBeforeInput = (event: InputEvent) => {
+      if (event.inputType !== "deleteContentBackward" || !event.cancelable)
+        return;
+      handleBoundaryAction({
+        key: "Backspace",
+        defaultPrevented: event.defaultPrevented,
+        isComposing: event.isComposing,
+        preventDefault: () => event.preventDefault(),
+      });
+    };
+
+    root.addEventListener("input", onInput, true);
+    root.addEventListener("keydown", onKeyDown, true);
+    root.addEventListener("beforeinput", onBeforeInput, true);
+
+    return () => {
+      cancelAnimationFrame(layoutFrame);
+      cancelAnimationFrame(reflowFrame);
+      root.removeEventListener("input", onInput, true);
+      root.removeEventListener("keydown", onKeyDown, true);
+      root.removeEventListener("beforeinput", onBeforeInput, true);
+    };
+  }, [paginateEditor]);
+
+  const handlePaperStageWheel = useCallback(
+    (event: ReactWheelEvent<HTMLDivElement>) => {
+      if (event.deltaY === 0 || event.shiftKey) return;
+      const stage = event.currentTarget;
+      const maxScrollTop = stage.scrollHeight - stage.clientHeight;
+      if (maxScrollTop <= 0) return;
+      const nextScrollTop = Math.min(
+        maxScrollTop,
+        Math.max(0, stage.scrollTop + event.deltaY),
+      );
+      if (nextScrollTop === stage.scrollTop) return;
+      event.preventDefault();
+      stage.scrollTop = nextScrollTop;
+    },
+    [],
+  );
+
   const serializeRegion = (region: HTMLElement | null) => {
     if (!region) return "";
+    if (region === editor.current) {
+      const holder = document.createElement("div");
+      region
+        .querySelectorAll<HTMLElement>(
+          ":scope > .editor-a4-page > .editor-a4-page-body",
+        )
+        .forEach((body) => {
+          Array.from(body.childNodes).forEach((node) =>
+            holder.appendChild(node.cloneNode(true)),
+          );
+        });
+      region = holder;
+    }
     const clone = region.cloneNode(true) as HTMLElement;
+    clone
+      .querySelectorAll("[data-editor-page-break]")
+      .forEach((node) => node.remove());
     clone
       .querySelectorAll("[data-variable-actions]")
       .forEach((node) => node.remove());
@@ -1814,9 +3188,9 @@ export function TemplateEditor({ template, onClose }: Props) {
 
       content: serializeRegion(editor.current),
 
-      headerContent: headerEnabled ? serializeRegion(headerEditor.current) : "",
+      headerContent: serializeRegion(headerEditor.current),
 
-      footerContent: footerEnabled ? serializeRegion(footerEditor.current) : "",
+      footerContent: serializeRegion(footerEditor.current),
 
       pageNumbers,
       variables,
@@ -1859,6 +3233,31 @@ export function TemplateEditor({ template, onClose }: Props) {
     : undefined;
 
   const pending = create.isPending || update.isPending;
+
+  useEffect(() => {
+    publishMobileEditorNav({
+      active: true,
+      kind: "template",
+      name: name.trim() || t("templateName"),
+      pending,
+    });
+
+    const handleSave = () => {
+      if (!pending) void save();
+    };
+    const handleBack = () => void closeEditor();
+    const handleEditMeta = () => openMetadataEditor();
+
+    window.addEventListener(MOBILE_EDITOR_NAV_SAVE, handleSave);
+    window.addEventListener(MOBILE_EDITOR_NAV_BACK, handleBack);
+    window.addEventListener(MOBILE_EDITOR_NAV_EDIT_META, handleEditMeta);
+    return () => {
+      window.removeEventListener(MOBILE_EDITOR_NAV_SAVE, handleSave);
+      window.removeEventListener(MOBILE_EDITOR_NAV_BACK, handleBack);
+      window.removeEventListener(MOBILE_EDITOR_NAV_EDIT_META, handleEditMeta);
+      publishMobileEditorNav({ active: false });
+    };
+  }, [name, pending, save, closeEditor, t]);
 
   return (
     <div className="editor-overlay">
@@ -2326,17 +3725,24 @@ export function TemplateEditor({ template, onClose }: Props) {
             }
           />
 
-          <DocumentOptions
-            t={t}
-            header={headerEnabled}
-            footer={footerEnabled}
-            pageNumbers={pageNumbers}
-            setHeader={setHeaderEnabled}
-            setFooter={setFooterEnabled}
-            setPageNumbers={setPageNumbers}
-          />
-
-          <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+          <div
+            className="editor-view-controls"
+            onPointerDownCapture={rememberSelection}
+          >
+            <DocumentOptions
+              t={t}
+              pageNumbers={pageNumbers}
+              setPageNumbers={(value) => {
+                // Do not call paginateEditor from this render: that callback still
+                // closes over the previous pageNumbers value. The effect below
+                // runs after React commits the new value.
+                setPageNumbers(value);
+                restoreSelection();
+                setDirty(true);
+              }}
+            />
+            <ZoomBar t={t} zoom={zoom} setZoom={setZoom} />
+          </div>
         </div>
 
         <div className="paper-stage" onWheelCapture={handlePaperStageWheel}>
@@ -2347,76 +3753,21 @@ export function TemplateEditor({ template, onClose }: Props) {
                 "--editor-zoom": zoom / 100,
                 "--scaled-a4-width": `${A4_WIDTH_PX * (zoom / 100)}px`,
                 "--scaled-a4-height": `${Math.round(A4_WIDTH_PX * (297 / 210) * (zoom / 100))}px`,
+                "--scaled-document-height": `${Math.round((A4_WIDTH_PX * (297 / 210) * editorPageCount + (12 / 25.4) * 96 * Math.max(0, editorPageCount - 1) + (16 / 25.4) * 96) * (zoom / 100))}px`,
+                "--editor-page-count": editorPageCount,
               } as CSSProperties
             }
           >
             <div
               className="a4-page-shell"
-              data-header-enabled={headerEnabled}
-              data-footer-enabled={footerEnabled}
+              data-page-count={editorPageCount}
+              data-header-enabled="true"
+              data-footer-enabled="true"
             >
-              {headerEnabled && (
-                <div
-                  ref={headerEditor}
-                  className="page-header-editor"
-                  contentEditable
-                  onDoubleClick={(event) => {
-                    const table = (
-                      event.target as HTMLElement
-                    ).closest<HTMLElement>("[data-data-table-name]");
-                    if (!table) return;
-                    const definition = variables.find(
-                      (item) =>
-                        item.type === "dataTable" &&
-                        item.name === table.dataset.dataTableName,
-                    );
-                    if (definition) {
-                      setEditingDataTable(definition);
-                      setDataTableOpen(true);
-                    }
-                  }}
-                  suppressContentEditableWarning
-                  onFocus={() => {
-                    activeEditor.current = headerEditor.current;
-                  }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) =>
-                    dropIntoRegion(event, headerEditor.current)
-                  }
-                  onDragStart={(event) => {
-                    const target = event.target as HTMLElement;
-
-                    if (target.tagName === "IMG") {
-                      draggedImage.current = target as HTMLImageElement;
-
-                      event.dataTransfer.effectAllowed = "move";
-                    }
-                  }}
-                  onClick={(event) => {
-                    const target = event.target as HTMLElement;
-                    selectTableCell(target);
-                    if (selectVariableElement(target)) return;
-
-                    if (target.tagName === "IMG") {
-                      selectImage(target as HTMLImageElement);
-                    }
-                  }}
-                  onKeyUp={rememberSelection}
-                  onInput={() =>
-                    keepRegionWithinA4(
-                      headerEditor.current,
-                      lastValidHeaderHtml,
-                    )
-                  }
-                  onMouseUp={rememberSelection}
-                  data-placeholder={t("headerPlaceholder")}
-                />
-              )}
-
               <div
                 ref={editor}
-                className="a4-paper"
-                contentEditable
+                className="a4-paper editor-page-stack"
+                contentEditable={false}
                 suppressContentEditableWarning
                 onDoubleClick={(event) => {
                   const table = (
@@ -2444,11 +3795,40 @@ export function TemplateEditor({ template, onClose }: Props) {
                   }
                 }}
                 onDrop={dropIntoEditor}
-                onFocus={() => {
-                  activeEditor.current = editor.current;
+                onFocus={(event) => {
+                  const target = event.target as HTMLElement;
+                  activeEditor.current =
+                    target.closest<HTMLDivElement>(".editor-a4-page-header") ??
+                    target.closest<HTMLDivElement>(".editor-a4-page-footer") ??
+                    target.closest<HTMLDivElement>(".editor-a4-page-body") ??
+                    editor.current;
                 }}
                 onKeyUp={rememberSelection}
                 onMouseUp={rememberSelection}
+                onKeyDown={(event) => {
+                  if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+                  const key = event.key.toLowerCase();
+                  if (key !== "z" && key !== "y") return;
+                  const region = (
+                    event.target as HTMLElement
+                  ).closest<HTMLDivElement>(
+                    ".editor-a4-page-header, .editor-a4-page-footer",
+                  );
+                  if (!region) return;
+                  event.preventDefault();
+                  activeEditor.current = region;
+                  cmd(key === "y" || event.shiftKey ? "redo" : "undo");
+                }}
+                onInput={(event) => {
+                  if (formattingTransaction.current) return;
+                  const region = (
+                    event.target as HTMLElement
+                  ).closest<HTMLDivElement>(
+                    ".editor-a4-page-header, .editor-a4-page-footer",
+                  );
+                  if (region) commitActiveBoundedRegion(region);
+                  setDirty(true);
+                }}
                 onClick={(event) => {
                   const target = event.target as HTMLElement;
                   selectTableCell(target);
@@ -2468,65 +3848,24 @@ export function TemplateEditor({ template, onClose }: Props) {
                 }}
               />
 
-              {footerEnabled && (
-                <div
-                  ref={footerEditor}
-                  className="page-footer-editor"
-                  contentEditable
-                  onDoubleClick={(event) => {
-                    const table = (
-                      event.target as HTMLElement
-                    ).closest<HTMLElement>("[data-data-table-name]");
-                    if (!table) return;
-                    const definition = variables.find(
-                      (item) =>
-                        item.type === "dataTable" &&
-                        item.name === table.dataset.dataTableName,
-                    );
-                    if (definition) {
-                      setEditingDataTable(definition);
-                      setDataTableOpen(true);
-                    }
-                  }}
-                  suppressContentEditableWarning
-                  onFocus={() => {
-                    activeEditor.current = footerEditor.current;
-                  }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) =>
-                    dropIntoRegion(event, footerEditor.current)
-                  }
-                  onDragStart={(event) => {
-                    const target = event.target as HTMLElement;
+              {/* Persistent shared-region sources. Physical A4 header/footer nodes are
+                  disposable pagination views; toolbar controls may temporarily move
+                  focus away from them. Keep the canonical HTML outside the page stack
+                  so a pagination pass cannot replace a styled header with an empty
+                  value while a Select owns focus. */}
+              <div
+                ref={headerEditor}
+                className="editor-header-source"
+                contentEditable={false}
+                aria-hidden="true"
+              />
 
-                    if (target.tagName === "IMG") {
-                      draggedImage.current = target as HTMLImageElement;
-
-                      event.dataTransfer.effectAllowed = "move";
-                    }
-                  }}
-                  onClick={(event) => {
-                    const target = event.target as HTMLElement;
-                    selectTableCell(target);
-                    if (selectVariableElement(target)) return;
-
-                    if (target.tagName === "IMG") {
-                      selectImage(target as HTMLImageElement);
-                    }
-                  }}
-                  onKeyUp={rememberSelection}
-                  onInput={() =>
-                    keepRegionWithinA4(
-                      footerEditor.current,
-                      lastValidFooterHtml,
-                    )
-                  }
-                  onMouseUp={rememberSelection}
-                  data-placeholder={t("footerPlaceholder")}
-                />
-              )}
-
-              {pageNumbers && <div className="page-number-preview">1 / 1</div>}
+              <div
+                ref={footerEditor}
+                className="editor-footer-source"
+                contentEditable={false}
+                aria-hidden="true"
+              />
             </div>
           </div>
 

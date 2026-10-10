@@ -1,4 +1,5 @@
 "use client";
+import { EditorBottomSheet } from "@/components/ui/editor-bottom-sheet";
 import { CategoryField } from "@/features/categories/CategoryField";
 import { DEFAULT_CATEGORY } from "@/features/categories/definitions";
 
@@ -25,10 +26,21 @@ import { useRouter } from "@/i18n/navigation";
 import { useFeedback } from "@/components/ui/feedback-provider";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { PendingOverlay } from "@/components/ui/pending-overlay";
+import {
+  MOBILE_EDITOR_NAV_BACK,
+  MOBILE_EDITOR_NAV_SAVE,
+  MOBILE_EDITOR_NAV_EDIT_META,
+  MOBILE_EDITOR_NAV_ACTION,
+  publishMobileEditorNav,
+} from "@/lib/mobile-editor-nav";
 import { parseTemplateVariables } from "@/features/templates/types";
 import type { TemplateVariable } from "@/features/templates/types";
 import { resolveCalculatedValues } from "@/features/templates/calculations";
 import { formatTemplateNumber } from "@/features/templates/number-format";
+import {
+  DocumentGeneratorSkeleton,
+  DocumentFieldSkeleton,
+} from "./components/DocumentGeneratorSkeleton";
 import { TemplatePicker } from "./components/TemplatePicker";
 import { DocumentPdfPreviewModal } from "./components/DocumentPdfPreviewModal";
 import { VariableField } from "./components/VariableField";
@@ -128,6 +140,7 @@ export default function DocumentGenerator({
   const [templateId, setTemplateId] = useState("");
   const [documentName, setDocumentName] = useState("");
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
+  const [metadataOpen, setMetadataOpen] = useState(false);
   const [documentNameError, setDocumentNameError] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
@@ -165,6 +178,8 @@ export default function DocumentGenerator({
   const copyFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const documentNameRef = useRef<HTMLInputElement>(null);
+  const documentNameEdited = useRef(false);
+  const categoryEdited = useRef(false);
 
   useEffect(
     () => () => {
@@ -533,6 +548,8 @@ export default function DocumentGenerator({
 
     if (!trimmedDocumentName) {
       setDocumentNameError(t("documentNameRequired"));
+      if (window.matchMedia("(max-width: 900px)").matches)
+        setMetadataOpen(true);
 
       requestAnimationFrame(() => {
         const element = documentNameRef.current;
@@ -621,79 +638,145 @@ export default function DocumentGenerator({
         (selectedTemplateQuery.isPending || selectedTemplateQuery.isFetching)));
 
   const renderLoadingState = (email = false) => (
-    <div
-      className={`document-generator-shell pending-form ${email ? "email-generator-loading" : ""}`}
-      aria-busy="true"
-    >
-      <div className="form-actions document-sticky-actions">
-        <button
-          className="btn secondary"
-          type="button"
-          onClick={() => router.push("/documents")}
-        >
-          <ArrowLeft size={17} />
-          {t("backToDocuments")}
-        </button>
-        {email ? (
-          <div className="email-header-actions">
-            <button className="btn secondary" type="button" disabled>
-              <Eye size={17} />
-              {t("previewEmail")}
-            </button>
-            <button className="btn secondary" type="button" disabled>
-              <Clipboard size={17} />
-              {t("copyEmail")}
-            </button>
-            <button className="btn email-send-button" type="button" disabled>
-              <Send size={17} />
-              {t("sendEmail")}
-            </button>
-          </div>
-        ) : (
-          <div className="document-primary-actions">
-            <button className="btn secondary" type="button" disabled>
-              <Eye size={17} />
-              {t("preview")}
-            </button>
-            <button className="btn" type="button" disabled>
-              <Save size={17} />
-              {t("saveDocument")}
-            </button>
-          </div>
-        )}
-      </div>
-      <section
-        className={`card document-form-card ${email ? "email-form-skeleton" : "document-data-loading document-edit-form-skeleton"}`}
-      >
-        <div className="document-loading-heading">
-          <span className="skeleton-icon" />
-          <div>
-            <span className="skeleton-line wide" />
-            <span className="skeleton-line" />
-          </div>
-        </div>
-        <div className="document-field-skeleton">
-          <span className="skeleton-line short" />
-          <span className="skeleton-input" />
-        </div>
-        {email && (
-          <div className="email-source-note-skeleton">
-            <span className="skeleton-icon" />
-            <div>
-              <span className="skeleton-line wide" />
-              <span className="skeleton-line" />
-            </div>
-          </div>
-        )}
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div className="document-field-skeleton" key={index}>
-            <span className="skeleton-line short" />
-            <span className="skeleton-input" />
-          </div>
-        ))}
-      </section>
-    </div>
+    <DocumentGeneratorSkeleton
+      email={email}
+      editing={isEditing}
+      source={Boolean(sourceDocumentId)}
+      recipient={Boolean(emailSettings.data?.configured)}
+    />
   );
+
+  const documentPending =
+    generateMutation.isPending || updateMutation.isPending || isRedirecting;
+  const pending = isEmailMode ? false : documentPending;
+
+  useEffect(() => {
+    const emailBusy =
+      emailAction !== null ||
+      sendEmailMutation.isPending ||
+      emailMutation.isPending ||
+      documentEmailMutation.isPending;
+    const sendDisabled =
+      !selected ||
+      emailBusy ||
+      !emailSettings.data?.configured ||
+      !recipientEmail.trim().includes("@");
+    publishMobileEditorNav({
+      active: true,
+      kind: isEmailMode ? "email" : "document",
+      name: isEmailMode
+        ? emailSubject.trim() || selected?.name || t("prepareEmail")
+        : documentName.trim() ||
+          t(isEditing ? "editFormTitle" : "generateTitle"),
+      backLabel: t("backToDocuments"),
+      primaryIcon: isEmailMode ? "send" : isEditing ? "save" : "generate",
+      primaryLabel: isEmailMode
+        ? t(sendEmailMutation.isPending ? "sendingEmail" : "sendEmail")
+        : t(pending ? "saving" : isEditing ? "saveDocument" : "generate"),
+      primaryTitle: isEmailMode
+        ? !emailSettings.data?.configured
+          ? t("sendEmailSetupRequired")
+          : !recipientEmail.trim().includes("@")
+            ? t("recipientEmailRequired")
+            : t("sendEmail")
+        : undefined,
+      primaryDisabled: isEmailMode ? sendDisabled : pending || !selected,
+      metadataDisabled:
+        sourceDocumentLoading ||
+        editingDocumentLoading ||
+        ((isEditing || Boolean(sourceDocumentId)) && !selected),
+      pending: isEmailMode ? sendEmailMutation.isPending : pending,
+      actions: isEmailMode
+        ? [
+            {
+              id: "preview",
+              label: t("previewEmail"),
+              disabled: !selected || emailBusy,
+            },
+            {
+              id: "copy",
+              label: emailCopied ? t("copied") : t("copyEmail"),
+              disabled: !selected || emailBusy,
+            },
+          ]
+        : [
+            {
+              id: "preview",
+              label: t("preview"),
+              disabled:
+                pending || !selected || documentPreviewMutation.isPending,
+            },
+          ],
+    });
+
+    const handleSave = () => {
+      if (isEmailMode) {
+        if (!sendDisabled) void sendPreparedEmail();
+      } else if (!pending && selected) void save();
+    };
+    const handleBack = async () => {
+      if (dirty && !(await confirmLeave())) return;
+      setDirty(false);
+      router.push("/documents");
+    };
+
+    const handleEditMeta = () => {
+      if (
+        sourceDocumentLoading ||
+        editingDocumentLoading ||
+        ((isEditing || Boolean(sourceDocumentId)) && !selected)
+      )
+        return;
+      setMetadataOpen(true);
+    };
+    const handleAction = (event: Event) => {
+      const action = (event as CustomEvent<string>).detail;
+      if (isEmailMode) {
+        if (!selected || emailBusy) return;
+        if (action === "preview") void previewEmail();
+        if (action === "copy") void copyEmail();
+      } else if (action === "preview" && !pending && selected)
+        void previewDocument();
+    };
+    window.addEventListener(MOBILE_EDITOR_NAV_EDIT_META, handleEditMeta);
+    window.addEventListener(MOBILE_EDITOR_NAV_ACTION, handleAction);
+    window.addEventListener(MOBILE_EDITOR_NAV_SAVE, handleSave);
+    window.addEventListener(MOBILE_EDITOR_NAV_BACK, handleBack);
+    return () => {
+      window.removeEventListener(MOBILE_EDITOR_NAV_EDIT_META, handleEditMeta);
+      window.removeEventListener(MOBILE_EDITOR_NAV_ACTION, handleAction);
+      window.removeEventListener(MOBILE_EDITOR_NAV_SAVE, handleSave);
+      window.removeEventListener(MOBILE_EDITOR_NAV_BACK, handleBack);
+      publishMobileEditorNav({ active: false });
+    };
+  }, [
+    documentName,
+    sourceDocumentLoading,
+    editingDocumentLoading,
+    sourceDocumentId,
+    emailSubject,
+    recipientEmail,
+    emailAction,
+    emailCopied,
+    emailSettings.data?.configured,
+    sendEmailMutation.isPending,
+    emailMutation.isPending,
+    documentEmailMutation.isPending,
+    previewEmail,
+    copyEmail,
+    sendPreparedEmail,
+    pending,
+    selected,
+    documentPreviewMutation.isPending,
+    previewDocument,
+    dirty,
+    isEmailMode,
+    isEditing,
+    save,
+    confirmLeave,
+    router,
+    t,
+  ]);
 
   if (sourceDocumentLoading) return renderLoadingState(true);
   if (editingDocumentLoading) return renderLoadingState(false);
@@ -712,7 +795,7 @@ export default function DocumentGenerator({
 
     if (sourceUnavailable || templateUnavailable) {
       return (
-        <div className="document-generator-shell">
+        <div className="document-generator-shell document-mobile-editor">
           <div className="form-actions document-sticky-actions">
             <button
               className="btn secondary"
@@ -760,7 +843,7 @@ export default function DocumentGenerator({
 
     if (documentUnavailable || templateUnavailable) {
       return (
-        <div className="document-generator-shell">
+        <div className="document-generator-shell document-mobile-editor">
           <div className="form-actions document-sticky-actions">
             <button
               className="btn secondary"
@@ -796,13 +879,90 @@ export default function DocumentGenerator({
     }
   }
 
-  const documentPending =
-    generateMutation.isPending || updateMutation.isPending || isRedirecting;
-  const pending = isEmailMode ? false : documentPending;
-
   return (
-    <div className="document-generator-shell pending-form" aria-busy={pending}>
+    <div
+      className="document-generator-shell pending-form document-mobile-editor"
+      aria-busy={pending}
+    >
       <PendingOverlay active={documentPending} label={t("saving")} />
+      <EditorBottomSheet
+        open={metadataOpen}
+        title={t(
+          isEmailMode
+            ? "prepareEmail"
+            : isEditing
+              ? "editFormTitle"
+              : "generateTitle",
+        )}
+        onClose={() => setMetadataOpen(false)}
+      >
+        {isEmailMode ? (
+          <>
+            <FormField
+              id="mobile-email-subject"
+              label={t("emailSubject")}
+              type="text"
+              maxLength={250}
+              value={emailSettings.data?.configured ? emailSubject : ""}
+              disabled={!selected || !emailSettings.data?.configured}
+              placeholder={
+                emailSettings.data?.configured
+                  ? t("emailSubjectPlaceholder")
+                  : t("emailSubjectSetupPlaceholder")
+              }
+              onChange={(event) => {
+                setEmailSubject(event.target.value);
+                setDirty(true);
+              }}
+            />
+            {emailSettings.data?.configured ? (
+              <FormField
+                id="mobile-recipient-email"
+                label={t("recipientEmail")}
+                type="email"
+                value={recipientEmail}
+                disabled={!selected}
+                onChange={(event) => {
+                  setRecipientTouched(true);
+                  setRecipientEmail(event.target.value);
+                }}
+              />
+            ) : (
+              <small className="field-help">
+                {t("sendEmailSetupRequired")}
+              </small>
+            )}
+          </>
+        ) : (
+          <>
+            <FormField
+              id="mobile-document-name"
+              label={t("documentName")}
+              type="text"
+              value={documentName}
+              disabled={pending}
+              placeholder={t("documentNamePlaceholder")}
+              error={documentNameError || undefined}
+              onChange={(event) => {
+                documentNameEdited.current = true;
+                setDocumentName(event.target.value);
+                setDocumentNameError(
+                  event.target.value.trim() ? "" : t("documentNameRequired"),
+                );
+                setDirty(true);
+              }}
+            />
+            <CategoryField
+              value={category}
+              onChange={(next) => {
+                categoryEdited.current = true;
+                setCategory(next);
+                setDirty(true);
+              }}
+            />
+          </>
+        )}
+      </EditorBottomSheet>
       <div className="form-actions document-sticky-actions">
         <button
           className="btn secondary"
@@ -976,18 +1136,23 @@ export default function DocumentGenerator({
               );
 
               setTemplateId(nextTemplateId);
-              // Choosing a template establishes the initial form state. It is
-              // not a user edit by itself, so do not enable the leave guard.
-              setDirty(false);
+              // Keep metadata entered before choosing the template.
+              setDirty(documentNameEdited.current || categoryEdited.current);
 
-              setDocumentName(
-                nextTemplate
-                  ? `${nextTemplate.name} - ${new Date().toLocaleDateString()}`
-                  : "",
+              setDocumentName((current) =>
+                documentNameEdited.current && current.trim()
+                  ? current
+                  : nextTemplate
+                    ? `${nextTemplate.name} - ${new Date().toLocaleDateString()}`
+                    : "",
               );
 
               setDocumentNameError("");
-              setCategory(nextTemplate?.category ?? DEFAULT_CATEGORY);
+              setCategory((current) =>
+                categoryEdited.current
+                  ? current
+                  : (nextTemplate?.category ?? DEFAULT_CATEGORY),
+              );
               setEmailSubject(
                 emailSettings.data?.configured
                   ? nextTemplate?.emailSubject?.trim() ||
@@ -1010,28 +1175,28 @@ export default function DocumentGenerator({
           selectedTemplateQuery.isFetching &&
           !selected && (
             <div
-              className="document-template-loading document-edit-form-skeleton"
+              className="document-template-loading"
               aria-busy="true"
               aria-label={t("loadingTemplate")}
             >
-              <div className="document-loading-heading">
-                <span className="skeleton-icon" />
-                <div>
-                  <span className="skeleton-line wide" />
-                  <span className="skeleton-line" />
-                </div>
-              </div>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div className="document-field-skeleton" key={index}>
-                  <span className="skeleton-line short" />
-                  <span className="skeleton-input" />
-                </div>
-              ))}
+              {isEmailMode ? (
+                <>
+                  <DocumentFieldSkeleton help />
+                  {emailSettings.data?.configured && (
+                    <DocumentFieldSkeleton help />
+                  )}
+                </>
+              ) : (
+                <>
+                  <DocumentFieldSkeleton metadata />
+                  <DocumentFieldSkeleton metadata />
+                </>
+              )}
             </div>
           )}
         {selected && !isEmailMode && (
           <label
-            className={`field ${documentNameError ? "field-error" : ""}`}
+            className={`field document-desktop-meta ${documentNameError ? "field-error" : ""}`}
             htmlFor="document-name"
           >
             <span>
@@ -1050,6 +1215,7 @@ export default function DocumentGenerator({
               }
               onChange={(event) => {
                 const nextName = event.target.value;
+                documentNameEdited.current = true;
                 if (nextName !== documentName) setDirty(true);
                 setDocumentName(nextName);
 
@@ -1068,13 +1234,16 @@ export default function DocumentGenerator({
         )}
 
         {selected && !isEmailMode && (
-          <CategoryField
-            value={category}
-            onChange={(next) => {
-              setCategory(next);
-              setDirty(true);
-            }}
-          />
+          <div className="document-desktop-meta">
+            <CategoryField
+              value={category}
+              onChange={(next) => {
+                categoryEdited.current = true;
+                setCategory(next);
+                setDirty(true);
+              }}
+            />
+          </div>
         )}
 
         {selected && isEmailMode && (
@@ -1133,30 +1302,6 @@ export default function DocumentGenerator({
             <small className="field-help">{t("recipientEmailHelp")}</small>
           </div>
         )}
-
-        {sourceDocumentId &&
-          (sourceDocumentQuery.isLoading ||
-            sourceTemplateQuery.isLoading ||
-            !initialized) && (
-            <div
-              className="email-source-loading email-form-skeleton"
-              aria-busy="true"
-            >
-              <div className="email-source-note-skeleton">
-                <span className="skeleton-icon" />
-                <div>
-                  <span className="skeleton-line wide" />
-                  <span className="skeleton-line" />
-                </div>
-              </div>
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div className="form-field-skeleton" key={index}>
-                  <span className="skeleton-line skeleton-label" />
-                  <span className="skeleton-control" />
-                </div>
-              ))}
-            </div>
-          )}
 
         {sourceDocumentId && sourceDocumentQuery.data && selected && (
           <div className="email-source-document" role="note">
