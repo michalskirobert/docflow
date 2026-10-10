@@ -538,3 +538,30 @@
 .auth-form .customer-type-card.selected:hover {
   transform: none !important;
 }
+
+.shared-select-options.opens-up {
+  top: auto !important;
+  bottom: calc(100% + 6px);
+}
+@media (max-width: 900px) {
+  .shared-select-options,
+  .searchable-select-menu {
+    max-height: 188px;
+    overscroll-behavior: contain;
+    overflow-y: auto;
+  }
+  .shared-select-options button,
+  .editor-toolbar .editor-select .shared-select-options button {
+    height: 44px;
+    min-height: 44px;
+    padding-block: 8px;
+  }
+  .shared-select-options button > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .searchable-select-menu button {
+    min-height: 44px;
+  }
+}

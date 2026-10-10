@@ -1,3 +1,7 @@
+import { TEMPLATE_EDITOR_FONT_FAMILIES } from "@/utils/constants";
+import { normalizeDocumentFontHtml } from "@/lib/document-fonts";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import chromium from "@sparticuz/chromium";
 import puppeteer from "puppeteer-core";
 
@@ -11,40 +15,40 @@ type PdfInput = {
 const PAGE_SIDE_MARGIN_MM = 20;
 const HEADER_REGION_MM = 20;
 const FOOTER_REGION_MM = 28;
-const PAGE_NUMBER_LANE_MM = 10;
 // A4 contract shared with the physical editor: 20mm header + 249mm body + 28mm footer.
 // Do not add a second gap: it changes line wrapping and the page count.
 const BODY_REGION_GAP_MM = 0;
 
-const documentCss = `
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0}
-  body{font-family:Arial,sans-serif;color:#111;line-height:1.55}
-  img{max-width:100%}
-  .docflow-rendered-data-table{max-width:100%;overflow:hidden}
-  .docflow-rendered-data-table table,table{width:100%;border-collapse:collapse}
-  td,th{border:1px solid #aeb5c2;padding:8px;white-space:normal;word-break:normal;overflow-wrap:anywhere}
-  p{margin:.45em 0}
-  h1{margin:.65em 0 .35em;font-size:32px}
-  h2{font-size:26px}h3{font-size:21px}h4{font-size:18px}h5{font-size:16px}
-  a{color:#4f46e5}
-`;
-
-const chromeRegionCss = `
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;color:#111827;background:transparent}
-  body{font-family:Arial,sans-serif;font-size:11px;line-height:1.55}
-  img{max-width:100%}
-  table{width:100%;border-collapse:collapse}
-  p{margin:.45em 0}
-  .document-header{font-size:16px}
-  .document-header > :is(p,h1,h2,h3,h4,h5,blockquote){margin-block:0}
-  .document-header h1{font-size:32px}
-  .document-header h2{font-size:24px}
-  .document-header h3{font-size:18.72px}
-  .document-header h4{font-size:16px}
-  .document-header h5{font-size:13.28px}
-`;
+// Reuse the editor stylesheet, embedding the exact same local font binaries.
+// Chromium print headers have isolated documents and cannot resolve public URLs.
+let printStyles: Promise<string> | undefined;
+async function getPrintStyles() {
+  if (!printStyles)
+    printStyles = (async () => {
+      const directory = path.join(process.cwd(), "public", "fonts");
+      let css = await readFile(path.join(directory, "document.css"), "utf8");
+      const files = [
+        ...new Set(
+          Array.from(
+            css.matchAll(/\/fonts\/([A-Za-z0-9-]+\.ttf)/g),
+            (match) => match[1],
+          ),
+        ),
+      ];
+      for (const file of files) {
+        const bytes = await readFile(path.join(directory, file));
+        css = css.replaceAll(
+          `/fonts/${file}`,
+          `data:font/ttf;base64,${bytes.toString("base64")}`,
+        );
+      }
+      return `*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:"DejaVu Sans",sans-serif;color:#111827;line-height:1.55}.docflow-rendered-data-table{max-width:100%;overflow:hidden}a{color:#4f46e5}${css}`;
+    })().catch((error) => {
+      printStyles = undefined;
+      throw error;
+    });
+  return printStyles;
+}
 
 async function optimizeRasterImages(
   page: Awaited<
@@ -114,29 +118,47 @@ export async function createDocumentPdf({
   });
 
   try {
+    const css = await getPrintStyles();
     const page = await browser.newPage();
     await page.setContent(
-      `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4}${documentCss}</style></head><body>${content}</body></html>`,
+      `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:20mm 20mm 28mm}${css}.docflow-print-body{display:flow-root}</style></head><body class="docflow-print-body">${normalizeDocumentFontHtml(content)}</body></html>`,
       { waitUntil: "load" },
     );
 
     // Fonts can load after the HTML load event. Wait before pagination so
     // Chromium measures the same glyphs that appear in the exported PDF.
-    await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    await page.evaluate(
+      async (families: string[]) => {
+        // Preload families used only in the isolated header/footer as well.
+        await Promise.all(
+          families.flatMap((family) =>
+            [400, 700].flatMap((weight) =>
+              ["normal", "italic"].map((style) =>
+                document.fonts.load(`${style} ${weight} 16px "${family}"`),
+              ),
+            ),
+          ),
+        );
+        await document.fonts.ready;
+      },
+      TEMPLATE_EDITOR_FONT_FAMILIES.map((font) => font.label),
+    );
     await optimizeRasterImages(page);
 
     // Match the editor physical sheet exactly: 20mm header + 249mm body
     // + 28mm footer = 297mm. Only the body paginates.
-    const hasHeader = Boolean(header?.trim());
-    const hasFooter = Boolean(footer?.trim());
-    const showHeaderFooter = hasHeader || hasFooter || Boolean(pageNumbers);
+    const showHeaderFooter = Boolean(
+      header?.trim() || footer?.trim() || pageNumbers,
+    );
 
     const pageNumber = pageNumbers
       ? '<span class="pageNumber"></span> / <span class="totalPages"></span>'
       : "";
 
-    const headerTemplate = `<style>${chromeRegionCss}</style><div class="document-header" style="width:100%;height:${HEADER_REGION_MM}mm;padding:6mm ${PAGE_SIDE_MARGIN_MM}mm 3mm;overflow:hidden">${header ?? ""}</div>`;
-    const footerTemplate = `<style>${chromeRegionCss}</style><div style="position:relative;width:100%;height:${FOOTER_REGION_MM}mm;padding:3mm ${PAGE_SIDE_MARGIN_MM}mm ${PAGE_NUMBER_LANE_MM}mm;overflow:hidden"><div style="max-height:${FOOTER_REGION_MM - PAGE_NUMBER_LANE_MM - 3}mm;overflow:hidden">${footer ?? ""}</div>${pageNumbers ? `<div style="position:absolute;right:${PAGE_SIDE_MARGIN_MM}mm;bottom:7mm;font-size:10px;line-height:1">${pageNumber}</div>` : ""}</div>`;
+    // Chromium adds a fixed 20px vertical inset to native page chrome.
+    // Compensate it explicitly so the shared physical bounds stay identical.
+    const headerTemplate = `<style>${css}</style><div class="document-header" style="width:100%;height:20mm;padding:3mm 20mm;clip-path:inset(3mm 0 3mm 0);overflow:hidden;transform:translateY(-20px)">${normalizeDocumentFontHtml(header ?? "")}</div>`;
+    const footerTemplate = `<style>${css}</style><div style="position:relative;width:100%;height:28mm;transform:translateY(20px)"><div class="document-footer" style="height:28mm;padding:3mm 20mm 10mm;clip-path:inset(3mm 0 10mm 0);overflow:hidden">${normalizeDocumentFontHtml(footer ?? "")}</div>${pageNumbers ? `<div style="position:absolute;right:20mm;bottom:7mm;font-size:10px;line-height:normal;color:#64748b">${pageNumber}</div>` : ""}</div>`;
 
     return Buffer.from(
       await page.pdf({

@@ -6,9 +6,11 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ChangeEvent,
+  type CSSProperties,
   type KeyboardEvent,
   type ReactElement,
   type ReactNode,
@@ -49,6 +51,39 @@ export const SelectControl = forwardRef<HTMLSelectElement, SelectControlProps>(
     const nativeRef = useRef<HTMLSelectElement | null>(null);
 
     const [open, setOpen] = useState(false);
+    const [dropUp, setDropUp] = useState(false);
+    const [menuHeight, setMenuHeight] = useState(280);
+    useLayoutEffect(() => {
+      if (!open) return;
+      const position = () => {
+        const root = rootRef.current;
+        if (!root) return;
+        const rect = root.getBoundingClientRect();
+        const scrollArea = root.closest(".editor-bottom-sheet-content");
+        const bounds = scrollArea?.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const bottom = Math.min(
+          bounds?.bottom ?? Infinity,
+          (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0),
+        );
+        const top = Math.max(bounds?.top ?? 0, viewport?.offsetTop ?? 0);
+        const desired = window.matchMedia("(max-width: 900px)").matches
+          ? 188
+          : 280;
+        const below = bottom - rect.bottom - 12;
+        const above = rect.top - top - 12;
+        const up = below < desired && above > below;
+        setDropUp(up);
+        setMenuHeight(Math.max(44, Math.min(desired, up ? above : below)));
+      };
+      position();
+      window.addEventListener("resize", position);
+      window.visualViewport?.addEventListener("resize", position);
+      return () => {
+        window.removeEventListener("resize", position);
+        window.visualViewport?.removeEventListener("resize", position);
+      };
+    }, [open]);
     const [uncontrolledValue, setUncontrolledValue] = useState(
       String(defaultValue ?? ""),
     );
@@ -144,6 +179,13 @@ export const SelectControl = forwardRef<HTMLSelectElement, SelectControlProps>(
       if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
         event.preventDefault();
         setOpen(true);
+        requestAnimationFrame(() => {
+          rootRef.current
+            ?.querySelector<HTMLButtonElement>(
+              '[role="option"][aria-selected="true"]:not(:disabled), [role="option"]:not(:disabled)',
+            )
+            ?.focus();
+        });
       }
 
       if (event.key === "Escape") {
@@ -207,8 +249,45 @@ export const SelectControl = forwardRef<HTMLSelectElement, SelectControlProps>(
         {open && !disabled && (
           <div
             id={`${selectId}-options`}
-            className="shared-select-options"
+            className={`shared-select-options${dropUp ? " opens-up" : ""}`}
+            style={
+              {
+                maxHeight: menuHeight,
+                "--select-menu-height": `${menuHeight}px`,
+              } as CSSProperties
+            }
             role="listbox"
+            onKeyDown={(event) => {
+              const items = Array.from(
+                event.currentTarget.querySelectorAll<HTMLButtonElement>(
+                  "button:not(:disabled)",
+                ),
+              );
+              const index = items.indexOf(
+                document.activeElement as HTMLButtonElement,
+              );
+              if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+                event.preventDefault();
+                const next =
+                  event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                      ? items.length - 1
+                      : (index +
+                          (event.key === "ArrowUp" ? -1 : 1) +
+                          items.length) %
+                        items.length;
+                items[next]?.focus();
+              }
+              if (event.key === "Escape") {
+                event.preventDefault();
+                event.stopPropagation();
+                setOpen(false);
+                rootRef.current
+                  ?.querySelector<HTMLButtonElement>(".shared-select-trigger")
+                  ?.focus();
+              }
+            }}
           >
             {options.map((option) => (
               <button

@@ -4,47 +4,81 @@ export const ANNUAL_MONTHLY_DOCUMENT_LIMIT = 100;
 export const A4_WIDTH_PX = 794;
 export const TEMPLATE_EDITOR_FONT_FAMILIES = [
   {
-    label: "Arial",
-    value: "Arial, Helvetica, sans-serif",
-    aliases: ["Arial", "Helvetica"],
+    label: "Carlito",
+    value: "'Carlito', sans-serif",
+    aliases: ["Carlito"],
   },
   {
-    label: "Times New Roman",
-    value: "\'Times New Roman\', Times, serif",
-    aliases: ["Times New Roman", "Times"],
-  },
-  { label: "Georgia", value: "Georgia, serif", aliases: ["Georgia"] },
-  {
-    label: "Verdana",
-    value: "Verdana, Geneva, sans-serif",
-    aliases: ["Verdana", "Geneva"],
-  },
-  { label: "Tahoma", value: "Tahoma, Geneva, sans-serif", aliases: ["Tahoma"] },
-  {
-    label: "Trebuchet MS",
-    value: "\'Trebuchet MS\', Arial, sans-serif",
-    aliases: ["Trebuchet MS"],
+    label: "Liberation Sans",
+    value: "'Liberation Sans', sans-serif",
+    aliases: ["Liberation Sans"],
   },
   {
-    label: "Courier New",
-    value: "\'Courier New\', Courier, monospace",
-    aliases: ["Courier New", "Courier"],
+    label: "Roboto",
+    value: "'Roboto', sans-serif",
+    aliases: ["Roboto"],
+  },
+  {
+    label: "Open Sans",
+    value: "'Open Sans', sans-serif",
+    aliases: ["Open Sans"],
+  },
+  {
+    label: "Source Sans 3",
+    value: "'Source Sans 3', sans-serif",
+    aliases: ["Source Sans 3"],
+  },
+  {
+    label: "Caladea",
+    value: "'Caladea', serif",
+    aliases: ["Caladea"],
+  },
+  {
+    label: "Liberation Serif",
+    value: "'Liberation Serif', serif",
+    aliases: ["Liberation Serif"],
+  },
+  {
+    label: "Gelasio",
+    value: "'Gelasio', serif",
+    aliases: ["Gelasio"],
+  },
+  {
+    label: "Liberation Mono",
+    value: "'Liberation Mono', monospace",
+    aliases: ["Liberation Mono"],
+  },
+  {
+    label: "DejaVu Sans",
+    value: "'DejaVu Sans', sans-serif",
+    aliases: ["DejaVu Sans"],
+  },
+  {
+    label: "DejaVu Serif",
+    value: "'DejaVu Serif', serif",
+    aliases: ["DejaVu Serif"],
+  },
+  {
+    label: "DejaVu Sans Mono",
+    value: "'DejaVu Sans Mono', monospace",
+    aliases: ["DejaVu Sans Mono"],
   },
 ] as const;
 
 export const normalizeTemplateEditorFontFamily = (fontFamily: string) => {
-  const normalized = fontFamily
+  const families = fontFamily
     .split(",")
-    .map((part) => part.trim().replace(/^['\"]|['\"]$/g, ""))
-    .filter(Boolean);
-
-  const match = TEMPLATE_EDITOR_FONT_FAMILIES.find((font) =>
-    font.aliases.some((alias) =>
-      normalized.some((part) => part.toLowerCase() === alias.toLowerCase()),
-    ),
-  );
-
-  return match?.value ?? "";
+    .map((part) => part.trim().replace(/^['\"]|['\"]$/g, ""));
+  // Match the first actual family before looking at its fallbacks.
+  for (const family of families) {
+    const match = TEMPLATE_EDITOR_FONT_FAMILIES.find((font) =>
+      font.aliases.some(
+        (alias) => alias.toLowerCase() === family.toLowerCase(),
+      ),
+    );
+    if (match) return match.value;
+  }
+  return "";
 };
 
 export const FONT_SIZES_PX = [

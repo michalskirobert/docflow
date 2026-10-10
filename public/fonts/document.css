@@ -1,0 +1,547 @@
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("/fonts/DejaVuSans-Oblique.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("/fonts/DejaVuSans-BoldOblique.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Serif";
+  src: url("/fonts/DejaVuSerif-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Serif";
+  src: url("/fonts/DejaVuSerif-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Carlito";
+  src: url("/fonts/Carlito-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Carlito";
+  src: url("/fonts/Carlito-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Carlito";
+  src: url("/fonts/Carlito-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Carlito";
+  src: url("/fonts/Carlito-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Sans";
+  src: url("/fonts/LiberationSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Sans";
+  src: url("/fonts/LiberationSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Sans";
+  src: url("/fonts/LiberationSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Sans";
+  src: url("/fonts/LiberationSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Open Sans";
+  src: url("/fonts/OpenSans-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("/fonts/SourceSans3-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("/fonts/SourceSans3-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("/fonts/SourceSans3-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("/fonts/SourceSans3-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caladea";
+  src: url("/fonts/Caladea-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caladea";
+  src: url("/fonts/Caladea-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caladea";
+  src: url("/fonts/Caladea-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Caladea";
+  src: url("/fonts/Caladea-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("/fonts/LiberationSerif-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("/fonts/LiberationSerif-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("/fonts/LiberationSerif-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("/fonts/LiberationSerif-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Gelasio";
+  src: url("/fonts/Gelasio-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Gelasio";
+  src: url("/fonts/Gelasio-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Gelasio";
+  src: url("/fonts/Gelasio-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Gelasio";
+  src: url("/fonts/Gelasio-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("/fonts/LiberationMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("/fonts/LiberationMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("/fonts/LiberationMono-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("/fonts/LiberationMono-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+/* Shared editor/PDF typography. Font binaries are local, never CDN hosted. */
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("/fonts/DejaVuSans.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans";
+  src: url("/fonts/DejaVuSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Serif";
+  src: url("/fonts/DejaVuSerif.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Serif";
+  src: url("/fonts/DejaVuSerif-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans Mono";
+  src: url("/fonts/DejaVuSansMono.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans Mono";
+  src: url("/fonts/DejaVuSansMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans Mono";
+  src: url("/fonts/DejaVuSansMono-Oblique.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: "DejaVu Sans Mono";
+  src: url("/fonts/DejaVuSansMono-BoldOblique.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+:is(
+  .paper-stage .editor-a4-page-body,
+  .paper-stage .editor-a4-page-header,
+  .paper-stage .editor-a4-page-footer,
+  .docflow-print-body,
+  .document-header,
+  .document-footer
+) {
+  font-family: "DejaVu Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  color: #111827;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  * {
+  box-sizing: border-box;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  p {
+  margin: 0.45em 0;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  h1 {
+  margin: 0.65em 0 0.35em;
+  font-size: 32px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  h2 {
+  margin: 0.83em 0;
+  font-size: 26px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  h3 {
+  margin: 1em 0;
+  font-size: 21px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  h4 {
+  margin: 1.33em 0;
+  font-size: 18px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  h5 {
+  margin: 1.67em 0;
+  font-size: 16px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  table {
+  width: 100%;
+  border-collapse: collapse;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  td,
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  th {
+  min-width: 40px;
+  border: 1px solid #aeb5c2;
+  padding: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  img {
+  max-width: 100%;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  [data-layout="between"] {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  [data-layout="between"]
+  > * {
+  min-width: 0;
+}
+:is(.paper-stage .editor-a4-page-header, .document-header.document-header)
+  > :is(p, h1, h2, h3, h4, h5, blockquote) {
+  margin-block: 0;
+}
+/* Header and footer have no nested scroll owner, even while editing. */
+.paper-stage .editor-a4-page-header {
+  overflow: clip !important;
+  clip-path: inset(3mm 0 3mm 0);
+}
+.paper-stage .editor-a4-page-footer {
+  overflow: clip !important;
+  clip-path: inset(3mm 0 10mm 0);
+  padding-bottom: 10mm !important;
+}
+
+:is(
+    .paper-stage .editor-a4-page-body,
+    .paper-stage .editor-a4-page-header,
+    .paper-stage .editor-a4-page-footer,
+    .docflow-print-body,
+    .document-header,
+    .document-footer
+  )
+  :is(p, h1, h2, h3, h4, h5, blockquote, li, td, th) {
+  line-height: inherit;
+}
+
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-footer {
+  padding-bottom: 10mm !important;
+  overflow: clip !important;
+  background: #fff !important;
+}
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > .editor-a4-page-header {
+  overflow: clip !important;
+}

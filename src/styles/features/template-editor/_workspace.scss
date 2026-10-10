@@ -4058,3 +4058,68 @@ body.data-table-is-resizing * {
   max-height: 20mm;
   padding: 6mm 20mm 3mm;
 }
+
+/* Dropdowns own their scroll; releasing toolbar clipping must not release the list. */
+.editor-sticky-controls .editor-toolbar .shared-select-options {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: var(--select-menu-height, 280px) !important;
+  overscroll-behavior: contain;
+}
+@media (max-width: 900px) {
+  .editor-toolbar .editor-select .shared-select-options button {
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+.paper-stage .editor-a4-page::before,
+.paper-stage .editor-a4-page::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+  opacity: 0;
+  background: #e0e7ff;
+  border: calc(2px / var(--editor-zoom, 1)) solid #4f46e5;
+}
+.paper-stage .editor-a4-page::before {
+  top: 0;
+  height: 20mm;
+}
+.paper-stage .editor-a4-page::after {
+  bottom: 0;
+  height: 28mm;
+}
+@media (hover: hover) {
+  .paper-stage .editor-a4-page:has(> .editor-a4-page-header:hover)::before,
+  .paper-stage .editor-a4-page:has(> .editor-a4-page-footer:hover)::after {
+    opacity: 0.55;
+  }
+}
+.paper-stage .editor-a4-page:has(> .editor-a4-page-header:focus)::before,
+.paper-stage .editor-a4-page:has(> .editor-a4-page-header:focus-within)::before,
+.paper-stage .editor-a4-page:has(> .editor-a4-page-footer:focus)::after,
+.paper-stage .editor-a4-page:has(> .editor-a4-page-footer:focus-within)::after {
+  opacity: 1;
+}
+@media print {
+  .paper-stage .editor-a4-page::before,
+  .paper-stage .editor-a4-page::after {
+    display: none !important;
+  }
+}
+
+.paper-stage
+  .a4-paper.editor-page-stack
+  > .editor-a4-page
+  > [contenteditable]:is(.editor-a4-page-header, .editor-a4-page-footer) {
+  position: relative !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}

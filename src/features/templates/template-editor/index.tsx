@@ -1,4 +1,5 @@
 "use client";
+import { normalizeDocumentFontHtml } from "@/lib/document-fonts";
 import { CategoryField } from "@/features/categories/CategoryField";
 import { DEFAULT_CATEGORY } from "@/features/categories/definitions";
 
@@ -304,7 +305,7 @@ export function TemplateEditor({ template, onClose }: Props) {
       const body = document.createElement("div");
       body.className = "editor-a4-page-body";
       body.contentEditable = "true";
-      body.innerHTML = initialContent;
+      body.innerHTML = normalizeDocumentFontHtml(initialContent);
       page.appendChild(body);
       editor.current.appendChild(page);
 
@@ -313,14 +314,18 @@ export function TemplateEditor({ template, onClose }: Props) {
     }
 
     if (headerEditor.current) {
-      headerEditor.current.innerHTML = template?.headerContent ?? "";
+      headerEditor.current.innerHTML = normalizeDocumentFontHtml(
+        template?.headerContent ?? "",
+      );
       lastValidHeaderHtml.current = headerEditor.current.innerHTML;
       normalizeEditorVariableImages(headerEditor.current);
       ensureDataTableCaretHosts(headerEditor.current);
     }
 
     if (footerEditor.current) {
-      footerEditor.current.innerHTML = template?.footerContent ?? "";
+      footerEditor.current.innerHTML = normalizeDocumentFontHtml(
+        template?.footerContent ?? "",
+      );
       lastValidFooterHtml.current = footerEditor.current.innerHTML;
       normalizeEditorVariableImages(footerEditor.current);
       ensureDataTableCaretHosts(footerEditor.current);
@@ -331,7 +336,13 @@ export function TemplateEditor({ template, onClose }: Props) {
     // Build repeated page chrome only after both shared sources are hydrated.
     // Previously the first pagination pass could race the hidden footer/header
     // source and only a later UI toggle forced the correct content to appear.
-    requestAnimationFrame(() => requestAnimationFrame(paginateEditor));
+    const reflowAfterFonts = () => requestAnimationFrame(paginateEditor);
+    document.fonts.addEventListener("loadingdone", reflowAfterFonts);
+    document.fonts.ready.then(() =>
+      requestAnimationFrame(() => requestAnimationFrame(paginateEditor)),
+    );
+    return () =>
+      document.fonts.removeEventListener("loadingdone", reflowAfterFonts);
   }, [template, t]);
 
   const keepRegionWithinA4 = (
@@ -340,61 +351,10 @@ export function TemplateEditor({ template, onClose }: Props) {
   ) => {
     if (!region) return;
 
-    // Header/footer are fixed physical regions, but their own contentEditable
-    // must be allowed to use the whole inner area. Chromium can internally
-    // scroll an overflow:hidden contentEditable to reveal the caret, so using
-    // live scrollHeight/clientHeight here rejects valid second/third lines and
-    // can also accept content that has already been visually shifted. Measure
-    // an unconstrained clone in the same A4/CSS context instead.
-    const page = region.closest<HTMLElement>(".editor-a4-page");
-    const computed = window.getComputedStyle(region);
-    const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
-    const paddingBottom = Number.parseFloat(computed.paddingBottom) || 0;
-    const availableContentHeight = Math.max(
-      0,
-      region.clientHeight - paddingTop - paddingBottom,
-    );
-
-    let contentHeight = region.scrollHeight - paddingTop - paddingBottom;
-    if (page) {
-      const probe = region.cloneNode(true) as HTMLDivElement;
-      probe.removeAttribute("id");
-      probe.contentEditable = "false";
-      probe.setAttribute("aria-hidden", "true");
-      probe.setAttribute("data-editor-region-probe", "true");
-      probe.style.setProperty("position", "absolute", "important");
-      probe.style.setProperty("left", `${region.offsetLeft}px`, "important");
-      probe.style.setProperty("top", "0", "important");
-      probe.style.setProperty("width", `${region.clientWidth}px`, "important");
-      probe.style.setProperty("height", "auto", "important");
-      probe.style.setProperty("min-height", "0", "important");
-      probe.style.setProperty("max-height", "none", "important");
-      probe.style.setProperty("flex", "none", "important");
-      probe.style.setProperty("overflow", "visible", "important");
-      probe.style.setProperty("visibility", "hidden", "important");
-      probe.style.setProperty("pointer-events", "none", "important");
-      probe.style.setProperty("z-index", "-1", "important");
-      page.appendChild(probe);
-      try {
-        contentHeight = Math.max(
-          0,
-          probe.scrollHeight - paddingTop - paddingBottom,
-        );
-      } finally {
-        probe.remove();
-      }
-    }
-
-    if (contentHeight <= availableContentHeight + 0.75) {
-      lastValid.current = region.innerHTML;
-      return;
-    }
-
-    // Do not clip or silently shrink text. Reject only the edit that no longer
-    // fits and keep the caret at the end of the last valid header/footer value.
-    region.innerHTML = lastValid.current;
+    // Keep every supported font size. The shared print CSS clips oversized
+    // chrome at the same physical boundary in the editor and exported PDF.
+    lastValid.current = region.innerHTML;
     region.scrollTop = 0;
-    sharedRegions.restoreCurrentSelection(region);
   };
 
   const commitActiveBoundedRegion = (region = activeEditor.current) => {
@@ -898,23 +858,83 @@ export function TemplateEditor({ template, onClose }: Props) {
       const element =
         anchor instanceof Element ? anchor : anchor?.parentElement;
       const region = activeEditor.current ?? editor.current;
-      const block = element?.closest<HTMLElement>(
+      let block = element?.closest<HTMLElement>(
         "p, div, h1, h2, h3, h4, h5, blockquote",
       );
+      if (block === region && anchor?.nodeType === Node.TEXT_NODE) {
+        block = document.createElement("p");
+        anchor.parentNode?.insertBefore(block, anchor);
+        block.appendChild(anchor);
+      }
 
-      if (block && region?.contains(block)) {
+      if (block && block !== region && region?.contains(block)) {
         const enabled = block.dataset.layout === "between";
         if (enabled) {
           block.style.display = "";
           block.style.justifyContent = "";
           block.style.alignItems = "";
           block.style.width = "";
+          block.style.gap = "";
+          block
+            .querySelectorAll<HTMLElement>("[data-between-word]")
+            .forEach((word) => {
+              if (word.hasAttribute("data-between-styled")) {
+                word.removeAttribute("data-between-word");
+                word.removeAttribute("data-between-styled");
+              } else word.replaceWith(...word.childNodes);
+            });
           delete block.dataset.layout;
         } else {
+          // Preserve a font/bold wrapper when a whole formatted line is one
+          // inline item; otherwise flex cannot separate its words.
+          const onlyChild =
+            block.childNodes.length === 1 ? block.firstElementChild : null;
+          if (
+            onlyChild &&
+            /^(FONT|SPAN|B|STRONG|I|EM|U)$/.test(onlyChild.tagName) &&
+            !onlyChild.hasAttribute("data-variable-name") &&
+            onlyChild.childNodes.length === 1 &&
+            onlyChild.firstChild?.nodeType === Node.TEXT_NODE
+          ) {
+            const fragment = document.createDocumentFragment();
+            for (const part of (onlyChild.textContent ?? "").split(/(\s+)/)) {
+              if (!part) continue;
+              if (/^\s+$/.test(part))
+                fragment.append(document.createTextNode(part));
+              else {
+                const word = onlyChild.cloneNode(false) as HTMLElement;
+                word.removeAttribute("id");
+                word.dataset.betweenWord = "true";
+                word.dataset.betweenStyled = "true";
+                word.textContent = part;
+                fragment.append(word);
+              }
+            }
+            onlyChild.replaceWith(fragment);
+          }
+          // Anonymous flex text becomes one item. Make plain words separate
+          // items while preserving whitespace for toggling back to normal flow.
+          for (const node of Array.from(block.childNodes)) {
+            if (node.nodeType !== Node.TEXT_NODE) continue;
+            const fragment = document.createDocumentFragment();
+            for (const part of (node.textContent ?? "").split(/(\s+)/)) {
+              if (!part) continue;
+              if (/^\s+$/.test(part))
+                fragment.append(document.createTextNode(part));
+              else {
+                const word = document.createElement("span");
+                word.dataset.betweenWord = "true";
+                word.textContent = part;
+                fragment.append(word);
+              }
+            }
+            node.replaceWith(fragment);
+          }
           block.style.display = "flex";
           block.style.justifyContent = "space-between";
           block.style.alignItems = "center";
           block.style.width = "100%";
+          block.style.gap = "8px";
           block.dataset.layout = "between";
         }
         setDirty(true);
@@ -2839,6 +2859,10 @@ export function TemplateEditor({ template, onClose }: Props) {
       if (!target?.closest(".editor-a4-page-body")) return;
       lastBodyInputType.current =
         event instanceof InputEvent ? event.inputType : "";
+      // Deleting within the first page can also move the caret above the stage
+      // after a reverse-flow. Keep the insertion line visible on every delete.
+      if (lastBodyInputType.current.startsWith("delete"))
+        revealBodyCaret.current = true;
       run();
     };
 

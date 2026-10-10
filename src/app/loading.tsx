@@ -1,5 +1,4 @@
-import { AppLoader } from "@/components/ui/app-loader";
-
-export default function RootLoading() {
-  return <AppLoader />;
+import { RouteLoading } from "@/components/ui/route-loading";
+export default function Loading() {
+  return <RouteLoading />;
 }
