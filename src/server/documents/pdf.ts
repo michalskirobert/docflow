@@ -9,10 +9,12 @@ type PdfInput = {
 };
 
 const PAGE_SIDE_MARGIN_MM = 20;
-const HEADER_REGION_MM = 32;
+const HEADER_REGION_MM = 20;
 const FOOTER_REGION_MM = 28;
 const PAGE_NUMBER_LANE_MM = 10;
-const BODY_REGION_GAP_MM = 8;
+// A4 contract shared with the physical editor: 20mm header + 249mm body + 28mm footer.
+// Do not add a second gap: it changes line wrapping and the page count.
+const BODY_REGION_GAP_MM = 0;
 
 const documentCss = `
   *{box-sizing:border-box}
@@ -118,12 +120,13 @@ export async function createDocumentPdf({
       { waitUntil: "load" },
     );
 
+    // Fonts can load after the HTML load event. Wait before pagination so
+    // Chromium measures the same glyphs that appear in the exported PDF.
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
     await optimizeRasterImages(page);
 
-    // Header/footer are fixed A4 regions. Keep only a small safety gap between
-    // those regions and the body; the old 20 mm value effectively applied a
-    // second top/bottom page margin and made the editor/PDF waste a large area.
-    // Only the body paginates; Chrome repeats header/footer on each generated page.
+    // Match the editor physical sheet exactly: 20mm header + 249mm body
+    // + 28mm footer = 297mm. Only the body paginates.
     const hasHeader = Boolean(header?.trim());
     const hasFooter = Boolean(footer?.trim());
     const showHeaderFooter = hasHeader || hasFooter || Boolean(pageNumbers);
@@ -133,7 +136,7 @@ export async function createDocumentPdf({
       : "";
 
     const headerTemplate = `<style>${chromeRegionCss}</style><div class="document-header" style="width:100%;height:${HEADER_REGION_MM}mm;padding:6mm ${PAGE_SIDE_MARGIN_MM}mm 3mm;overflow:hidden">${header ?? ""}</div>`;
-    const footerTemplate = `<style>${chromeRegionCss}</style><div style="position:relative;width:100%;height:${FOOTER_REGION_MM}mm;padding:3mm ${PAGE_SIDE_MARGIN_MM}mm ${PAGE_NUMBER_LANE_MM}mm;overflow:hidden"><div style="max-height:${FOOTER_REGION_MM - PAGE_NUMBER_LANE_MM - 3}mm;overflow:hidden">${footer ?? ""}</div>${pageNumbers ? `<div style="position:absolute;right:${PAGE_SIDE_MARGIN_MM}mm;bottom:4mm;font-size:10px;line-height:1">${pageNumber}</div>` : ""}</div>`;
+    const footerTemplate = `<style>${chromeRegionCss}</style><div style="position:relative;width:100%;height:${FOOTER_REGION_MM}mm;padding:3mm ${PAGE_SIDE_MARGIN_MM}mm ${PAGE_NUMBER_LANE_MM}mm;overflow:hidden"><div style="max-height:${FOOTER_REGION_MM - PAGE_NUMBER_LANE_MM - 3}mm;overflow:hidden">${footer ?? ""}</div>${pageNumbers ? `<div style="position:absolute;right:${PAGE_SIDE_MARGIN_MM}mm;bottom:7mm;font-size:10px;line-height:1">${pageNumber}</div>` : ""}</div>`;
 
     return Buffer.from(
       await page.pdf({

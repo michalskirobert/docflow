@@ -4050,3 +4050,11 @@ body.data-table-is-resizing * {
     box-shadow: none !important;
   }
 }
+
+/* Shared A4 geometry: the header designer must not advertise a larger
+   editable region than the 20mm header reserved on the physical page/PDF. */
+.region-designer-canvas.header {
+  min-height: 20mm;
+  max-height: 20mm;
+  padding: 6mm 20mm 3mm;
+}
